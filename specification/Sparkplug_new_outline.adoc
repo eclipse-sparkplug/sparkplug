@@ -1,0 +1,65 @@
+
+
+== Table of Contents
+
+. Introduction
+  .. Rationale and Use Case
+  .. Intellectual Property Rights
+  .. Organization of the Sparkplug Specification
+  .. Terminology
+  .. Normative References
+  .. Non Normative References
+  .. Security
+  .. Editing convention
+. Principles
+  .. Pub / Sub
+  .. Report by Exception
+  .. Continuous Session Awareness
+  .. Death and Birth Certificates
+  .. Persistent Connections
+. Sparkplug Architecture and Infrastructure Components
+  .. MQTT Broker
+  .. MQTT  Edge of Network (EoN) Node
+  .. Device / Sensor
+  .. MQTT Enabled Device
+  .. SCADA/IIoT Host (Primary Application)
+  .. MQTT Application Node
+.  Sparkplug Topic Namespace
+. Sparkplug Messages
+  .. EoN
+    ... Data Message (NDATA)
+    ... Birth Message (NBIRTH)
+    ... Death Message (NDEATH)
+    ... Command (NCMD)
+  .. Device / Sensor
+    ... Data Message (DDATA)
+    ... Birth Message (DBIRTH)
+    ... Death Message (DDEATH)
+    ... Command (DCMD)
+  .. SCADA / IIoT Host
+    ... Birth Message (STATE)
+    ... Death Message (STATE)
+. General Message Flow
+  .. Primary Application Session Establishment
+  .. EoN Session Establishment
+  .. Device/Sensor Session Establishment
+  .. MQTT Enabled Device Session Establishment
+  .. MQTT Application Node Session Establishment
+  .. Data Publish
+  .. Commands
+. Data
+  .. See Sparkplug B Data Spec (TODO)
+. Security
+  .. TLS
+  .. Authentication
+  .. Authorization
+  .. Implementation Notes
+. High Availability (non-normative)
+  .. Multiple MQTT Server Topology (non-normative)
+  .. HA Clusters (non-normative)
+  .. Client Message Buffering (non-normative)
+. Acknowledgements
+. Appendix
+  .. Appendix A: Open Source Software (non-normative)
+  .. Appendix B: MQTT 3.1.1 required features (non-normative)
+  .. Appendix C: List of normative statements (non-normative)
