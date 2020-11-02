@@ -1,12 +1,8 @@
-image:extracted-media/media/image2.png[image,width=44,height=25]image:extracted-media/media/image3.png[image,width=390,height=180]
-
+image:extracted-media/media/image3.png[image,width=390,height=180]image:extracted-media/media/image2.png[image,width=44,height=25]image:extracted-media/media/image4.png[image,width=400,height=160]
 _Version 2.2_
-
-image:extracted-media/media/image4.png[image,width=400,height=160]
 
 Copyright © 2019 Eclipse Foundation, Inc. https://www.eclipse.org/legal/efsl.php
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
-
 
 [cols=",,,",options="header",]
 |===
