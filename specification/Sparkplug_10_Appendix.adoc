@@ -7,10 +7,8 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
-== Principles
+== Appendix
 
-.. Pub / Sub
-.. Report by Exception
-.. Continuous Session Awareness
-.. Death and Birth Certificates
-.. Persistent Connections
+.. Appendix A: Open Source Software (non-normative)
+.. Appendix B: MQTT 3.1.1 required features (non-normative)
+.. Appendix C: List of normative statements (non-normative)

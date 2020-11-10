@@ -1,4 +1,25 @@
+image:extracted-media/media/image3.png[image,width=390,height=180]image:extracted-media/media/image2.png[image,width=44,height=25]image:extracted-media/media/image4.png[image,width=400,height=160]
+_Version 3.0_
 
+Copyright © 2016-2020 Eclipse Foundation, Inc, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+SPDX-License-Identifier: EPL-2.0
+
+_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+
+[cols=",,,",options="header",]
+|===
+|*Revision Number* |*Date* |*Author* |*Description*
+|1.0 |5/26/16 |Cirrus Link |Initial Release
+|2.1 |12/10/16 |Cirrus Link |Payload B Addition
+|2.2 |10/11/19 |Cirrus Link |Re-branding for Eclipse foundation added TM to Sparkplug
+|3.0 |11/1/20 |Eclipse Sparkplug Specification Project Team |Reorganized to be in adoc format and to include normative and non-normative statements
+| | | |
+| | | |
+|===
 
 == Table of Contents
 
@@ -18,14 +39,13 @@
   .. Death and Birth Certificates
   .. Persistent Connections
 . Sparkplug Architecture and Infrastructure Components
-  .. MQTT Broker
+  .. MQTT Server
   .. MQTT  Edge of Network (EoN) Node
   .. Device / Sensor
   .. MQTT Enabled Device
   .. SCADA/IIoT Host (Primary Application)
   .. MQTT Application Node
-.  Sparkplug Topic Namespace
-. Sparkplug Messages
+. Sparkplug Topic Namespace
   .. EoN
     ... Data Message (NDATA)
     ... Birth Message (NBIRTH)
@@ -48,6 +68,7 @@
   .. Data Publish
   .. Commands
 . Data
+  .. See Sparkplug A Data Spec (TODO)
   .. See Sparkplug B Data Spec (TODO)
 . Security
   .. TLS

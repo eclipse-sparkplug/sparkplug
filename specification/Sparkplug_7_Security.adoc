@@ -7,10 +7,9 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
-== Principles
+== Security
 
-.. Pub / Sub
-.. Report by Exception
-.. Continuous Session Awareness
-.. Death and Birth Certificates
-.. Persistent Connections
+.. TLS
+.. Authentication
+.. Authorization
+.. Implementation Notes

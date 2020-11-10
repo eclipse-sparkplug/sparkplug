@@ -1,0 +1,17 @@
+Copyright © 2016-2020 Eclipse Foundation, Inc, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+SPDX-License-Identifier: EPL-2.0
+
+_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+
+== Sparkplug Architecture and Infrastructure Components
+
+.. MQTT Server
+.. MQTT  Edge of Network (EoN) Node
+.. Device / Sensor
+.. MQTT Enabled Device
+.. SCADA/IIoT Host (Primary Application)
+.. MQTT Application Node
