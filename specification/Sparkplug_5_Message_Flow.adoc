@@ -7,10 +7,12 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
-== Principles
+== General Message Flow
 
-.. Pub / Sub
-.. Report by Exception
-.. Continuous Session Awareness
-.. Death and Birth Certificates
-.. Persistent Connections
+  .. Primary Application Session Establishment
+  .. EoN Session Establishment
+  .. Device/Sensor Session Establishment
+  .. MQTT Enabled Device Session Establishment
+  .. MQTT Application Node Session Establishment
+  .. Data Publish
+  .. Commands
