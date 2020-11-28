@@ -26,7 +26,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 . Introduction
   .. Rationale and Use Case
   .. Intellectual Property Rights
-  .. Organization of the Sparkplug Specification
+  .. Organization of the Sparkplug™ Specification
   .. Terminology
   .. Normative References
   .. Non Normative References
@@ -38,27 +38,36 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
   .. Continuous Session Awareness
   .. Death and Birth Certificates
   .. Persistent Connections
-. Sparkplug Architecture and Infrastructure Components
+. Sparkplug™ Architecture and Infrastructure Components
   .. MQTT Server
   .. MQTT  Edge of Network (EoN) Node
   .. Device / Sensor
   .. MQTT Enabled Device
   .. SCADA/IIoT Host (Primary Application)
   .. MQTT Application Node
-. Sparkplug Topic Namespace
-  .. EoN
-    ... Data Message (NDATA)
-    ... Birth Message (NBIRTH)
-    ... Death Message (NDEATH)
-    ... Command (NCMD)
-  .. Device / Sensor
-    ... Data Message (DDATA)
-    ... Birth Message (DBIRTH)
-    ... Death Message (DDEATH)
-    ... Command (DCMD)
-  .. SCADA / IIoT Host
-    ... Birth Message (STATE)
-    ... Death Message (STATE)
+. Sparkplug™ Topic Namespace
+  .. Introduction
+  .. Sparkplug™ Topic Namespace Elements
+    ... namespace Element
+    ... group_id Element
+    ... message_type Element
+    ... edge_node_id Element
+    ... device_id Element
+  .. Sparkplug™ MQTT Message Types
+    ... Message Type Overview
+    ... EoN
+       .... Birth Message (NBIRTH)
+       .... Data Message (NDATA)
+       .... Death Message (NDEATH)
+       .... Command (NCMD)
+    ... Device / Sensor
+       .... Birth Message (DBIRTH)
+       .... Data Message (DDATA)
+       .... Death Message (DDEATH)
+       .... Command (DCMD)
+    ... SCADA / IIoT Host
+       .... Birth Message (STATE)
+       .... Death Message (STATE)
 . General Message Flow
   .. Primary Application Session Establishment
   .. EoN Session Establishment
@@ -68,8 +77,8 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
   .. Data Publish
   .. Commands
 . Data
-  .. See Sparkplug A Data Spec (TODO)
-  .. See Sparkplug B Data Spec (TODO)
+  .. See Sparkplug™ A Data Spec (TODO)
+  .. See Sparkplug™ B Data Spec (TODO)
 . Security
   .. TLS
   .. Authentication
