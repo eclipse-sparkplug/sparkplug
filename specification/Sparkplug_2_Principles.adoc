@@ -9,8 +9,76 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 
 == Principles
 
-.. Pub / Sub
+.. Pub/Sub
 .. Report by Exception
 .. Continuous Session Awareness
 .. Death and Birth Certificates
 .. Persistent Connections
+
+=== 2.a - Pub/Sub
+
+This section discusses the generic topology shown in Figure 3 – Simple MQTT Infrastructure identifying how 
+each of the components of the infrastructure interacts.
+
+At the simplest level, there are only two components required as shown below. An MQTT Client and an MQTT 
+Server. With proper credentials, any MQTT Client can connect to the MQTT Server without any notion of other 
+MQTT Client applications that are connected, and can issue subscriptions to any MQTT messages that it might 
+be interested in as well as start publishing any message containing data that it has. This is one of the 
+principal notions of IIoT, that is the decoupling of intelligent devices from any direct connection to any 
+one consumer application.
+
+image:extracted-media/media/image6.png[image,width=311,height=116]
+Figure 2 - Simple MQTT Infrastructure
+
+=== 2.b - Report by Exception
+TODO: Github Issue #52
+
+=== 2.c - Continuous Session Awareness
+
+In any network architecture, network connection *_State_* is important. In SCADA/IIoT, connection *_State_* 
+is extremely important. *State* is the session awareness of the MQTT EoN and the MQTT Server. The very reason 
+that most SCADA Host systems in this market sector are still using legacy poll/response protocols to 
+maintain a notion of the *_State_* of the connection between the SCADA application and the connected 
+devices. “_I poll, I get a response, I know the *State* of all the I/O points, but now I must poll again 
+because that *State* may have changed.”_
+
+Many implementations of solutions using MQTT treat it as a simple, stateless, pub/sub state machine. This is 
+quite viable for IoT and some IIoT applications, however it is not taking advantage of the full capability 
+of MQTT based infrastructures.
+
+One of the primary applications for MQTT as it was originally designed was to provide reliable SCADA 
+communications over VSAT topologies. Due to propagation delay and cost, it was not feasible to use a 
+poll/response protocol. Instead of a poll/response protocol where all the data was sent in response to every 
+poll, MQTT was used to “publish” information from remote sites only when the data changed. This technique is 
+sometimes called Report by Exception or RBE. But for RBE to work properly in real-time SCADA, the “state” of 
+the end device needs to be always known. In other words, SCADA/IIoT host could only rely on RBE data 
+arriving reliably if it could be assured of the state of the MQTT session.
+
+The Sparkplug™ specification defines the use of the MQTT V3.1.1 “Last Will and Testament” feature to provide 
+MQTT session state information to any other interested MQTT client in the infrastructure. The session state 
+awareness is implemented around a set of defined “Birth” and “Death” Topic Namespace and Payload definitions 
+in conjunction with the MQTT connection “Keep Alive” timer.
+
+=== 2.d - Birth and Death Certificates
+TODO: Github Issue #53
+
+=== 2.e - Persistent Connections
+
+Persistent connections are intended to remain connected to the MQTT infrastructure at all times. They never 
+send an MQTT DISCONNECT message during normal operation. This fact lets the _Primary Application_ provide the 
+real-time state of every persistent node in the infrastructure within the configured MQTT Keep Alive period 
+using the Birth/Death mechanisms defined above.
+
+But in some use cases, such as sending GPS coordinates for asset tracking or other IOT applications with 
+periodic data from sensors, MQTT enabled devices do not need to remain connected to the MQTT infrastructure. 
+In these use cases, all the Device needs to do is to issue an MQTT DISCONNECT control packet prior to going 
+offline to leave the MQTT infrastructure “gracefully”. In this case an MQTT Device or associated Device DEATH 
+certificate will most normally not be seen. System designers just need to be aware that the metric in 
+_Primary Application_ in this case will represent “Last Known Good” values with a time stamp of this data 
+where the current state of the of the MQTT Device is not a real-time indication. The _Primary Application_ 
+metric time stamp values can be used to determine when the values from this node were last updated.
+
+Non-persistent MQTT Enabled Devices should still register a proper DEATH Certificate upon the establishment 
+of an MQTT session. In this manner, the _Primary Application_ can still have a good representation of Last 
+Known Good process variable versus the fact that the MQTT session was terminated prior to the EoN node being 
+able to complete its transaction.
