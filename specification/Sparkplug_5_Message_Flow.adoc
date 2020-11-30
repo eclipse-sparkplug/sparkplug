@@ -9,10 +9,144 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 
 == General Message Flow
 
-  .. Primary Application Session Establishment
-  .. EoN Session Establishment
-  .. Device/Sensor Session Establishment
-  .. MQTT Enabled Device Session Establishment
-  .. MQTT Application Node Session Establishment
-  .. Data Publish
-  .. Commands
+.. Primary Application Session Establishment
+.. EoN Session Establishment
+.. Device/Sensor Session Establishment
+.. General MQTT applications and non-primary Applications
+.. Primary Application STATE in Multiple MQTT Server Topologies
+.. EoN NDATA and NCMD Messages
+.. MQTT Enabled Device Session Establishment TODO?
+.. MQTT Application Node Session Establishment TODO?
+.. Data Publish TODO?
+.. Commands TODO?
+
+An MQTT based SCADA system is unique in that the Host node is NOT responsible for establishing and maintaining connections to the devices as is the case in most existing legacy poll/response device protocols. With an MQTT based architecture, both the Host application as well as the devices establish MQTT Sessions with a central MQTT Server(s). This is the desired functionality as it provides the necessary decoupling from any one application and any given device. Additional MQTT clients can connect and subscribe to any of the real time data without impacting the primary SCADA Host application(s).
+
+Due to the nature of real time SCADA solutions, it is very important for the primary SCADA Host and all connected MQTT EoN nodes to have the MQTT Session STATE information for each other. In order to accomplish this the Sparkplug™ Topic Namespace definitions for Birth/Death certificates along with the defined payloads provide both state and context between the SCADA Host MQTT client and the associated node side MQTT Clients. In most use cases and solution scenarios there are two primary reasons for this "designation" of a primary SCADA Host:
+
+[arabic]
+. Only the Host _Primary_ _Application(s)_ should have the permission to issue commands to end devices.
+. In high availability and redundancy use cases where multiple MQTT Servers are used, MQTT EoN nodes need to be aware of whether _Primary Application_ has network connectivity to each MQTT Server in the infrastructure. If the _Primary Application_ STATE shows that an EoN node is connected to an MQTT Server that the _Primary Application_ is *NOT* connected to, then the EoN node should walk to the next available MQTT Server where STATE for the _Primary Application_ is ‘ONLINE’.
+
+=== 5.a - Primary Application Session Establishment 
+
+The _Primary Application_ upon startup or reconnect will immediately try to create a Host MQTT Session with the configured _MQTT Server infrastructure_. Note that the establishment of an MQTT Host session is asynchronous of any other MQTT Client session. If EoN nodes are already connected to the _MQTT Server infrastructure_, the _Primary Application_ will synchronize with them. If associated EoN nodes are not connected, _Primary Application_ will register them when they publish their Birth Certificate.
+
+image:extracted-media/media/image7.png[image,width=660,height=492]
+
+Figure 3 - Host Session Establishment
+
+The session diagram in Figure 3 - Host Session Establishment shows a very simple topology with a single MQTT Server. The steps outlined in the session diagram are defined as follows:
+
+[arabic]
+. _Primary Application_ will try to create an MQTT Session using the MQTT CONNECT Control Packet (_refer to section 3.1 in the MQTT V3.1.1 specification_). A Death Certificate is constructed into the Will Topic and Will Payload of the of the Connect Control Packet with a Will QoS = 1 and Will Retain = true. The MQTT CONNECT Control Packet is acknowledged as successful with a valid CONNACK Control Packet. From this point forward in time, the MQTT Server is ready to deliver a Host Death Certificate any time the _Primary Application_ MQTT Client loses connectivity to the MQTT Server.
+. Once an MQTT Session has been established, _Primary Application_ will publish a new STATE message as defined in in section 7.5.1, _SCADA/IIoT_ Birth Certificate Payload. At this point, _Primary Application_ can update the MQTT Client metrics in the _Primary Application_ with a current state of ONLINE.
+. With the MQTT Session established, and a STATE Birth Certificate published, the _Primary Application_ will issue an MQTT subscription for the defined Sparkplug™ Topic Namespace. The _Primary Application_ is now ready to start receiving MQTT messages from any connected EoN node within the infrastructure. Since the _Primary Application_ is also relying on the MQTT Session to the MQTT Server(s), the availability of Servers to the _Primary Application_ is also being monitored and reflected in the MQTT Client metrics in the _Primary Application_.
+. If at any point in time _Primary Application_ loses connectivity with the defined MQTT Server(s), the ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the _Primary Application_. All metric data associated with any MQTT EoN node that was connected to that MQTT Server will be updated to a "*STALE*" data quality.
+
+=== 5.b - EoN Session Establishment 
+
+Any EoN node in the MQTT infrastructure must establish an MQTT Session prior to providing information for connected devices. Most implementations of an MQTT EoN node for real time SCADA will try to maintain a persistent MQTT Session with the _MQTT Server infrastructure_. But there are use cases where the MQTT Session does not need to be persistent. In either case, an EoN node can try to establish an MQTT session at any time and is completely asynchronous from any other MQTT Client in the infrastructure. The only exception to this rule is the use case where there are multiple MQTT Servers and a Primary Host application.
+
+image:extracted-media/media/image8.png[image,width=660,height=508]
+
+Figure 4 - EoN node MQTT Session Establishment
+
+The session diagram in Figure 4 - EoN node MQTT Session Establishment shows a very simple topology with a single MQTT Server. The steps outlined in the session diagram are defined as follows:
+
+[arabic]
+. The EoN node MQTT client will attempt to create an MQTT session to the available MQTT Server(s) using the MQTT CONNECT Control Packet (_refer to section 3.1 in the MQTT V3.1.1 specification_). The Death Certificate constructed into the Will Topic and Will Payload follows the format defined in section 0,
+. EoN Node Death Certificate (NDEATH). The MQTT CONNECT Control Packet is acknowledged as successful with a valid CONNACK Control Packet. From this point forward in time, the MQTT Server is ready to deliver an EoN node Death Certificate to any subscribing MQTT Client any time connectivity is lost.
+. The subscription to NCMD level topics ensures that EoN targeted messages from the _Primary Application_ are delivered. The subscription to DCMD ensures that device targeted messages from the _Primary Application_ are delivered. In applications with multiple MQTT Servers and designated Primary Host applications, the subscription to STATE informs the EoN node the current state of the Primary SCADA/IIoT Host. At this point the EoN node has fully completed the steps required for establishing a valid MQTT Session with the _Primary Application_.
+. Once an MQTT Session has been established, the EoN node MQTT client will publish an application level NBIRTH as defined in section 7.1.2, EoN Node Birth Certificate (NBIRTH). At this point, the _Primary Application_ will have all the information required to build out the EoN node metric structure and show the EoN node in an "ONLINE" state.
+. If at any point in time the EoN node MQTT Client loses connectivity to the defined MQTT Server(s), a Death Certificate is issue by the MQTT Server on behalf of the EoN node. Upon receipt of the Death Certificate, the _Primary Application_ will set the state of the EoN node to ‘OFFLINE’ and update all timestamp metrics concerning the connection. Any defined metrics will be set to a "*STALE*" data quality.
+
+=== 5.c - Device / Sensor Session Establishment
+
+The Sparkplug™ specification is provided to get real time process variable information from existing and new end devices measuring, monitoring and controlling a physical process into an MQTT MOM infrastructure and the _Primary Application_ Industrial Internet of Things application platform. In the context of this document an MQTT Device can represent anything from existing legacy poll/response driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and instrumentation devices that can implement a conformant MQTT client natively.
+
+The preceding sections in this document detail how the _Primary Application_ interacts with the _MQTT Server infrastructure_ and how that infrastructure interacts with the notion of an MQTT EoN node. But to a large extent the technical requirements of those pieces of the infrastructure have already been provided. For most use cases in this market sector the primary focus will be on the implementation of the Sparkplug™ specification between the native device and the EoN node API’s.
+
+In order to expose and populate the metrics from any intelligent device, the following simple session diagram outlines the requirements:
+
+image:extracted-media/media/image9.png[image,width=660,height=309]Figure 5 - MQTT Device Session Establishment
+
+The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with all the Sparkplug™ elements in place i.e. _Primary Application_, MQTT Server(s), MQTT EoN node and this element, the device element. The steps outlined in the session diagram are defined as follows:
+
+This flow diagram assumes that at least one MQTT Server is available and operational within the infrastructure. Without at least a single MQTT Server the remainder of the infrastructure is unavailable.
+
+[arabic]
+. Assuming MQTT Server is available.
+. Assuming the _Primary Application_ established MQTT Session with the MQTT Server(s).
+. The Session Establishment of the associated MQTT EoN node is described in section 8.2, EoN node Session Establishment. This flow diagram assumes that the EoN node session has already been established with the _Primary Application_. Depending on the target platform, the EoN node may be a physical "Edge of Network" gateway device polling physical legacy devices via Modbus, AB, DNP3.0, HART, etc., a MQTT enabled sensor or device, or it might be a logical implementation of one of the Eclipse Tahu reference implementations for prototype EoN nodes running on the Raspberry PI platform. Regardless of the implementation, at some point the device interface will need to provide a state and associated metrics to publish to the MQTT infrastructure.
+. State #4 in the session diagram represents the state at which the device is ready to report all of its metric information to the MQTT EoN node as defined in Sparkplug™. It is the responsibility of the EoN node (logical or physical) to put this information in a form defined in 0,
+. {blank}
+. Device Birth Certificate (DBIRTH). Upon receiving the DBIRTH message, the _Primary Application_ can build out the proper metric structure.
+. Following the Sparkplug™ specification in section 7.4, Device Data Messages (DDATA), all subsequent metrics are published to the _Primary Application_ on a Report by Exception (RBE) basis using the DDATA message format.
+. In at any time the device (logical or physical) cannot provide real time information, the MQTT EoN node specification requires that an DDEATH be published. This will inform the _Primary Application_ that all metric information be set to a "*STALE*" data quality.
+
+=== 5.d - General MQTT applications and non-primary Applications.
+
+As noted above, there is the notion of a _Primary Application_ instance in the infrastructure that has the required permissions to send command to nodes and devices and the fact that all EoN nodes need to know the _Primary Application_ is connected to the same MQTT Server its connected to or it needs to walk to another one in the infrastructure. Both are known requirements of a mission critical SCADA system.
+
+But unlike legacy SCADA system implementations, all real time process variable information being published thru the MQTT infrastructure is available to any number of additional MQTT Clients in the business that might be interested in subsets if not all of the real time data.
+
+The *ONLY* difference between a _Primary Application_ MQTT client and all other clients that _non-primary_ Client do *NOT* issue the STATE Birth/Death certificates.
+
+=== 5.e - Primary Application STATE in Multiple MQTT Server Topologies
+
+For implementations with multiple MQTT Servers, there is one additional aspect that needs to be understood and managed properly. When multiple MQTT Servers are available there is the possibility of "stranding" and EoN node if the Primary command/control of the _Primary Application_ loses network connectivity to one of the MQTT Servers. In this instance the EoN node would stay properly connected to the MQTT Server publishing information not knowing that _Primary Application_ was not able to receive the messages. When using multiple MQTT Servers, the _Primary Application_ instance must be configured to publish a STATE Birth Certificate and all EoN nodes need to subscribe to this STATE message.
+
+The _Primary Application_ will need to specify whether it is a "Primary" command/control instance or not. If it is a primary instance then every time it establishes a new MQTT Session with an MQTT Server, the STATE Birth Certificate defined in section above is the first message that is published after a successful MQTT Session is established.
+
+EoN node devices in an infrastructure that provides multiple MQTT Servers can establish a session to any one of the MQTT Servers. Upon establishing a session, the EoN node should issue a subscription to the STATE message published by _Primary Application_. Since the STATE message is published with the RETAIN message flag set, MQTT will guarantee that the last STATE message is always available. The EoN node should examine the payload of this message to ensure that it is a value of "ONLINE". If the value is "OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT Server. This should cause the EoN node to terminate its session with this MQTT Server and move to the next available MQTT Server that is available. This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server to the _Primary Application_ does not result in EoN nodes being "stranded" on an MQTT server because of network issues. The following message flow diagram outlines how the STATE message is used when three (3) MQTT Servers are available in the infrastructure:
+
+image:extracted-media/media/image11.png[image,width=660,height=304]
+
+Figure 7 – Primary Application STATE flow diagram
+
+[arabic]
+. When an EoN node is configured with multiple available MQTT Servers in the infrastructure it should issue a subscription to the _Primary Application_ STATE message. The EoN nodes are free to establish an MQTT Session to any of the available servers over any available network at any time and examine the current STATE value. If the STATE message payload is ‘OFFLINE’ then the EoN node should disconnect and walk to the next available server.
+. Upon startup, the configured Primary Application, the MQTT Session will be configured to register the _Primary Application_ DEATH Certificate that indicates STATE is ‘OFFLINE’ with the message RETAIN flag set to true. Then the _Primary Application_ BIRTH Certificate will be published with a STATE payload of ‘ONLINE’.
+. As the EoN node walks its available MQTT Server table, it will establish an MQTT Session with a server that has a STATE message with a payload of ‘ONLINE’. The EoN node can stay connected to this server if its MQTT Session stays intact and it does not receive the _Primary Application_ DEATH Certificate.
+. Having a subscription registered to the MQTT Server on the STATE topic will result in any change to the current the _Primary Application_ STATE being received immediately. In this case, a network disruption causes the _Primary Application_ MQTT Session to server #2 to be terminated. This will cause the MQTT Server, on behalf of the now terminated the _Primary Application_ MQTT Client to publish the DEATH certificate to anyone that is currently subscribed to it. Upon receipt of the _Primary Application_ DEATH Certificate this EoN node will move to the next MQTT Server in its table.
+. The EoN node moved to the next available MQTT Server and since the current STATE on this server is ‘ONLINE’, it can stay connected.
+. In the meantime, the network disruption between _Primary Application_ and MQTT Server #2 has been corrected. The _Primary Application_ has a new MQTT Session established to server #2 with an update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is ready to accept new EoN node session requests.
+
+=== 5.f - EoN NDATA and NCMD Messages
+
+We’ll start this section with a description of how metric information is published to the _Primary Application_ from an EoN node in the MQTT infrastructure. The definition of an EoN node is generic in that it can represent both physical "Edge of Network Gateway" devices that are interfacing with existing legacy equipment and a logical MQTT endpoint for devices that natively implement the Sparkplug™ specification. Section 7.4.1 above defines the Birth Certificate MQTT Payload and the fact that it can provide any number of metrics that will be exposed in the _Primary Application_. Some of these will be "read only" such as:
+
+* EoN Manufacture ID
+* EoN Device Type
+* EoN Serial Number
+* EoN Software Version Number
+* EoN Configuration Change Count
+* EoN Position (if GPS device is available)
+* EoN Cellular RSSI value (if cellular is being used)
+* EoN Power Supply voltage level
+* EoN Temperature
+
+Other metrics may be dynamic and "read/write" such as:
+
+* EoN Rebirth command to republish all EoN and Device Birth Certificates.
+* EoN Next server command to move to next available MQTT Server.
+* EoN Reboot command to reboot the EoN node.
+* EoN Primary Network (PRI_NETWORK) where 1 = Cellular, 2 = Ethernet
+
+The important point to realize is that the metrics exposed in the _Primary Application_ for use in the design of applications are completely determined by what metric information is published in the NBIRTH. Each specific EoN node can best determine what data to expose, and how to expose it, and it will automatically appear in the _Primary Application_ metric structure. Metrics can even be added dynamically at runtime and with a new NBIRTH. These metrics will automatically be added to the _Primary Application_ metric structure.
+
+The other very important distinction to make here is that EoN node NDATA and NCMD messages are decoupled from the device level data and command messages of DDATA and DCMD. This decoupling in the Topic Namespace is important because it allows interaction from all MQTT Clients in the system (to the level of permission and application) with the EoN nodes, but NOT to the level of sending device commands. The _Primary Application_ could provide a configuration parameter that would BLOCK output DDATA and DCMD messages but still allow NDATA and NCMD messages to flow. In this manner, multiple application systems can be connected to the same MQTT infrastructure, but only the ones with DCMD enabled can publish Device commands.
+
+The following simple message flow diagram demonstrates the messages used to update a changing cellular RSSI value in the _Primary Application_ and sending a command from the _Primary Application_ to the EoN node to use a different primary network path.
+
+image:extracted-media/media/image10.png[image,width=660,height=303]
+
+Figure 6 - EoN node NDATA and NCMD Message Flow
+
+[arabic]
+. Assuming MQTT Server is available.
+. Assuming the _Primary Application_ established MQTT Session with the MQTT Server(s).
+. The EoN node has an established MQTT Session and the NBIRTH has been published. _Primary Application_ now has all defined metrics and their current value.
+. The EoN node is monitoring its local cellular RSSI level. The level has changed and now the EoN node wants to publish the new value to the associated metric in _Primary Application_.
+. From an operational requirement, the EoN node needs to be told to switch its primary network interface from cellular to Ethernet. From the _Primary Application,_ the new value is written to the metric and will automatically publish the new value to the EoN node parameters.

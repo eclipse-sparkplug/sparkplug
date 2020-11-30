@@ -12,6 +12,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 This section details the infrastructure components implemented.
 
 image:extracted-media/media/image5.png[image,width=660,height=314]
+
 Figure 1 - MQTT SCADA Infrastructure
   
 .. MQTT Server
