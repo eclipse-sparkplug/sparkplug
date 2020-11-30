@@ -76,9 +76,11 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
   .. MQTT Application Node Session Establishment
   .. Data Publish
   .. Commands
-. Data
-  .. See Sparkplug™ A Data Spec (TODO)
-  .. See Sparkplug™ B Data Spec (TODO)
+. Sparkplug Payloads
+  .. Overview
+  .. Sparkplug™ A MQTT Payload Definition
+  .. Sparkplug™ B MQTT Payload Definition
+  .. Google Protocol Buffers
 . Security
   .. TLS
   .. Authentication

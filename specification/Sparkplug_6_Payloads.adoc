@@ -1,0 +1,87 @@
+Copyright © 2016-2020 Eclipse Foundation, Inc, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+SPDX-License-Identifier: EPL-2.0
+
+_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+
+== Payloads
+
+=== 6.a - Overview
+
+The MQTT message transport specification does not define any required data payload format. From an MQTT 
+infrastructure standpoint, the payload is treated as an agnostic binary array of bytes that can be anything 
+from no payload at all, to a maximum of 256MB. But for applications within a known solution space to work 
+using MQTT the payload representation does need to be defined.
+
+This section of the Sparkplug™ specification defines how an MQTT Sparkplug™ payloads are encoded and the data 
+that is required. Note that Sparkplug™ supports multiple payloads encoding definitions. For more detailed 
+information on the payload formats and encoding associated with each Sparkplug™ release see the following 
+sections.
+
+.. Sparkplug A Data Spec (TODO)
+.. Sparkplug B Data Spec (TODO)
+
+The majority of devices connecting into next generation IIoT infrastructure are legacy equipment using 
+poll/response protocols. This means we must take in account register based data from devices that talk 
+protocols like Modbus. The existing legacy equipment needs to work in concert with emerging IIoT equipment 
+that is able to leverage message transports like MQTT natively.
+
+=== 6.b - Sparkplug™ A MQTT Payload Definition
+TODO: Github Issue #55
+
+=== 6.c - Sparkplug™ B MQTT Payload Definition
+
+The goal of the Sparkplug™ is to provide a specification that both OEM device manufactures and application 
+developers can use to create rich and interoperable SCADA/IIoT solutions using MQTT as a base messaging 
+technology. In Sparkplug™ B message payload definition, the goal was to create a simple and straightforward 
+binary message encoding that could be used primarily for legacy register based process variables (Modbus 
+register value for example).
+
+The Sparkplug™ B MQTT payload specification has come about based on the feedback from many system integrators 
+and end user customers who wanted to be able to natively support a much richer data model within the MQTT 
+infrastructures that they were designing and deploying. Using the feedback from the user community 
+Sparkplug™ B provides support for:
+
+* Complex data types using templates.
+* Datasets.
+* Richer metrics with the ability to add property metadata for each metric.
+* Metric alias support to maintain rich metric naming while keeping bandwidth usage to a minimum.
+* Historical data.
+* File data.
+
+Sparkplug™ B definition creates a bandwidth efficient data transport for real time device data. For WAN based 
+SCADA/IIoT infrastructures this equates to lower latency data updates while minimizing the amount of traffic 
+and therefore cellular and/or VSAT bandwidth required. In situations where bandwidth savings is not the 
+primary concern, the efficient use enables higher throughput of more and interesting data eliminating sensor 
+data that have been left stranded in the field. It is also ideal for LAN based SCADA infrastructures equating 
+to higher throughput of real time data to consumer applications without requiring extreme networking 
+topologies and/or equipment.
+
+There are many data encoding technologies available that can all be used in conjunction with MQTT. 
+Sparkplug™ B selected an existing, open, and highly available encoding scheme that efficiently encodes 
+register based process variables. The encoding technology selected for Sparkplug™ B is Google Protocol 
+Buffers also referred to as *Google* *_Protobufs_*.
+
+=== 6.d - Google Protocol Buffers
+
+*_“Protocol Buffers are a way of encoding structured data in an efficient yet extensible format.”_*
+
+Google Protocol Buffers, sometimes referred to as “*Google Protobufs*”, provide the efficiency of packed 
+binary data encoding while providing the structure required to make it easy to create, transmit, and parse 
+register based process variables using a standard set of tools while enabling emerging IIoT requirements 
+around richer metadata. Google Protocol Buffers development tools are available for:
+
+* C
+* C++
+* C#
+* Java
+* Python
+* GO
+* JavaScript
+
+Additional information on Google Protocol Buffers can be found at:
+
+https://developers.google.com/protocol-buffers/
