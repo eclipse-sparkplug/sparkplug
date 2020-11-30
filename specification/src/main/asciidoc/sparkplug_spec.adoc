@@ -1,0 +1,34 @@
+= Sparkplug 1.0.0-SNAPSHOT: Sparkplug Specification
+Eclipse Sparkplug Contributors
+Version 1.0.0-SNAPSHOT Snapshot Release, November 2020
+
+// Settings:
+:experimental:
+:reproducible:
+:icons: font
+:listing-caption: Listing
+:sectnums:
+:toc:
+:toclevels: 3
+:autofit-option:
+ifdef::backend-pdf[]
+:sectanchors:
+:doctype: book
+:compat-mode:
+:pdf-page-size: Letter
+:source-highlighter: rouge
+:rouge-style: googlecode
+endif::[]
+
+include::chapters/Sparkplug_1_Introduction.adoc[]
+include::chapters/Sparkplug_2_Principles.adoc[]
+include::chapters/Sparkplug_3_Components.adoc[]
+include::chapters/Sparkplug_4_Topics.adoc[]
+include::chapters/Sparkplug_5_Message_Flow.adoc[]
+include::chapters/Sparkplug_6_Data.adoc[]
+include::chapters/Sparkplug_7_Security.adoc[]
+include::chapters/Sparkplug_8_HA.adoc[]
+include::chapters/Sparkplug_9_Acknowledgements.adoc[]
+include::chapters/Sparkplug_10_Appendix.adoc[]
+//include::chapters/Sparkplug_Payload_A.adoc[]
+//include::chapters/Sparkplug_Payload_B.adoc[]

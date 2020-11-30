@@ -32,19 +32,19 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
      .... Birth Message (STATE)
      .... Death Message (STATE)
      
-== 4.a - Introduction
+== Introduction
 
 To get a working Message Oriented Middleware (MOM) based SCADA system using MQTT, the first thing that must be defined is a Topic Namespace to work within. The beauty of MQTT is the fact that you can just come up with an arbitrary topic like “Portland/Temperature”, connect to an MQTT Server, and start publishing the temperature value. For this data to be useful to other MQTT Client applications that want to consume the temperature values, the Topic Namespace needs to be understood by everyone participating in the data exchange.
 
 Every MQTT message published consist of a *_topic_* and a *_payload_* component. These components are the “overhead” of an MQTT message as measured in bytes on the wire. The Sparkplug™ specification is designed to keep these components meaningful and easy to understand, but not to get so verbose as to negatively impact bandwidth/time sensitive data exchange.
 
-=== 4.b - Sparkplug™ Topic Namespace Elements
+=== Sparkplug™ Topic Namespace Elements
 
 All MQTT clients using the Sparkplug™ specification will use the following Topic Namespace structure:
 
   namespace/group_id/message_type/edge_node_id/[device_id]
 
-==== 4.b.i - namespace Element
+==== namespace Element
 
 The *_namespace_* element of the Topic Namespace is the root element that will define both the structure of the remaining namespace elements as well as the encoding used for the associated payload data. The current Sparkplug™ specification defines two (2) namespaces. One is for Sparkplug™ payload definition A, and another one of for the Sparkplug™ payload definition B.
 
@@ -58,11 +58,11 @@ For the Sparkplug™ B version of the specification, the UTF-8 string constant f
 
 Note that for the remainder of this document, the version of the Sparkplug™ Payload definition does not affect the Topic Namespace or session state management as they will remain the same. There are separate appendices that defines the encoding used for both the A and B versions of Sparkplug™ MQTT message payload.
 
-==== 4.b.ii - group_id Element
+==== group_id Element
 
 The *_group_id_* element of the Topic Namespace provides for a logical grouping of MQTT EoN nodes into the MQTT Server and back out to the consuming MQTT Clients. The format of the *_group_id_* element is not dictated in that it can be any valid UTF-8 alphanumeric string except for the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and ‘#’ (number sign). In most use cases to minimize bandwidth, it should be descriptive but as small as possible. Examples of where the [*group_id*] might be used include Oil/Gas applications where MQTT EoN nodes on a physical pipeline segment all have the same [*group_id*]. Plant floor applications may group MQTT EoN nodes based on logical cell or manufacturing line requirements.
 
-==== 4.b.iii - message_type Element
+==== message_type Element
 
 The *_message_type_* element of the Topic Namespace provides an indication as to how to handle the MQTT payload of the message. Note that the actual encoding of the payload will vary depending on the version of the Sparkplug™ implementation as indicated by the *_namespace_* element.
 
@@ -80,17 +80,17 @@ The following *_message_type_* elements are defined for the Sparkplug™ Topic N
 
 The specification for each of these _message_type_ elements are detailed later in this document.
 
-==== 4.b.iv - edge_node_id Element
+==== edge_node_id Element
 
 The *_edge_node_id_* element of the Sparkplug™ Topic Namespace uniquely identifies the MQTT EoN node within the infrastructure. The *_group_id_* combined with the *_edge_node_id_* element must be unique from any other *_group_id_*/*_edge_node_id_* assigned in the MQTT infrastructure. The format of the *_edge_node_id_* can be valid UTF-8 alphanumeric String with the exception of the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and ‘#’ (number sign). The topic element *_edge_node_id_* travels with every message published and should be as short as possible.
 
-==== 4.b.v - device_id Element
+==== device_id Element
 
 The *_device_id_* element of the Sparkplug™ Topic Namespace identifies a device attached (physically or logically) to the MQTT EoN node. Note that the *_device_id_* is an optional element within the Topic Namespace as some messages will be either originating or destined to the *_edge_node_id_* and the *_device_id_* would not be required. The format of the *_device_id_* is a valid UTF-8 alphanumeric String except for the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and ‘#’ (number sign). The *_device_id_* must be unique from other devices connected to the same EoN node, but can be duplicated from EoN node to other EoN nodes. The device_id element travels with every message published and should be as short as possible.
 
-=== 4.c - Sparkplug™ MQTT Message Types
+=== Sparkplug™ MQTT Message Types
 
-==== 4.c.i - Message Type Overview
+==== Message Type Overview
 
 Sparkplug™ defines the Topic Namespace for set of MQTT messages that are used to manage connection state as well as bidirectional metric information exchange that would apply to many typical real-time SCADA/IIoT, monitoring, and data collection system use cases. The defined message types include:
 
@@ -112,7 +112,7 @@ Using these defined messages host SCADA/IIoT applications can:
 
 This section of the document defines the Topic Namespace and how each of the associated messages types can be used.
 
-==== 4.c.ii - EoN
+==== EoN
 [upperalpha, start=1]
 .. Birth Message (NBIRTH)
 +
@@ -149,7 +149,7 @@ The NCMD command topic provides the Topic Namespace used to send commands to any
 [subs="quotes"]
   namespace/group_id/*NCMD*/edge_node_id
   
-==== 4.c.iii - Device / Sensor
+==== Device / Sensor
 [upperalpha, start=1]
 .. Birth Message (DBIRTH)
 +
@@ -187,7 +187,7 @@ The DCMD topic provides the Topic Namespace used to publish metrics to any conne
 [subs="quotes"]
   namespace/group_id/*DCMD*/edge_node_id/device_id
 
-==== 4.c.iv - SCADA / IIoT Host
+==== SCADA / IIoT Host
 [upperalpha, start=1]
 .. Birth Message (STATE)
 +

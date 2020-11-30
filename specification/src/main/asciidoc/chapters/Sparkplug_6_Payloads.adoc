@@ -9,7 +9,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 
 == Payloads
 
-=== 6.a - Overview
+=== Overview
 
 The MQTT message transport specification does not define any required data payload format. From an MQTT 
 infrastructure standpoint, the payload is treated as an agnostic binary array of bytes that can be anything 
@@ -29,10 +29,10 @@ poll/response protocols. This means we must take in account register based data 
 protocols like Modbus. The existing legacy equipment needs to work in concert with emerging IIoT equipment 
 that is able to leverage message transports like MQTT natively.
 
-=== 6.b - Sparkplug™ A MQTT Payload Definition
+=== Sparkplug™ A MQTT Payload Definition
 TODO: Github Issue #55
 
-=== 6.c - Sparkplug™ B MQTT Payload Definition
+=== Sparkplug™ B MQTT Payload Definition
 
 The goal of the Sparkplug™ is to provide a specification that both OEM device manufactures and application 
 developers can use to create rich and interoperable SCADA/IIoT solutions using MQTT as a base messaging 
@@ -65,7 +65,7 @@ Sparkplug™ B selected an existing, open, and highly available encoding scheme 
 register based process variables. The encoding technology selected for Sparkplug™ B is Google Protocol 
 Buffers also referred to as *Google* *_Protobufs_*.
 
-=== 6.d - Google Protocol Buffers
+=== Google Protocol Buffers
 
 *_“Protocol Buffers are a way of encoding structured data in an efficient yet extensible format.”_*
 
