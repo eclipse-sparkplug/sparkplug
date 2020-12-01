@@ -100,116 +100,116 @@ syntax = "proto2";
 //
 // To compile:
 // cd client_libraries/java
-// protoc --proto_path=../../ --java_out=src/main/java ../../Sparkplug™_b.proto 
+// protoc --proto_path=../../ --java_out=src/main/java ../../Sparkplug™_b.proto 
 //
 
 package org.eclipse.tahu.protobuf;
 
-option java_package         = "org.eclipse.tahu.protobuf";
+option java_package         = "org.eclipse.tahu.protobuf";
 
 option java_outer_classname = "Sparkplug™BProto";
 
 message Payload {
 
-    /*
+    /*
 
-        // Indexes of Data Types
+        // Indexes of Data Types
 
-        // Unknown placeholder for future expansion.
+        // Unknown placeholder for future expansion.
 
-        Unknown         = 0;
+        Unknown         = 0;
 
-        // Basic Types
+        // Basic Types
 
-        Int8            = 1;
+        Int8            = 1;
 
-        Int16           = 2;
+        Int16           = 2;
 
-        Int32           = 3;
+        Int32           = 3;
 
-        Int64           = 4;
+        Int64           = 4;
 
-        UInt8           = 5;
+        UInt8           = 5;
 
-        UInt16          = 6;
+        UInt16          = 6;
 
-        UInt32          = 7;
+        UInt32          = 7;
 
-        UInt64          = 8;
+        UInt64          = 8;
 
-        Float           = 9;
+        Float           = 9;
 
-        Double          = 10;
+        Double          = 10;
 
-        Boolean         = 11;
+        Boolean         = 11;
 
-        String          = 12;
+        String          = 12;
 
-        DateTime        = 13;
+        DateTime        = 13;
 
-        Text            = 14;
+        Text            = 14;
 
-        // Additional Metric Types
+        // Additional Metric Types
 
-        UUID            = 15;
+        UUID            = 15;
 
-        DataSet         = 16;
+        DataSet         = 16;
 
-        Bytes           = 17;
+        Bytes           = 17;
 
-        File            = 18;
+        File            = 18;
 
-        Template        = 19;
+        Template        = 19;
 
-        
+        
 
-        // Additional PropertyValue Types
+        // Additional PropertyValue Types
 
-        PropertySet     = 20;
+        PropertySet     = 20;
 
-        PropertySetList = 21;
+        PropertySetList = 21;
 
-    */
+    */
 
-    message Template {
+    message Template {
 
-        message Parameter {
+        message Parameter {
 
-            optional string name        = 1;
+            optional string name        = 1;
 
-            optional uint32 type        = 2;
+            optional uint32 type        = 2;
 
-            oneof value {
+            oneof value {
 
-                uint32 int_value        = 3;
+                uint32 int_value        = 3;
 
-                uint64 long_value       = 4;
+                uint64 long_value       = 4;
 
-                float  float_value      = 5;
+                float  float_value      = 5;
 
-                double double_value     = 6;
+                double double_value     = 6;
 
-                bool   boolean_value    = 7;
+                bool   boolean_value    = 7;
 
-                string string_value     = 8;
+                string string_value     = 8;
 
-                ParameterValueExtension extension_value = 9;
+                ParameterValueExtension extension_value = 9;
 
-            }
+            }
 
-            message ParameterValueExtension {
+            message ParameterValueExtension {
 
-                extensions              1 to max;
+                extensions              1 to max;
 
-            }
+            }
 
-        }
+        }
 
-        optional string version         = 1;          // The version of the Template to
+        optional string version         = 1;          // The version of the Template to
 
 // prevent mismatches
 
-        repeated Metric metrics         = 2;          // Each metric is the name of the
+        repeated Metric metrics         = 2;          // Each metric is the name of the
 
 // metric and the datatype of the
 
@@ -217,9 +217,9 @@ message Payload {
 
 // value
 
-        repeated Parameter parameters   = 3;
+        repeated Parameter parameters   = 3;
 
-        optional string template_ref    = 4;          // Reference to a template if this is
+        optional string template_ref    = 4;          // Reference to a template if this is
 
 // extending a Template or an
 
@@ -227,239 +227,239 @@ message Payload {
 
 // instance
 
-        optional bool is_definition     = 5;
+        optional bool is_definition     = 5;
 
-        extensions                      6 to max;
+        extensions                      6 to max;
 
-    }
+    }
 
-    message DataSet {
+    message DataSet {
 
-        message DataSetValue {
+        message DataSetValue {
 
-            oneof value {
+            oneof value {
 
-                uint32 int_value                        = 1;
+                uint32 int_value                        = 1;
 
-                uint64 long_value                       = 2;
+                uint64 long_value                       = 2;
 
-                float  float_value                      = 3;
+                float  float_value                      = 3;
 
-                double double_value                     = 4;
+                double double_value                     = 4;
 
-                bool   boolean_value                    = 5;
+                bool   boolean_value                    = 5;
 
-                string string_value                     = 6;
+                string string_value                     = 6;
 
-                DataSetValueExtension extension_value   = 7;
+                DataSetValueExtension extension_value   = 7;
 
-            }
+            }
 
-            message DataSetValueExtension {
+            message DataSetValueExtension {
 
-                extensions  1 to max;
+                extensions  1 to max;
 
-            }
+            }
 
-        }
+        }
 
-        message Row {
+        message Row {
 
-            repeated DataSetValue elements  = 1;
+            repeated DataSetValue elements  = 1;
 
-            extensions                      2 to max;   // For third party extensions
+            extensions                      2 to max;   // For third party extensions
 
-        }
+        }
 
-        optional uint64   num_of_columns    = 1;
+        optional uint64   num_of_columns    = 1;
 
-        repeated string   columns           = 2;
+        repeated string   columns           = 2;
 
-        repeated uint32   types             = 3;
+        repeated uint32   types             = 3;
 
-        repeated Row      rows              = 4;
+        repeated Row      rows              = 4;
 
-        extensions                          5 to max;   // For third party extensions
+        extensions                          5 to max;   // For third party extensions
 
-    }
+    }
 
-    message PropertyValue {
+    message PropertyValue {
 
-        optional uint32     type                    = 1;
+        optional uint32     type                    = 1;
 
-        optional bool       is_null                 = 2; 
+        optional bool       is_null                 = 2; 
 
-        oneof value {
+        oneof value {
 
-            uint32          int_value               = 3;
+            uint32          int_value               = 3;
 
-            uint64          long_value              = 4;
+            uint64          long_value              = 4;
 
-            float           float_value             = 5;
+            float           float_value             = 5;
 
-            double          double_value            = 6;
+            double          double_value            = 6;
 
-            bool            boolean_value           = 7;
+            bool            boolean_value           = 7;
 
-            string          string_value            = 8;
+            string          string_value            = 8;
 
-            PropertySet     propertyset_value       = 9;
+            PropertySet     propertyset_value       = 9;
 
-            PropertySetList propertysets_value      = 10;      // List of Property Values
+            PropertySetList propertysets_value      = 10;      // List of Property Values
 
-            PropertyValueExtension extension_value  = 11;
+            PropertyValueExtension extension_value  = 11;
 
-        }
+        }
 
-        message PropertyValueExtension {
+        message PropertyValueExtension {
 
-            extensions                             1 to max;
+            extensions                             1 to max;
 
-        }
+        }
 
-    }
+    }
 
-    message PropertySet {
+    message PropertySet {
 
-        repeated string        keys     = 1;         // Names of the properties
+        repeated string        keys     = 1;         // Names of the properties
 
-        repeated PropertyValue values   = 2;
+        repeated PropertyValue values   = 2;
 
-        extensions                      3 to max;
+        extensions                      3 to max;
 
-    }
+    }
 
-    message PropertySetList {
+    message PropertySetList {
 
-        repeated PropertySet propertyset = 1;
+        repeated PropertySet propertyset = 1;
 
-        extensions                       2 to max;
+        extensions                       2 to max;
 
-    }
+    }
 
-    message MetaData {
+    message MetaData {
 
-        // Bytes specific metadata
+        // Bytes specific metadata
 
-        optional bool   is_multi_part   = 1;
+        optional bool   is_multi_part   = 1;
 
-        // General metadata
+        // General metadata
 
-        optional string content_type    = 2;        // Content/Media type
+        optional string content_type    = 2;        // Content/Media type
 
-        optional uint64 size            = 3;        // File size, String size, Multi-part
+        optional uint64 size            = 3;        // File size, String size, Multi-part
 
 // size, etc.
 
-        optional uint64 seq             = 4;        // Sequence number for multi-part
+        optional uint64 seq             = 4;        // Sequence number for multi-part
 
 // messages
 
-        // File metadata
+        // File metadata
 
-        optional string file_name       = 5;        // File name
+        optional string file_name       = 5;        // File name
 
-        optional string file_type       = 6;        // File type (i.e. xml, json, txt, cpp,
+        optional string file_type       = 6;        // File type (i.e. xml, json, txt, cpp,
 
 // etc.)
 
-        optional string md5             = 7;        // md5 of data
+        optional string md5             = 7;        // md5 of data
 
-        // Catchalls and future expansion
+        // Catchalls and future expansion
 
-        optional string description     = 8;        // Could be anything such as json or
+        optional string description     = 8;        // Could be anything such as json or
 
 // xml of custom properties
 
-        extensions                      9 to max;
+        extensions                      9 to max;
 
-    }
+    }
 
-    message Metric {
+    message Metric {
 
-        optional string   name          = 1;        // Metric name - should only be
+        optional string   name          = 1;        // Metric name - should only be
 
 // included on birth
 
-        optional uint64   alias         = 2;        // Metric alias - tied to name on birth
+        optional uint64   alias         = 2;        // Metric alias - tied to name on birth
 
 // and included in all later DATA
 
 // messages
 
-        optional uint64   timestamp     = 3;        // Timestamp associated with data
+        optional uint64   timestamp     = 3;        // Timestamp associated with data
 
 // acquisition time
 
-        optional uint32   datatype      = 4;        // DataType of the metric/tag value
+        optional uint32   datatype      = 4;        // DataType of the metric/tag value
 
-        optional bool     is_historical = 5;        // If this is historical data and
+        optional bool     is_historical = 5;        // If this is historical data and
 
 // should not update real time tag
 
-        optional bool     is_transient  = 6;        // Tells consuming clients such as MQTT
+        optional bool     is_transient  = 6;        // Tells consuming clients such as MQTT
 
 // Engine to not store this as a tag
 
-        optional bool     is_null       = 7;        // If this is null - explicitly say so
+        optional bool     is_null       = 7;        // If this is null - explicitly say so
 
 // rather than using -1, false, etc. for
 
 // some datatypes.
 
-        optional MetaData metadata      = 8;        // Metadata for the payload
+        optional MetaData metadata      = 8;        // Metadata for the payload
 
-        optional PropertySet properties = 9;
+        optional PropertySet properties = 9;
 
-        oneof value {
+        oneof value {
 
-            uint32   int_value                      = 10;
+            uint32   int_value                      = 10;
 
-            uint64   long_value                     = 11;
+            uint64   long_value                     = 11;
 
-            float    float_value                    = 12;
+            float    float_value                    = 12;
 
-            double   double_value                   = 13;
+            double   double_value                   = 13;
 
-            bool     boolean_value                  = 14;
+            bool     boolean_value                  = 14;
 
-            string   string_value                   = 15;
+            string   string_value                   = 15;
 
-            bytes    bytes_value                    = 16;       // Bytes, File
+            bytes    bytes_value                    = 16;       // Bytes, File
 
-            DataSet  dataset_value                  = 17;
+            DataSet  dataset_value                  = 17;
 
-            Template template_value                 = 18;
+            Template template_value                 = 18;
 
-            MetricValueExtension extension_value    = 19;
+            MetricValueExtension extension_value    = 19;
 
-        }
+        }
 
-        message MetricValueExtension {
+        message MetricValueExtension {
 
-            extensions  1 to max;
+            extensions  1 to max;
 
-        }
+        }
 
-    }
+    }
 
-    optional uint64   timestamp     = 1;        // Timestamp at message sending time
+    optional uint64   timestamp     = 1;        // Timestamp at message sending time
 
-    repeated Metric   metrics       = 2;        // Repeated forever - no limit in Google
+    repeated Metric   metrics       = 2;        // Repeated forever - no limit in Google
 
 // Protobufs
 
-    optional uint64   seq           = 3;        // Sequence number
+    optional uint64   seq           = 3;        // Sequence number
 
-    optional string   uuid          = 4;        // UUID to track message type in terms of
+    optional string   uuid          = 4;        // UUID to track message type in terms of
 
 // schema definitions
 
-    optional bytes    body          = 5;        // To optionally bypass the whole
+    optional bytes    body          = 5;        // To optionally bypass the whole
 
 // definition above
 
-    extensions                      6 to max;   // For third party extensions
+    extensions                      6 to max;   // For third party extensions
 
 }
 
@@ -469,23 +469,23 @@ For the remainder of this document JSON will be used to represent components of 
 
 {
 
-        "timestamp": <timestamp>,
+        "timestamp": <timestamp>,
 
-        "metrics": [{
+        "metrics": [{
 
-                "name": <metric_name>,
+                "name": <metric_name>,
 
-                "alias": <alias>,
+                "alias": <alias>,
 
-                "timestamp": <timestamp>,
+                "timestamp": <timestamp>,
 
-                "dataType": <datatype>,
+                "dataType": <datatype>,
 
-                "value": <value>
+                "value": <value>
 
-        }],
+        }],
 
-        "seq": <sequence_number>
+        "seq": <sequence_number>
 
 }
 
@@ -493,23 +493,23 @@ A simple Sparkplug™ B payload with values would be represented as follows:
 
 {
 
-        "timestamp": 1486144502122,
+        "timestamp": 1486144502122,
 
-        "metrics": [{
+        "metrics": [{
 
-                "name": "My Metric",
+                "name": "My Metric",
 
-                "alias": 1,
+                "alias": 1,
 
-                "timestamp": 1479123452194,
+                "timestamp": 1479123452194,
 
-                "dataType": "String",
+                "dataType": "String",
 
-                "value": "Test"
+                "value": "Test"
 
-        }],
+        }],
 
-        "seq": 2
+        "seq": 2
 
 }
 
@@ -1166,111 +1166,111 @@ Consider the following Sparkplug™ B payload in the NBIRTH message shown above:
 
 {
 
-        "timestamp": 1486144502122,
+        "timestamp": 1486144502122,
 
-        "metrics": [{
+        "metrics": [{
 
-                "name": "bdSeq",
+                "name": "bdSeq",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Uint64",
+                "dataType": "Uint64",
 
-                "value": 0
+                "value": 0
 
-        }, {
+        }, {
 
-                "name": "Node Control/Reboot",
+                "name": "Node Control/Reboot",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Boolean",
+                "dataType": "Boolean",
 
-                "value": false
+                "value": false
 
-        }, {
+        }, {
 
-                "name": "Node Control/Rebirth",
+                "name": "Node Control/Rebirth",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Boolean",
+                "dataType": "Boolean",
 
-                "value": false
+                "value": false
 
-        }, {
+        }, {
 
-                "name": "Node Control/Next Server",
+                "name": "Node Control/Next Server",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Boolean",
+                "dataType": "Boolean",
 
-                "value": false
+                "value": false
 
-        }, {
+        }, {
 
-                "name": "Node Control/Scan Rate",
+                "name": "Node Control/Scan Rate",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Int64",
+                "dataType": "Int64",
 
-                "value": 3000
+                "value": 3000
 
-        }, {
+        }, {
 
-                "name": "Properties/Hardware Make",
+                "name": "Properties/Hardware Make",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "String",
+                "dataType": "String",
 
-                "value": "Raspberry Pi"
+                "value": "Raspberry Pi"
 
-        }, {
+        }, {
 
-                "name": "Properties/Hardware Model",
+                "name": "Properties/Hardware Model",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "String",
+                "dataType": "String",
 
-                "value": "Pi 3 Model B"
+                "value": "Pi 3 Model B"
 
-        }, {
+        }, {
 
-                "name": "Properties/OS",
+                "name": "Properties/OS",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "String",
+                "dataType": "String",
 
-                "value": "Raspbian"
+                "value": "Raspbian"
 
-        }, {
+        }, {
 
-                "name": "Properties/OS Version",
+                "name": "Properties/OS Version",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "String",
+                "dataType": "String",
 
-                "value": "Jessie with PIXEL/11.01.2017"
+                "value": "Jessie with PIXEL/11.01.2017"
 
-        }, {
+        }, {
 
-                "name": "Supply Voltage (V)",
+                "name": "Supply Voltage (V)",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Float",
+                "dataType": "Float",
 
-                "value": 12.1
+                "value": 12.1
 
-        }],
+        }],
 
-        "seq": 0
+        "seq": 0
 
 }
 
@@ -1471,21 +1471,21 @@ Consider the following Sparkplug™ B payload in the NDATA message shown above:
 
 {
 
-        "timestamp": 1486144502122,
+        "timestamp": 1486144502122,
 
-        "metrics": [{
+        "metrics": [{
 
-                "name": "Supply Voltage (V)",
+                "name": "Supply Voltage (V)",
 
-                "timestamp": 1486144502122,
+                "timestamp": 1486144502122,
 
-                "dataType": "Float",
+                "dataType": "Float",
 
-                "value": 12.3
+                "value": 12.3
 
-        }],
+        }],
 
-        "seq": 2
+        "seq": 2
 
 }
 
