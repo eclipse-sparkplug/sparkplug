@@ -15,7 +15,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 .. Death and Birth Certificates
 .. Persistent Connections
 
-=== 2.a - Pub/Sub
+=== Pub/Sub
 
 This section discusses the generic topology shown in Figure 3 – Simple MQTT Infrastructure identifying how 
 each of the components of the infrastructure interacts.
@@ -30,10 +30,10 @@ one consumer application.
 image:extracted-media/media/image6.png[image,width=311,height=116]
 Figure 2 - Simple MQTT Infrastructure
 
-=== 2.b - Report by Exception
+=== Report by Exception
 TODO: Github Issue #52
 
-=== 2.c - Continuous Session Awareness
+=== Continuous Session Awareness
 
 In any network architecture, network connection *_State_* is important. In SCADA/IIoT, connection *_State_* 
 is extremely important. *State* is the session awareness of the MQTT EoN and the MQTT Server. The very reason 
@@ -59,10 +59,10 @@ MQTT session state information to any other interested MQTT client in the infras
 awareness is implemented around a set of defined “Birth” and “Death” Topic Namespace and Payload definitions 
 in conjunction with the MQTT connection “Keep Alive” timer.
 
-=== 2.d - Birth and Death Certificates
+=== Birth and Death Certificates
 TODO: Github Issue #53
 
-=== 2.e - Persistent Connections
+=== Persistent Connections
 
 Persistent connections are intended to remain connected to the MQTT infrastructure at all times. They never 
 send an MQTT DISCONNECT message during normal operation. This fact lets the _Primary Application_ provide the 
