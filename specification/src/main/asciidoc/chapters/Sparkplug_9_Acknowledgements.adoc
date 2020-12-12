@@ -7,4 +7,5 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
+[[acknowledgements]]
 == Acknowledgements

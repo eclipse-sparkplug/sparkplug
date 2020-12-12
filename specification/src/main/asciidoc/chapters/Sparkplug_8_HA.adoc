@@ -7,8 +7,14 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
+[[high_availability]]
 == High Availability
 
-.. Multiple MQTT Server Topology (non-normative)
-.. HA Clusters (non-normative)
-.. Client Message Buffering (non-normative)
+[[high_availability_multiple_mqtt_server_topology]]
+=== Multiple MQTT Server Topology (non-normative)
+
+[[high_availability_ha_clusters]]
+=== HA Clusters (non-normative)
+
+[[high_availability_client_message_buffering]]
+=== Client Message Buffering (non-normative)

@@ -96,7 +96,6 @@
                     <headerFooter>true</headerFooter>
                 </configuration>
             </plugin>
-<!--
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>xml-maven-plugin</artifactId>
@@ -113,7 +112,7 @@
                         <transformationSet>
                             <dir>${project.build.directory}/generated-docs</dir>
                             <outputDir>${project.build.directory}/tck-audit</outputDir>
-                            <includes>spec.xml</includes>
+                            <includes>sparkplug_spec.xml</includes>
                             <fileMappers>
                                 <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
                                     <pattern>sparkplug_spec.xml</pattern>
@@ -135,7 +134,6 @@
                     </transformationSets>
                 </configuration>
             </plugin>
--->
         </plugins>
     </build>
 </project>
