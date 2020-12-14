@@ -7,6 +7,7 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
+[[components]]
 == Sparkplug Architecture and Infrastructure Components
 
 This section details the infrastructure components implemented.
@@ -14,14 +15,8 @@ This section details the infrastructure components implemented.
 image:extracted-media/media/image5.png[image,width=660,height=314]
 
 Figure 1 - MQTT SCADA Infrastructure
-  
-.. MQTT Server
-.. MQTT Edge of Network (EoN) Node
-.. Device / Sensor
-.. MQTT Enabled Device
-.. SCADA/IIoT Host (Primary Application)
-.. MQTT Application Node
 
+[[components_mqtt_servers]]
 === MQTT Server(s)
 
 MQTT enabled infrastructure requires that one or more MQTT Servers are present in the infrastructure. The 
@@ -32,6 +27,7 @@ properly manage all MQTT message traffic.
 One can implement the use (if required) of multiple MQTT servers for redundancy, high availability, and 
 scalability within any given infrastructure.
 
+[[components_mqtt_edge_of_network_node]]
 === MQTT Edge of Network (EoN) Node (aka Edge Node)
 
 In the context of this specification, an MQTT Edge of Network (EoN) Node is any v3.1.1 compliant MQTT Client 
@@ -40,17 +36,20 @@ to participate in the Topic Namespace and Payload definitions described in this 
 responsible for any local protocol interface to existing legacy devices (PLCs, RTUs, Flow Computers, Sensors, 
 etc.) and/or any local discrete I/O, and/or any logical internal process variables(PVs).
 
+[[components_device_sensor]]
 === Device / Sensor 
 
 The Device/Sensor represents any physical or logical device connected to the MQTT EoN node providing any 
 data, process variables or metrics.
 
+[[components_mqtt_enabled_device]]
 === MQTT Enabled Device (Sparkplug™)
 
 This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using a 
 compliant MQTT 3.1.1 connection with the payload and topic notation as outlined in this Sparkplug™ 
 specification. Note that it will be represented as an EoN node in the Sparkplug™ topic payload.
 
+[[components_scada_iiot_host]]
 === SCADA / IIoT Host
 
 The SCADA/IIoT Host Node is any MQTT Client application that subscribes to and publishes messages defined in 
@@ -60,6 +59,7 @@ Sparkplug™ does support the notion of multiple critical Host applications. Thi
 of additional MQTT SCADA/IIoT Nodes participating in the infrastructure that are in either a pure monitoring 
 mode, or in the role of a hot standby should the Primary MQTT SCADA/IIoT Host go offline.
 
+[[components_mqtt_application_node]]
 === MQTT Application Node 
 
 An MQTT Application Node is any non-primary MQTT SCADA/IIoT Client application that consumes the real-time 

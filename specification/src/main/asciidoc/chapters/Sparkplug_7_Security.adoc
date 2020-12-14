@@ -7,9 +7,17 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
+[[security_security]]
 == Security
 
-.. TLS
-.. Authentication
-.. Authorization
-.. Implementation Notes
+[[security_tls]]
+=== TLS
+
+[[security_authentication]]
+=== Authentication
+
+[[security_authorization]]
+=== Authorization
+
+[[security_implementation_notes]]
+=== Implementation Notes

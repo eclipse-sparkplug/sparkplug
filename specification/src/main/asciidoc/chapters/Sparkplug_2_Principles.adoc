@@ -7,14 +7,10 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
+[[principles]]
 == Principles
 
-.. Pub/Sub
-.. Report by Exception
-.. Continuous Session Awareness
-.. Death and Birth Certificates
-.. Persistent Connections
-
+[[principles_pub_sub]]
 === Pub/Sub
 
 This section discusses the generic topology shown in Figure 3 – Simple MQTT Infrastructure identifying how 
@@ -30,9 +26,11 @@ one consumer application.
 image:extracted-media/media/image6.png[image,width=311,height=116]
 Figure 2 - Simple MQTT Infrastructure
 
+[[principles_report_by_exception]]
 === Report by Exception
 TODO: Github Issue #52
 
+[[principles_continuous_session_awareness]]
 === Continuous Session Awareness
 
 In any network architecture, network connection *_State_* is important. In SCADA/IIoT, connection *_State_* 
@@ -59,9 +57,11 @@ MQTT session state information to any other interested MQTT client in the infras
 awareness is implemented around a set of defined “Birth” and “Death” Topic Namespace and Payload definitions 
 in conjunction with the MQTT connection “Keep Alive” timer.
 
+[[principles_birth_and_death_certificates]]
 === Birth and Death Certificates
 TODO: Github Issue #53
 
+[[principles_persistent_connections]]
 === Persistent Connections
 
 Persistent connections are intended to remain connected to the MQTT infrastructure at all times. They never 

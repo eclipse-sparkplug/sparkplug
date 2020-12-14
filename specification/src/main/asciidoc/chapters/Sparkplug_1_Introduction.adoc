@@ -7,17 +7,10 @@ SPDX-License-Identifier: EPL-2.0
 
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 
+[[introduction]]
 == Introduction
 
-.. Rationale and Use Case
-.. Intellectual Property Rights
-.. Organization of the Sparkplug Specification
-.. Terminology
-.. Normative References
-.. Non Normative References
-.. Security
-.. Editing convention
-
+[[introduction_rationale_and_use_case]]
 === Rationale and Use Case
 
 Sparkplug™ provides an open and freely available specification for how Edge of Network (EoN) gateways or 
@@ -29,6 +22,7 @@ It is recognized that MQTT is used across a wide spectrum of application solutio
 indefinable variation of network topologies. To that end the Sparkplug™ specification strives to accomplish 
 the three following goals.
 
+[[introduction_define_an_mqtt_topic_namespace]]
 ==== Define an MQTT Topic Namespace
 
 As noted many times in this document one of the many attractive features of MQTT is that is does not specify 
@@ -36,6 +30,7 @@ any required Topic Namespace within its implementation. This fact has meant that
 position across a wide spectrum of IoT solutions. The intent of the Sparkplug™ specification is to identify 
 and document a Topic Namespace that is well thought out and optimized for the SCADA/IIoT solution sector.
 
+[[introduction_define_mqtt_state_management]]
 ==== Define MQTT State Management
 
 One of the unique aspects of MQTT is that it was originally designed for real time SCADA systems to help 
@@ -44,6 +39,7 @@ implementations though the full benefit of this “Continuous Session Awareness�
 even implemented. The intent of the Sparkplug™ specification is to take full advantage of MQTT’s native 
 Continuous Session Awareness capability as it applies to real time SCADA/IIoT solutions.
 
+[[introduction_define_the_mqtt_payload]]
 ==== Define the MQTT Payload
 
 Just as the MQTT specification does not dictate any particular Topic Namespace, nor does it dictate any 
@@ -57,6 +53,7 @@ specification supports. The first one is the Sparkplug™ A encoding scheme base
 source Google Protocol Buffer definition. The second one is the Sparkplug™ B encoding scheme that provides a 
 richer data model developed with the feedback of many system integrators and end user customers using MQTT.
 
+[[introduction_background]]
 ==== Background
 
 MQTT was originally designed as a message transport for real-time SCADA systems. The MQTT message transport 
@@ -81,8 +78,10 @@ Namespace and message sizes to a minimum while still making the overall message 
 state management between MQTT devices and MQTT SCADA/IIoT applications simple, efficient and easy to 
 understand and implement.
 
+[[introduction_intellectual_property_rights]]
 === Intellectual Property Rights
 
+[[introduction_eclipse_foundation_specification_license]]
 ==== Eclipse Foundation Specification License
 
  TODO - Verify this with the Eclipse Foundation
@@ -97,8 +96,8 @@ provided that you include the following on ALL copies of the document, or portio
 
 * link or URL to the original Eclipse Foundation document.
 * All existing copyright notices, or if one does not exist, a notice (hypertext is preferred, but a textual 
-representation is permitted) of the form: "Copyright (c) [$date-of-document] Eclipse Foundation, Inc. 
-https://www.eclipse.org/legal/efsl.php"
+  representation is permitted) of the form: "Copyright © [$date-of-document]
+  "Eclipse Foundation, Inc. \<<url to this license>> "
 
 Inclusion of the full text of this NOTICE must be provided. We request that authorship attribution be 
 provided in any software, documents, or other items or products that you create pursuant to the 
@@ -115,6 +114,7 @@ The notice is:
 "Copyright (c) 2016-2020 Eclipse Foundation. This software or document includes material copied from or 
 derived from the Sparkplug Specification: https://www.eclipse.org/tahu/spec/Sparkplug%20Topic%20Namespace%20and%20State%20ManagementV2.2-with%20appendix%20B%20format%20-%20Eclipse.pdf
 
+[[introduction_disclaimers]]
 ==== Disclaimers
 
 THIS DOCUMENT IS PROVIDED "AS IS," AND THE COPYRIGHT HOLDERS AND THE ECLIPSE FOUNDATION MAKE NO 
@@ -131,10 +131,13 @@ The name and trademarks of the copyright holders or the Eclipse Foundation may N
 publicity pertaining to this document or its contents without specific, written prior permission. Title to 
 copyright in this document will at all times remain with copyright holders.
 
+[[introduction_organization_of_the_sparkplug_specification]]
 === Organization of the Sparkplug Specification
 
+[[introduction_terminology]]
 === Terminology
 
+[[introduction_infrastructure_components]]
 ==== Infrastructure Components
 
 This section details the infrastructure components implemented.
@@ -142,6 +145,7 @@ This section details the infrastructure components implemented.
 image:extracted-media/media/image5.png[image,width=660,height=314]
 Figure 1 - MQTT SCADA Infrastructure
 
+[[introduction_mqtt_servers]]
 ===== MQTT Server(s)
 
 MQTT enabled infrastructure requires that one or more MQTT Servers are present in the infrastructure. The 
@@ -152,6 +156,7 @@ properly manage all MQTT message traffic.
 One can implement the use (if required) of multiple MQTT servers for redundancy, high availability, and 
 scalability within any given infrastructure.
 
+[[introduction_mqtt_edge_od_network_node]]
 ===== MQTT Edge of Network (EoN) Node (aka Edge Node)
 
 In the context of this specification, an MQTT Edge of Network (EoN) Node is any v3.1.1 compliant MQTT Client 
@@ -160,17 +165,20 @@ to participate in the Topic Namespace and Payload definitions described in this 
 responsible for any local protocol interface to existing legacy devices (PLCs, RTUs, Flow Computers, Sensors, 
 etc.) and/or any local discrete I/O, and/or any logical internal process variables(PVs).
 
+[[introduction_device_sensor]]
 ===== Device/Sensor 
 
 The Device/Sensor represents any physical or logical device connected to the MQTT EoN node providing any 
 data, process variables or metrics.
 
+[[introduction_mqtt_enabled_device]]
 ===== MQTT Enabled Device(Sparkplug™)
 
 This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using a 
 compliant MQTT 3.1.1 connection with the payload and topic notation as outlined in this Sparkplug™ 
 specification. Note that it will be represented as an EoN node in the Sparkplug™ topic payload.
 
+[[introduction_scada_iiot_host]]
 ===== SCADA/IIoT Host
 
 The SCADA/IIoT Host Node is any MQTT Client application that subscribes to and publishes messages defined in 
@@ -180,25 +188,31 @@ Sparkplug™ does support the notion of multiple critical Host applications. Thi
 of additional MQTT SCADA/IIoT Nodes participating in the infrastructure that are in either a pure monitoring 
 mode, or in the role of a hot standby should the Primary MQTT SCADA/IIoT Host go offline.
 
+[[introduction_mqtt_application_node]]
 ===== MQTT Application Node 
 
 An MQTT Application Node is any non-primary MQTT SCADA/IIoT Client application that consumes the real-time 
 messages or any other data being published with proper permission and security.
 
+[[introduction_normative_references]]
 === Normative References
  TODO: Github Issue #43
  
+[[introduction_non_normative_references]]
 === Non Normative References
  TODO: Github Issue #44
- 
+
+[[introduction_security]]
 === Security
 
+[[introduction_authentication]]
 ==== Authentication
 
 There are several levels of security and access control configured within an MQTT infrastructure. From a pure 
 MQTT client perspective, the client does need to provide a unique Client ID, and an optional Username and 
 Password.
 
+[[introduction_autorization]]
 ==== Authorization
 
 Although access control is not mandated in the MQTT specification for use in MQTT Server implementations, 
@@ -207,11 +221,13 @@ MQTT Server implementation is used to specify which Topic Namespace any MQTT Cli
 publish on. Examples are provided on how to setup and manage MQTT Client credentials and some considerations 
 on setting up proper ACL’s on the MQTT Servers.
 
+[[introduction_encryption]]
 ==== Encryption
 
 The MQTT specification does not specify any TCP/IP security scheme as it was envisaged that TCP/IP security 
 would (and did) change over time. Although this document will not specify any TCP/IP security schema it will 
 provide examples on how to secure an MQTT infrastructure using TLS security.
 
+[[introduction_editing_convention]]
 === Editing convention
  TODO: Github Issue #45
