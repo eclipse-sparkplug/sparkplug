@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright © 2020 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.sparkplug</groupId>
+        <artifactId>sparkplug-tck-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>sparkplug-tck-edge</artifactId>
+    <packaging>jar</packaging>
+    <name>Sparkplug TCK Edge Node Tests</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>add-third-party</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>add-third-party</goal>
+                            <goal>download-licenses</goal>
+                        </goals>
+                        <configuration>
+                            <useMissingFile>true</useMissingFile>
+                            <excludedScopes>test</excludedScopes>
+                            <excludedGroups> (org.eclipse.tahu*)</excludedGroups>
+                            <licenseMerges>
+                                <licenseMerge>The Apache Software License, Version
+                                    2.0|Apache License, Version 2.0|Apache Public License
+                                    2.0|Apache License 2.0|Apache Software License -
+                                    Version 2.0</licenseMerge>
+                            </licenseMerges>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
