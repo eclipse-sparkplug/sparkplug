@@ -1,8 +1,11 @@
 /*
- * Licensed Materials - Property of Cirrus Link Solutions
- * Copyright (c) 2020 Cirrus Link Solutions LLC - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
+ * Copyright © 2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
  */
 package org.eclipse.sparkplug.tck.host;
 
@@ -18,9 +21,9 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extension.sdk.api.services.Services;
 
-public class SparkplugExtension implements ExtensionMain {
+public class LifecycleExtension implements ExtensionMain {
 
-	private static Logger logger = LoggerFactory.getLogger(SparkplugExtension.class.getName());
+	private static Logger logger = LoggerFactory.getLogger(LifecycleExtension.class.getName());
 
 	@Override
 	public void extensionStart(final @NotNull ExtensionStartInput extensionStartInput,
@@ -28,11 +31,10 @@ public class SparkplugExtension implements ExtensionMain {
 
 		try {
 			logger.info("Starting Extension");
-			final TestInterceptor testInterceptor = new TestInterceptor();
+			final LifecycleInterceptor lifecycleInterceptor = new LifecycleInterceptor();
 			Services.interceptorRegistry().setConnectInboundInterceptorProvider(input -> {
-				return testInterceptor;
+				return lifecycleInterceptor;
 			});
-
 		} catch (Exception e) {
 			logger.error("Exception thrown at extension start: ", e);
 		}

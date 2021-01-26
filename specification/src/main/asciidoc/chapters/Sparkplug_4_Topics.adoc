@@ -13,9 +13,6 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[topics]]
 == Sparkplug™ Topic Namespace
 
-[[topics_introduction]]
-== Introduction
-
 To get a working Message Oriented Middleware (MOM) based SCADA system using MQTT, the first thing that must be defined is a Topic Namespace to work within. The beauty of MQTT is the fact that you can just come up with an arbitrary topic like “Portland/Temperature”, connect to an MQTT Server, and start publishing the temperature value. For this data to be useful to other MQTT Client applications that want to consume the temperature values, the Topic Namespace needs to be understood by everyone participating in the data exchange.
 
 Every MQTT message published consist of a *_topic_* and a *_payload_* component. These components are the “overhead” of an MQTT message as measured in bytes on the wire. The Sparkplug™ specification is designed to keep these components meaningful and easy to understand, but not to get so verbose as to negatively impact bandwidth/time sensitive data exchange.
@@ -204,9 +201,11 @@ The topic used for the Host Birth Certificate is identical to the topic used for
 [subs="quotes"]
   *STATE*/scada_host_id
 
-The Birth Certificate Payload is the UTF-8 STRING “*ONLINE*”.
+[tck-testable tck-id-host-topic-phid-birth-payload]#The Birth Certificate Payload MUST be the UTF-8 STRING “*ONLINE*”.#
 
-The RETAIN flag for the Birth Certificate is set to *TRUE*, and the Quality of Service (QoS) is set to 1.
+[tck-testable tck-id-host-topic-phid-birth-qos]#The MQTT Quality of Service (QoS) MUST be set to *1*.#
+
+[tck-testable tck-id-host-topic-phid-birth-retain]#The MQTT RETAIN flag for the Birth Certificate MUST be set to *TRUE*#
 
 [[topics_death_message_state]]
 ===== Death Message (STATE)
@@ -215,6 +214,9 @@ When the SCADA/IIoT Host MQTT client establishes an MQTT session to the MQTT Ser
 [subs="quotes"]
   *STATE*/scada_host_id
 
-The Will Payload will be the UTF-8 STRING “*OFFLINE*”.
+[tck-testable tck-id-host-topic-phid-death-payload]#The MQTT Will Payload MUST be the UTF-8 STRING “*OFFLINE*”.#
 
-The Will RETAIN flag will be set to TRUE, and the Will QoS will be set to 1.
+[tck-testable tck-id-host-topic-phid-death-qos]#The MQTT Will QoS MUST be set to *1*#
+
+[tck-testable tck-id-host-topic-phid-death-retain]#The MQTT Will RETAIN flag MUST be set to *TRUE*#
+
