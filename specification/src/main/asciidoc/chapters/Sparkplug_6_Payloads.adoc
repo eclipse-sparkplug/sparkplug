@@ -21,9 +21,9 @@ infrastructure standpoint, the payload is treated as an agnostic binary array of
 from no payload at all, to a maximum of 256MB. But for applications within a known solution space to work 
 using MQTT the payload representation does need to be defined.
 
-This section of the Sparkplug™ specification defines how an MQTT Sparkplug™ payloads are encoded and the data 
-that is required. Note that Sparkplug™ supports multiple payloads encoding definitions. For more detailed 
-information on the payload formats and encoding associated with each Sparkplug™ release see the following 
+This section of the Sparkplug™ specification defines how an MQTT Sparkplug payloads are encoded and the data 
+that is required. Note that Sparkplug supports multiple payloads encoding definitions. For more detailed 
+information on the payload formats and encoding associated with each Sparkplug release see the following 
 sections.
 
 .. Sparkplug A Data Spec (TODO)
@@ -57,22 +57,22 @@ Additional information on Google Protocol Buffers can be found at:
 https://developers.google.com/protocol-buffers/
 
 [[payloads_sparkplug_a_mqtt_payload_definition]]
-=== Sparkplug™ A MQTT Payload Definition
+=== Sparkplug A MQTT Payload Definition
 TODO: Github Issue #55
 
 [[payloads_sparkplug_b_mqtt_payload_definition]]
-=== Sparkplug™ B MQTT Payload Definition
+=== Sparkplug B MQTT Payload Definition
 
-The goal of the Sparkplug™ is to provide a specification that both OEM device manufactures and application 
+The goal of the Sparkplug is to provide a specification that both OEM device manufactures and application 
 developers can use to create rich and interoperable SCADA/IIoT solutions using MQTT as a base messaging 
-technology. In Sparkplug™ B message payload definition, the goal was to create a simple and straightforward 
+technology. In Sparkplug B message payload definition, the goal was to create a simple and straightforward 
 binary message encoding that could be used primarily for legacy register based process variables (Modbus 
 register value for example).
 
-The Sparkplug™ B MQTT payload specification has come about based on the feedback from many system integrators 
+The Sparkplug B MQTT payload specification has come about based on the feedback from many system integrators 
 and end user customers who wanted to be able to natively support a much richer data model within the MQTT 
 infrastructures that they were designing and deploying. Using the feedback from the user community 
-Sparkplug™ B provides support for:
+Sparkplug B provides support for:
 
 * Complex data types using templates.
 * Datasets.
@@ -81,7 +81,7 @@ Sparkplug™ B provides support for:
 * Historical data.
 * File data.
 
-Sparkplug™ B definition creates a bandwidth efficient data transport for real time device data. For WAN based 
+Sparkplug B definition creates a bandwidth efficient data transport for real time device data. For WAN based 
 SCADA/IIoT infrastructures this equates to lower latency data updates while minimizing the amount of traffic 
 and therefore cellular and/or VSAT bandwidth required. In situations where bandwidth savings is not the 
 primary concern, the efficient use enables higher throughput of more and interesting data eliminating sensor 
@@ -90,14 +90,14 @@ to higher throughput of real time data to consumer applications without requirin
 topologies and/or equipment.
 
 There are many data encoding technologies available that can all be used in conjunction with MQTT. 
-Sparkplug™ B selected an existing, open, and highly available encoding scheme that efficiently encodes 
-register based process variables. The encoding technology selected for Sparkplug™ B is Google Protocol 
+Sparkplug B selected an existing, open, and highly available encoding scheme that efficiently encodes 
+register based process variables. The encoding technology selected for Sparkplug B is Google Protocol 
 Buffers also referred to as *Google* *_Protobufs_*.
 
 [[payloads_google_protocol_buffer_schema]]
 ==== Google Protocol Buffer Schema
 
-Using lessons learned on the feedback from the Sparkplug™ A implementation a new Google Protocol Buffer 
+Using lessons learned on the feedback from the Sparkplug A implementation a new Google Protocol Buffer 
 schema was developed that could be used to represent and encode the more complex data models being 
 requested. The entire Google Protocol Buffers definition is below.
 
@@ -315,10 +315,10 @@ message Payload {
 [[payloads_payload_metric_naming_convention]]
 === Payload Metric Naming Convention
 
-For the remainder of this document JSON will be used to represent components of a Sparkplug™ B payload. It 
+For the remainder of this document JSON will be used to represent components of a Sparkplug B payload. It 
 is important to note that the payload is a binary encoding and is not actually JSON. However, JSON 
 representation is used in this document to represent the payloads in a way that is easy to read. For 
-example, a simple Sparkplug™ B payload with a single metric can be represented in JSON as follows:
+example, a simple Sparkplug B payload with a single metric can be represented in JSON as follows:
 
 ----
 {
@@ -334,7 +334,7 @@ example, a simple Sparkplug™ B payload with a single metric can be represented
 }
 ----
 
-A simple Sparkplug™ B payload with values would be represented as follows:
+A simple Sparkplug B payload with values would be represented as follows:
 
 ----
 {
@@ -364,25 +364,25 @@ image:extracted-media/media/image12.png[image,width=638,height=139]
 Figure 8 – Payload Metric Folder Structure
 
 [[payloads_sparkplug_bv1_0_payload_components]]
-== Sparkplug™ Bv1.0 Payload Components
+== Sparkplug Bv1.0 Payload Components
 
-The Sparkplug™ specification document “*_MQTT Topic Namespace and State Management_*” document defines the 
-Topic Namespace that Sparkplug™ uses to publish and subscribe between EoN nodes and applications within the 
+The Sparkplug specification document “*_MQTT Topic Namespace and State Management_*” document defines the 
+Topic Namespace that Sparkplug uses to publish and subscribe between EoN nodes and applications within the 
 MQTT infrastructure. Using that Topic Namespace, this section of the specification defines the actual 
-payload contents of each message type in Sparkplug™ Bv1.0.
+payload contents of each message type in Sparkplug Bv1.0.
 
 [[payloads_payload_component_definitions]]
 === Payload Component Definitions
 
-Sparkplug™ B consists of a series of one or more metrics with metadata surrounding those metrics. The 
+Sparkplug B consists of a series of one or more metrics with metadata surrounding those metrics. The 
 following definitions explain the components that make up a payload.
 
 [[payloads_payload]]
 ==== Payload
 
-A Sparkplug™ B payload is the top-level component that is encoded and used in an MQTT message. It contains 
+A Sparkplug B payload is the top-level component that is encoded and used in an MQTT message. It contains 
 some basic information such as a timestamp and a sequence number as well as an array of metrics which 
-contain key/value pairs of data. A Sparkplug™ B payload includes the following components.
+contain key/value pairs of data. A Sparkplug B payload includes the following components.
 
 * *payload*
 ** _timestamp_
@@ -394,7 +394,7 @@ represent the time at which the message was published.
 section 3.1.2.
 ** _seq_
 *** This is the sequence number which is an unsigned 64-bit integer. A sequence number must be included in 
-the payload of every Sparkplug™ MQTT message. A NBIRTH message must always contain a sequence number of 
+the payload of every Sparkplug MQTT message. A NBIRTH message must always contain a sequence number of 
 zero. All subsequent messages must contain a sequence number that is continually increasing by one in each 
 message until a value of 255 is reached. At that point, the sequence number of the following message must 
 be zero.
@@ -408,7 +408,7 @@ bytes associated with a payload.
 [[payloads_metric]]
 ==== Metric
 
-A Sparkplug™ B metric is a core component of data in the payload. It represents a key/value/datatype along 
+A Sparkplug B metric is a core component of data in the payload. It represents a key/value/datatype along 
 with metadata used to describe the information it contains. It includes the following components.
 
 * *name*
@@ -418,7 +418,7 @@ example, ‘outputs/A’ would be a metric with a unique identifier of ‘A’ i
 limit to the number of folders. However, across the infrastructure of MQTT publishers a defined folder 
 should always remain a folder.
 * *alias*
-** This is an unsigned 64-bit integer representing an optional alias for a Sparkplug™ B payload. If supplied 
+** This is an unsigned 64-bit integer representing an optional alias for a Sparkplug B payload. If supplied 
 in an NBIRTH or DBIRTH it must be a unique number across this EoN nodes entire set of metrics. In other 
 words, no two metrics for the same EoN node can have the same alias. Upon being defined in the NBIRTH or 
 DBIRTH, subsequent messages can supply only the alias instead of the metric friendly name to reduce overall 
@@ -429,7 +429,7 @@ since epoch (Jan 1, 1970). It is highly recommended that this time is in UTC. Th
 represent the time at which the value of a metric was captured.
 * *datatype*
 ** This is an unsigned 32-bit integer representing the datatype. Datatypes are not explicitly defined in 
-the Sparkplug™ B Protobuf definition. Instead they are defined in section 4 of this document.
+the Sparkplug B Protobuf definition. Instead they are defined in section 4 of this document.
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some cases, 
 it may be desirable to send metrics after they were acquired on a device or EoN node. This can be done for 
@@ -440,7 +440,7 @@ denotes that the message should not be considered a real time/current value.
 metrics can be considered those that are of interest to a back-end application(s) but shouldn’t be stored 
 in a historian on the backend.
 * *is_null*
-** This is a Boolean flag which denotes whether this metric has a null value. This is Sparkplug™ B’s 
+** This is a Boolean flag which denotes whether this metric has a null value. This is Sparkplug B’s 
 mechanism of explicitly denoting a metric’s value is actually null.
 * *metadata*
 ** This is a MetaData object associated with the metric for dealing with more complex datatypes. This is 
@@ -474,7 +474,7 @@ be omitted altogether.
 [[payloads_metadata]]
 ==== MetaData
 
-A Sparkplug™ B MetaData object is used to describe different types of binary data. It includes the 
+A Sparkplug B MetaData object is used to describe different types of binary data. It includes the 
 following components.
 
 * *is_multi_part*
@@ -504,7 +504,7 @@ subscriber.
 [[payloads_propertyset]]
 ==== PropertySet
 
-A Sparkplug™ B PropertySet object is used with a metric to add custom properties to the object. The 
+A Sparkplug B PropertySet object is used with a metric to add custom properties to the object. The 
 PropertySet is a map expressed as two arrays of equal size, one containing the keys and one containing the 
 values. It includes the following components.
 
@@ -518,14 +518,14 @@ It must contain the same number of items that are in the keys array.
 [[payloads_propertyvalue]]
 ==== PropertyValue
 
-A Sparkplug™ B PropertyValue object is used to encode the value and datatype of the value of a property in 
+A Sparkplug B PropertyValue object is used to encode the value and datatype of the value of a property in 
 a PropertySet. It includes the following components.
 
 * *type*
 ** This is an unsigned 32-bit integer representing the datatype of the value. Datatypes are not explicitly 
-defined in the Sparkplug™ B Protobuf definition. Instead they are defined in section 4 of this document.
+defined in the Sparkplug B Protobuf definition. Instead they are defined in section 4 of this document.
 * *is_null*
-** This is a Boolean flag which denotes whether this property has a null value. This is Sparkplug™ B’s 
+** This is a Boolean flag which denotes whether this property has a null value. This is Sparkplug B’s 
 mechanism of explicitly denoting a property’s value is actually null.
 * *value*
 ** The value of a property utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value supplied 
@@ -551,7 +551,7 @@ can be omitted altogether.
 [[payloads_propertysetlist]]
 ==== PropertySetList
 
-A Sparkplug™ B PropertySetList object is an array of PropertySet objects. It includes the following 
+A Sparkplug B PropertySetList object is an array of PropertySet objects. It includes the following 
 components.
 
 * *propertyset*
@@ -560,7 +560,7 @@ components.
 [[payloads_dataset]]
 ==== DataSet
 
-A Sparkplug™ B DataSet object is used to encode matrices of data. It includes the following components.
+A Sparkplug B DataSet object is used to encode matrices of data. It includes the following components.
 
 * *num_of_columns*
 ** This is an unsigned 64-bit integer representing the number of columns in this DataSet.
@@ -570,7 +570,7 @@ of elements that the types array contains.
 * *types*
 ** This is an array of unsigned 32 bit integers representing the datatypes of the columns. It must have the 
 same number of elements that the columns array contains. Datatypes are not explicitly defined in the 
-Sparkplug™ B Protobuf definition. Instead they are defined in section 4 of this document.
+Sparkplug B Protobuf definition. Instead they are defined in section 4 of this document.
 * *rows*
 ** This is an array of DataSet.Row objects. It contains the data that makes up the data rows of this 
 DataSet.
@@ -578,7 +578,7 @@ DataSet.
 [[payloads_dataset_row]]
 ==== DataSet.Row
 
-A Sparkplug™ B DataSet.Row object represents a row of data in a DataSet. It includes the following 
+A Sparkplug B DataSet.Row object represents a row of data in a DataSet. It includes the following 
 components.
 
 * *elements*
@@ -607,7 +607,7 @@ supplied with a DataSet.DataSetValue must be one of the following types.
 [[payloads_template]]
 ==== Template
 
-A Sparkplug™ B Template is used for encoding complex datatypes in a payload. It is a type of metric and can 
+A Sparkplug B Template is used for encoding complex datatypes in a payload. It is a type of metric and can 
 be used to create custom datatype definitions and instances. It includes the following components.
 
 * *version*
@@ -627,7 +627,7 @@ this is a definition. If false, this is an instance.
 [[payloads_template_parameter]]
 ==== Template.Parameter
 
-A Sparkplug™ B Template.Parameter is a metadata field for a Template. This can be used to represent 
+A Sparkplug B Template.Parameter is a metadata field for a Template. This can be used to represent 
 parameters that are common across a Template but the values are unique to the Template instances. It 
 includes the following components.
 
@@ -635,7 +635,7 @@ includes the following components.
 ** This is a UTF-8 string representing the name of the Template parameter.
 * *type*
 ** This is an unsigned 32-bit integer representing the datatype of the template parameter. Datatypes are 
-not explicitly defined in the Sparkplug™ B Protobuf definition. Instead they are defined in section 4 of 
+not explicitly defined in the Sparkplug B Protobuf definition. Instead they are defined in section 4 of 
 this document.
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value 
@@ -655,9 +655,9 @@ parameter. For a template instance, this is the value unique to that instance.
 **** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
 
 [[payloads_sparkplug_bv1_0_payload_datatypes]]
-=== Sparkplug™ Bv1.0 Payload Datatypes
+=== Sparkplug Bv1.0 Payload Datatypes
 
-The Sparkplug™ B Google Protocol Buffers definition intentionally excludes datatypes in the definition. 
+The Sparkplug B Google Protocol Buffers definition intentionally excludes datatypes in the definition. 
 Different applications and systems have a wide variety of datatypes. As a result, Sparkplug B left them 
 out and instead defines them in the client libraries. This allows consuming applications to be more dynamic 
 in terms of adding new datatypes or even defining custom datatypes.
@@ -703,7 +703,7 @@ in terms of adding new datatypes or even defining custom datatypes.
 ** _Float_
 *** 32-bit floating point number
 *** Google Protocol Buffer Type: float
-*** Sparkplug™ enum value: 9
+*** Sparkplug enum value: 9
 ** _Double_
 *** 64-bit floating point number
 *** Google Protocol Buffer Type: double
@@ -944,7 +944,7 @@ in terms of adding new datatypes or even defining custom datatypes.
 * _Text_
 ** String value (UTF-8)
 ** Google Protocol Buffer Type: string
-** Sparkplug™ enum value: 14
+** Sparkplug enum value: 14
 
 [[payloads_payloads_by_message_type]]
 == Payloads by Message Type
@@ -1095,13 +1095,13 @@ of the following:
 * ONLINE
 ** If the application is connected
 
-Sparkplug™ B payloads are not used for encoding in this payload. This allows critical/backend application(s) 
+Sparkplug B payloads are not used for encoding in this payload. This allows critical/backend application(s) 
 to work across Sparkplug payload types.
 
 [[payloads_payload_representation_on_backend_applications]]
 == Payload Representation on Backend Applications
 
-Sparkplug™ B payloads in conjunction with the Sparkplug topic namespace result in hierarchical data 
+Sparkplug B payloads in conjunction with the Sparkplug topic namespace result in hierarchical data 
 structures that can be represented in folder structures with metrics which are often called tags.
 
 [[payloads_nbirth]]

@@ -46,11 +46,11 @@ The Device/Sensor represents any physical or logical device connected to the MQT
 data, process variables or metrics.
 
 [[components_mqtt_enabled_device]]
-=== MQTT Enabled Device (Sparkplug™)
+=== MQTT Enabled Device (Sparkplug)
 
 This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using a 
-compliant MQTT 3.1.1 connection with the payload and topic notation as outlined in this Sparkplug™ 
-specification. Note that it will be represented as an EoN node in the Sparkplug™ topic payload.
+compliant MQTT 3.1.1 connection with the payload and topic notation as outlined in this Sparkplug 
+specification. Note that it will be represented as an EoN node in the Sparkplug topic payload.
 
 [[components_scada_iiot_host]]
 === SCADA / IIoT Host
@@ -58,7 +58,7 @@ specification. Note that it will be represented as an EoN node in the Sparkplug�
 The SCADA/IIoT Host Node is any MQTT Client application that subscribes to and publishes messages defined in 
 this document. In typical SCADA/IIoT infrastructure implementations, there will be only one *Primary* 
 SCADA/IIoT Host Node responsible for the monitoring and control of a given group of MQTT EoN nodes. 
-Sparkplug™ does support the notion of multiple critical Host applications. This does not preclude any number 
+Sparkplug does support the notion of multiple critical Host applications. This does not preclude any number 
 of additional MQTT SCADA/IIoT Nodes participating in the infrastructure that are in either a pure monitoring 
 mode, or in the role of a hot standby should the Primary MQTT SCADA/IIoT Host go offline.
 

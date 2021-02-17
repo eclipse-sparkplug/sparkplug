@@ -16,13 +16,13 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[introduction_rationale_and_use_case]]
 === Rationale and Use Case
 
-Sparkplug™ provides an open and freely available specification for how Edge of Network (EoN) gateways or 
+Eclipse Sparkplug™ provides an open and freely available specification for how Edge of Network (EoN) gateways or 
 native MQTT enabled end devices and MQTT Applications communicate bi-directionally within an MQTT 
-Infrastructure. This document details the structure and implementation requirements for Sparkplug™ compliant 
+Infrastructure. This document details the structure and implementation requirements for Sparkplug compliant 
 MQTT Client implementations on both devices and applications.
 
 It is recognized that MQTT is used across a wide spectrum of application solution use cases, and an almost 
-indefinable variation of network topologies. To that end the Sparkplug™ specification strives to accomplish 
+indefinable variation of network topologies. To that end the Sparkplug specification strives to accomplish 
 the three following goals.
 
 [[introduction_define_an_mqtt_topic_namespace]]
@@ -30,7 +30,7 @@ the three following goals.
 
 As noted many times in this document one of the many attractive features of MQTT is that is does not specify 
 any required Topic Namespace within its implementation. This fact has meant that MQTT has taken a dominant 
-position across a wide spectrum of IoT solutions. The intent of the Sparkplug™ specification is to identify 
+position across a wide spectrum of IoT solutions. The intent of the Sparkplug pecification is to identify 
 and document a Topic Namespace that is well thought out and optimized for the SCADA/IIoT solution sector.
 
 [[introduction_define_mqtt_state_management]]
@@ -39,21 +39,21 @@ and document a Topic Namespace that is well thought out and optimized for the SC
 One of the unique aspects of MQTT is that it was originally designed for real time SCADA systems to help 
 reduce data latency over bandwidth limited and often unreliable network infrastructure. In many 
 implementations though the full benefit of this “Continuous Session Awareness” is not well understood, or not 
-even implemented. The intent of the Sparkplug™ specification is to take full advantage of MQTT’s native 
+even implemented. The intent of the Sparkplug specification is to take full advantage of MQTT’s native 
 Continuous Session Awareness capability as it applies to real time SCADA/IIoT solutions.
 
 [[introduction_define_the_mqtt_payload]]
 ==== Define the MQTT Payload
 
 Just as the MQTT specification does not dictate any particular Topic Namespace, nor does it dictate any 
-particular payload data encoding. The intent of the Sparkplug™ specification is to strive to define payload 
+particular payload data encoding. The intent of the Sparkplug specification is to strive to define payload 
 encoding architectures that remain true to the original, lightweight, bandwidth efficient, low latency 
 features of MQTT while adding modern encoding schemes targeting the SCADA/IIoT solution space.
 
-Sparkplug™ has defined an approach where the Topic Namespace can aid in the determination of the encoding 
-scheme of any particular payload. Currently there are two (2) Sparkplug™ defined encoding schemes that this 
-specification supports. The first one is the Sparkplug™ A encoding scheme based on the very popular Kura open 
-source Google Protocol Buffer definition. The second one is the Sparkplug™ B encoding scheme that provides a 
+Sparkplug has defined an approach where the Topic Namespace can aid in the determination of the encoding 
+scheme of any particular payload. Currently there are two (2) Sparkplug defined encoding schemes that this 
+specification supports. The first one is the Sparkplug A encoding scheme based on the very popular Kura open 
+source Google Protocol Buffer definition. The second one is the Sparkplug B encoding scheme that provides a 
 richer data model developed with the feedback of many system integrators and end user customers using MQTT.
 
 [[introduction_background]]
@@ -69,14 +69,14 @@ infrastructure is not defined. All of this was intentional within the original s
 maximum flexibility across any solution sector that might choose to use MQTT infrastructures.
 
 But at some point, for MQTT based solutions to be interoperable within a given market sector, the Topic 
-Namespace, Payload representation and session state must be defined. The intent and purpose of the Sparkplug™ 
+Namespace, Payload representation and session state must be defined. The intent and purpose of the Sparkplug 
 specification is to define an MQTT Topic Namespace, payload, and session state management that can be applied 
 generically to the overall IIoT market sector, but specifically meets the requirements of real-time 
 SCADA/Control HMI solutions. Meeting the operational requirements for these systems will enable MQTT based 
 infrastructures to provide more valuable real-time information to Line of Business and MES solution 
 requirements as well.
 
-The purpose of the Sparkplug™ specification is to remain true to the original notion of keeping the Topic 
+The purpose of the Sparkplug specification is to remain true to the original notion of keeping the Topic 
 Namespace and message sizes to a minimum while still making the overall message transactions and session 
 state management between MQTT devices and MQTT SCADA/IIoT applications simple, efficient and easy to 
 understand and implement.
@@ -152,7 +152,7 @@ Figure 1 - MQTT SCADA Infrastructure
 ===== MQTT Server(s)
 
 MQTT enabled infrastructure requires that one or more MQTT Servers are present in the infrastructure. The 
-only requirement that the Sparkplug™ specification places on the selection of an MQTT Server component in the 
+only requirement that the Sparkplug specification places on the selection of an MQTT Server component in the 
 architecture is it is required to be compliant with the latest MQTT V3.1.1 specification and is sized to 
 properly manage all MQTT message traffic.
 
@@ -175,11 +175,11 @@ The Device/Sensor represents any physical or logical device connected to the MQT
 data, process variables or metrics.
 
 [[introduction_mqtt_enabled_device]]
-===== MQTT Enabled Device(Sparkplug™)
+===== MQTT Enabled Device(Sparkplug)
 
 This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using a 
-compliant MQTT 3.1.1 connection with the payload and topic notation as outlined in this Sparkplug™ 
-specification. Note that it will be represented as an EoN node in the Sparkplug™ topic payload.
+compliant MQTT 3.1.1 connection with the payload and topic notation as outlined in this Sparkplug 
+specification. Note that it will be represented as an EoN node in the Sparkplug topic payload.
 
 [[introduction_scada_iiot_host]]
 ===== SCADA/IIoT Host
@@ -187,7 +187,7 @@ specification. Note that it will be represented as an EoN node in the Sparkplug�
 The SCADA/IIoT Host Node is any MQTT Client application that subscribes to and publishes messages defined in 
 this document. In typical SCADA/IIoT infrastructure implementations, there will be only one *Primary* 
 SCADA/IIoT Host Node responsible for the monitoring and control of a given group of MQTT EoN nodes. 
-Sparkplug™ does support the notion of multiple critical Host applications. This does not preclude any number 
+Sparkplug does support the notion of multiple critical Host applications. This does not preclude any number 
 of additional MQTT SCADA/IIoT Nodes participating in the infrastructure that are in either a pure monitoring 
 mode, or in the role of a hot standby should the Primary MQTT SCADA/IIoT Host go offline.
 
