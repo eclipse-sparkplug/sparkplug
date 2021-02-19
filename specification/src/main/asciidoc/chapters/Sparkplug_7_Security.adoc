@@ -15,12 +15,15 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 
 [[security_tls]]
 === TLS
+The MQTT specification does not specify any TCP/IP security scheme as it was envisaged that TCP/IP security would (and did) change over time. Although this document will not specify any TCP/IP security schema it will provide examples on how to secure an MQTT infrastructure using TLS security.
 
 [[security_authentication]]
 === Authentication
+There are several levels of security and access control configured within an MQTT infrastructure. From a pure MQTT client perspective, the client does need to provide a unique Client ID, and an optional Username and Password.
 
 [[security_authorization]]
 === Authorization
+Although access control is not mandated in the MQTT specification for use in MQTT Server implementations, Access Control List (ACL) functionality is available for most MQTT Server implementations. The ACL of an MQTT Server implementation is used to specify which Topic Namespace any MQTT Client can subscribe to and publish on. Examples are provided on how to setup and manage MQTT Client credentials and some considerations on setting up proper ACL’s on the MQTT Servers.
 
 [[security_implementation_notes]]
 === Implementation Notes
