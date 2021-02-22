@@ -1,0 +1,31 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+////
+
+[[conformance]]
+== Conformance
+ TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
+
+[[conformance_targets]]
+=== Conformance Targets
+ TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
+
+[[conformance_sparkplug_edge_node]]
+==== Sparkplug EoN Node
+ TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
+
+[[conformance_sparkplug_host_application]]
+==== Sparkplug Host Application
+ TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
+
+[[conformance_sparkplug_primary_host_application]]
+==== Sparkplug Primary Host Application
+ TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
