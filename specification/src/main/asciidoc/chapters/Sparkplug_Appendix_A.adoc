@@ -10,5 +10,19 @@ SPDX-License-Identifier: EPL-2.0
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 ////
 
-[[acknowledgements]]
-== Acknowledgements
+[[appendix_a]]
+== Appendix A: Definitions
+
+*Edge of Network (EoN) Node*: TODO
+
+*Host Application*: TODO
+
+*Primary Host Application*: TODO
+
+*Sparkplug Group ID*: TODO
+
+*Sparkplug Edge Node ID*: TODO
+
+*Sparkplug Device ID*: TODO
+
+*Sparkplug Edge Node Descriptor*: TODO
