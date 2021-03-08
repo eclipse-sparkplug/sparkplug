@@ -13,43 +13,70 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[topics]]
 == Sparkplug™ Topic Namespace
 
-To get a working Message Oriented Middleware (MOM) based SCADA system using MQTT, the first thing that must be defined is a Topic Namespace to work within. The beauty of MQTT is the fact that you can just come up with an arbitrary topic like “Portland/Temperature”, connect to an MQTT Server, and start publishing the temperature value. For this data to be useful to other MQTT Client applications that want to consume the temperature values, the Topic Namespace needs to be understood by everyone participating in the data exchange.
+To get a working Message Oriented Middleware (MOM) based SCADA system using MQTT, the first thing
+that must be defined is a topic namespace to work within. The beauty of MQTT is the fact that you
+can just come up with an arbitrary topic like “Portland/Temperature”, connect to an MQTT Server, and
+start publishing the temperature value. For this data to be useful to other MQTT Client applications
+that want to consume the temperature values, the topic namespace needs to be understood by everyone
+participating in the data exchange.
 
-Every MQTT message published consist of a *_topic_* and a *_payload_* component. These components are the “overhead” of an MQTT message as measured in bytes on the wire. The Sparkplug specification is designed to keep these components meaningful and easy to understand, but not to get so verbose as to negatively impact bandwidth/time sensitive data exchange.
+Every MQTT message published typically consists of a *_topic_* and *_payload_* components. These
+components are the overhead of an MQTT message as measured in bytes on the wire. The Sparkplug
+specification is designed to keep these components meaningful and easy to understand, but not to get
+so verbose as to negatively impact bandwidth/time sensitive data exchange.
 
 [[topics_sparkplug_topic_namesapce_elements]]
 === Sparkplug Topic Namespace Elements
 
-All MQTT clients using the Sparkplug specification will use the following Topic Namespace structure:
+[tck-testable tck-id-topic-structure]#All MQTT clients using the Sparkplug specification MUST use
+the following topic namespace structure:#
 
   namespace/group_id/message_type/edge_node_id/[device_id]
 
 [[topics_namespace_element]]
 ==== namespace Element
 
-The *_namespace_* element of the Topic Namespace is the root element that will define both the structure of the remaining namespace elements as well as the encoding used for the associated payload data. The current Sparkplug specification defines two (2) namespaces. One is for Sparkplug payload definition A, and another one of for the Sparkplug payload definition B.
+The *_namespace_* element of the topic namespace is the root element that will define both the
+structure of the remaining namespace elements as well as the encoding used for the associated
+payload data. The Sparkplug specification defines two (2) namespaces. One is for Sparkplug payload
+definition A, and another one of for the Sparkplug payload definition B.
 
-For the Sparkplug A version of the payload definition, the UTF-8 string constant for the *namespace* element will be:
+[tck-testable tck-id-topic-structure-namespace-a]#For the Sparkplug A version of the payload
+definition, the UTF-8 string constant for the *namespace* element MUST be:#
 
-*“spAv1.0”*
+  spAv1.0
 
-For the Sparkplug B version of the specification, the UTF-8 string constant for the *_namespace_* element will be:
+[tck-testable tck-id-topic-structure-namespace-a]#For the Sparkplug B version of the payload
+definition, the UTF-8 string constant for the *_namespace_* element MUST be:#
 
-*“spBv1.0”*
+  spBv1.0
 
-Note that for the remainder of this document, the version of the Sparkplug Payload definition does not affect the Topic Namespace or session state management as they will remain the same. There are separate appendices that defines the encoding used for both the A and B versions of Sparkplug MQTT message payload.
+Note that for the remainder of this document, the version of the Sparkplug Payload definition does
+not affect the topic namespace or session state management as they will remain the same. There are
+separate definitions in this document for the encoding used for both the A and B versions of
+Sparkplug MQTT message payloads.
 
 [[topics_group_id_element]]
 ==== group_id Element
 
-The *_group_id_* element of the Topic Namespace provides for a logical grouping of MQTT EoN nodes into the MQTT Server and back out to the consuming MQTT Clients. The format of the *_group_id_* element is not dictated in that it can be any valid UTF-8 alphanumeric string except for the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and ‘#’ (number sign). In most use cases to minimize bandwidth, it should be descriptive but as small as possible. Examples of where the [*group_id*] might be used include Oil/Gas applications where MQTT EoN nodes on a physical pipeline segment all have the same [*group_id*]. Plant floor applications may group MQTT EoN nodes based on logical cell or manufacturing line requirements.
+The *_group_id_* element of the topic namespace provides for a logical grouping of MQTT EoN nodes
+into the MQTT Server and back out to the consuming MQTT Clients.
+[tck-testable tck-id-topic-structure-namespace-valid-group-id]#The format of the  *_group_id_* MUST
+be a valid UTF-8 string with the exception of the reserved characters of ‘+’ (plus), ‘/’ (forward
+slash), and ‘#’ (number sign).#
+In most use cases to minimize bandwidth, it should be descriptive but as small as possible. Examples
+of where the [*group_id*] might be used include Oil/Gas applications where MQTT EoN nodes on a
+physical pipeline segment all have the same [*group_id*]. Plant floor applications may group MQTT
+EoN nodes based on logical cell or manufacturing line requirements.
 
 [[topics_message_type_element]]
 ==== message_type Element
 
-The *_message_type_* element of the Topic Namespace provides an indication as to how to handle the MQTT payload of the message. Note that the actual encoding of the payload will vary depending on the version of the Sparkplug implementation as indicated by the *_namespace_* element.
+The *_message_type_* element of the topic namespace provides an indication as to how to handle the
+MQTT payload of the message. Note that the actual encoding of the payload will vary depending on the
+version of the Sparkplug implementation as indicated by the *_namespace_* element.
 
-The following *_message_type_* elements are defined for the Sparkplug Topic Namespace:
+The following *_message_type_* elements are defined for the Sparkplug topic namespace:
 
 * *NBIRTH* – Birth certificate for MQTT EoN nodes.
 * *NDEATH* – Death certificate for MQTT EoN nodes.
@@ -59,19 +86,41 @@ The following *_message_type_* elements are defined for the Sparkplug Topic Name
 * *DDATA* – Device data message.
 * *NCMD* – Node command message.
 * *DCMD* – Device command message.
-* *STATE* – Critical application state message.
+* *STATE* – Primary Host application state message.
 
 The specification for each of these _message_type_ elements are detailed later in this document.
 
 [[topics_edge_node_id_element]]
 ==== edge_node_id Element
 
-The *_edge_node_id_* element of the Sparkplug Topic Namespace uniquely identifies the MQTT EoN node within the infrastructure. The *_group_id_* combined with the *_edge_node_id_* element must be unique from any other *_group_id_*/*_edge_node_id_* assigned in the MQTT infrastructure. The format of the *_edge_node_id_* can be valid UTF-8 alphanumeric String with the exception of the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and ‘#’ (number sign). The topic element *_edge_node_id_* travels with every message published and should be as short as possible.
+The *_edge_node_id_* element of the Sparkplug topic namespace uniquely identifies the MQTT EoN node
+within the infrastructure.
+[tck-testable tck-id-topic-structure-namespace-unique-edge-node-descriptor]#The *_group_id_*
+combined with the *_edge_node_id_* element MUST be unique from any other
+*_group_id_*/*_edge_node_id_* assigned in the MQTT infrastructure.#
+[tck-testable tck-id-topic-structure-namespace-valid-edge-node-id]#The format of the
+*_edge_node_id_* MUST be a valid UTF-8 string with the exception of the reserved characters of ‘+’
+(plus), ‘/’ (forward slash), and ‘#’ (number sign).#
+The topic element *_edge_node_id_* travels with every message published and should be as short as
+ possible.
 
 [[topics_device_id_element]]
 ==== device_id Element
 
-The *_device_id_* element of the Sparkplug Topic Namespace identifies a device attached (physically or logically) to the MQTT EoN node. Note that the *_device_id_* is an optional element within the Topic Namespace as some messages will be either originating or destined to the *_edge_node_id_* and the *_device_id_* would not be required. The format of the *_device_id_* is a valid UTF-8 alphanumeric String except for the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and ‘#’ (number sign). The *_device_id_* must be unique from other devices connected to the same EoN node, but can be duplicated from EoN node to other EoN nodes. The device_id element travels with every message published and should be as short as possible.
+The *_device_id_* element of the Sparkplug topic namespace identifies a device attached (physically
+or logically) to the MQTT EoN node. Note that the *_device_id_* is an optional element within the
+topic namespace as some messages will be either originating or destined to the *_edge_node_id_* and
+the *_device_id_* would not be required.
+[tck-testable tck-id-topic-structure-namespace-valid-device-id]#The format of the *_device_id_* MUST
+be a valid UTF-8 string except for the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and
+‘#’ (number sign).#
+[tck-testable tck-id-topic-structure-namespace-unique-device-id]#The *_device_id_* MUST be unique
+from other devices connected to the same EoN node.
+[tck-testable tck-id-topic-structure-namespace-duplicate-device-id-across-eon]#The *_device_id_* MAY
+be duplicated from EoN node to other EoN nodes. The device_id element travels with every message
+published and should be as short as possible.
+[tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#The *_device_id_*
+MUST be included with *_message_type_* elements DBIRTH, DDEATH, DDATA, and DCMD based topics#
 
 [[topics_sparkplug_mqtt_message_types]]
 === Sparkplug MQTT Message Types
@@ -79,7 +128,10 @@ The *_device_id_* element of the Sparkplug Topic Namespace identifies a device a
 [[topics_message_type_oeverview]]
 ==== Message Type Overview
 
-Sparkplug defines the Topic Namespace for set of MQTT messages that are used to manage connection state as well as bidirectional metric information exchange that would apply to many typical real-time SCADA/IIoT, monitoring, and data collection system use cases. The defined message types include:
+Sparkplug defines the topic namespace for set of MQTT messages that are used to manage connection
+state as well as bidirectional metric information exchange that would apply to many typical
+real-time SCADA/IIoT, monitoring, and data collection system use cases. The defined message types
+are:
 
 * *NBIRTH* – Birth certificate for MQTT EoN nodes.
 * *NDEATH* – Death certificate for MQTT EoN nodes.
@@ -89,15 +141,17 @@ Sparkplug defines the Topic Namespace for set of MQTT messages that are used to 
 * *DDATA* – Device data message.
 * *NCMD* – Node command message.
 * *DCMD* – Device command message.
-* *STATE* – Critical application state message.
+* *STATE* – Primary Host application state message.
 
-Using these defined messages host SCADA/IIoT applications can:
+Using these defined messages host applications can:
 
 * Discover all metadata and monitor state of any EoN/Device connected to the MQTT infrastructure.
-* Discover all metrics which include all diagnostics, properties, metadata, and current state values.
+* Discover all metrics which include all diagnostics, properties, metadata, and current state
+values.
 * Issue write/command messages to any EoN/Device metric.
 
-This section of the document defines the Topic Namespace and how each of the associated messages types can be used.
+This section of the document defines the topic namespace and how each of the associated messages
+types can be used.
 
 [[topics_eon]]
 ==== EoN
@@ -110,17 +164,26 @@ The Birth Certificate topic for an MQTT EoN node is:
 [subs="quotes"]
   namespace/group_id/*NBIRTH*/edge_node_id
 
-The EoN Birth Certificate payload contains everything required to build out a data structure for all metrics for this EoN node. The ONLINE state of this EoN node should be set to TRUE along with the associated ONLINE Date Time parameter. Note that the EoN Birth Certificate ONLY indicates the node itself is online and in an MQTT Session, but any devices that have previously published a DBIRTH will still have “*STALE*” metric quality until those devices come online with their associated DBIRTH.
+The EoN Birth Certificate payload contains everything required to build out a data structure for all
+metrics for this EoN node. At the time any host application receives and NBIRTH, the ONLINE state of
+this EoN node should be set to TRUE along with the associated ONLINE Date Time parameter. Note that
+the EoN Birth Certificate ONLY indicates the node itself is online and in an MQTT Session, but any
+devices that have previously published a DBIRTH will still have “*STALE*” metric quality until the
+host application receives the associated DBIRTH messages.
 
 [[topics_data_message_ndata]]
 ===== Data Message (NDATA)
 
-Once an MQTT EoN node is online with a proper NBIRTH it is in a mode of quiescent Report by Exception (RBE) or time based reporting of metric information that changes. This enables the advantages of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected MQTT EoN node and to rely on Report by Exception (RBE) messages for metric state changes over the MQTT session connection.
-  The Data Topic for an MQTT EoN node is:
+Once an MQTT EoN node is online with a proper NBIRTH it is in a mode of quiescent Report by
+Exception (RBE) or time based reporting of metric information that changes. This enables the
+advantages of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
+MQTT EoN node and to rely on Report by Exception (RBE) messages for metric state changes over the
+MQTT session connection. The Data Topic for an MQTT EoN node is:
 [subs="quotes"]
   namespace/group_id/*NDATA*/edge_node_id
 
-The payload of NDATA messages will contain any RBE or time based metric EoN node values that need to be reported to any subscribing MQTT clients.
+The payload of NDATA messages will contain any RBE or time based metric EoN node values that need
+to be reported to any subscribing MQTT clients.
 
 [[topics_death_message_ndeath]]
 ===== Death Message (NDEATH)
@@ -129,16 +192,26 @@ The Death Certificate topic for an MQTT EoN node is:
 [subs="quotes"]
   namespace/group_id/*NDEATH*/edge_node_id
 
-The Death Certificate topic and payload described here are not “published” as an MQTT message by a client, but provided as parameters within the MQTT CONNECT control packet when this MQTT EoN node first establishes the MQTT Client session.
+The Death Certificate topic and payload described here are not “published” as an MQTT message by a
+client, but provided as parameters within the MQTT CONNECT control packet when this MQTT EoN node
+first establishes the MQTT Client session.
 
-Immediately upon reception of an EoN Death Certificate, any MQTT client subscribed to this EoN node should set the data quality of all metrics to STALE and should note the time stamp when the NDEATH message was received.
+Immediately upon reception of an EoN Death Certificate, any MQTT client subscribed to this EoN node
+should set the data quality of all metrics to STALE and should note the time stamp when the NDEATH
+message was received.
 
-The MQTT payload typically associated with this topic can include a Birth/Death sequence number used to track and synchronize Birth and Death sequences across the MQTT infrastructure. Since this payload will be defined in advance, and held in the MQTT server and only delivered on the termination of an MQTT session, not a lot of additional diagnostic information can be pre-populated into the payload.
+The MQTT payload typically associated with this topic can include a Birth/Death sequence number used
+to track and synchronize Birth and Death sequences across the MQTT infrastructure. Since this
+payload will be defined in advance, and held in the MQTT server and only delivered on the
+termination of an MQTT session, not a lot of additional diagnostic information can be pre-populated
+into the payload.
 
 [[topics_command_ncmd]]
 ===== Command (NCMD)
 
-The NCMD command topic provides the Topic Namespace used to send commands to any connected EoN nodes. This means sending an updated metric value to an associated metric included in the NBIRTH metric list.
+The NCMD command topic provides the topic namespace used to send commands to any connected EoN
+nodes. This means sending an updated metric value to an associated metric included in the NBIRTH
+metric list.
 [subs="quotes"]
   namespace/group_id/*NCMD*/edge_node_id
 
@@ -149,18 +222,29 @@ The NCMD command topic provides the Topic Namespace used to send commands to any
 [[topics_birth_message_dbirth]]
 ===== Birth Message (DBIRTH)
 
-The Topic Namespace for a Birth Certificate for a device is:
+The topic namespace for a Birth Certificate for a device is:
 [subs="quotes"]
   namespace/group_id/*DBIRTH*/edge_node_id/device_id
 
-The DBIRTH payload contains everything required to build out a data structure for all metrics for this device. The ONLINE state of this device should be set to TRUE along with the associated ONLINE date time this message was received.
+The DBIRTH payload contains everything required to build out a data structure for all metrics for
+this device. The ONLINE state of this device should be set to TRUE along with the associated ONLINE
+date time this message was received.
 
-The MQTT EoN node is responsible for the management of all attached physical and/or logical devices. Once the EoN node has published its NBIRTH, any consumer application ensures that the metric structure has the EoN node in an ONLINE state. But each physical and/or logical device connected to this node will still need to provide this DBIRTH before consumer applications create/update the metric structure (if this is the first time this device has been seen) and set any associated metrics in the application to a “*GOOD*” state.
+The MQTT EoN node is responsible for the management of all attached physical and/or logical devices.
+Once the EoN node has published its NBIRTH, any consumer application ensures that the metric
+structure has the EoN node in an ONLINE state. But each physical and/or logical device connected to
+this node will still need to provide this DBIRTH before consumer applications create/update the
+metric structure (if this is the first time this device has been seen) and set any associated
+metrics in the application to a “*GOOD*” state.
 
 [[topics_data_message_ddata]]
 ===== Data Message (DDATA)
 
-Once an MQTT EoN node and associated devices are all online with proper Birth Certificates it is in a mode of quiescent Report by Exception (RBE) reporting of any metric that changes. This takes advantage of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT session connection.
+Once an MQTT EoN node and associated devices are all online with proper Birth Certificates it is in
+a mode of quiescent Report by Exception (RBE) reporting of any metric that changes. This takes
+advantage of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
+devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT
+session connection.
 
 As defined above, the Data Topic for an MQTT device is:
 [subs="quotes"]
@@ -171,18 +255,24 @@ The payload of DDATA messages can contain one or more metric values that need to
 [[topics_death_message_ddeath]]
 ===== Death Message (DDEATH)
 
-The Sparkplug Topic Namespace for a device Death Certificate is:
+The Sparkplug topic namespace for a device Death Certificate is:
 [subs="quotes"]
   namespace/group_id/*DDEATH*/edge_node_id/device_id
 
-It is the responsibility of the MQTT EoN node to indicate the real-time state of either physical legacy device using poll/response protocols and/or local logical devices. If the device becomes unavailable for any reason (no response, CRC error, etc.) it is the responsibility of the EoN node to publish a DDEATH on behalf of the end device.
+It is the responsibility of the MQTT EoN node to indicate the real-time state of either physical
+legacy device using poll/response protocols and/or local logical devices. If the device becomes
+unavailable for any reason (no response, CRC error, etc.) it is the responsibility of the EoN node
+to publish a DDEATH on behalf of the end device.
 
-Immediately upon reception of a DDEATH, any MQTT client subscribed to this device should set the data quality of all metrics to “*STALE”* and should note the time stamp when the DDEATH message was received.
+Immediately upon reception of a DDEATH, any MQTT client subscribed to this device should set the
+data quality of all metrics to “*STALE”* and should note the time stamp when the DDEATH message was
+received.
 
 [[topics_command_dcmd]]
 ===== Command (DCMD)
 
-The DCMD topic provides the Topic Namespace used to publish metrics to any connected device. This means sending a new metric value to an associated metric included in the DBIRTH metric list.
+The DCMD topic provides the topic namespace used to publish metrics to any connected device. This
+means sending a new metric value to an associated metric included in the DBIRTH metric list.
 [subs="quotes"]
   namespace/group_id/*DCMD*/edge_node_id/device_id
 
@@ -193,30 +283,40 @@ The DCMD topic provides the Topic Namespace used to publish metrics to any conne
 [[topics_birth_message_state]]
 ===== Birth Message (STATE)
 
-The first message a SCADA/IIoT MQTT Host MUST publish is a Birth Certificate. The SCADA/IIoT Host Death Certificate is registered above within the actual establishment of the MQTT session and is published as a part of the native MQTT transport if the MQTT session terminates for any reason.
+The first message a SCADA/IIoT MQTT Host MUST publish is a Birth Certificate. The SCADA/IIoT Host
+Death Certificate is registered above within the actual establishment of the MQTT session and is
+published as a part of the native MQTT transport if the MQTT session terminates for any reason.
 
-The Birth Certificate that is defined here is an application level message published by the Host SCADA/IIoT MQTT Client applications.
+The Birth Certificate that is defined here is an application level message published by the Host
+SCADA/IIoT MQTT Client applications.
 
-The topic used for the Host Birth Certificate is identical to the topic used for the Death Certificate:
+The topic used for the Host Birth Certificate is identical to the topic used for the Death
+Certificate:
 [subs="quotes"]
   *STATE*/scada_host_id
 
-[tck-testable tck-id-host-topic-phid-birth-payload]#The Birth Certificate Payload MUST be the UTF-8 STRING “*ONLINE*”.#
+[tck-testable tck-id-host-topic-phid-birth-payload]#The Birth Certificate Payload MUST be the UTF-8
+string “*ONLINE*”.#
 
-[tck-testable tck-id-host-topic-phid-birth-qos]#The MQTT Quality of Service (QoS) MUST be set to *1*.#
+[tck-testable tck-id-host-topic-phid-birth-qos]#The MQTT Quality of Service (QoS) MUST be set to
+*1*.#
 
-[tck-testable tck-id-host-topic-phid-birth-retain]#The MQTT RETAIN flag for the Birth Certificate MUST be set to *TRUE*#
+[tck-testable tck-id-host-topic-phid-birth-retain]#The MQTT retain flag for the Birth Certificate
+MUST be set to *TRUE*#
 
 [[topics_death_message_state]]
 ===== Death Message (STATE)
 
-When the SCADA/IIoT Host MQTT client establishes an MQTT session to the MQTT Server(s), the Death Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT transaction. The *Will Topic* as defined above will be:
+When the SCADA/IIoT Host MQTT client establishes an MQTT session to the MQTT Server(s), the Death
+Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
+transaction. The *Will Topic* as defined above will be:
 [subs="quotes"]
   *STATE*/scada_host_id
 
-[tck-testable tck-id-host-topic-phid-death-payload]#The MQTT Will Payload MUST be the UTF-8 STRING “*OFFLINE*”.#
+[tck-testable tck-id-host-topic-phid-death-payload]#The MQTT Will Payload MUST be the UTF-8 string
+“*OFFLINE*”.#
 
 [tck-testable tck-id-host-topic-phid-death-qos]#The MQTT Will QoS MUST be set to *1*#
 
-[tck-testable tck-id-host-topic-phid-death-retain]#The MQTT Will RETAIN flag MUST be set to *TRUE*#
+[tck-testable tck-id-host-topic-phid-death-retain]#The MQTT Will retain flag MUST be set to *TRUE*#
 

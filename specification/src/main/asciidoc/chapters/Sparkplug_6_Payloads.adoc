@@ -1087,7 +1087,7 @@ not and cannot be known.
 [[payloads_desc_state]]
 === STATE
 
-The STATE messages from the critical application must include a payload that is a UTF-8 string that is one 
+The STATE messages from the primary host application must include a payload that is a UTF-8 string that is one 
 of the following:
 
 * OFFLINE
@@ -1095,7 +1095,7 @@ of the following:
 * ONLINE
 ** If the application is connected
 
-Sparkplug B payloads are not used for encoding in this payload. This allows critical/backend application(s) 
+Sparkplug B payloads are not used for encoding in this payload. This allows primary host and host application(s) 
 to work across Sparkplug payload types.
 
 [[payloads_payload_representation_on_backend_applications]]
