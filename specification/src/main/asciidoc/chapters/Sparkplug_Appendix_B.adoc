@@ -11,4 +11,4 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 ////
 
 [[appendix_b]]
-== Appendix B: Open Source Software (non-normative)
+== Appendix B: MQTT 3.1.1 required features (non-normative)
