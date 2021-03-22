@@ -11,18 +11,4 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 ////
 
 [[appendix_a]]
-== Appendix A: Definitions
-
-*Edge of Network (EoN) Node*: TODO
-
-*Host Application*: TODO
-
-*Primary Host Application*: TODO
-
-*Sparkplug Group ID*: TODO
-
-*Sparkplug Edge Node ID*: TODO
-
-*Sparkplug Device ID*: TODO
-
-*Sparkplug Edge Node Descriptor*: TODO
+== Appendix A: Open Source Software (non-normative)

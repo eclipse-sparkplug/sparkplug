@@ -16,13 +16,14 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[introduction_rationale_and_use_case]]
 === Rationale and Use Case
 
-Eclipse Sparkplug™ provides an open and freely available specification for how Edge of Network (EoN)
-gateways or native MQTT enabled end devices and MQTT Applications communicate bi-directionally
+Eclipse Sparkplug™ provides an open and freely available specification for how Edge of Network
+Gateways or native MQTT enabled end devices and MQTT Host Applications communicate bi-directionally
 within an MQTT Infrastructure. This document details the structure and implementation requirements
-for Sparkplug compliant MQTT Client implementations on both EoN gateways and host applications.
+for Sparkplug compliant MQTT Client implementations on both Edge of Network Gateways and Host
+Applications.
 
 It is recognized that MQTT is used across a wide spectrum of application solution use cases, and an
-almost indefinable variation of network topologies. To that end the Sparkplug specification strives
+almost indefinable variation of network topologies. To that end the Sparkplug Specification strives
 to accomplish the three following goals.
 
 [[introduction_define_an_mqtt_topic_namespace]]
@@ -31,7 +32,7 @@ to accomplish the three following goals.
 As noted many times in this document one of the many attractive features of MQTT is that is does not
 specify any required Topic Namespace within its implementation. This fact has meant that MQTT has
 taken a dominant position across a wide spectrum of IoT solutions. The intent of the Sparkplug
-specification is to identify and document a Topic Namespace that is well thought out and optimized
+Specification is to identify and document a Topic Namespace that is well thought out and optimized
 for the SCADA/IIoT solution sector.
 
 [[introduction_define_mqtt_state_management]]
@@ -40,15 +41,15 @@ for the SCADA/IIoT solution sector.
 One of the unique aspects of MQTT is that it was originally designed for real time SCADA systems to
 help reduce data latency over bandwidth limited and often unreliable network infrastructures. In
 many implementations the full benefit of this “Continuous Session Awareness” is not well understood,
-or not even implemented. The intent of the Sparkplug specification is to take full advantage of
+or not even implemented. The intent of the Sparkplug Specification is to take full advantage of
 MQTT’s native Continuous Session Awareness capability as it applies to real time SCADA/IIoT
 solutions.
 
 [[introduction_define_the_mqtt_payload]]
 ==== Define the MQTT Payload
 
-Just as the MQTT specification does not dictate any particular Topic Namespace, it also does it
-dictate any particular payload data encoding. The intent of the Sparkplug specification is to strive
+Just as the MQTT Specification does not dictate any particular Topic Namespace, it also does it
+dictate any particular payload data encoding. The intent of the Sparkplug Specification is to strive
 to define payload encoding architectures that remain true to the original, lightweight, bandwidth
 efficient, low latency features of MQTT while adding modern encoding schemes targeting the
 SCADA/IIoT solution space.
@@ -63,25 +64,26 @@ integrators and end user customers using MQTT.
 [[introduction_background]]
 ==== Background
 
-MQTT was originally designed as a message transport for real-time SCADA systems. The MQTT message
-transport specification does *not* specify the Topic Namespace to use nor does it define the Payload
+MQTT was originally designed as a message transport for real-time SCADA systems. The MQTT
+Specification does *not* specify the Topic Namespace to use nor does it define the Payload
 representation of the data being published and/or subscribed to. In addition to this, since the
 original use case for MQTT was targeting real-time SCADA, there are mechanisms defined to provide
-the *state* of an MQTT session such that SCADA/Control HMI application can monitor the current state
-of any MQTT enabled device in the infrastructure. As with the Topic Namespace and Payload the way
-state information is implemented and managed within the MQTT infrastructure is not defined. All of
-this was intentional within the original MQTT specification to provide maximum flexibility across
-any solution sector that might choose to use MQTT infrastructures.
+the *state* of an MQTT session such that SCADA/Control Human-Machine Interface (HMI) application
+can monitor the current state of any MQTT enabled device in the infrastructure. As with the Topic
+Namespace and Payload the way state information is implemented and managed within the MQTT
+infrastructure is not defined. All of this was intentional within the original MQTT Specification to
+provide maximum flexibility across any solution sector that might choose to use MQTT
+infrastructures.
 
 But at some point, for MQTT based solutions to be interoperable within a given market sector, the
-Topic Namespace, Payload representation and session state must be defined. The intent and purpose of
-the Sparkplug specification is to define an MQTT Topic Namespace, payload, and session state
+Topic Namespace, Payload representation, and session state must be defined. The intent and purpose
+of the Sparkplug Specification is to define an MQTT Topic Namespace, payload, and session state
 management that can be applied generically to the overall IIoT market sector, but specifically meets
 the requirements of real-time SCADA/Control HMI solutions. Meeting the operational requirements for
 these systems will enable MQTT based infrastructures to provide more valuable real-time information
 to Line of Business and MES solution requirements as well.
 
-The purpose of the Sparkplug specification is to remain true to the original notion of keeping the
+The purpose of the Sparkplug Specification is to remain true to the original notion of keeping the
 Topic Namespace and message sizes to a minimum while still making the overall message transactions
 and session state management between MQTT enabled devices and MQTT SCADA/IIoT applications simple,
 efficient and easy to understand and implement.
@@ -161,29 +163,37 @@ Figure 1 - MQTT SCADA Infrastructure
 ===== MQTT Server(s)
 
 MQTT enabled infrastructure requires that one or more MQTT Servers are present in the 
-infrastructure. The only requirement that the Sparkplug specification places on the selection of an
+infrastructure. The only requirement that the Sparkplug Specification places on the selection of an
 MQTT Server component in the architecture is it is required to be compliant with the latest
-MQTT v3.1.1 or MQTT v5.0 specification and is sized to properly manage all MQTT message traffic.
+MQTT v3.1.1 or MQTT v5.0 Specification and is sized to properly manage all MQTT message traffic.
 
 One can implement the use (if required) of multiple MQTT servers for redundancy, high availability,
 and scalability within any given infrastructure.
 
-[[introduction_sparkplug_edge_of_network_node]]
-===== Sparkplug Edge of Network (EoN) Node (aka Edge Node)
+[[introduction_sparkplug_group]]
+===== Sparkplug Group
+// TODO
 
-In the context of this specification, an MQTT Edge of Network (EoN) Node is any v3.1.1 or v5.0
-compliant MQTT Client application that manages an MQTT Session and provides the physical and/or
-logical gateway functions required to participate in the Topic Namespace and Payload definitions
-described in this document. The EoN Node is responsible for any local protocol interface to existing
-devices (PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete I/O, and/or any
-logical internal process variables(PVs).
+[[introduction_sparkplug_edge_node]]
+===== Sparkplug Edge Node
+
+In the context of this specification, a Sparkplug Edge Node is any v3.1.1 or v5.0 compliant MQTT
+Client application that manages an MQTT Session and provides the physical and/or logical gateway
+functions required to participate in the Topic Namespace and Payload definitions described in
+this document. The Edge Node is responsible for any local protocol interface to existing devices
+(PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete I/O, and/or any logical
+internal process variables(PVs).
+
+[[introduction_sparkplug_device]]
+===== Sparkplug Device
+// TODO: Device a Sparkplug device differentiating it from a physical device
 
 [[introduction_device_sensor]]
 ===== Device/Sensor 
 
-The Device/Sensor represents any physical or logical device connected to the MQTT EoN Node providing
-any data, process variables or metrics. The connection between the device and the EoN Node is
-typically a non-MQTT based connection such as Modbus, Serial, LoRa, Ethernet IP, proprietary
+The Device/Sensor represents any physical or logical device connected to the Sparkplug Edge Node
+providing any data, process variables or metrics. The connection between the device and the Edge
+Node is typically a non-MQTT based connection such as Modbus, Serial, LoRa, Ethernet IP, proprietary
 protocols, or any other local connection protocol.
 
 [[introduction_mqtt_sparkplug_enabled_device]]
@@ -191,20 +201,36 @@ protocols, or any other local connection protocol.
 
 This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using
 a compliant MQTT v3.1.1 or v5.0 connection with the payload and topic notation as outlined in this
-Sparkplug specification. With MQTT/Sparkplug enabled directly in the device this would bypass the
-use of an EoN Node in the infrastructure.
+Sparkplug Specification. With MQTT/Sparkplug enabled directly in the device this would bypass the
+use of a Sparkplug Device in the infrastructure. In this case, the physical device or sensor is the
+Edge Node.
+
+[[introduction_primary_host_application]]
+===== Primary Host Application
+// TODO: Define Primary Host
+
+[[introduction_secondary_host_application]]
+===== Secondary Host Application
+// TODO: Device Secondary Host
 
 [[introduction_host_applications]]
 ===== Host Applications
+// TODO: Clean up to denote a 'Host application' is either a primary or secondary host - or remove
+// this altogether
 
 The SCADA/IIoT Host, MES, Historian, and Analytics applications are all Sparkplug Host Applications.
 These are MQTT Client application that subscribe to and potentially publishes command messages
 defined in this document. In typical SCADA/IIoT infrastructure implementations, there will be only
-one *Primary Host Application* responsible for the monitoring and control of a given group of MQTT
-EoN Nodes. Sparkplug does support the notion of multiple Primary Host Applications. This does not
-preclude any number of additional Host Applications participating in the infrastructure that are in
-either a pure monitoring mode, or in the role of a hot standby should the Primary Host Application
-go offline or become unavailable within the infrastructure.
+one *Primary Host Application* responsible for the monitoring and control of a given group of
+Sparkplug Edge Nodes. Sparkplug does support the notion of multiple Primary Host Applications. This
+does not preclude any number of Secondary Host Applications participating in the infrastructure that
+are in either a pure monitoring mode, or in the role of a hot standby should the Primary Host
+Application go offline or become unavailable within the infrastructure.
+
+[[introduction_sparkplug_ids]]
+===== Sparkplug Identifiers
+// TODO: Define the Sparkplug IDs (Group/Edge Node/Device). Make sure to include the concept of a
+// 'descriptor'
 
 [[introduction_normative_references]]
 === Normative References
@@ -228,7 +254,7 @@ optional MQTT Username and Password.
 [[introduction_autorization]]
 ==== Authorization
 
-Although access control is not mandated in the MQTT specification for use in MQTT Server
+Although access control is not mandated in the MQTT Specification for use in MQTT Server
 implementations, Access Control List (ACL) functionality is available for most MQTT Server
 implementations. The ACL of an MQTT Server implementation is used to specify which Topic Namespace
 any MQTT Client can subscribe to and publish on. Examples are provided on how to setup and manage
@@ -237,8 +263,8 @@ MQTT Client credentials and some considerations on setting up proper ACL’s on 
 [[introduction_encryption]]
 ==== Encryption
 
-The MQTT specification does not specify any TCP/IP security scheme as it was envisaged during
-development of the MQTT specification that TCP/IP security would (and did) change over time.
+The MQTT Specification does not specify any TCP/IP security scheme as it was envisaged during
+development of the MQTT Specification that TCP/IP security would (and did) change over time.
 Although this document will not specify any TCP/IP security schema it will provide examples on how
 to secure an MQTT infrastructure using TLS security.
 
@@ -249,20 +275,20 @@ to secure an MQTT infrastructure using TLS security.
 [[introduction_leveragint_standards_and_open_source]]
 === Leveraging Standards and Open Source
 
-In addition to leveraging MQTT v3.1.1 and MQTT v5.0 standards, the Sparkplug specification leverages
+In addition to leveraging MQTT v3.1.1 and MQTT v5.0 standards, the Sparkplug Specification leverages
 as much open source development tooling and data encoding as possible.
 
 [[introduction_oasis_mqtt_specification]]
 ==== OASIS MQTT Specification
 
-The Sparkplug specification specifies that MQTT Server/Clients in the infrastructure adhere to the
-MQTT v3.1.1 and MQTT v5.0 specification. The specification documentation refers to
+The Sparkplug Specification specifies that MQTT Server/Clients in the infrastructure adhere to the
+MQTT v3.1.1 and MQTT v5.0 Specification. The specification documentation refers to
 “*mqtt-v3.1.1-os.doc*” and “*mqtt-v5.0-os.docx*”:
 
 http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
 https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html
 
-Also referred is an addendum document to the MQTT v3.1.1 specification document that discusses best
+Also referred is an addendum document to the MQTT v3.1.1 Specification document that discusses best
 practices for implementing security on MQTT TCP/IP networks:
 
 http://docs.oasis-open.org/mqtt/mqtt-nist-cybersecurity/v1.0/mqtt-nist-cybersecurity-v1.0.doc
@@ -272,7 +298,7 @@ http://docs.oasis-open.org/mqtt/mqtt-nist-cybersecurity/v1.0/mqtt-nist-cybersecu
 
 The Eclipse Foundation is an excellent resource for open source software supporting industry
 standards. There is a Sparkplug working group responsible for maintaining and developing the
-Sparkplug specification.
+Sparkplug Specification.
 
 https://sparkplug.eclipse.org/
 
@@ -294,7 +320,7 @@ http://www.eclipse.org/paho/
 
 Protocol buffers are Google's language-neutral, platform-neutral, extensible mechanism for
 serializing structured data. Google Protocol Buffers are used to encode the Sparkplug payload in
-both payload formats A and B of the Sparkplug specification.
+both payload formats A and B of the Sparkplug Specification.
 
 https://developers.google.com/protocol-buffers/
 
@@ -310,7 +336,7 @@ https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/sr
 [[introduction_raspberry_pi]]
 === Raspberry Pi Hardware
 
-For the sake of keeping the Sparkplug specification as real world as possible, a reference
-implementation of an EoN Node and associated Device is provided for the examples and screen shots in
-this document. All of this was implemented on Raspberry Pi hardware representing the EoN Node with a
-Pibrella I/O board representing the Device.
+For the sake of keeping the Sparkplug Specification as real world as possible, a reference
+implementation of a Sparkplug Edge Node and associated Device is provided for the examples and
+screen shots in this document. All of this was implemented on Raspberry Pi hardware representing the
+Edge Node with a Pibrella I/O board representing the Device.
