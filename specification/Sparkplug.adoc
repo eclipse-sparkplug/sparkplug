@@ -557,11 +557,11 @@ This flow diagram assumes that at least one MQTT Server is available and operati
 
 === General MQTT applications and non-primary Applications.
 
-As noted above, there is the notion of a _Primary Application_ instance in the infrastructure that has the required permissions to send command to nodes and devices and the fact that all EoN nodes need to know the _Primary Application_ is connected to the same MQTT Server its connected to or it needs to walk to another one in the infrastructure. Both are known requirements of a mission critical SCADA system.
+As noted above, there is the notion of a _Primary Application_ instance in the infrastructure that has the required permissions to send commands to nodes and devices. All EoN nodes need to know the _Primary Application_ is connected to the same MQTT Server the EoN node is connected to or it needs to walk to another MQTT server in the infrastructure. Both are known requirements of a mission critical SCADA system.
 
 But unlike legacy SCADA system implementations, all real time process variable information being published thru the MQTT infrastructure is available to any number of additional MQTT Clients in the business that might be interested in subsets if not all of the real time data.
 
-The *ONLY* difference between a _Primary Application_ MQTT client and all other clients that _non-primary_ Client do *NOT* issue the STATE Birth/Death certificates.
+The *ONLY* difference between a _Primary Application_ MQTT client and all other clients is that _non-primary_ clients do *NOT* issue the STATE Birth/Death certificates and may not send commands to nodes and devices.
 
 == Sparkplug™ MQTT Data and Command Messages
 
