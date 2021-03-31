@@ -11,7 +11,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 ////
 
 [[topics]]
-== Sparkplug™ Topic Namespace
+== Topics and Messages
 
 To get a working Message Oriented Middleware based SCADA system using MQTT, the first thing that
 must be defined is a topic namespace to work within. The beauty of MQTT is the fact that you can
@@ -26,7 +26,7 @@ Specification is designed to keep these components meaningful and easy to unders
 so verbose as to negatively impact bandwidth/time sensitive data exchange.
 
 [[topics_sparkplug_topic_namesapce_elements]]
-=== Sparkplug Topic Namespace Elements
+=== Topic Namespace Elements
 
 [tck-testable tck-id-topic-structure]#All MQTT clients using the Sparkplug specification MUST use
 the following topic namespace structure:#
@@ -122,11 +122,8 @@ published and should be as short as possible.
 [tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#The *_device_id_*
 MUST be included with *_message_type_* elements DBIRTH, DDEATH, DDATA, and DCMD based topics#
 
-[[topics_sparkplug_mqtt_message_types]]
-=== Sparkplug MQTT Message Types
-
-[[topics_message_type_oeverview]]
-==== Message Type Overview
+[[topics_message_type_overview]]
+=== Message Types and Contents
 
 Sparkplug defines the topic namespace for set of MQTT messages that are used to manage connection
 state as well as bidirectional metric information exchange that would apply to many typical
@@ -151,19 +148,24 @@ infrastructure.
 values.
 * Issue write/command messages to any Edge Node or Device metric.
 
-This section of the document defines the topic namespace and how each of the associated messages
-types can be used.
+This section defines the payload contents and how each of the associated messages types can be used.
 
 [[topics_edge_node]]
 ==== Edge Node
 [upperalpha, start=1]
 
-[[topics_birth_message_nbirth]]
+[[birth_message_nbirth]]
 ===== Birth Message (NBIRTH)
+
+[[topics_birth_message_nbirth]]
+====== Topic (NBIRTH)
 
 The Birth Certificate topic for an Sparkplug Edge Node is:
 [subs="quotes"]
   namespace/group_id/*NBIRTH*/edge_node_id
+
+[[payloads_desc_nbirth]]
+====== Payload (NBIRTH)
 
 The Sparkplug Edge Node Birth Certificate payload contains everything required to build out a data
 structure for all metrics for this Edge Node. At the time any host application receives and NBIRTH,
@@ -172,26 +174,78 @@ parameter. Note that the Edge Node Birth Certificate ONLY indicates the node its
 an MQTT Session, but any devices that have previously published a DBIRTH will still have “*STALE*”
 metric quality until the host application receives the associated DBIRTH messages.
 
-[[topics_data_message_ndata]]
+The NBIRTH message requires the following payload components.
+
+* The NBIRTH must include the a seq number in the payload and it must have a value of 0.
+* The NBIRTH must include a timestamp denoting the DateTime the message was sent from the EoN node.
+* The NBIRTH must include every metric the EoN node will ever report on. At a minimum these metrics must 
+include:
+** The metric name
+** The metric datatype
+** The current value
+* If Template instances will be published by this EoN or any devices, all Template definitions must be 
+published in the NBIRTH.
+* A bdSeq number as a metric should be included in the payload. This should match the bdSeq number provided 
+in the MQTT CONNECT packet’s LW&T payload. This allows backend applications to correlate NBIRTHs to NDEATHs. 
+The bdSeq number should start at zero and increment by one on every new MQTT CONNECT.
+
+The NBIRTH message can also include optional ‘Node Control’ payload components. These are used by a backend 
+application to control aspects of the EoN node. The following are examples of Node Control metrics.
+
+* Metric name: ‘Node Control/Reboot’
+** Used by backend application(s) to reboot an EoN node.
+* Metric name: ‘Node Control/Rebirth’
+** Used by backend application(s) to request a new NBIRTH and DBIRTH(s) from an EoN node.
+* Metric name: ‘Node Control/Next Server’
+** Used by backend application(s) to request an EoN node to walk to the next MQTT Server in its list in 
+multi-MQTT Server environments.
+* Metric name: ‘Node Control/Scan rate’
+** Used by backed application(s) to modify a poll rate on an EoN node.
+
+The NBIRTH message can also include optional ‘Properties’ of an EoN node. The following are examples of 
+Property metrics.
+
+* Metric name: ‘Properties/Hardware Make’
+** Used to transmit the hardware manufacturer of the EoN node
+* Metric name: ‘Properties/Hardware Model’
+** Used to transmit the hardware model of the EoN node
+* Metric name: ‘Properties/OS’
+** Used to transmit the operating system of the EoN node
+* Metric name: ‘Properties/OS Version’
+** Used to transmit the OS version of the EoN node
+
+[[data_message_ndata]]
 ===== Data Message (NDATA)
 
 Once an Sparkplug Edge Node is online with a proper NBIRTH it is in a mode of quiescent Report by
 Exception (RBE) or time based reporting of metric information that changes. This enables the
 advantages of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
 Sparkplug Edge Node and to rely on Report by Exception (RBE) messages for metric state changes over
-the MQTT session connection. The Data Topic for an Sparkplug Edge Node is:
+the MQTT session connection. 
+
+[[topics_data_message_ndata]]
+====== Topic (NDATA)
+
+The Data Topic for an Sparkplug Edge Node is:
 [subs="quotes"]
   namespace/group_id/*NDATA*/edge_node_id
 
 The payload of NDATA messages will contain any RBE or time based metric Edge Node values that need
 to be reported to any subscribing MQTT clients.
 
-[[topics_death_message_ndeath]]
-===== Death Message (NDEATH)
+[[payloads_desc_ndata]]
+====== Payload (NDATA)
 
-The Death Certificate topic for an Sparkplug Edge Node is:
-[subs="quotes"]
-  namespace/group_id/*NDEATH*/edge_node_id
+The NDATA message requires the following payload components.
+
+* The NDATA must include the a seq number in the payload and it must have a value of one greater than the 
+previous MQTT message from the EoN node contained unless the previous MQTT message contained a value of 255. 
+In this case the seq number must be 0.
+* The NDATA must include a timestamp denoting the DateTime the message was sent from the EoN node.
+* The NDATA must include the EoN node’s metrics that have changed since the last NBIRTH or NDATA message.
+
+[[death_message_ndeath]]
+===== Death Message (NDEATH)
 
 The Death Certificate topic and payload described here are not “published” as an MQTT message by a
 client, but provided as parameters within the MQTT CONNECT control packet when this Sparkplug Edge
@@ -201,35 +255,54 @@ Immediately upon reception of an Edge Node Death Certificate, any MQTT client su
 Edge Node should set the data quality of all metrics to STALE and should note the time stamp when
 the NDEATH message was received.
 
+[[topics_death_message_ndeath]]
+====== Topic (NDEATH)
+
+The Death Certificate topic for an Sparkplug Edge Node is:
+[subs="quotes"]
+  namespace/group_id/*NDEATH*/edge_node_id
+  
+[[payloads_desc_ndeath]]
+====== Payload (NDEATH)
+
+The NDEATH message contains a very simple payload that only includes a single metric, the bdSeq number, so 
+that the NDEATH event can be associated with the NBIRTH. Since this is typically published by the MQTT 
+Server on behalf of the EoN node, information about the current state of the EoN node and its devices is 
+not and cannot be known.
+
 The MQTT payload typically associated with this topic can include a Birth/Death sequence number used
 to track and synchronize Birth and Death sequences across the MQTT infrastructure. Since this
 payload will be defined in advance, and held in the MQTT server and only delivered on the
 termination of an MQTT session, not a lot of additional diagnostic information can be pre-populated
 into the payload.
 
-[[topics_command_ncmd]]
+[[command_ncmd]]
 ===== Command (NCMD)
+
+[[topics_command_ncmd]]
+====== Topic (NCMD)
 
 The NCMD command topic provides the topic namespace used to send commands to any connected Edge
 Nodes. This means sending an updated metric value to an associated metric included in the NBIRTH
 metric list.
 [subs="quotes"]
   namespace/group_id/*NCMD*/edge_node_id
+  
+[[payloads_desc_ncmd]]
+====== Payload (NCMD)
+
+The NCMD message requires the following payload components.
+
+* The NCMD must include a timestamp denoting the DateTime the message was sent from the backend 
+application’s MQTT client.
+* The NCMD must include the metrics that need to be written to on the EoN node.
 
 [[topics_device_sensor]]  
 ==== Device / Sensor
 [upperalpha, start=1]
 
-[[topics_birth_message_dbirth]]
+[[birth_message_dbirth]]
 ===== Birth Message (DBIRTH)
-
-The topic namespace for a Birth Certificate for a device is:
-[subs="quotes"]
-  namespace/group_id/*DBIRTH*/edge_node_id/device_id
-
-The DBIRTH payload contains everything required to build out a data structure for all metrics for
-this device. The ONLINE state of this device should be set to TRUE along with the associated ONLINE
-date time this message was received.
 
 The Sparkplug Edge Node is responsible for the management of all attached physical and/or logical
 devices. Once the Edge Node has published its NBIRTH, any consumer application ensures that the
@@ -238,7 +311,53 @@ connected to this node will still need to provide this DBIRTH before consumer ap
 create/update the metric structure (if this is the first time this device has been seen) and set any
 associated metrics in the application to a “*GOOD*” state.
 
-[[topics_data_message_ddata]]
+The DBIRTH payload contains everything required to build out a data structure for all metrics for
+this device. The ONLINE state of this device should be set to TRUE along with the associated ONLINE
+date time this message was received.
+
+[[topics_birth_message_dbirth]]
+====== Topic (DBIRTH)
+
+The topic namespace for a Birth Certificate for a device is:
+[subs="quotes"]
+  namespace/group_id/*DBIRTH*/edge_node_id/device_id
+
+[[payloads_desc_dbirth]]
+====== Payload (DBIRTH)
+
+The DBIRTH message requires the following payload components.
+
+* The DBIRTH must include the a seq number in the payload and it must have a value of one greater than the 
+previous MQTT message from the EoN node contained unless the previous MQTT message contained a value of 255. 
+In this case the seq number must be 0.
+* The DBIRTH must include a timestamp denoting the DateTime the message was sent from the EoN node.
+* The DBIRTH must include every metric the device will ever report on. At a minimum these metrics must 
+include:
+** The metric name
+** The metric datatype
+** The current value
+
+The DBIRTH message can also include optional ‘Device Control’ payload components. These are used by a 
+backend application to control aspects of a device. The following are examples of Device Control metrics.
+
+* Metric name: ‘Device Control/Reboot’
+** Used by backend application(s) to reboot a device.
+* Metric name: ‘Device Control/Rebirth’
+** Used by backend application(s) to request a new DBIRTH from a device.
+* Metric name: ‘Device Control/Scan rate’
+** Used by backed application(s) to modify a poll rate on a device.
+
+The DBIRTH message can also include optional ‘Properties’ of a device. The following are examples of 
+Property metrics.
+
+* Metric name: ‘Properties/Hardware Make’
+** Used to transmit the hardware manufacturer of the device
+* Metric name: ‘Properties/Hardware Model’
+** Used to transmit the hardware model of the device
+* Metric name: ‘Properties/FW’
+** Used to transmit the firmware version of the device
+
+[[data_message_ddata]]
 ===== Data Message (DDATA)
 
 Once an Sparkplug Edge Node and associated devices are all online with proper Birth Certificates it
@@ -247,18 +366,28 @@ advantage of the native Continuous Session Awareness of MQTT to monitor the STAT
 devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT
 session connection.
 
+[[topics_data_message_ddata]]
+====== Topic (DDATA)
+
 As defined above, the Data Topic for an MQTT device is:
 [subs="quotes"]
   namespace/group_id/*DDATA*/edge_node_id/device_id
 
 The payload of DDATA messages can contain one or more metric values that need to be reported.
 
-[[topics_death_message_ddeath]]
-===== Death Message (DDEATH)
+[[payloads_desc_ddata]]
+====== Payload (DDATA)
 
-The Sparkplug topic namespace for a device Death Certificate is:
-[subs="quotes"]
-  namespace/group_id/*DDEATH*/edge_node_id/device_id
+The DDATA message requires the following payload components.
+
+* The DDATA must include the a seq number in the payload and it must have a value of one greater than the 
+previous MQTT message from the EoN node contained unless the previous MQTT message contained a value of 255. 
+In this case the seq number must be 0.
+* The DDATA must include a timestamp denoting the DateTime the message was sent from the EoN node.
+* The DDATA must include the device’s metrics that have changed since the last DBIRTH or DDATA message.
+
+[[death_message_ddeath]]
+===== Death Message (DDEATH)
 
 It is the responsibility of the Sparkplug Edge Node to indicate the real-time state of either
 physical legacy device using poll/response protocols and/or local logical devices. If the device
@@ -269,19 +398,48 @@ Immediately upon reception of a DDEATH, any MQTT client subscribed to this devic
 data quality of all metrics to “*STALE”* and should note the time stamp when the DDEATH message was
 received.
 
-[[topics_command_dcmd]]
+[[topics_death_message_ddeath]]
+====== Topic (DDEATH)
+
+The Sparkplug topic namespace for a device Death Certificate is:
+[subs="quotes"]
+  namespace/group_id/*DDEATH*/edge_node_id/device_id
+  
+[[payloads_desc_ddeath]]
+====== Payload (DDEATH)
+
+The DDEATH message requires the following payload components.
+
+* The DDEATH must include the a seq number in the payload and it must have a value of one greater than the 
+previous MQTT message from the EoN node contained unless the previous MQTT message contained a value of 255. 
+In this case the seq number must be 0.
+
+[[command_dcmd]]
 ===== Command (DCMD)
 
 The DCMD topic provides the topic namespace used to publish metrics to any connected device. This
 means sending a new metric value to an associated metric included in the DBIRTH metric list.
+
+[[topics_command_dcmd]]
+====== Topic DCMD)
+
 [subs="quotes"]
   namespace/group_id/*DCMD*/edge_node_id/device_id
+  
+[[payloads_desc_dcmd]]
+====== Payload (DCMD)
+
+The DCMD message requires the following payload components.
+
+* The DCMD must include a timestamp denoting the DateTime the message was sent from the backend 
+application’s MQTT client.
+* The DCMD must include the metrics that need to be written to on the device.
 
 [[topics_scada_iiot_host]]
-==== SCADA / IIoT Host
+==== Host Application
 [upperalpha, start=1]
 
-[[topics_birth_message_state]]
+[[birth_message_state]]
 ===== Birth Message (STATE)
 
 [tck-testable tck-id-host-topic-phid-birth-payload]#The first message a Primary Host Application
@@ -293,10 +451,13 @@ terminates for any reason.
 The Birth Certificate that is defined here is an application level message published by the Primary
 Host Application MQTT Client applications.
 
+[[topics_birth_message_state]]
+====== Topic (STATE)
+
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
 Certificate:
 [subs="quotes"]
-  *STATE*/scada_host_id
+  *STATE*/host_application_id
 
 [tck-testable tck-id-host-topic-phid-birth-payload]#The Birth Certificate Payload MUST be the UTF-8
 string “*ONLINE*”.#
@@ -307,14 +468,33 @@ string “*ONLINE*”.#
 [tck-testable tck-id-host-topic-phid-birth-retain]#The MQTT retain flag for the Birth Certificate
 MUST be set to *TRUE*#
 
-[[topics_death_message_state]]
+[[payloads_desc_state]]
+====== Payload (STATE)
+
+The STATE messages from the primary host application must include a payload that is a UTF-8 string that is one 
+of the following:
+
+* OFFLINE
+** If the application is not connected
+* ONLINE
+** If the application is connected
+
+Sparkplug B payloads are not used for encoding in this payload. This allows primary host and host application(s) 
+to work across Sparkplug payload types.
+
+[[death_message_state]]
 ===== Death Message (STATE)
 
 When the SCADA/IIoT Host MQTT client establishes an MQTT session to the MQTT Server(s), the Death
 Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
-transaction. The *Will Topic* as defined above will be:
+transaction. 
+
+[[topics_death_message_state]]
+====== Topic (STATE)
+
+The *Will Topic* as defined above will be:
 [subs="quotes"]
-  *STATE*/scada_host_id
+  *STATE*/host_application_id
 
 [tck-testable tck-id-host-topic-phid-death-payload]#The MQTT Will Payload MUST be the UTF-8 string
 “*OFFLINE*”.#
@@ -322,4 +502,9 @@ transaction. The *Will Topic* as defined above will be:
 [tck-testable tck-id-host-topic-phid-death-qos]#The MQTT Will QoS MUST be set to *1*#
 
 [tck-testable tck-id-host-topic-phid-death-retain]#The MQTT Will retain flag MUST be set to *TRUE*#
+
+[[payloads_desc_state_death]]
+====== Payload (STATE)
+
+As for Host Application birth message.
 

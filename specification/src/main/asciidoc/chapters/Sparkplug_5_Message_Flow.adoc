@@ -11,7 +11,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 ////
 
 [[message_flow]]
-== General Message Flow
+== Operational Behavior
 
 An MQTT based SCADA system is unique in that the Primary Host Application is NOT responsible for
 establishing and maintaining connections to the edge nodes as is the case in most existing legacy
