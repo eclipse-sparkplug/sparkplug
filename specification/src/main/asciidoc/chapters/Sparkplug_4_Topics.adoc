@@ -435,8 +435,8 @@ The DCMD message requires the following payload components.
 application’s MQTT client.
 * The DCMD must include the metrics that need to be written to on the device.
 
-[[topics_scada_iiot_host]]
-==== Host Application
+[[topics_primary_host]]
+==== Primary Host Application
 [upperalpha, start=1]
 
 [[birth_message_state]]
