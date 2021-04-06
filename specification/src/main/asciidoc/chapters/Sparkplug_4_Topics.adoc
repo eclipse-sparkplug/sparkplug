@@ -116,9 +116,9 @@ be a valid UTF-8 string except for the reserved characters of ‘+’ (plus), �
 ‘#’ (number sign).#
 [tck-testable tck-id-topic-structure-namespace-unique-device-id]#The *_device_id_* MUST be unique
 from other devices connected to the same Edge Node.
-[tck-testable tck-id-topic-structure-namespace-duplicate-device-id-across-eon]#The *_device_id_* MAY
-be duplicated from Edge Node to other Edge Nodes. The device_id element travels with every message
-published and should be as short as possible.
+[tck-testable tck-id-topic-structure-namespace-duplicate-device-id-across-edge-node]#The
+*_device_id_* MAY be duplicated from Edge Node to other Edge Nodes. The device_id element travels 
+with every message published and should be as short as possible.
 [tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#The *_device_id_*
 MUST be included with *_message_type_* elements DBIRTH, DDEATH, DDATA, and DCMD based topics#
 

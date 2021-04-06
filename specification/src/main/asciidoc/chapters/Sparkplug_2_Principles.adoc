@@ -37,11 +37,11 @@ TODO: Github Issue #52
 === Continuous Session Awareness
 
 In any network architecture, network connection *_State_* is important. In SCADA/IIoT, connection
-*_State_* is extremely important. *State* is the session awareness of the MQTT EoN and the MQTT
-Server. The very reason that most SCADA Host systems in this market sector are still using legacy
-poll/response protocols to maintain a notion of the *_State_* of the connection between the SCADA
-application and the connected devices. “_I poll, I get a response, I know the *State* of all the I/O
-points, but now I must poll again because that *State* may have changed.”_
+*_State_* is extremely important. *State* is the session awareness of the MQTT Edge Node and the
+MQTT Server. The very reason that most SCADA Host systems in this market sector are still using
+legacy poll/response protocols to maintain a notion of the *_State_* of the connection between the
+SCADA application and the connected devices. “_I poll, I get a response, I know the *State* of all
+the I/O points, but now I must poll again because that *State* may have changed.”_
 
 Many implementations of solutions using MQTT treat it as a simple, stateless, pub/sub state machine.
 This is quite viable for IoT and some IIoT applications, however it is not taking advantage of the
@@ -87,4 +87,4 @@ determine when the values from this node were last updated.
 Non-persistent MQTT Enabled Devices should still register a proper DEATH Certificate upon the
 establishment of an MQTT session. In this manner, the _Primary Host Application_ can still have a 
 good representation of last known good process variable versus the fact that the MQTT session was
-terminated prior to the EoN node being able to complete its transaction.
+terminated prior to the Edge Node being able to complete its transaction.
