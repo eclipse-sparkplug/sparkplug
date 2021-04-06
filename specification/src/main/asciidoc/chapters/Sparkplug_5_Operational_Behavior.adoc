@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
 ////
 
-[[message_flow]]
+[[operational_behavior]]
 == Operational Behavior
 
 An MQTT based SCADA system is unique in that the Primary Host Application is NOT responsible for
@@ -37,7 +37,7 @@ is connected to an MQTT Server that the Primary Host Application is *NOT* connec
 Node should connect to the next available MQTT Server where STATE for the Primary Host Application
 is  ‘ONLINE’.
 
-[[message_flow_primary_host_application_session_establishment]]
+[[operational_behavior_primary_host_application_session_establishment]]
 === Primary Host Application Session Establishment
 
 The Primary Host Application upon startup or reconnect will immediately try to create a Host MQTT
@@ -88,12 +88,12 @@ Primary Host Application.
 [tck-not-testable]#All metric data associated with any Sparkplug Edge Node that was connected to
 that MQTT Server MUST be updated to a "*STALE*" data quality.#
 
-[[message_flow_edge_node_session_establishment]]
+[[operational_behavior_edge_node_session_establishment]]
 === Edge Node Session Establishment
 
-[tck-testable tck-id-message-flow-eon-birth-publish-connect]#Any Edge Node in the MQTT
+[tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#Any Edge Node in the MQTT
 infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH messages.#
-[tck-testable tck-id-message-flow-eon-birth-publish-subscribe]#Any Edge Node in the MQTT
+[tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#Any Edge Node in the MQTT
 infrastructure MUST also verify the Primary Host Application is ONLINE via the STATE topic if a
 primary host is configured for the Edge Node before publishing NBIRTH and DBIRTH messages.#
 Most implementations of an Sparkplug Edge Node for real time SCADA systems will try to maintain a
@@ -139,11 +139,11 @@ the Death Certificate, the Primary Host Application will set the state of the Ed
 ‘OFFLINE’ and update all timestamp metrics related to this Edge Node. Any defined metrics will be set
 to a "*STALE*" data quality.
 
-[[message_flow_device_sensor_session_establishment]]
+[[operational_behavior_device_sensor_session_establishment]]
 === Device / Sensor Session Establishment
 
 The Sparkplug Specification is provided to get real time process variable information from existing
-and new end devices measuring, monitoring and controlling a physical process into an MQTT MOM
+and new end devices measuring, monitoring and controlling a physical process into an MQTT
 infrastructure and the Primary Host Application Industrial Internet of Things application platform.
 In the context of this document an MQTT Device can represent anything from existing legacy
 poll/response driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and
@@ -176,7 +176,7 @@ unavailable.
 . Assuming the Primary Host Application established MQTT Session with the MQTT Server(s).
 
 . The Session Establishment of the associated Sparkplug Edge Node is described in
-link:#message_flow_edge_node_session_establishment[Edge Node Session Establishment]. This flow
+link:#operational_behavior_edge_node_session_establishment[Edge Node Session Establishment]. This flow
 diagram assumes that the Edge Node session has already been established with the Primary Host
 Application. Depending on the target platform, the Edge Node may be a physical "Edge of Network"
 gateway device polling physical legacy devices via Modbus, AB, DNP3.0, HART, etc, a MQTT enabled
@@ -204,7 +204,7 @@ basis using the DDATA message format.
 Specification requires that an DDEATH be published. This will inform the Primary Host Application
 that all metric information be set to a "*STALE*" data quality.
 
-[[message_flow_general_mqtt_application_and_non_primary_applications]]
+[[operational_behavior_general_mqtt_application_and_non_primary_applications]]
 === General MQTT applications and non-primary Applications.
 
 As noted above, there is the notion of a Primary Host Application in the infrastructure that has the
@@ -221,7 +221,7 @@ The *ONLY* difference between a Primary Host Application MQTT Client and Seconda
 MQTT Clients is that Secondary Host Applicaiton MQTT Clients do *NOT* issue the STATE Birth/Death
 certificates.
 
-[[message_flow_primary_application_state_in_multiple_mqtt_server_topologies]]
+[[operational_behavior_primary_application_state_in_multiple_mqtt_server_topologies]]
 === Primary Application STATE in Multiple MQTT Server Topologies
 
 For implementations with multiple MQTT Servers, there is one additional aspect that needs to be
@@ -234,7 +234,7 @@ able to receive the messages.
 When using multiple MQTT Servers, the Primary Host Application instance must be configured to
 publish a STATE Birth Certificate and all Edge Nodes need to subscribe to this STATE message.
 
-[tck-testable tck-id-message_flow_primary_application_state_with_multiple_servers-state]#Regardless
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-state]#Regardless
 of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application
 establishes a new MQTT Session with an MQTT Server, the STATE Birth Certificate defined in the
 link:#payloads_desc_state[STATE description section] MUST be the first message that is published
@@ -242,7 +242,7 @@ after a successful MQTT Session is established with each MQTT Server.#
 
 Sparkplug Edge Nodes in an infrastructure that provides multiple MQTT Servers can establish a
 session to any one of the MQTT Servers.
-[tck-testable tck-id-message_flow_primary_application_state_with_multiple_servers-single-server]#The
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-single-server]#The
 Edge Nodes MUST not connected to more than one server at any point in time.#
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
 published by Primary Host Application. Since the STATE message is published with the RETAIN message
@@ -250,11 +250,11 @@ flag set, MQTT will guarantee that the last STATE message is always available. T
 examine the payload of this message to ensure that it is a value of "ONLINE". If the value is
 "OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT
 Server.
-[tck-testable tck-id-message_flow_primary_application_state_with_multiple_servers-walk]#
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#
 If the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST
 terminate its session with this MQTT Server and move to the next available MQTT Server that is
 available.#
-[tck-testable tck-id-message_flow_primary_application_state_with_multiple_servers-walk]#The Edge
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#The Edge
 Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received by the
 Edge Node.#
 This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
@@ -301,7 +301,7 @@ been corrected. The Primary Host Application has a new MQTT Session established 
 update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is ready to accept new Edge Node session
 requests.
 
-[[message_flow_edge_node_ndata_and_ncmd_messages]]
+[[operational_behavior_edge_node_ndata_and_ncmd_messages]]
 === Edge Node NDATA and NCMD Messages
 
 We’ll start this section with a description of how metric information is published to the Primary
@@ -366,18 +366,18 @@ Node wants to publish the new value to the associated metric in Primary Host App
 interface from cellular to Ethernet. From the Primary Host Application, the new metric value is
 published to the Edge Node using a NCMD Sparkplug message.
 
-[[message_flow_mqtt_enabled_device_session_establishment]]
+[[operational_behavior_mqtt_enabled_device_session_establishment]]
 === MQTT Enabled Device Session Establishment
- TODO
- 
-[[message_flow_mqtt_application_node_session_establishment]]
-=== MQTT Application Node Session Establishment
- TODO
+// TODO
 
-[[message_flow_data_publish]]
+[[operational_behavior_mqtt_host_application_session_establishment]]
+=== MQTT Host Application Session Establishment
+// TODO
+
+[[operational_behavior_data_publish]]
 === Data Publish
- TODO
+// TODO
 
-[[message_flow_commands]] 
+[[operational_behavior_commands]] 
 === Commands
- TODO
+// TODO

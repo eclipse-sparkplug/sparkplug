@@ -19,7 +19,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
  TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
 
 [[conformance_sparkplug_edge_node]]
-==== Sparkplug EoN Node
+==== Sparkplug Edge Node
  TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
 
 [[conformance_sparkplug_host_application]]
