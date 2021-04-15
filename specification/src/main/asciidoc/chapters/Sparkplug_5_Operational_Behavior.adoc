@@ -57,20 +57,20 @@ The session diagram in Figure 3 - Host Session Establishment shows a very simple
 single MQTT Server. The steps outlined in the session diagram are defined as follows:
 
 [arabic]
-. Primary Host Application will try to create an MQTT Session using the MQTT CONNECT Control
-Packet. A Death Certificate is constructed into the MQTT Will Topic and Will Payload of the of the
-CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true. The MQTT CONNECT
-control packet is acknowledged as successful with a valid MQTT CONNACK Control Packet. From this
+. [tck-testable tck-id-primary-application-connect]#The Primary Host Application MUST 
+create an MQTT Session using the MQTT CONNECT Control Packet.# 
+[tck-testable tck-id-primary-application-death-cert]#A Death Certificate is constructed into the
+MQTT Will Topic and Will Payload of the of the CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true.#
+The MQTT CONNECT control packet is acknowledged as successful with a valid MQTT CONNACK Control Packet. From this
 point forward in time, the MQTT Server is ready to deliver a Host Death Certificate any time the
 Primary Host Application MQTT Client loses connectivity to the MQTT Server.
 
-. With the MQTT Session established, Primary Host Application MUST issue an MQTT subscription for
-the defined Sparkplug Topic Namespace.
-[tck-testable tck-id-message-flow-phid-sparkplug-subscription]#The subscription on the Sparkplug
-Topic Namespace and the STATE topic MUST be done immediately after successfully establishing the
-MQTT session and before publishing its own STATE message.#
+. [tck-testable tck-id-primary-application-subscribe]#With the MQTT Session established, 
+the Primary Host Application MUST issue an MQTT subscription for the defined Sparkplug Topic Namespace.#
+The subscription on the Sparkplug Topic Namespace and the STATE topic MUST be done immediately
+after successfully establishing the MQTT session and before publishing its own STATE message.
 
-. [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#Once an MQTT Session and the
+. [tck-testable tck-id-primary-application-state-publish]#Once an MQTT Session and the
 Primary Host Application subscriptions on the Sparkplug Topic Namespace and STATE topics have been
 established, the Primary Host Application will publish a new STATE message with a Payload of a
 UTF-8 string of 'ONLINE'.#
