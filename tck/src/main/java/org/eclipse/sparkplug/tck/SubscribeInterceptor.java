@@ -7,12 +7,13 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.sparkplug.tck.host;
+package org.eclipse.sparkplug.tck;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import org.eclipse.sparkplug.tck.test.TCK;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,6 @@ import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
-import org.eclipse.sparkplug.tck.host.test.TCK;
 
 public class SubscribeInterceptor implements SubscribeInboundInterceptor {
 

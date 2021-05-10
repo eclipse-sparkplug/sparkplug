@@ -1,10 +1,8 @@
-package org.eclipse.sparkplug.tck.host.test;
+package org.eclipse.sparkplug.tck.test.host;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eclipse.sparkplug.tck.host.test.TCK;
-import org.eclipse.sparkplug.tck.host.test.TCKTest;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
@@ -12,6 +10,8 @@ import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 
@@ -30,19 +30,21 @@ public class SessionEstablishment extends TCKTest {
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
     private HashMap testResults = new HashMap<String, String>();
     String[] testIds = {
+    	"host-topic-phid-birth-payload",
     	"host-topic-phid-death-payload", 
     	"host-topic-phid-death-qos",
     	"host-topic-phid-death-retain",
     	"primary-application-connect",
     	"primary-application-death-cert",
     	"primary-application-subscribe",
-    	"primary-application-state-publish"
+    	"primary-application-state-publish",
     };
     private String myClientId = null;
     private String state = null;
     private TCK theTCK = null;
+    private String host_application_id = null;
     
-    public SessionEstablishment(TCK aTCK) {
+    public SessionEstablishment(TCK aTCK, String[] parms) {
         logger.info("Primary host session establishment test");
         theTCK = aTCK;
          
@@ -51,6 +53,9 @@ public class SessionEstablishment extends TCKTest {
         for (int i = 0; i < testIds.length; ++i) {
             testResults.put(testIds[i], "");
         }
+        
+        host_application_id = parms[0];
+        logger.info("Host application id is "+host_application_id);
     }
     
     public void endTest() {
@@ -75,13 +80,13 @@ public class SessionEstablishment extends TCKTest {
     }
     
     @SpecAssertion(
-    		section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
     		id = "host-topic-phid-death-payload")
     @SpecAssertion(
-    		section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
     		id = "host-topic-phid-death-qos")
     @SpecAssertion(
-    		section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
     		id = "host-topic-phid-death-retain")
     public Optional<WillPublishPacket> checkWillMessage(ConnectPacket packet) {
     	Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
@@ -175,6 +180,9 @@ public class SessionEstablishment extends TCKTest {
 
     @Test
     @SpecAssertion(
+    		section = Sections.TOPICS_PRIMARY_HOST,
+    		id = "host-topic-phid-birth-payload")
+    @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
             id = "primary-application-state-publish")
     public void publish(String clientId, PublishPacket packet) {
@@ -185,6 +193,10 @@ public class SessionEstablishment extends TCKTest {
         	try {
         		if (!state.equals("SUBSCRIBED"))
         			throw new Exception("State should be subscribed");
+        		
+        		String topic = packet.getTopic();
+        		if (!topic.equals("STATE/"+host_application_id))
+        			throw new Exception("Topic should be STATE/host_application_id");
         		
     			String payload = null;
     			ByteBuffer bpayload = packet.getPayload().orElseGet(null);
@@ -201,6 +213,7 @@ public class SessionEstablishment extends TCKTest {
         		result = "FAIL " + e.getMessage();
         	}
         	testResults.put("primary-application-state-publish", result);
+        	testResults.put("host-topic-phid-birth-payload", result);
         }
         
         theTCK.endTest();

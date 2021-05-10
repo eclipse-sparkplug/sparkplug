@@ -8,6 +8,7 @@ import time
 """
 broker = "localhost"
 port = 1883
+host_application_id = "HOSTAPPID"
 
 def control_on_message(client, userdata, msg):
     if msg.topic == "SPARKPLUG_TCK/RESULT":
@@ -21,7 +22,7 @@ def control_on_connect(client, userdata, flags, rc):
 
 def control_on_subscribe(client, userdata, mid, granted_qos):
     print("Control client subscribed")
-    rc = client.publish("SPARKPLUG_TCK/TEST_CONTROL", "NEW SessionEstablishment", qos=1)
+    rc = client.publish("SPARKPLUG_TCK/TEST_CONTROL", "NEW host SessionEstablishment " + host_application_id, qos=1)
 
 published = False
 def control_on_publish(client, userdata, mid):
@@ -40,8 +41,6 @@ control_client.loop_start()
 # wait for publish to complete
 while published == False:
     time.sleep(0.1)
-
-host_application_id = "HOSTAPPID"
 
 def test_on_connect(client, userdata, flags, rc):
     print("Test client connected with result code "+str(rc))

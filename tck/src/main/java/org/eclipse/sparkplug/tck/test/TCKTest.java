@@ -1,4 +1,17 @@
-package org.eclipse.sparkplug.tck.host.test;
+/*******************************************************************************
+ * Copyright (c) 2021 Ian Craggs
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Ian Craggs - initial implementation and documentation
+ *******************************************************************************/
+
+package org.eclipse.sparkplug.tck.test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +40,7 @@ public abstract class TCKTest {
 	public abstract String[] getTestIds();
 	public abstract void endTest();
 	
-	void reportResults(HashMap<String, String> results) {
+	public void reportResults(HashMap<String, String> results) {
 		
 		StringBuilder payload = new StringBuilder();
 		String overall = "PASS";

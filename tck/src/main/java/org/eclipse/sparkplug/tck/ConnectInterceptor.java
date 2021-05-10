@@ -7,8 +7,9 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.sparkplug.tck.host;
+package org.eclipse.sparkplug.tck;
 
+import org.eclipse.sparkplug.tck.test.TCK;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +18,6 @@ import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundIntercepto
 import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.connect.parameter.ConnectInboundOutput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-
-import org.eclipse.sparkplug.tck.host.test.TCK;
 
 public class ConnectInterceptor implements ConnectInboundInterceptor {
 
