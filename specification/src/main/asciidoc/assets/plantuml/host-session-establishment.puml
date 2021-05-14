@@ -1,0 +1,80 @@
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+
+activate Server
+
+
+note left of PrimApp
+Initial State of all Clients is
+in an **OFFLINE** state.
+end note
+
+autonumber 1 "<b>(#)"
+PrimApp -> Server : CONNECT
+
+|||
+PrimApp -> Server : SUBSCRIBE( **spv1.0/#** )
+
+
+PrimApp -> Server : PUBLISH( **STATE** )
+activate PrimApp
+
+note right
+Primary Application MQTT Session
+established and **'STATE'** Death Certificate
+registered. Current 'STATE' is **ONLINE**.
+end note
+
+
+note left of PrimApp
+Metric now shows MQTT
+Client **ONLINE** with MQTT
+Server.
+end note
+
+... (normal operation) ...
+
+
+PrimApp <-- Server : "Loss of Connection"
+autonumber stop
+
+note left of PrimApp
+Loss of TCP/IP
+connection to MQTT
+Server sets Metric to
+OFFLINE.
+end note
+
+deactivate PrimApp
+
+note right
+Primary Application MQTT Session
+terminated. Death Certificate delivered
+with **OFFLINE** payload and RETAINED
+topic.
+end note
+
+PrimApp -> Server : CONNECT
+
+|||
+
+PrimApp -> Server : SUBSCRIBE( **spv1.0/#** )
+
+PrimApp -> Server : PUBLISH( **STATE** )
+activate PrimApp
+
+note right
+Primary Application MQTT Session
+established and **'STATE'** Death Certificate
+registered. Current 'STATE' is **ONLINE**.
+end note
+
+
+note left of PrimApp
+Updated Metric shows
+**ONLINE** again.
+end note
+
+|||
+@enduml
