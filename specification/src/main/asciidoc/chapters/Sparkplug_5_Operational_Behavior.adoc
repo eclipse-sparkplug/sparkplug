@@ -52,9 +52,9 @@ register them when they publish their Sparkplug Edge Node Birth Certificate.
 ....
 @startuml
 participant "Primary Application" as PrimApp #lightblue
-database "MQTT Broker" as Broker #lightblue
+database "MQTT Server" as Server #lightblue
 
-activate Broker
+activate Server
 
 
 note left of PrimApp
@@ -63,13 +63,13 @@ in an **OFFLINE** state.
 end note
 
 autonumber 1 "<b>(#)"
-PrimApp -> Broker : CONNECT
+PrimApp -> Server : CONNECT
 
 |||
-PrimApp -> Broker : SUBSCRIBE( **spv1.0/#** )
+PrimApp -> Server : SUBSCRIBE( **spv1.0/#** )
 
 
-PrimApp -> Broker : PUBLISH( **STATE** )
+PrimApp -> Server : PUBLISH( **STATE** )
 activate PrimApp
 
 note right
@@ -82,19 +82,19 @@ end note
 note left of PrimApp
 Metric now shows MQTT
 Client **ONLINE** with MQTT
-Broker.
+Server.
 end note
 
-... normal operation ...
+... (normal operation) ...
 
 
-PrimApp <-- Broker : "Loss of Connection"
+PrimApp <-- Server : "Loss of Connection"
 autonumber stop
 
 note left of PrimApp
 Loss of TCP/IP
 connection to MQTT
-Broker sets Metric to
+Server sets Metric to
 OFFLINE.
 end note
 
@@ -107,13 +107,13 @@ with **OFFLINE** payload and RETAINED
 topic.
 end note
 
-PrimApp -> Broker : CONNECT
+PrimApp -> Server : CONNECT
 
 |||
 
-PrimApp -> Broker : SUBSCRIBE( **spv1.0/#** )
+PrimApp -> Server : SUBSCRIBE( **spv1.0/#** )
 
-PrimApp -> Broker : PUBLISH( **STATE** )
+PrimApp -> Server : PUBLISH( **STATE** )
 activate PrimApp
 
 note right
@@ -128,7 +128,7 @@ Updated Metric shows
 **ONLINE** again.
 end note
 
-... normal operation ...
+|||
 @enduml
 ....
 //image:extracted-media/media/image7.png[image,width=660,height=492]
@@ -185,7 +185,93 @@ MQTT Session at any time and is completely asynchronous from any other MQTT Clie
 infrastructure. The only exception to this rule is the use case where there are multiple MQTT
 Servers and a Primary Host Application.
 
-image:extracted-media/media/image8.png[image,width=660,height=508]
+[plantuml, edge-node-mqtt-session-establishment, svg]
+....
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "MQTT EoN Node" as EoN #lightblue
+
+activate PrimApp
+activate Server
+
+
+autonumber 1 "<b>(#)"
+Server <- EoN : CONNECT
+
+|||
+
+Server <- EoN : PUBLISH( **NBIRTH** )
+activate EoN
+
+note left
+Create/update Eon Node
+folder and metrics.
+Create and update all
+metrics and set data
+quality to 'GOOD'.
+end note
+
+Server <- EoN : SUBSCRIBE( **NCMD, DCMD, STATE** )
+
+
+note right of EoN
+MQTT EoN Node Session
+established. Current 'STATE'
+is ONLINE.
+end note
+
+... (normal operation) ...
+|||
+
+Server <--> EoN : "Loss of Connection"
+autonumber stop
+deactivate EoN
+
+[<-- Server : Death Certificate
+
+note left of Server
+All EoN Node metrics set
+to 'STALE'. OFFLINE
+time and metrics updated.
+end note
+
+
+
+note right of EoN
+MQTT EoN Node
+Session terminated.
+Current 'STATE' is
+OFFLINE.
+end note
+
+|||
+
+Server <- EoN : CONNECT
+
+|||
+Server <- EoN : PUBLISH( **NBIRTH** )
+activate EoN
+note left
+All EoN Node metrics set
+to 'GOOD'. OFFLINE
+time and metrics updated.
+end note
+
+
+Server <- EoN : SUBSCRIBE( **NCMD, DCMD, STATE** )
+
+note right of EoN
+MQTT EoN Node Session
+reestablished. Current 'STATE'
+is ONLINE.
+end note
+
+|||
+
+@enduml
+....
+//image:extracted-media/media/image8.png[image,width=660,height=508]
 
 Figure 4 - Edge Node MQTT Session Establishment
 
@@ -240,8 +326,83 @@ the implementation of the Sparkplug Specification between the native device and 
 In order to expose and populate the metrics from any intelligent device, the following simple
 session diagram outlines the requirements:
 
-image:extracted-media/media/image9.png[image,width=660,height=309]Figure 5 - MQTT Device Session
-Establishment
+[plantuml, mqtt-device-session-establishment, svg]
+....
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "MQTT EoN Node" as EoN #lightblue
+participant "MQTT SCADA Device" as Device #lightblue
+
+activate PrimApp
+activate Server
+activate EoN
+
+
+autonumber 1 "<b>(#)"
+PrimApp <--> Server
+autonumber 1 "<b>(#)"
+Server <--> EoN
+
+PrimApp <-> Server
+Server <-> EoN
+
+|||
+
+autonumber stop
+EoN <- Device
+note right
+Device metrics are available
+and ready to publish.
+end note
+
+autonumber 4 "<b>(#)"
+Server <- EoN : PUBLISH( **DBIRTH** )
+activate Device
+note left
+Create/update Device folder
+and metrics. Set Device
+to 'ONLINE' and metrics
+to quality 'GOOD'
+end note
+
+|||
+
+autonumber stop
+EoN <- Device
+note right
+Any device process variable
+or metric change.
+end note
+
+autonumber 5 "<b>(#)"
+Server <- EoN : PUBLISH ( **DDATA** )
+note left
+Update only metrics that
+change.
+end note
+
+autonumber stop
+EoN <- Device
+note right
+Device data becomes
+unavailable or stale.
+end note
+
+autonumber 6 "<b>(#)"
+Server <- EoN : PUBLISH ( **DDEATH** )
+note left
+All associated Device
+metrics are set to 'STALE'
+end note
+
+deactivate Device
+
+|||
+@enduml
+....
+//image:extracted-media/media/image9.png[image,width=660,height=309]
+Figure 5 - MQTT Device Session Establishment
 
 The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with
 all the Sparkplug elements in place i.e. Primary Host Application, MQTT Server(s), Sparkplug Edge
@@ -344,8 +505,92 @@ to the Primary Host Application does not result in Edge Nodes being "stranded" o
 because of network issues. The following message flow diagram outlines how the STATE message is
 used when three (3) MQTT Servers are available in the infrastructure:
 
-image:extracted-media/media/image11.png[image,width=660,height=304]
+[plantuml, primary-host-application-state-flow-diagram, svg]
+....
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server\n #1" as Server1 #lightblue
+database "MQTT Server\n #2" as Server2 #lightblue
+database "MQTT Server\n #n" as ServerN #lightblue
+participant "MQTT EoN Node" as EoN #lightblue
 
+activate PrimApp
+activate Server1
+activate Server2
+activate ServerN
+activate EoN
+
+note left of PrimApp
+Establish a session with all defined
+MQTT Servers in the infrastructure
+and publish a STATE Birth
+Certificate.
+end note
+
+autonumber 1 "<b>(#)"
+Server1 <--> EoN
+note right
+Establish an MQTT Session with
+server and then subscribe to the
+STATE message. IF payload is
+"OFFLINE" walk to the next Server.
+end note
+
+
+autonumber 2 "<b>(#)"
+PrimApp <-> Server1 : STATE = 'ONLINE'
+activate Server1 #green
+
+autonumber 2 "<b>(#)"
+PrimApp <-> Server2 : STATE = 'ONLINE'
+activate Server2 #green
+
+autonumber 2 "<b>(#)"
+PrimApp <-> ServerN : STATE = 'ONLINE'
+activate ServerN #green
+
+autonumber 3 "<b>(#)"
+Server2 <-> EoN
+note right
+STATE for this server is currently 'ONLINE'
+so stay connected here.
+end note
+
+autonumber stop
+PrimApp <--> Server2 : Network issues\nand MQTT Session\nTerminated!
+note left
+All tags for all EoN Nodes and
+Devices connected to Server #2
+set to a data quality of 'STALE'. All
+connection metrics updated.
+end note
+
+deactivate Server2
+
+autonumber 4 "<b>(#)"
+Server2 -> EoN : STATE = 'OFFLINE'
+note right
+STATE for this server changed to 'OFFLINE.
+Connect to next available server.
+end note
+
+autonumber 5 "<b>(#)"
+ServerN <-> EoN
+
+autonumber 5 "<b>(#)"
+PrimApp <-> Server2 : STATE = 'ONLINE'
+activate Server2 #green
+note left
+Primary Application keeps trying to
+reestablish a session to Server #2.
+Upon success, the STATE is
+updated with a new publish.
+end note
+
+|||
+@enduml
+....
+//image:extracted-media/media/image11.png[image,width=660,height=304]
 Figure 7 – Primary Host Application STATE flow diagram
 
 [arabic]
@@ -433,8 +678,79 @@ The following simple message flow diagram demonstrates the messages used to upda
 cellular RSSI value in the Primary Host Application and sending a command from the Primary Host
 Application to the Edge Node to use a different primary network path.
 
-image:extracted-media/media/image10.png[image,width=660,height=303]
+[plantuml, edge-node-ndata-and-ncmd-message-flow, svg]
+....
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "MQTT EoN Node" as EoN #lightblue
 
+activate PrimApp
+activate Server
+activate EoN
+
+
+autonumber 1 "<b>(#)"
+PrimApp <--> Server
+autonumber 1 "<b>(#)"
+Server <--> EoN
+
+PrimApp <--> Server
+
+
+Server <--> EoN
+autonumber 3 "<b>(#)"
+PrimApp <--> EoN
+note left
+All metrics provided in Birth
+Certificate are created in the
+EoN Node folder within the
+Primary Application
+end note
+
+|||
+
+Server <- EoN : PUBLISH( **NDATA** )
+note right
+Cellular RSSI level changes
+value. New value is updated
+in a payload and published.
+end note
+
+autonumber 4 "<b>(#)"
+PrimApp <-- Server
+note left
+New RSSI metric is updated in
+the associated EoN Node
+folder.
+end note
+
+|||
+
+autonumber 5 "<b>(#)"
+PrimApp -> Server : PUBLISH( **NCMD** )
+note left
+Send a command to the EoN
+Node to set Ethernet as the
+Primary network. Writing to
+the tag PRI_NETWORK in
+the Primary Application will
+automatically publish the
+new value.
+end note
+
+autonumber 5 "<b>(#)"
+Server --> EoN
+note right
+PRI_NETWORK set to a
+new value of 2.
+end note
+
+|||
+
+@enduml
+....
+//image:extracted-media/media/image10.png[image,width=660,height=303]
 Figure 6 - Edge Node NDATA and NCMD Message Flow
 
 [arabic]
@@ -460,6 +776,6 @@ published to the Edge Node using a NCMD Sparkplug message.
 === Data Publish
 // TODO
 
-[[operational_behavior_commands]] 
+[[operational_behavior_commands]]
 === Commands
 // TODO
