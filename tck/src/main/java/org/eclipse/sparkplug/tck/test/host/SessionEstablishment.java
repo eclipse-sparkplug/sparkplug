@@ -1,4 +1,22 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Ian Craggs
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Ian Craggs - initial implementation and documentation
+ *******************************************************************************/
+
 package org.eclipse.sparkplug.tck.test.host;
+
+/*
+ * This is the primary host Sparkplug session establishment, and re-establishment test.
+ * 
+ */
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +56,7 @@ public class SessionEstablishment extends TCKTest {
     	"primary-application-death-cert",
     	"primary-application-subscribe",
     	"primary-application-state-publish",
+    	"components-ph-state"
     };
     private String myClientId = null;
     private String state = null;
@@ -185,6 +204,9 @@ public class SessionEstablishment extends TCKTest {
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
             id = "primary-application-state-publish")
+    @SpecAssertion(
+            section = Sections.COMPONENTS_PRIMARY_HOST_APPLICATION,
+            id = "components-ph-state")
     public void publish(String clientId, PublishPacket packet) {
         logger.info("Primary host session establishment test - publish");
         
@@ -214,7 +236,14 @@ public class SessionEstablishment extends TCKTest {
         	}
         	testResults.put("primary-application-state-publish", result);
         	testResults.put("host-topic-phid-birth-payload", result);
+        	testResults.put("components-ph-state", result);
         }
+        
+        // TODO: now we can disconnnect the client and allow it to reconnect and go throught the
+        // session re-establishment phases.  It would be nice to be able to do this at after a 
+        // short arbitrary interval, but I haven't worked out a good way of doing that yet (assuming
+        // that a sleep here is not a good idea).  Using a PING interceptor could be one way but
+        // we probably can't rely on any particular keepalive interval values.
         
         theTCK.endTest();
         

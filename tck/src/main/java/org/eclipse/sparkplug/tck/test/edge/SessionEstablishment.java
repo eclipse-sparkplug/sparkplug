@@ -41,7 +41,7 @@ import java.nio.ByteBuffer;
 public class SessionEstablishment extends TCKTest {
 
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-    private HashMap testResults = new HashMap<String, String>();
+    private HashMap<String, String> testResults = new HashMap<String, String>();
     String[] testIds = {
     	"message-flow-edge-node-birth-publish-connect",
     	"message-flow-edge-node-birth-publish-subscribe",
@@ -50,6 +50,20 @@ public class SessionEstablishment extends TCKTest {
     private String myClientId = null;
     private String state = null;
     private TCK theTCK = null;
+    private String host_application_id = null; // The primary host application id to be used
+    private boolean commands_supported = true; // Are commands supported by the edge node?
+    
+    enum TestType {
+      GOOD,
+      HOST_OFFLINE
+    } 
+    
+    TestType test_type = TestType.GOOD;
+
+    
+    /*
+     * The 
+     */
     
     public SessionEstablishment(TCK aTCK, String[] parms) {
         logger.info("Edge Node session establishment test");
@@ -60,6 +74,14 @@ public class SessionEstablishment extends TCKTest {
         for (int i = 0; i < testIds.length; ++i) {
             testResults.put(testIds[i], "");
         }
+        
+        host_application_id = parms[0];
+        logger.info("Host application id is "+host_application_id);
+        
+        if (parms.length > 1 && parms[1].equals("false")) {
+        	commands_supported = false;
+        }
+        	
     }
     
     public void endTest() {
@@ -83,9 +105,6 @@ public class SessionEstablishment extends TCKTest {
     	return testResults;
     }
     
-    @SpecAssertion(
-    		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-    		id = "message-flow-edge-node-birth-publish-connect")
 
     public Optional<WillPublishPacket> checkWillMessage(ConnectPacket packet) {
     	Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
@@ -116,11 +135,8 @@ public class SessionEstablishment extends TCKTest {
 
     @Test
     @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-connect")
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-death-cert")          
+    		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+    		id = "message-flow-edge-node-birth-publish-connect")
     public void connect(String clientId, ConnectPacket packet) {
         logger.info("Primary host session establishment test - connect");
         
@@ -132,7 +148,7 @@ public class SessionEstablishment extends TCKTest {
         	if (willPublishPacketOptional.isPresent()) {
         		result = "PASS";
         	}
-        	testResults.put("primary-application-death-cert", result);
+        	//testResults.put("primary-application-death-cert", result);
         } catch (Exception e) {
         	logger.info("Exception", e);
         }
@@ -150,13 +166,13 @@ public class SessionEstablishment extends TCKTest {
         	logger.info("Test failed "+e.getMessage());
         	result = "FAIL "+e.getMessage();
         }
-        testResults.put("primary-application-connect", result);
+        testResults.put("message-flow-edge-node-birth-publish-connect", result);
     }
     
     @Test
     @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-subscribe")
+            section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+            id = "message-flow-edge-node-birth-publish-subscribe")
     public void subscribe(String clientId, SubscribePacket packet) {
         logger.info("Edge node session establishment test - subscribe");
 
@@ -165,7 +181,7 @@ public class SessionEstablishment extends TCKTest {
         	try {
         		if (!state.equals("CONNECTED"))
         			throw new Exception("State should be connected");
-        		if (!packet.getSubscriptions().get(0).getTopicFilter().equals("spAv1.0/#"))
+        		if (!packet.getSubscriptions().get(0).getTopicFilter().equals("STATE/"+host_application_id))
         			throw new Exception("Topic string wrong");
         		// TODO: what else do we need to check?
         		result = "PASS";
@@ -173,13 +189,18 @@ public class SessionEstablishment extends TCKTest {
         	} catch (Exception e) {
         		result = "FAIL "+e.getMessage();
         	}
-        	testResults.put("primary-application-subscribe", result);
+        	testResults.put("message-flow-edge-node-birth-publish-subscribe", result);
+        	
+        
+        	// A retained message should have been set on the STATE/host_application_id topic to indicate the 
+        	// status of the primary host.  The edge node's behavior will vary depending on the result.
+        
         }
     }
 
     @Test
     @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+            section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
             id = "primary-application-state-publish")
     public void publish(String clientId, PublishPacket packet) {
         logger.info("Primary host session establishment test - publish");
