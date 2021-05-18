@@ -178,32 +178,34 @@ The NBIRTH message requires the following payload components.
 
 * The NBIRTH must include the a seq number in the payload and it must have a value of 0.
 * The NBIRTH must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The NBIRTH must include every metric the Edge Node will ever report on. At a minimum these metrics must 
-include:
+* The NBIRTH must include every metric the Edge Node will ever report on. At a minimum these metrics
+must include:
 ** The metric name
 ** The metric datatype
 ** The current value
-* If Template instances will be published by this Edge Node or any devices, all Template definitions must be 
-published in the NBIRTH.
-* A bdSeq number as a metric must be included in the payload. This should match the bdSeq number provided 
-in the MQTT CONNECT packet’s LW&T payload. This allows backend applications to correlate NBIRTHs to NDEATHs. 
-The bdSeq number must start at zero and increment by one on every new MQTT CONNECT.
+* If Template instances will be published by this Edge Node or any devices, all Template definitions
+must be published in the NBIRTH.
+* A bdSeq number as a metric must be included in the payload. This should match the bdSeq number
+provided in the MQTT CONNECT packet’s LW&T payload. This allows backend applications to correlate
+NBIRTHs to NDEATHs. The bdSeq number must start at zero and increment by one on every new MQTT
+CONNECT packet.
 
-The NBIRTH message can also include optional ‘Node Control’ payload components. These are used by a backend 
-application to control aspects of the Edge Node. The following are examples of Node Control metrics.
+The NBIRTH message can also include optional ‘Node Control’ payload components. These are used by a
+backend application to control aspects of the Edge Node. The following are examples of Node Control
+metrics.
 
 * Metric name: ‘Node Control/Reboot’
 ** Used by backend application(s) to reboot an Edge Node.
 * Metric name: ‘Node Control/Rebirth’
 ** Used by backend application(s) to request a new NBIRTH and DBIRTH(s) from an Edge Node.
 * Metric name: ‘Node Control/Next Server’
-** Used by backend application(s) to request an Edge Node to walk to the next MQTT Server in its list in 
-multi-MQTT Server environments.
+** Used by backend application(s) to request an Edge Node to walk to the next MQTT Server in its
+list in multi-MQTT Server environments.
 * Metric name: ‘Node Control/Scan rate’
 ** Used by backed application(s) to modify a poll rate on an Edge Node.
 
-The NBIRTH message can also include optional ‘Properties’ of an Edge Node. The following are examples of 
-Property metrics.
+The NBIRTH message can also include optional ‘Properties’ of an Edge Node. The following are
+examples of Property metrics.
 
 * Metric name: ‘Properties/Hardware Make’
 ** Used to transmit the hardware manufacturer of the Edge Node
@@ -238,11 +240,12 @@ to be reported to any subscribing MQTT clients.
 
 The NDATA message requires the following payload components.
 
-* The NDATA must include the a seq number in the payload and it must have a value of one greater than the 
-previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. 
-In this case the seq number must be 0.
+* The NDATA must include the a seq number in the payload and it must have a value of one greater
+than the previous MQTT message from the Edge Node contained unless the previous MQTT message
+contained a value of 255. In this case the seq number must be 0.
 * The NDATA must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The NDATA must include the Edge Node’s metrics that have changed since the last NBIRTH or NDATA message.
+* The NDATA must include the Edge Node’s metrics that have changed since the last NBIRTH or NDATA
+message.
 
 [[death_message_ndeath]]
 ===== Death Message (NDEATH)
@@ -265,10 +268,10 @@ The Death Certificate topic for an Sparkplug Edge Node is:
 [[payloads_desc_ndeath]]
 ====== Payload (NDEATH)
 
-The NDEATH message contains a very simple payload that MUST only include a single metric, the bdSeq number, so 
-that the NDEATH event can be associated with the NBIRTH. Since this is typically published by the MQTT 
-Server on behalf of the Edge Node, information about the current state of the Edge Node and its devices is 
-not and cannot be known.
+The NDEATH message contains a very simple payload that MUST only include a single metric, the bdSeq
+number, so that the NDEATH event can be associated with the NBIRTH. Since this is typically
+published by the MQTT Server on behalf of the Edge Node, information about the current state of the
+Edge Node and its devices is not and cannot be known.
 
 The MQTT payload typically associated with this topic can include a Birth/Death sequence number used
 to track and synchronize Birth and Death sequences across the MQTT infrastructure. Since this
@@ -327,18 +330,19 @@ The topic namespace for a Birth Certificate for a device is:
 
 The DBIRTH message requires the following payload components.
 
-* The DBIRTH must include the a seq number in the payload and it must have a value of one greater than the 
-previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. 
-In this case the seq number must be 0.
+* The DBIRTH must include the a seq number in the payload and it must have a value of one greater
+than the previous MQTT message from the Edge Node contained unless the previous MQTT message
+contained a value of 255. In this case the seq number must be 0.
 * The DBIRTH must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The DBIRTH must include every metric the device will ever report on. At a minimum these metrics must 
-include:
+* The DBIRTH must include every metric the device will ever report on. At a minimum these metrics
+must include:
 ** The metric name
 ** The metric datatype
 ** The current value
 
-The DBIRTH message can also include optional ‘Device Control’ payload components. These are used by a 
-backend application to control aspects of a device. The following are examples of Device Control metrics.
+The DBIRTH message can also include optional ‘Device Control’ payload components. These are used by
+a backend application to control aspects of a device. The following are examples of Device Control
+metrics.
 
 * Metric name: ‘Device Control/Reboot’
 ** Used by backend application(s) to reboot a device.
@@ -380,11 +384,12 @@ The payload of DDATA messages can contain one or more metric values that need to
 
 The DDATA message requires the following payload components.
 
-* The DDATA must include the a seq number in the payload and it must have a value of one greater than the 
-previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. 
-In this case the seq number must be 0.
+* The DDATA must include the a seq number in the payload and it must have a value of one greater
+than the previous MQTT message from the Edge Node contained unless the previous MQTT message
+contained a value of 255. In this case the seq number must be 0.
 * The DDATA must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The DDATA must include the device’s metrics that have changed since the last DBIRTH or DDATA message.
+* The DDATA must include the device’s metrics that have changed since the last DBIRTH or DDATA
+message.
 
 [[death_message_ddeath]]
 ===== Death Message (DDEATH)
@@ -410,9 +415,9 @@ The Sparkplug topic namespace for a device Death Certificate is:
 
 The DDEATH message requires the following payload components.
 
-* The DDEATH must include the a seq number in the payload and it must have a value of one greater than the 
-previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. 
-In this case the seq number must be 0.
+* The DDEATH must include the a seq number in the payload and it must have a value of one greater
+than the previous MQTT message from the Edge Node contained unless the previous MQTT message
+contained a value of 255. In this case the seq number must be 0.
 
 [[command_dcmd]]
 ===== Command (DCMD)
@@ -471,23 +476,23 @@ MUST be set to *TRUE*#
 [[payloads_desc_state]]
 ====== Payload (STATE)
 
-The STATE messages from the primary host application must include a payload that is a UTF-8 string that is one 
-of the following:
+The STATE messages from the primary host application must include a payload that is a UTF-8 string
+that is one of the following:
 
 * OFFLINE
 ** If the application is not connected
 * ONLINE
 ** If the application is connected
 
-Sparkplug B payloads are not used for encoding in this payload. This allows primary host and host application(s) 
-to work across Sparkplug payload types.
+Sparkplug B payloads are not used for encoding in this payload. This allows primary host and host 
+application(s) to work across Sparkplug payload types.
 
 [[death_message_state]]
 ===== Death Message (STATE)
 
-When the SCADA/IIoT Host MQTT client establishes an MQTT session to the MQTT Server(s), the Death
-Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
-transaction. 
+When the Primary Host Application MQTT client establishes an MQTT session to the MQTT Server(s), the
+Death Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
+packet.
 
 [[topics_death_message_state]]
 ====== Topic (STATE)
@@ -495,6 +500,9 @@ transaction.
 The *Will Topic* as defined above will be:
 [subs="quotes"]
   *STATE*/host_application_id
+
+[tck-testable tck-id-host-topic-phid-required]#The Primary Host Application MUST provide a Will
+message in the MQTT CONNECT packet.
 
 [tck-testable tck-id-host-topic-phid-death-payload]#The MQTT Will Payload MUST be the UTF-8 string
 “*OFFLINE*”.#
