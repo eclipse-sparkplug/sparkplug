@@ -22,11 +22,11 @@ Additional MQTT clients can connect and subscribe to any of the real time data w
 Primary Host Application.
 
 Due to the nature of real time SCADA solutions, it is very important for the primary host
-application and all connected Sparkplug Edge Nodes to have the MQTT Session STATE information for
-each other. In order to accomplish this the Sparkplug™ Topic Namespace definitions for Birth/Death
-Certificates along with the defined payloads provide both state and context between the Primary Host
-Application and the associated Edge Nodes. In most use cases and solution scenarios there are two
-primary reasons for this "designation" of a Primary Host Application:
+application and all connected Eclipse Sparkplug™ Edge Nodes to have the MQTT Session STATE
+information for each other. In order to accomplish this the Sparkplug™ Topic Namespace definitions
+for Birth/Death Certificates along with the defined payloads provide both state and context between
+the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios
+there are two primary reasons for this "designation" of a Primary Host Application:
 
 [arabic]
 . Only the Primary Host Application should have the permission to issue commands to end devices.

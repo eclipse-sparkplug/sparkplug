@@ -31,7 +31,7 @@ Figure 2 - Simple MQTT Infrastructure
 
 [[principles_report_by_exception]]
 === Report by Exception
-TODO: Github Issue #52
+// TODO: Github Issue #52
 
 [[principles_continuous_session_awareness]]
 === Continuous Session Awareness
@@ -56,14 +56,14 @@ real-time SCADA, the “state” of the end device needs to be always known. In 
 host could only rely on RBE data arriving reliably if it could be assured of the state of the MQTT
 session.
 
-The Sparkplug™ specification defines the use of the MQTT v3.1.1 and v5.0 “Last Will and Testament”
+The Eclipse Sparkplug™ specification defines the use of the MQTT v3.1.1 and v5.0 “Will Message”
 feature to provide MQTT session state information to any other interested MQTT client in the
 infrastructure. The session state awareness is implemented around a set of defined BIRTH and DEATH
 topic namespace and payload definitions in conjunction with the MQTT connection “Keep Alive” timer.
 
 [[principles_birth_and_death_certificates]]
 === Birth and Death Certificates
-TODO: Github Issue #53
+// TODO: Github Issue #53
 
 [[principles_persistent_vs_non_persistent_connections]]
 === Persistent vs Non-Persistent Connections

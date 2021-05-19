@@ -23,9 +23,9 @@ Figure 1 - MQTT SCADA Infrastructure
 === MQTT Server(s)
 
 MQTT enabled infrastructure requires that one or more MQTT Servers are present in the
-infrastructure. The only requirement that the Sparkplug™ specification places on the selection of a
-MQTT Server component in the architecture is it is required to be compliant with the MQTT v3.1.1 or
-v5.0 specification and is sized to properly manage all MQTT message traffic.
+infrastructure. The only requirement that the Eclipse Sparkplug™ specification places on the
+selection of a MQTT Server component in the architecture is it is required to be compliant with the
+MQTT v3.1.1 or v5.0 specification and is sized to properly manage all MQTT message traffic.
 
 One can implement the use (if required) of multiple MQTT servers for redundancy, high availability,
 and scalability within any given infrastructure.

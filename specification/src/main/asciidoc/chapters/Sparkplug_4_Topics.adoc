@@ -21,9 +21,9 @@ that want to consume the temperature values, the Topic Namespace needs to be und
 participating in the data exchange.
 
 Every MQTT message published typically consists of a *_topic_* and *_payload_* components. These
-components are the overhead of an MQTT message as measured in bytes on the wire. The Sparkplug
-Specification is designed to keep these components meaningful and easy to understand, but not to get
-so verbose as to negatively impact bandwidth/time sensitive data exchange.
+components are the overhead of an MQTT message as measured in bytes on the wire. The Eclipse
+Sparkplug™ Specification is designed to keep these components meaningful and easy to understand, but
+not to get so verbose as to negatively impact bandwidth/time sensitive data exchange.
 
 [[topics_sparkplug_topic_namesapce_elements]]
 === Topic Namespace Elements
