@@ -91,9 +91,9 @@ that MQTT Server MUST be updated to a "*STALE*" data quality.#
 [[operational_behavior_edge_node_session_establishment]]
 === Edge Node Session Establishment
 
-[tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#Any Edge Node in the MQTT
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#Any Edge Node in the MQTT
 infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH messages.#
-[tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#Any Edge Node in the MQTT
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#Any Edge Node in the MQTT
 infrastructure MUST also verify the Primary Host Application is ONLINE via the STATE topic if a
 primary host is configured for the Edge Node before publishing NBIRTH and DBIRTH messages.#
 Most implementations of an Sparkplug Edge Node for real time SCADA systems will try to maintain a
@@ -141,8 +141,14 @@ the Death Certificate, the Primary Host Application will set the state of the Ed
 ‘OFFLINE’ and update all timestamp metrics related to this Edge Node. Any defined metrics will be set
 to a "*STALE*" data quality.
 
-[[operational_behavior_device_sensor_session_establishment]]
-=== Device / Sensor Session Establishment
+[[operational_behavior_edge_node_session_termination]]
+=== Edge Node Session Termination
+
+// TODO - call out how to disconnect (no-disconnect packet) and describe timing issues
+
+
+[[operational_behavior_device_session_establishment]]
+=== Device Session Establishment
 
 The Sparkplug Specification is provided to get real time process variable information from existing
 and new end devices measuring, monitoring and controlling a physical process into an MQTT
@@ -208,8 +214,8 @@ basis using the DDATA message format.
 Specification requires that an DDEATH be published. This will inform the Primary Host Application
 that all metric information be set to a "*STALE*" data quality.
 
-[[operational_behavior_general_mqtt_application_and_non_primary_applications]]
-=== General MQTT applications and non-primary Applications.
+[[operational_behavior_primary host_application_and_secondary_host_applications]]
+=== Primary Host Application and Secondary Host Applications
 
 As noted above, there is the notion of a Primary Host Application in the infrastructure that has the
 required permissions to send commands to Edge Nodes and Sparkplug Devices and the fact that all Edge
@@ -222,11 +228,11 @@ published thru the MQTT infrastructure is available to any number of additional 
 business that might be interested in subsets if not all of the real time data.
 
 The *ONLY* difference between a Primary Host Application MQTT Client and Secondary Host Application
-MQTT Clients is that Secondary Host Applicaiton MQTT Clients do *NOT* issue the STATE Birth/Death
+MQTT Clients is that Secondary Host Application MQTT Clients do *NOT* issue the STATE Birth/Death
 certificates.
 
 [[operational_behavior_primary_application_state_in_multiple_mqtt_server_topologies]]
-=== Primary Application STATE in Multiple MQTT Server Topologies
+=== Primary Host Application STATE in Multiple MQTT Server Topologies
 
 For implementations with multiple MQTT Servers, there is one additional aspect that needs to be
 understood and managed properly. When multiple MQTT Servers are available there is the possibility
