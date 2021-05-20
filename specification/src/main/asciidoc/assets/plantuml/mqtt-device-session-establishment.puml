@@ -1,0 +1,72 @@
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "MQTT EoN Node" as EoN #lightblue
+participant "MQTT SCADA Device" as Device #lightblue
+
+activate PrimApp
+activate Server
+activate EoN
+
+
+autonumber 1 "<b>(#)"
+PrimApp <--> Server
+autonumber 1 "<b>(#)"
+Server <--> EoN
+
+PrimApp <-> Server
+Server <-> EoN
+
+|||
+
+autonumber stop
+EoN <- Device
+note right
+Device metrics are available
+and ready to publish.
+end note
+
+autonumber 4 "<b>(#)"
+Server <- EoN : PUBLISH( **DBIRTH** )
+activate Device
+note left
+Create/update Device folder
+and metrics. Set Device
+to 'ONLINE' and metrics
+to quality 'GOOD'
+end note
+
+|||
+
+autonumber stop
+EoN <- Device
+note right
+Any device process variable
+or metric change.
+end note
+
+autonumber 5 "<b>(#)"
+Server <- EoN : PUBLISH ( **DDATA** )
+note left
+Update only metrics that
+change.
+end note
+
+autonumber stop
+EoN <- Device
+note right
+Device data becomes
+unavailable or stale.
+end note
+
+autonumber 6 "<b>(#)"
+Server <- EoN : PUBLISH ( **DDEATH** )
+note left
+All associated Device
+metrics are set to 'STALE'
+end note
+
+deactivate Device
+
+|||
+@enduml

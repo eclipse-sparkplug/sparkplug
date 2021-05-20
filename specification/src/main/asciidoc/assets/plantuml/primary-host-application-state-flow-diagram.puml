@@ -1,0 +1,82 @@
+@startuml
+participant "Primary Application" as PrimApp #lightblue
+database "MQTT Server\n #1" as Server1 #lightblue
+database "MQTT Server\n #2" as Server2 #lightblue
+database "MQTT Server\n #n" as ServerN #lightblue
+participant "MQTT EoN Node" as EoN #lightblue
+
+activate PrimApp
+activate Server1
+activate Server2
+activate ServerN
+activate EoN
+
+note left of PrimApp
+Establish a session with all defined
+MQTT Servers in the infrastructure
+and publish a STATE Birth
+Certificate.
+end note
+
+autonumber 1 "<b>(#)"
+Server1 <--> EoN
+note right
+Establish an MQTT Session with
+server and then subscribe to the
+STATE message. IF payload is
+"OFFLINE" walk to the next Server.
+end note
+
+
+autonumber 2 "<b>(#)"
+PrimApp <-> Server1 : STATE = 'ONLINE'
+activate Server1 #green
+
+autonumber 2 "<b>(#)"
+PrimApp <-> Server2 : STATE = 'ONLINE'
+activate Server2 #green
+
+autonumber 2 "<b>(#)"
+PrimApp <-> ServerN : STATE = 'ONLINE'
+activate ServerN #green
+
+autonumber 3 "<b>(#)"
+Server2 <-> EoN
+note right
+STATE for this server is currently 'ONLINE'
+so stay connected here.
+end note
+
+autonumber stop
+PrimApp <--> Server2 : Network issues\nand MQTT Session\nTerminated!
+note left
+All tags for all EoN Nodes and
+Devices connected to Server #2
+set to a data quality of 'STALE'. All
+connection metrics updated.
+end note
+
+deactivate Server2
+
+autonumber 4 "<b>(#)"
+Server2 -> EoN : STATE = 'OFFLINE'
+note right
+STATE for this server changed to 'OFFLINE.
+Connect to next available server.
+end note
+
+autonumber 5 "<b>(#)"
+ServerN <-> EoN
+
+autonumber 5 "<b>(#)"
+PrimApp <-> Server2 : STATE = 'ONLINE'
+activate Server2 #green
+note left
+Primary Application keeps trying to
+reestablish a session to Server #2.
+Upon success, the STATE is
+updated with a new publish.
+end note
+
+|||
+@enduml
