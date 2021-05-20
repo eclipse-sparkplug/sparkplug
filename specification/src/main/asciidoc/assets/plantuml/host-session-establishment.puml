@@ -36,7 +36,7 @@ end note
 ... (normal operation) ...
 
 
-PrimApp <-- Server : "Loss of Connection"
+PrimApp <--> Server : "Loss of Connection"
 autonumber stop
 
 note left of PrimApp

@@ -47,7 +47,6 @@ connected to the _MQTT Server infrastructure_, the Primary Host Application will
 the STATE MQTT topic. If associated Edge Nodes are not connected, Primary Host Application will
 register them when they publish their Sparkplug Edge Node Birth Certificate.
 
-// TODO: This image below needs to swap subscribe/publish order
 // suppress inspection "AsciiDocLinkResolve"
 plantuml::assets/plantuml/host-session-establishment.puml[format=png, alt="Host Session Establishment"]
 //image:extracted-media/media/image7.png[image,width=660,height=492]
