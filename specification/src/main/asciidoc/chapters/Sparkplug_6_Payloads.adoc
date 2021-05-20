@@ -21,10 +21,10 @@ standpoint, the payload is treated as an agnostic binary array of bytes that can
 payload at all, to a maximum of 256MB. But for applications within a known solution space to work
 using MQTT the payload representation does need to be defined.
 
-This section of the Sparkplug™ specification defines how an MQTT Sparkplug payloads are encoded and
-the data that is required. Sparkplug supports multiple payloads encoding definitions. There is an
-'A' payload format as well as a 'B' payload format. This section will cover the details of each of
-these payload formats.
+This section of the Eclipse Sparkplug™ specification defines how an MQTT Sparkplug payloads are
+encoded and the data that is required. Sparkplug supports multiple payloads encoding definitions.
+There is an 'A' payload format as well as a 'B' payload format. This section will cover the details
+of each of these payload formats.
 
 The majority of devices connecting into next generation IIoT infrastructure are legacy equipment
 using poll/response protocols. This means we MUST take in account register based data from devices

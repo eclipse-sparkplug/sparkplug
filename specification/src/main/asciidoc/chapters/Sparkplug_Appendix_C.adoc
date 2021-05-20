@@ -11,4 +11,4 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 ////
 
 [[appendix_c]]
-== Appendix C: List of normative statements (non-normative)
+== Appendix C: List of Normative Statements (non-normative)

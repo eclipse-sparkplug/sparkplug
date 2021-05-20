@@ -12,3 +12,67 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 
 [[appendix_a]]
 == Appendix A: Open Source Software (non-normative)
+
+[[introduction_oasis_mqtt_specification]]
+=== OASIS MQTT Specifications
+
+The Sparkplug Specification specifies that MQTT Server/Clients in the infrastructure adhere to the
+MQTT v3.1.1 and MQTT v5.0 Specifications. The Sparkplug Specification documentation refers to the
+following two links for the MQTT v3.1.1 and v5.0 Specifications.
+
+* MQTT v3.1.1: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
+* MQTT v5.0: https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html
+
+Also referred is an addendum document to the MQTT v3.1.1 Specification document that discusses best
+practices for implementing security on MQTT TCP/IP networks:
+
+* http://docs.oasis-open.org/mqtt/mqtt-nist-cybersecurity/v1.0/mqtt-nist-cybersecurity-v1.0.doc
+
+[[introduction_eclipse_foundation_iot_resources]]
+=== Eclipse Foundation IoT Resources
+
+The Eclipse Foundation is an excellent resource for open source software supporting industry
+standards. There is a Sparkplug Working Group responsible for maintaining and developing the
+Sparkplug Specification.
+
+* https://sparkplug.eclipse.org/
+
+In addition to the Sparkplug Working Group, the Eclipse Foundation has an Internet of Things (IoT)
+working group providing a wealth of information and projects around the Internet of Things.
+
+* https://iot.eclipse.org/
+
+[[introduction_eclipse_paho]]
+=== Eclipse Paho
+
+Eclipse Paho™ is an Eclipse Foundation project that offers excellent resources for mature, compliant
+MQTT Client and MQTT Server implementations and well as additional resources for all things MQTT.
+
+* http://www.eclipse.org/paho/
+
+[[introduction_google_protocol_buffers]]
+=== Google Protocol Buffers
+
+Protocol buffers are Google's language-neutral, platform-neutral, extensible mechanism for
+serializing structured data. Google Protocol Buffers are used to encode the Sparkplug payload in
+both payload formats A and B of the Sparkplug Specification.
+
+https://developers.google.com/protocol-buffers/
+
+[[introduction_eclipse_kura_schema]]
+=== Eclipse Kura Google Protocol Buffer Schema
+
+Eclipse Kura is another Eclipse Foundation project under the IoT resources. Kura provides open
+source resources for the Google Protocol Buffer representation of MQTT payloads as defined in the
+original Sparkplug A payload definition. While no longer used in Sparkplug it was critical to the
+evolution of Sparkplug.
+
+* https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto
+
+[[introduction_raspberry_pi]]
+=== Raspberry Pi Hardware
+
+For the sake of keeping the Sparkplug Specification as real world as possible, a reference
+implementation of a Sparkplug Edge Node and associated Device is provided for the examples and
+screen shots in this document. All of this was implemented on Raspberry Pi hardware representing the
+Edge Node with a Pibrella I/O board representing the Device.
