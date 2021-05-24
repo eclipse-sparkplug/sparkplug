@@ -77,6 +77,7 @@ SPDX-License-Identifier: EPL-2.0
                             <attributes>
                                 <source-highlighter>highlight.js</source-highlighter>
                                 <toc/>
+                                <docinfo2>true</docinfo2>
                                 <linkcss>false</linkcss>
                                 <project-version>${project.version}</project-version>
                             </attributes>
@@ -98,8 +99,10 @@ SPDX-License-Identifier: EPL-2.0
                             <attributes>
                                 <pagenums/>
                                 <project-version>${project.version}</project-version>
+                                <source-highlighter>highlight.js</source-highlighter>
                                 <numbered>true</numbered>
-                                <docinfo>true</docinfo>
+                                <docinfo2>true</docinfo2>
+                                <linkcss>false</linkcss>
                                 <experimental>false</experimental>
                                 <toc>true</toc>
                             </attributes>

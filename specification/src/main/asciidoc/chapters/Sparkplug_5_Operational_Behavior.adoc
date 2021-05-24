@@ -65,14 +65,14 @@ Primary Host Application MQTT Client loses connectivity to the MQTT Server.
 
 . With the MQTT Session established, Primary Host Application MUST issue an MQTT subscription for
 the defined Sparkplug Topic Namespace.
-[tck-testable tck-id-message-flow-phid-sparkplug-subscription]#The subscription on the Sparkplug
-Topic Namespace and the STATE topic MUST be done immediately after successfully establishing the
-MQTT session and before publishing its own STATE message.#
+[tck-testable tck-id-message-flow-phid-sparkplug-subscription]#[yellow-background]*The subscription
+on the Sparkplug Topic Namespace and the STATE topic MUST be done immediately after successfully
+establishing the MQTT session and before publishing its own STATE message.*#
 
-. [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#Once an MQTT Session and the
-Primary Host Application subscriptions on the Sparkplug Topic Namespace and STATE topics have been
-established, the Primary Host Application will publish a new STATE message with a Payload of a
-UTF-8 string of 'ONLINE'.#
+. [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#[yellow-background]*Once an MQTT
+Session and the Primary Host Application subscriptions on the Sparkplug Topic Namespace and STATE
+topics have been established, the Primary Host Application will publish a new STATE message with a
+Payload of a UTF-8 string of 'ONLINE'.*#
 The Primary Host Application is now ready to start receiving MQTT messages from any connected Edge
 Node within the infrastructure. At this point, the Primary Host Application can update the MQTT
 Client metrics in the Primary Host Application with a current state of ONLINE once each Edge Node
@@ -84,17 +84,19 @@ Host Application.
 . If at any point in time Primary Host Application loses connectivity with the defined MQTT
 Server(s), the ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the
 Primary Host Application.
-[tck-not-testable]#All metric data associated with any Sparkplug Edge Node that was connected to
-that MQTT Server MUST be updated to a "*STALE*" data quality.#
+[tck-not-testable]#[yellow-background]*All metric data associated with any Sparkplug Edge Node that
+was connected to that MQTT Server MUST be updated to a "STALE" data quality.*#
 
 [[operational_behavior_edge_node_session_establishment]]
 === Edge Node Session Establishment
 
-* [tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#Any Edge Node in the MQTT
-infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH messages.#
-* [tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#Any Edge Node in the MQTT
-infrastructure MUST also verify the Primary Host Application is ONLINE via the STATE topic if a
-primary host is configured for the Edge Node before publishing NBIRTH and DBIRTH messages.#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#[yellow-background]*Any Edge
+Node in the MQTT infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH
+messages.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#[yellow-background]*Any Edge
+Node in the MQTT infrastructure MUST also verify the Primary Host Application is ONLINE via the
+STATE topic if a primary host is configured for the Edge Node before publishing NBIRTH and DBIRTH
+messages.*#
 Most implementations of an Sparkplug Edge Node for real time SCADA systems will try to maintain a
 persistent MQTT Session with the _MQTT Server Infrastructure_. But there are use cases where the
 MQTT Session does not need to be persistent. In either case, an Edge Node can try to establish an
@@ -243,29 +245,33 @@ able to receive the messages.
 When using multiple MQTT Servers, the Primary Host Application instance must be configured to
 publish a STATE Birth Certificate and all Edge Nodes need to subscribe to this STATE message.
 
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-state]#Regardless
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-state]#[yellow-background]*Regardless
 of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application
 establishes a new MQTT Session with an MQTT Server, the STATE Birth Certificate defined in the
 link:#payloads_desc_state[STATE description section] MUST be the first message that is published
-after a successful MQTT Session is established with each MQTT Server.#
+after a successful MQTT Session is established with each MQTT Server.*#
 
 Sparkplug Edge Nodes in an infrastructure that provides multiple MQTT Servers can establish a
 session to any one of the MQTT Servers.
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-single-server]#The
-Edge Nodes MUST not connected to more than one server at any point in time.#
+
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-single-server]#[yellow-background]*The
+Edge Nodes MUST not connected to more than one server at any point in time.*#
+
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
 published by Primary Host Application. Since the STATE message is published with the RETAIN message
 flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
 examine the payload of this message to ensure that it is a value of "ONLINE". If the value is
 "OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT
 Server.
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#
-If the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST
+
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#[yellow-background]*If
+the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST
 terminate its session with this MQTT Server and move to the next available MQTT Server that is
-available.#
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#The Edge
-Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received by the
-Edge Node.#
+available.*#
+
+[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#[yellow-background]*The
+Edge Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received
+by the Edge Node.*#
 This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
 to the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
 because of network issues. The following message flow diagram outlines how the STATE message is
