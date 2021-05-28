@@ -14,12 +14,10 @@
 package org.eclipse.sparkplug.tck.test.host;
 
 /*
- * This is the primary host Sparkplug receive data test.  Data can be received from edge
- * nodes and devices.
+ * This is the primary host Sparkplug send command test.  
  * 
- * We can manufacture some data events to be received by the primary host.
- * But how do we verify that they have been handled correctly?  Can we rely on the
- * user running the tests to report the results accurately?
+ * There will be a prompt to the person executing the test to send a command to 
+ * a device and edge node we will connect.
  * 
  */
 
@@ -31,6 +29,10 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
@@ -48,7 +50,7 @@ import java.nio.ByteBuffer;
 @SpecVersion(
         spec = "sparkplug",
         version = "3.0.0-SNAPSHOT")
-public class EdgeNodeDeath extends TCKTest {
+public class SendCommandTest extends TCKTest {
 
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
     private HashMap testResults = new HashMap<String, String>();
@@ -59,9 +61,10 @@ public class EdgeNodeDeath extends TCKTest {
     private String state = null;
     private TCK theTCK = null;
     private String host_application_id = null;
+	private PublishService publishService = Services.publishService();
     
-    public EdgeNodeDeath(TCK aTCK, String[] parms) {
-        logger.info("Primary host receive data test");
+    public SendCommandTest(TCK aTCK, String[] parms) {
+        logger.info("Primary host send command test");
         theTCK = aTCK;
          
         testResults = new HashMap<String, String>();
@@ -72,6 +75,15 @@ public class EdgeNodeDeath extends TCKTest {
         
         host_application_id = parms[0];
         logger.info("Host application id is "+host_application_id);
+        
+        // First we have to connect an edge node and device      
+        state = "ConnectingDevice";
+        String payload = "NEW DEVICE";
+		Publish message = Builders.publish().topic("SPARKPLUG_TCK/DEVICE_CONTROL").qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(payload.getBytes()))
+				.build();
+		publishService.publish(message);
+
     }
     
     public void endTest() {
@@ -84,7 +96,7 @@ public class EdgeNodeDeath extends TCKTest {
     }
     
     public String getName() {
-    	return "ReceiveData";
+    	return "SendCommandTest";
     }
     
     public String[] getTestIds() {
@@ -97,19 +109,28 @@ public class EdgeNodeDeath extends TCKTest {
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void subscribe(String clientId, SubscribePacket packet) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
-		// TODO Auto-generated method stub
+	
+		if (packet.getTopic().equals("SPARKPLUG_TCK/DEVICE_CONTROL")) {
+			String payload = null;
+			ByteBuffer bpayload = packet.getPayload().orElseGet(null);
+			if (bpayload != null) {
+				payload = StandardCharsets.UTF_8.decode(bpayload).toString();
+			}
+			
+			if (payload.equals("DEVICE CONNECTED")) {
+				
+			}
+		}
 		
 	}
 
