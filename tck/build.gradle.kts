@@ -72,20 +72,20 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor("org.jboss.test-audit:jboss-test-audit-impl:${property("jboss.test-audit.version")}")
+
     compileOnly("org.slf4j:slf4j-api:${property("slf4j.version")}")
     implementation("org.slf4j:slf4j-simple:${property("slf4j.version")}")
-
-    annotationProcessor("org.jboss.test-audit:jboss-test-audit-impl:2.0.0.Final")
 
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${property("paho.version")}")
     implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")
     implementation("javax.validation:validation-api:${property("javax.validation.version")}")
     implementation("com.google.code.gson:gson:${property("gson.version")}")
     implementation("org.hibernate.beanvalidation.tck:beanvalidation-tck-tests:${property("beanvalidation.tck.version")}")
-    implementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-    implementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
-    implementation("jakarta.annotation:jakarta.annotation-api:2.0.0")
-    implementation("jakarta.validation:jakarta.validation-api:3.0.0")
+    implementation("org.junit.jupiter:junit-jupiter-params:${property("junit-jupiter.version")}")
+    runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit-jupiter.version")}")
+    implementation("jakarta.annotation:jakarta.annotation-api:${property("jakarta.annotation.version")}")
+    implementation("jakarta.validation:jakarta.validation-api:${property("jakarta.validation.version")}")
 }
 
 
@@ -291,6 +291,13 @@ sourceSets {
     }
 }
 
+tasks.register("audit") {
+    org.jboss.test.audit.generate.SectionsClassGenerator.main(arrayOf(
+            projectDir.absolutePath + "/../specification/target/tck-audit/tck-audit.xml",
+            "org.eclipse.sparkplug.tck",
+            projectDir.absolutePath + "/build/generated/sources/audit/"))
+}
+
 tasks.named("compileJava", JavaCompile::class.java) {
     dependsOn("audit")
     options.compilerArgs.addAll(listOf(
@@ -298,12 +305,7 @@ tasks.named("compileJava", JavaCompile::class.java) {
             "-AoutputDir=${projectDir}/build/coverage-report"))
 }
 
-tasks.register("audit") {
-    org.jboss.test.audit.generate.SectionsClassGenerator.main(arrayOf(
-            projectDir.absolutePath + "/../specification/target/tck-audit/tck-audit.xml",
-            "org.eclipse.sparkplug.tck",
-            projectDir.absolutePath + "/build/generated/sources/audit/"))
-}
+
 
 
 /*

@@ -1,3 +1,13 @@
+import org.asciidoctor.gradle.jvm.AsciidoctorJExtension
+import org.asciidoctor.gradle.jvm.AsciidoctorTask
+import org.xml.sax.InputSource
+import java.nio.file.Files.newInputStream
+import java.nio.file.Files.newOutputStream
+import java.nio.file.StandardOpenOption
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.sax.SAXSource
+import javax.xml.transform.stream.StreamResult
+
 plugins {
     id("com.github.sgtsilvio.gradle.metadata")
     id("org.asciidoctor.jvm.base")
@@ -7,14 +17,15 @@ repositories {
     mavenCentral()
 }
 
+
 /* ******************** metadata ******************** */
 
 group = "org.eclipse.sparkplug"
-description = "Sparkplug 3.0.0-SNAPSHOT Specification"
+description = "Sparkplug ${project.version} Specification"
 
 metadata {
     moduleName = "org.eclipse.sparkplug.specification"
-    readableName = "Sparkplug $version Specification"
+    readableName = "Sparkplug ${project.version} Specification"
 
     organization {
         name = "Eclipse Foundation"
@@ -31,10 +42,10 @@ metadata {
     }
 }
 
+
 /* ******************** asciidoctor ******************** */
 
-
-tasks.register("asciidoctorPdf", org.asciidoctor.gradle.jvm.AsciidoctorTask::class) {
+tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
     group = "documentation"
 
     baseDirFollowsSourceDir()
@@ -53,12 +64,11 @@ tasks.register("asciidoctorPdf", org.asciidoctor.gradle.jvm.AsciidoctorTask::cla
         into("./assets/images")
     }
 
-
-    configure<org.asciidoctor.gradle.jvm.AsciidoctorJExtension> {
+    configure<AsciidoctorJExtension> {
         modules {
             diagram.use()
             pdf.use()
-            pdf.setVersion("1.5.4")
+            pdf.setVersion(project.property("plugin.asciidoctor.pdf.version"))
         }
 
         setOptions(mapOf(
@@ -81,7 +91,7 @@ tasks.register("asciidoctorPdf", org.asciidoctor.gradle.jvm.AsciidoctorTask::cla
 
 }
 
-tasks.register("asciidoctorHtml", org.asciidoctor.gradle.jvm.AsciidoctorTask::class) {
+tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
     group = "documentation"
 
     baseDirFollowsSourceDir()
@@ -100,7 +110,7 @@ tasks.register("asciidoctorHtml", org.asciidoctor.gradle.jvm.AsciidoctorTask::cl
         into("./assets/images")
     }
 
-    configure<org.asciidoctor.gradle.jvm.AsciidoctorJExtension> {
+    configure<AsciidoctorJExtension> {
         modules {
             diagram.use()
         }
@@ -118,7 +128,7 @@ tasks.register("asciidoctorHtml", org.asciidoctor.gradle.jvm.AsciidoctorTask::cl
     }
 }
 
-tasks.register("asciidoctorDocbook", org.asciidoctor.gradle.jvm.AsciidoctorTask::class) {
+tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
     group = "documentation"
 
     baseDirFollowsSourceDir()
@@ -138,7 +148,7 @@ tasks.register("asciidoctorDocbook", org.asciidoctor.gradle.jvm.AsciidoctorTask:
         into("./assets/images")
     }
 
-    configure<org.asciidoctor.gradle.jvm.AsciidoctorJExtension> {
+    configure<AsciidoctorJExtension> {
         modules {
             diagram.use()
         }
@@ -155,80 +165,70 @@ tasks.register("asciidoctorDocbook", org.asciidoctor.gradle.jvm.AsciidoctorTask:
     }
 }
 
-val xxx by configurations.creating {
 
-}
-
-dependencies {
-    //xxx("xalan:xalan:2.7.2")
-}
+/* ******************** xslt transformation ******************** */
 
 tasks.register("xsltXalan") {
-    //dependsOn("asciidoctorDocbook")
+    group = "tck"
+    dependsOn("asciidoctorDocbook")
+
+    val inputFile = buildDir.resolve("docs/docbook/sparkplug_spec.xml")
+    inputs.file(inputFile)
+
+    val xslFile = projectDir.resolve("src/main/xsl/tck-audit.xsl")
 
     val outputFolder = buildDir.resolve("tck-audit")
     val outputFile = outputFolder.resolve("tck-audit.xml")
     outputs.file(outputFile)
 
-    val inputFile = buildDir.resolve("docs/docbook/sparkplug_spec.xml")
-    inputs.file(inputFile)
-
-    val transformerFactory2 = javax.xml.transform.TransformerFactory.newInstance()
-    println(transformerFactory2)
-    doLast {
-        outputFolder.mkdirs()
-
-        val transformerFactory = javax.xml.transform.TransformerFactory.newInstance()
-        println(transformerFactory)
-
-        val inputXslStream = java.nio.file.Files.newInputStream(projectDir.resolve("src/main/xsl/tck-audit.xsl").toPath(),
-                java.nio.file.StandardOpenOption.READ)
-        val inputXslSource = org.xml.sax.InputSource(inputXslStream)
-        val saxXslSource = javax.xml.transform.sax.SAXSource(inputXslSource)
-
-        val inputStream = java.nio.file.Files.newInputStream(inputFile.toPath(), java.nio.file.StandardOpenOption.READ)
-        val inputSource = org.xml.sax.InputSource(inputStream)
-        val saxSource = javax.xml.transform.sax.SAXSource(inputSource)
-
-        val outputFileStream = java.nio.file.Files.newOutputStream(outputFile.toPath(), java.nio.file.StandardOpenOption.CREATE)
-        val streamResult = javax.xml.transform.stream.StreamResult(outputFileStream)
-
-
-        val template = transformerFactory.newTemplates(saxXslSource)
-
-        val transformer = template.newTransformer()
-        transformer.setParameter("currentDate", java.time.Instant.now().toString())
-        transformer.setParameter("revision", project.version.toString())
-
-        transformer.transform(saxSource, streamResult)
-
-        inputXslStream.close()
-        inputStream.close()
-        outputFileStream.close()
-        //println(projectDir.resolve("src/main/xsl/tck-audit.xsl").absoluteFile.readText())
-        //println(inputFile.absoluteFile.readText())
-        //println(outputFile.absoluteFile.readText())
-
-    }
-    /*classpath = xxx
-
-    main = "com.sun.org.apache.xalan.xslt.Process"
-    args = listOf(
-            "-IN", inputFile.absolutePath.toString(),//project.buildDir.resolve("")
-            "-XSL", projectDir.resolve("src/main/xsl/tck-audit.xsl").absolutePath.toString(),
-            "-OUT", outputFile.absolutePath,
-            "-PARAM", "currentDate", java.time.Instant.now().toString(),
-            "-PARAM", "revision", project.version.toString()
+    val parameters = mapOf(
+            "currentDate" to java.time.Instant.now().toString(),
+            "revision" to project.version.toString()
     )
 
-    /*org.apache.xalan.xslt.Process.main(arrayOf(
-            "-IN", inputFile.absolutePath.toString(),//project.buildDir.resolve("")
-            "-XSL", projectDir.resolve("src/main/xsl/tck-audit.xsl").absolutePath.toString(),
-            "-OUT", outputFile.absolutePath,
-            "-PARAM", "currentDate", java.time.Instant.now().toString(),
-            "-PARAM", "revision", project.version.toString()
-    ))*/*/
+    doLast {
+        outputFolder.mkdirs()
+        transform(inputFile, xslFile, outputFile, parameters)
+    }
 }
+
+fun transform(inputFile: File, xslFile: File, outputFile: File, parameters: Map<String, String>) {
+    val transformerFactory = TransformerFactory.newInstance()
+
+    //XML input file
+    val inputStream = newInputStream(
+            inputFile.toPath(),
+            StandardOpenOption.READ)
+    val inputSource = InputSource(inputStream)
+    val saxSource = SAXSource(inputSource)
+
+    //XSL stylesheet
+    val inputXslStream = newInputStream(
+            xslFile.toPath(),
+            StandardOpenOption.READ)
+    val inputXslSource = InputSource(inputXslStream)
+    val saxXslSource = SAXSource(inputXslSource)
+
+    //XML output file
+    val outputFileStream = newOutputStream(
+            outputFile.toPath(),
+            StandardOpenOption.CREATE)
+    val streamResult = StreamResult(outputFileStream)
+
+    //create transformer
+    val template = transformerFactory.newTemplates(saxXslSource)
+    val transformer = template.newTransformer()
+
+    //set parameters for transformation
+    parameters.forEach { (name, value) ->
+        transformer.setParameter(name, value)
+    }
+
+    transformer.transform(saxSource, streamResult)
+}
+
+
+/* ******************** additional ******************** */
 
 tasks.named("build") {
     dependsOn("asciidoctorDocbook", "asciidoctorHtml", "asciidoctorPdf", "xsltXalan")

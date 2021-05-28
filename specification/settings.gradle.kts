@@ -10,15 +10,3 @@ pluginManagement {
         id("com.github.sgtsilvio.gradle.metadata") version "${extra["plugin.metadata.version"]}"
     }
 }
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    val xalanVersion = extra["xalan.version"]
-
-    dependencies {
-        //classpath("xalan:xalan:$xalanVersion")
-    }
-}
