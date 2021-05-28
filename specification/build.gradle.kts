@@ -79,10 +79,12 @@ tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
         ))
 
         setAttributes(mapOf(
+                "source-highlighter" to "highlight.js",
                 "pagenums" to "true",
                 "numbered" to "true",
-                "docinfo" to "true",
+                "docinfo2" to "true",
                 "experimental" to "false",
+                "linkcss" to "false",
                 "toc" to "true",
                 "project-version" to project.version,
                 "imagesdir" to "assets/images"
@@ -121,6 +123,7 @@ tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
         setAttributes(mapOf(
                 "source-highlighter" to "highlight.js",
                 "toc" to "true",
+                "docinfo2" to "true",
                 "linkcss" to "false",
                 "project-version" to project.version,
                 "imagesdir" to "assets/images"
