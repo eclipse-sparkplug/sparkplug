@@ -1,34 +1,34 @@
 @startuml
-participant "Primary Application" as PrimApp #lightblue
+participant "Primary Host Application" as PrimApp #lightblue
 database "MQTT Server" as Server #lightblue
-participant "MQTT EoN Node" as EoN #lightblue
+participant "Sparkplug Edge Node" as EdgeNode #lightblue
 
 activate PrimApp
 activate Server
-activate EoN
+activate EdgeNode
 
 
 autonumber 1 "<b>(#)"
 PrimApp <--> Server
 autonumber 1 "<b>(#)"
-Server <--> EoN
+Server <--> EdgeNode
 
 PrimApp <--> Server
 
 
-Server <--> EoN
+Server <--> EdgeNode
 autonumber 3 "<b>(#)"
-PrimApp <--> EoN
+PrimApp <--> EdgeNode
 note left
 All metrics provided in Birth
 Certificate are created in the
-EoN Node folder within the
+Edge Node folder within the
 Primary Application
 end note
 
 |||
 
-Server <- EoN : PUBLISH( **NDATA** )
+Server <- EdgeNode : PUBLISH( **NDATA** )
 note right
 Cellular RSSI level changes
 value. New value is updated
@@ -39,7 +39,7 @@ autonumber 4 "<b>(#)"
 PrimApp <-- Server
 note left
 New RSSI metric is updated in
-the associated EoN Node
+the associated Edge Node
 folder.
 end note
 
@@ -48,17 +48,17 @@ end note
 autonumber 5 "<b>(#)"
 PrimApp -> Server : PUBLISH( **NCMD** )
 note left
-Send a command to the EoN
+Send a command to the Edge
 Node to set Ethernet as the
 Primary network. Writing to
-the tag PRI_NETWORK in
-the Primary Application will
-automatically publish the
-new value.
+the tag PRI_NETWORK in the
+Primary Host Application
+will automatically publish
+the new value.
 end note
 
 autonumber 5 "<b>(#)"
-Server --> EoN
+Server --> EdgeNode
 note right
 PRI_NETWORK set to a
 new value of 2.

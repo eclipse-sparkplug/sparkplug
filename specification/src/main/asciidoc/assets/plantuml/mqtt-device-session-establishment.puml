@@ -1,33 +1,33 @@
 @startuml
-participant "Primary Application" as PrimApp #lightblue
+participant "Primary Host Application" as PrimApp #lightblue
 database "MQTT Server" as Server #lightblue
-participant "MQTT EoN Node" as EoN #lightblue
-participant "MQTT SCADA Device" as Device #lightblue
+participant "Sparkplug Edge Node" as EdgeNode #lightblue
+participant "Sparkplug Device" as Device #lightblue
 
 activate PrimApp
 activate Server
-activate EoN
+activate EdgeNode
 
 
 autonumber 1 "<b>(#)"
 PrimApp <--> Server
 autonumber 1 "<b>(#)"
-Server <--> EoN
+Server <--> EdgeNode
 
 PrimApp <-> Server
-Server <-> EoN
+Server <-> EdgeNode
 
 |||
 
 autonumber stop
-EoN <- Device
+EdgeNode <- Device
 note right
 Device metrics are available
 and ready to publish.
 end note
 
 autonumber 4 "<b>(#)"
-Server <- EoN : PUBLISH( **DBIRTH** )
+Server <- EdgeNode : PUBLISH( **DBIRTH** )
 activate Device
 note left
 Create/update Device folder
@@ -39,28 +39,28 @@ end note
 |||
 
 autonumber stop
-EoN <- Device
+EdgeNode <- Device
 note right
 Any device process variable
 or metric change.
 end note
 
 autonumber 5 "<b>(#)"
-Server <- EoN : PUBLISH ( **DDATA** )
+Server <- EdgeNode : PUBLISH ( **DDATA** )
 note left
 Update only metrics that
 change.
 end note
 
 autonumber stop
-EoN <- Device
+EdgeNode <- Device
 note right
 Device data becomes
 unavailable or stale.
 end note
 
 autonumber 6 "<b>(#)"
-Server <- EoN : PUBLISH ( **DDEATH** )
+Server <- EdgeNode : PUBLISH ( **DDEATH** )
 note left
 All associated Device
 metrics are set to 'STALE'
