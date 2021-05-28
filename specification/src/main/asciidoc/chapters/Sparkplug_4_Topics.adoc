@@ -28,26 +28,26 @@ not to get so verbose as to negatively impact bandwidth/time sensitive data exch
 [[topics_sparkplug_topic_namesapce_elements]]
 === Topic Namespace Elements
 
-[tck-testable tck-id-topic-structure]#All MQTT clients using the Sparkplug specification MUST use
-the following topic namespace structure:#
+[tck-testable tck-id-topic-structure]#[yellow-background]*All MQTT clients using the Sparkplug
+specification MUST use the following topic namespace structure:*#
 
   namespace/group_id/message_type/edge_node_id/[device_id]
 
 [[topics_namespace_element]]
 ==== namespace Element
 
-The *_namespace_* element of the topic namespace is the root element that will define both the
+The namespace element of the topic namespace is the root element that will define both the
 structure of the remaining namespace elements as well as the encoding used for the associated
 payload data. The Sparkplug specification defines two (2) namespaces. One is for Sparkplug payload
 definition A, and another one of for the Sparkplug payload definition B.
 
-[tck-testable tck-id-topic-structure-namespace-a]#For the Sparkplug A version of the payload
-definition, the UTF-8 string constant for the *namespace* element MUST be:#
+[tck-testable tck-id-topic-structure-namespace-a]#[yellow-background]*For the Sparkplug A version of
+the payload definition, the UTF-8 string constant for the namespace element MUST be:*#
 
   spAv1.0
 
-[tck-testable tck-id-topic-structure-namespace-a]#For the Sparkplug B version of the payload
-definition, the UTF-8 string constant for the *_namespace_* element MUST be:#
+[tck-testable tck-id-topic-structure-namespace-a]#[yellow-background]*For the Sparkplug B version of
+the payload definition, the UTF-8 string constant for the namespace element MUST be:*#
 
   spBv1.0
 
@@ -59,24 +59,25 @@ Sparkplug MQTT message payloads.
 [[topics_group_id_element]]
 ==== group_id Element
 
-The *_group_id_* element of the topic namespace provides for a logical grouping of Sparkplug Edge
+The Group ID element of the topic namespace provides for a logical grouping of Sparkplug Edge
 Nodes into the MQTT Server and back out to the consuming MQTT Clients.
-[tck-testable tck-id-topic-structure-namespace-valid-group-id]#The format of the  *_group_id_* MUST
-be a valid UTF-8 string with the exception of the reserved characters of ‘+’ (plus), ‘/’ (forward
-slash), and ‘#’ (number sign).#
+
+[tck-testable tck-id-topic-structure-namespace-valid-group-id]#[yellow-background]*The format of the
+Group ID MUST be a valid UTF-8 string with the exception of the reserved characters of + (plus),
+/ (forward slash), and # (number sign).*#
 In most use cases to minimize bandwidth, it should be descriptive but as small as possible. Examples
-of where the [*group_id*] might be used include Oil/Gas applications where Sparkplug Edge Nodes on a
-physical pipeline segment all have the same [*group_id*]. Plant floor applications may group
+of where the [group_id] might be used include Oil/Gas applications where Sparkplug Edge Nodes on a
+physical pipeline segment all have the same [group_id]. Plant floor applications may group
 Sparkplug Edge Nodes based on logical cell or manufacturing line requirements.
 
 [[topics_message_type_element]]
 ==== message_type Element
 
-The *_message_type_* element of the topic namespace provides an indication as to how to handle the
+The message_type element of the topic namespace provides an indication as to how to handle the
 MQTT payload of the message. Note that the actual encoding of the payload will vary depending on the
-version of the Sparkplug implementation as indicated by the *_namespace_* element.
+version of the Sparkplug implementation as indicated by the namespace element.
 
-The following *_message_type_* elements are defined for the Sparkplug topic namespace:
+The following message_type elements are defined for the Sparkplug topic namespace:
 
 * *NBIRTH* – Birth certificate for Sparkplug Edge Nodes
 * *NDEATH* – Death certificate for Sparkplug Edge Nodes
@@ -93,34 +94,34 @@ The specification for each of these _message_type_ elements are detailed later i
 [[topics_edge_node_id_element]]
 ==== edge_node_id Element
 
-The *_edge_node_id_* element of the Sparkplug topic namespace uniquely identifies the Sparkplug Edge
+The edge_node_id element of the Sparkplug topic namespace uniquely identifies the Sparkplug Edge
 Node within the infrastructure.
-[tck-testable tck-id-topic-structure-namespace-unique-edge-node-descriptor]#The *_group_id_*
-combined with the *_edge_node_id_* element MUST be unique from any other
-*_group_id_*/*_edge_node_id_* assigned in the MQTT infrastructure.#
-[tck-testable tck-id-topic-structure-namespace-valid-edge-node-id]#The format of the
-*_edge_node_id_* MUST be a valid UTF-8 string with the exception of the reserved characters of ‘+’
-(plus), ‘/’ (forward slash), and ‘#’ (number sign).#
-The topic element *_edge_node_id_* travels with every message published and should be as short as
+[tck-testable tck-id-topic-structure-namespace-unique-edge-node-descriptor]#[yellow-background]*The
+group_id combined with the _edge_node_id_ element MUST be unique from any other
+group_id/edge_node_id assigned in the MQTT infrastructure.*#
+[tck-testable tck-id-topic-structure-namespace-valid-edge-node-id]#[yellow-background]*The format of
+the _edge_node_id_ MUST be a valid UTF-8 string with the exception of the reserved characters of +
+(plus), / (forward slash), and # (number sign).*#
+The topic element edge_node_id travels with every message published and should be as short as
  possible.
 
 [[topics_device_id_element]]
 ==== device_id Element
 
-The *_device_id_* element of the Sparkplug topic namespace identifies a device attached (physically
-or logically) to the Sparkplug Edge Node. Note that the *_device_id_* is an optional element within
-thetopic namespace as some messages will be either originating or destined to the *_edge_node_id_*
-and the *_device_id_* would not be required.
-[tck-testable tck-id-topic-structure-namespace-valid-device-id]#The format of the *_device_id_* MUST
-be a valid UTF-8 string except for the reserved characters of ‘+’ (plus), ‘/’ (forward slash), and
-‘#’ (number sign).#
-[tck-testable tck-id-topic-structure-namespace-unique-device-id]#The *_device_id_* MUST be unique
-from other devices connected to the same Edge Node.
-[tck-testable tck-id-topic-structure-namespace-duplicate-device-id-across-edge-node]#The
-*_device_id_* MAY be duplicated from Edge Node to other Edge Nodes. The device_id element travels 
-with every message published and should be as short as possible.
-[tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#The *_device_id_*
-MUST be included with *_message_type_* elements DBIRTH, DDEATH, DDATA, and DCMD based topics#
+The device_id element of the Sparkplug topic namespace identifies a device attached (physically
+or logically) to the Sparkplug Edge Node. Note that the device_id is an optional element within
+thetopic namespace as some messages will be either originating or destined to the edge_node_id
+and the device_id would not be required.
+[tck-testable tck-id-topic-structure-namespace-valid-device-id]#[yellow-background]*The format of
+the device_id MUST be a valid UTF-8 string except for the reserved characters of + (plus), /
+(forward slash), and # (number sign).*#
+[tck-testable tck-id-topic-structure-namespace-unique-device-id]#[yellow-background]*The device_id
+MUST be unique from other devices connected to the same Edge Node.*#
+[tck-testable tck-id-topic-structure-namespace-duplicate-device-id-across-edge-node]#[yellow-background]*The
+device_id MAY be duplicated from Edge Node to other Edge Nodes.*#
+The device_id element travels  with every message published and should be as short as possible.
+[tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#[yellow-background]*The
+device_id MUST be included with message_type elements DBIRTH, DDEATH, DDATA, and DCMD based topics*#
 
 [[topics_message_type_overview]]
 === Message Types and Contents
@@ -223,7 +224,9 @@ Once an Sparkplug Edge Node is online with a proper NBIRTH it is in a mode of qu
 Exception (RBE) or time based reporting of metric information that changes. This enables the
 advantages of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
 Sparkplug Edge Node and to rely on Report by Exception (RBE) messages for metric state changes over
-the MQTT session connection. 
+the MQTT session connection. Time based reporting is not explicitly disallowed by the Sparkplug
+Specification but it is discouraged. Due to the session awareness provided by MQTT and Sparkplug it
+is not necessary to send the same data again on a periodic basis.
 
 [[topics_data_message_ndata]]
 ====== Topic (NDATA)
@@ -368,7 +371,8 @@ Once an Sparkplug Edge Node and associated devices are all online with proper Bi
 is in a mode of quiescent Report by Exception (RBE) reporting of any metric that changes. This takes
 advantage of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
 devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT
-session connection.
+session connection. Again, time based reporting can be used instead of RBE but is discouraged and
+unnecessary.
 
 [[topics_data_message_ddata]]
 ====== Topic (DDATA)
@@ -447,8 +451,8 @@ application’s MQTT client.
 [[birth_message_state]]
 ===== Birth Message (STATE)
 
-[tck-testable tck-id-host-topic-phid-birth-payload]#The first message a Primary Host Application
-MUST publish is a Birth Certificate.#
+[tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The first message a Primary
+Host Application MUST publish is a Birth Certificate.*#
 The Primary Host Application Death Certificate is registered above within the actual establishment
 of the MQTT session and is published as a part of the native MQTT transport if the MQTT session
 terminates for any reason.
@@ -464,14 +468,14 @@ Certificate:
 [subs="quotes"]
   *STATE*/host_application_id
 
-[tck-testable tck-id-host-topic-phid-birth-payload]#The Birth Certificate Payload MUST be the UTF-8
-string “*ONLINE*”.#
+[tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
+Payload MUST be the UTF-8 string “ONLINE”*#
 
-[tck-testable tck-id-host-topic-phid-birth-qos]#The MQTT Quality of Service (QoS) MUST be set to
-*1*.#
+[tck-testable tck-id-host-topic-phid-birth-qos]#[yellow-background]*The MQTT Quality of Service
+(QoS) MUST be set to 1*#
 
-[tck-testable tck-id-host-topic-phid-birth-retain]#The MQTT retain flag for the Birth Certificate
-MUST be set to *TRUE*#
+[tck-testable tck-id-host-topic-phid-birth-retain]#[yellow-background]*The MQTT retain flag for the
+Birth Certificate MUST be set to TRUE*#
 
 [[payloads_desc_state]]
 ====== Payload (STATE)
@@ -501,15 +505,17 @@ The *Will Topic* as defined above will be:
 [subs="quotes"]
   *STATE*/host_application_id
 
-[tck-testable tck-id-host-topic-phid-required]#The Primary Host Application MUST provide a Will
-message in the MQTT CONNECT packet.
+[tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Primary Host Application MUST
+provide a Will message in the MQTT CONNECT packet*#
 
-[tck-testable tck-id-host-topic-phid-death-payload]#The MQTT Will Payload MUST be the UTF-8 string
-“*OFFLINE*”.#
+[tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*The MQTT Will Payload MUST
+be the UTF-8 string “OFFLINE”*#
 
-[tck-testable tck-id-host-topic-phid-death-qos]#The MQTT Will QoS MUST be set to *1*#
+[tck-testable tck-id-host-topic-phid-death-qos]#[yellow-background]*The MQTT Will QoS MUST be set to
+1*#
 
-[tck-testable tck-id-host-topic-phid-death-retain]#The MQTT Will retain flag MUST be set to *TRUE*#
+[tck-testable tck-id-host-topic-phid-death-retain]#[yellow-background]*The MQTT Will retain flag
+MUST be set to TRUE*#
 
 [[payloads_desc_state_death]]
 ====== Payload (STATE)

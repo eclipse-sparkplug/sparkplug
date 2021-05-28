@@ -27,13 +27,14 @@ image::extracted-media/media/image4.png[image,width=200,height=80]
 |===
 
 // Settings:
-:experimental:
+//:experimental:
 :reproducible:
 :icons: font
 :listing-caption: Listing
 :sectnums:
 :toc:
 :toclevels: 3
+:docinfo: shared,private
 :autofit-option:
 ifdef::backend-pdf[]
 :sectanchors:

@@ -305,32 +305,36 @@ infrastructure. There are three primary IDs and one that is a composite ID. Thes
 the following.
 
 * Group ID
-** [tck-testable tck-id-intro-group-id-string]#The Group ID MUST be UTF-8 string and used as part of
-the Sparkplug topics as defined in the link:#topics[Topics Section].#
-** [tck-testable tck-id-intro-group-id-chars]#Because the Group ID is used in MQTT topic strings the
-Group ID MUST only contain characters allowed for MQTT topics per the MQTT Specification.#
+** [tck-testable tck-id-intro-group-id-string]#[yellow-background]*The Group ID MUST be UTF-8 string
+and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-group-id-chars]#[yellow-background]*Because the Group ID is used in
+MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
+Specification.*#
 ** Non-normative comment: The Group ID represents a general grouping of Edge Nodes that makes sense
 within the context of the Sparkplug application and use-case.
 * Edge Node ID
-** [tck-testable tck-id-intro-edge-node-id-string]#The Edge Node ID MUST be UTF-8 string and used as
-part of the Sparkplug topics as defined in the link:#topics[Topics Section].#
-** [tck-testable tck-id-intro-edge-node-id-chars]#Because the Edge Node ID is used in MQTT topic
-strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
-Specification.#
+** [tck-testable tck-id-intro-edge-node-id-string]#[yellow-background]*The Edge Node ID MUST be
+UTF-8 string and used as part of the Sparkplug topics as defined in the
+link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-edge-node-id-chars]#[yellow-background]*Because the Edge Node ID is
+used in MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the
+MQTT Specification.*#
 ** Non-normative comment: The Edge Node ID represents a unique identifier for an Edge Node within
 the context of the Group ID under which it exists.
 * Device ID
-** [tck-testable tck-id-intro-device-id-string]#The Device ID MUST be UTF-8 string and used as part
-of the Sparkplug topics as defined in the link:#topics[Topics Section].#
-** [tck-testable tck-id-intro-device-id-chars]#Because the Device ID is used in MQTT topic strings
-the Group ID MUST only contain characters allowed for MQTT topics per the MQTT Specification.#
+** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Device ID MUST be UTF-8
+string and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-device-id-chars]#[yellow-background]*Because the Device ID is used in
+MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
+Specification.*#
 ** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
 * Edge Node Descriptor (composite ID)
 ** The Edge Node Descriptor is the combination of the Group ID and Edge Node ID.
-** [tck-testable tck-id-intro-device-id-string]#The Edge Node Descriptor MUST be unique within the
-context of all of other Edge Nodes within the Sparkplug infrastructure.# In other words, no two Edge
-Nodes within a Sparkplug environment can have the same Group ID and same Edge Node ID.
+** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Edge Node Descriptor MUST be
+unique within the context of all of other Edge Nodes within the Sparkplug infrastructure.*# In other
+words, no two Edge Nodes within a Sparkplug environment can have the same Group ID and same Edge
+Node ID.
 ** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
 
@@ -371,8 +375,14 @@ Although this document will not specify any TCP/IP security schema it will provi
 to secure an MQTT infrastructure using TLS security.
 
 [[introduction_editing_convention]]
-=== Editing convention
-// TODO: Github #45
+=== Editing Convention
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+"RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC
+2119. RFC 2119: https://tools.ietf.org/html/rfc2119
+
+All normative statements in this document are highlighted in [yellow-background]*yellow text as
+shown here*.
 
 [[introduction_leveragint_standards_and_open_source]]
 === Leveraging Standards and Open Source
