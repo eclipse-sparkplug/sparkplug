@@ -2,3 +2,4 @@
 .mvn
 SparkplugTCKClient*
 tck/src/license/THIRD-PARTY.properties 
+specification/src/main/asciidoc/docinfo-header.html
