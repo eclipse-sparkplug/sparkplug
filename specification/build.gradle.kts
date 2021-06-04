@@ -198,6 +198,7 @@ val xsltAudit = tasks.register("xsltAudit") {
 
     doLast {
         outputFolder.mkdirs()
+        outputFile.delete()
         transform(inputFile, xslFile, outputFile, parameters)
     }
 }
@@ -290,18 +291,20 @@ val copySpec = tasks.register("copySpecSourceIntoBuild", Copy::class) {
     group = "spec"
 
     from("src/main/asciidoc")
-    into("build/spec")
+    into(buildDir.resolve("spec"))
 }
+
 
 val renameHtml = tasks.register("renameHtml", Copy::class) {
     group = "spec"
     dependsOn("asciidoctorHtml")
 
-    from("build/docs/html/sparkplug_spec.html") {
+    from(buildDir.resolve("docs/html/sparkplug_spec.html")) {
         rename { "index.html" }
     }
-    into("build/docs/html")
+    into(buildDir.resolve("docs/html"))
 }
+
 
 
 tasks.named("build") {

@@ -710,7 +710,7 @@ every Template Definition and Template Instance.*#
 [tck-testable tck-id-payloads_template_is_definition_definition]#[yellow-background]*This MUST be
 set to true if this is a Template Definition.*#
 [tck-testable tck-id-payloads_template_is_definition_instance]#[yellow-background]*This MUST be set
-to false if this is a Template Instance.#
+to false if this is a Template Instance.*#
 
 [[payloads_b_template_parameter]]
 ==== Template.Parameter
@@ -732,7 +732,7 @@ one of the enumerated values as shown in the
 link:#payloads_b_datatypes_basic[Sparkplug Basic Data Types].*#
 // FIXME: Is this correct?
 [tck-testable tck-id-payloads_template_parameter_type_req]#[yellow-background]*This MUST be included
-in Template Parameter Definitions in NBIRTH and DBIRTH messages.#
+in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
 [tck-testable tck-id-payloads_template_parameter_value]#[yellow-background]*The value supplied MUST
@@ -1097,7 +1097,7 @@ published by the Edge Node.*#
 * [tck-testable tck-id-payloads_dbirth_qos]#[yellow-background]*DBIRTH messages MUST be published
 with the MQTT QoS set to 0.*#
 * [tck-testable tck-id-payloads_dbirth_retain]#[yellow-background]*DBIRTH messages MUST be published
-with the MQTT retain flag set to false.#
+with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple DBIRTH message on the topic:
 
@@ -1369,7 +1369,7 @@ sequence number.*#
 * [tck-testable tck-id-payloads_dcmd_qos]#[yellow-background]*DCMD messages MUST be published with
 the MQTT QoS set to 0.*#
 * [tck-testable tck-id-payloads_dcmd_retain]#[yellow-background]*DCMD messages MUST be published
-with the MQTT retain flag set to false.#
+with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple DCMD message on the topic:
 
@@ -1413,7 +1413,7 @@ Message'. This is used by Host Applications to know when an Edge Node has lost i
 with the MQTT Server.
 
 * [tck-testable tck-id-payloads_ndeath_seq]#[yellow-background]*Every NDEATH message MUST NOT
-include a sequence number.#
+include a sequence number.*#
 * [tck-testable tck-id-payloads_ndeath_will_message]#[yellow-background]*An NDEATH message MUST be
 registered as a Will Message in the MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads_ndeath_will_message_qos]#[yellow-background]*The NDEATH message MUST
@@ -1502,7 +1502,7 @@ B payloads. State messages are used by Primary Host Applications to denote to Ed
 not the Primary Host Application is online and operational or not.
 
 * [tck-testable tck-id-payloads_state_will_message]#[yellow-background]*Primary Host Applications
-MUST register a Will Message in the MQTT CONNECT packet on the topic 'STATE/[phid]'.# The [phid]
+MUST register a Will Message in the MQTT CONNECT packet on the topic 'STATE/[phid]'.*# The [phid]
 should be replaced with the Primary Host Application's ID. This can be any UTF-8 string.
 * [tck-testable tck-id-payloads_state_will_message_qos]#[yellow-background]*The Primary Host
 Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
