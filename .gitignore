@@ -6,3 +6,4 @@ tck/src/license/THIRD-PARTY.properties
 .gradle
 build/
 target/
+specification/src/main/asciidoc/docinfo-header.html
