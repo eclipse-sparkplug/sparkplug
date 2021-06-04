@@ -1,3 +1,4 @@
+import de.undercouch.gradle.tasks.download.Download
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
 
 plugins {
@@ -5,6 +6,7 @@ plugins {
     id("com.hivemq.extension")
     id("com.github.hierynomus.license-report")
     id("com.github.sgtsilvio.gradle.utf8")
+    id("de.undercouch.download")
     //checkstyle
 }
 
@@ -19,7 +21,7 @@ hivemqExtension {
     author = "Eclipse"
     priority = 0
     startPriority = 1000
-    mainClass = "org.eclipse.sparkplug.SparkplugHiveMQExtension"
+    mainClass = "org.eclipse.sparkplug.tck.SparkplugHiveMQExtension"
     sdkVersion = "4.4.4"
 }
 
@@ -293,7 +295,8 @@ tasks.register("audit") {
                         .projectDir.resolve("build/tck-audit/tck-audit.xml")
                         .absolutePath,
                 "org.eclipse.sparkplug.tck",
-                buildDir.resolve("generated/sources/audit/").absolutePath))
+                buildDir.resolve("generated/sources/audit/").absolutePath)
+        )
     }
 }
 
@@ -307,6 +310,32 @@ tasks.named("compileJava", JavaCompile::class.java) {
                         .absolutePath
             }",
             "-AoutputDir=${buildDir.resolve("coverage-report").absolutePath}"))
+}
+
+
+/* ******************** debug run ******************** */
+
+val downloadHivemqCe by tasks.registering(Download::class) {
+    src("https://github.com/hivemq/hivemq-community-edition/releases/download/2021.1/hivemq-ce-2021.1.zip")
+    dest(buildDir.resolve("hivemq-ce.zip"))
+    overwrite(false)
+}
+
+val unzipHivemq by tasks.registering(Sync::class) {
+    dependsOn(downloadHivemqCe)
+    from(zipTree(buildDir.resolve("hivemq-ce.zip")))
+    into({ temporaryDir })
+    println(temporaryDir)
+}
+
+tasks.prepareHivemqHome {
+    hivemqFolder.set(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") } as Any)
+}
+
+tasks.runHivemqWithExtension {
+    debugOptions {
+        enabled.set(true)
+    }
 }
 
 
