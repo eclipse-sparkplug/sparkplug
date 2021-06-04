@@ -32,7 +32,9 @@ metadata {
         url = "https://sparkplug.eclipse.org/"
     }
     license {
-        //add license
+        shortName = "EPL-2.0"
+        readableName = "Eclipse Public License - v 2.0"
+        url = "https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt"
     }
     github {
         org = "eclipse"
@@ -45,11 +47,12 @@ metadata {
 
 /* ******************** asciidoctor ******************** */
 
-tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
-    group = "documentation"
+val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
+    group = "spec"
+    dependsOn(createNormativeAppendix)
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("src/main/asciidoc"))
+    sourceDirProperty.set(file("build/spec"))
     sources {
         include("*.adoc", "chapters/*.adoc")
     }
@@ -93,11 +96,12 @@ tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
 
 }
 
-tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
-    group = "documentation"
+val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
+    group = "spec"
+    dependsOn(createNormativeAppendix)
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("src/main/asciidoc"))
+    sourceDirProperty.set(file("build/spec"))
     sources {
         include("*.adoc", "chapters/*.adoc")
     }
@@ -131,11 +135,12 @@ tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
     }
 }
 
-tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
-    group = "documentation"
+val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
+    group = "spec"
+    dependsOn("copySpecSourceIntoBuild")
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("src/main/asciidoc"))
+    sourceDirProperty.set(file("build/spec"))
     sources {
         include("*.adoc", "chapters/*.adoc")
     }
@@ -171,17 +176,19 @@ tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
 
 /* ******************** xslt transformation ******************** */
 
-tasks.register("xsltXalan") {
+val xsltAudit = tasks.register("xsltAudit") {
     group = "tck"
-    dependsOn("asciidoctorDocbook")
+    dependsOn(asciidoctorDocbook)
 
     val inputFile = buildDir.resolve("docs/docbook/sparkplug_spec.xml")
-    inputs.file(inputFile)
-
     val xslFile = projectDir.resolve("src/main/xsl/tck-audit.xsl")
+
+    inputs.file(inputFile)
+    inputs.file(xslFile)
 
     val outputFolder = buildDir.resolve("tck-audit")
     val outputFile = outputFolder.resolve("tck-audit.xml")
+
     outputs.file(outputFile)
 
     val parameters = mapOf(
@@ -191,7 +198,30 @@ tasks.register("xsltXalan") {
 
     doLast {
         outputFolder.mkdirs()
+        outputFile.delete()
         transform(inputFile, xslFile, outputFile, parameters)
+    }
+}
+
+val normativeStatements = tasks.register("xsltNormativeStatements") {
+    group = "spec"
+    dependsOn(xsltAudit)
+
+    val inputFile = xsltAudit.get().outputs.files.singleFile
+    val xslFile = projectDir.resolve("src/main/xsl/normative-statements.xsl")
+
+    inputs.file(inputFile)
+    inputs.file(xslFile)
+
+    val outputFolder = buildDir.resolve("normative-statements")
+    val outputFile = outputFolder.resolve("appendix.adoc")
+
+    outputs.file(outputFile)
+
+    doLast {
+        outputFolder.mkdirs()
+        outputFile.delete()
+        transform(inputFile, xslFile, outputFile, mapOf())
     }
 }
 
@@ -228,11 +258,55 @@ fun transform(inputFile: File, xslFile: File, outputFile: File, parameters: Map<
     }
 
     transformer.transform(saxSource, streamResult)
+    transformer.reset()
 }
 
 
 /* ******************** additional ******************** */
 
+val createNormativeAppendix = tasks.register("createNormativeAppendix") {
+    group = "spec"
+    dependsOn(copySpec, normativeStatements)
+
+    inputs.files(copySpec.get().outputs.files)
+    inputs.file(normativeStatements.get().outputs.files.singleFile)
+
+    val origAppendixFile = file(buildDir.resolve("spec/chapters/Sparkplug_Appendix_C.adoc"))
+    val createdStatements = normativeStatements.get().outputs.files.singleFile
+
+    val outputFolder = buildDir.resolve("spec/chapters")
+    val outputFile = outputFolder.resolve("Sparkplug_Appendix_C.adoc")
+
+    outputs.file(outputFile)
+
+    doLast {
+        outputFolder.mkdirs()
+
+        file(outputFile).writeText(origAppendixFile.readText())
+        file(outputFile).appendText(createdStatements.readText())
+    }
+}
+
+val copySpec = tasks.register("copySpecSourceIntoBuild", Copy::class) {
+    group = "spec"
+
+    from("src/main/asciidoc")
+    into(buildDir.resolve("spec"))
+}
+
+
+val renameHtml = tasks.register("renameHtml", Copy::class) {
+    group = "spec"
+    dependsOn("asciidoctorHtml")
+
+    from(buildDir.resolve("docs/html/sparkplug_spec.html")) {
+        rename { "index.html" }
+    }
+    into(buildDir.resolve("docs/html"))
+}
+
+
+
 tasks.named("build") {
-    dependsOn("asciidoctorDocbook", "asciidoctorHtml", "asciidoctorPdf", "xsltXalan")
+    dependsOn(asciidoctorPdf, asciidoctorHtml, renameHtml)
 }

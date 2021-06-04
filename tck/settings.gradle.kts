@@ -1,5 +1,7 @@
 rootProject.name = "sparkplug-tck"
 
+includeBuild("../specification")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
