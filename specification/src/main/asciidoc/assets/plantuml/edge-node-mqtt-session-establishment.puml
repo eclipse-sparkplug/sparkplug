@@ -1,32 +1,32 @@
 @startuml
-participant "Primary Application" as PrimApp #lightblue
+participant "Primary Host Application" as PrimApp #lightblue
 database "MQTT Server" as Server #lightblue
-participant "MQTT EoN Node" as EoN #lightblue
+participant "Sparkplug Edge Node" as EdgeNode #lightblue
 
 activate PrimApp
 activate Server
 
 
 autonumber 1 "<b>(#)"
-Server <- EoN : CONNECT
+Server <- EdgeNode : CONNECT
 
 |||
 
-Server <- EoN : PUBLISH( **NBIRTH** )
-activate EoN
+Server <- EdgeNode : SUBSCRIBE( **NCMD, DCMD, STATE** )
+
+Server <- EdgeNode : PUBLISH( **NBIRTH** )
+activate EdgeNode
 
 note left
-Create/update Eon Node
+Create/update Edge Node
 folder and metrics.
 Create and update all
 metrics and set data
 quality to 'GOOD'.
 end note
 
-Server <- EoN : SUBSCRIBE( **NCMD, DCMD, STATE** )
-
-note right of EoN
-MQTT EoN Node Session
+note right of EdgeNode
+Sparkplug Node Session
 established. Current 'STATE'
 is ONLINE.
 end note
@@ -34,20 +34,20 @@ end note
 ... (normal operation) ...
 |||
 
-Server <--> EoN : "Loss of Connection"
+Server <--> EdgeNode : "Loss of Connection"
 autonumber stop
-deactivate EoN
+deactivate EdgeNode
 
 [<-- Server : Death Certificate
 
 note left of Server
-All EoN Node metrics set
+All Edge Node metrics set
 to 'STALE'. OFFLINE
 time and metrics updated.
 end note
 
-note right of EoN
-MQTT EoN Node
+note right of EdgeNode
+Sparkplug Edge Node
 Session terminated.
 Current 'STATE' is
 OFFLINE.
@@ -55,25 +55,26 @@ end note
 
 |||
 
-Server <- EoN : CONNECT
+Server <- EdgeNode : CONNECT
+
+Server <- EdgeNode : SUBSCRIBE( **NCMD, DCMD, STATE** )
 
 |||
-Server <- EoN : PUBLISH( **NBIRTH** )
-activate EoN
+Server <- EdgeNode : PUBLISH( **NBIRTH** )
+activate EdgeNode
 note left
-All EoN Node metrics set
+All Edge Node metrics set
 to 'GOOD'. OFFLINE
 time and metrics updated.
 end note
 
 
-Server <- EoN : SUBSCRIBE( **NCMD, DCMD, STATE** )
-
-note right of EoN
-MQTT EoN Node Session
+note right of EdgeNode
+Sparkplug Edge Node Session
 reestablished. Current 'STATE'
 is ONLINE.
 end note
 
+... (normal operation) ...
 |||
 @enduml

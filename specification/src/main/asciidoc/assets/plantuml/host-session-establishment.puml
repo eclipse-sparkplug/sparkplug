@@ -1,5 +1,5 @@
 @startuml
-participant "Primary Application" as PrimApp #lightblue
+participant "Primary Host Application" as PrimApp #lightblue
 database "MQTT Server" as Server #lightblue
 
 activate Server
@@ -14,7 +14,7 @@ autonumber 1 "<b>(#)"
 PrimApp -> Server : CONNECT
 
 |||
-PrimApp -> Server : SUBSCRIBE( **spv1.0/#** )
+PrimApp -> Server : SUBSCRIBE( **spBv1.0/#** )
 
 
 PrimApp -> Server : PUBLISH( **STATE** )
@@ -59,7 +59,7 @@ PrimApp -> Server : CONNECT
 
 |||
 
-PrimApp -> Server : SUBSCRIBE( **spv1.0/#** )
+PrimApp -> Server : SUBSCRIBE( **spBv1.0/#** )
 
 PrimApp -> Server : PUBLISH( **STATE** )
 activate PrimApp
@@ -75,6 +75,8 @@ note left of PrimApp
 Updated Metric shows
 **ONLINE** again.
 end note
+
+... (normal operation) ...
 
 |||
 @enduml
