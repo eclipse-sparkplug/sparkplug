@@ -304,8 +304,6 @@ val renameHtml = tasks.register("renameHtml", Copy::class) {
 }
 
 
-
-
 tasks.named("build") {
     dependsOn(asciidoctorPdf, asciidoctorHtml, renameHtml)
 }

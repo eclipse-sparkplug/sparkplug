@@ -201,7 +201,6 @@ downloadLicenses {
     val epl_2_0 = license("EPL, Version 2.0", "https://opensource.org/licenses/EPL-2.0")
     val edl_1_0 = license("EDL, Version 1.0", "https://www.eclipse.org/org/documents/edl-v10.php")
     val bsd_3clause = license("BSD 3-Clause License", "https://opensource.org/licenses/BSD-3-Clause")
-    val bouncycastle = license("Bouncy Castle License", "https://www.bouncycastle.org/licence.html")
     val w3c = license("W3C License", "https://opensource.org/licenses/W3C")
     val cc0 = license("CC0", "https://creativecommons.org/publicdomain/zero/1.0/")
 
@@ -260,7 +259,6 @@ downloadLicenses {
                     license("BSD", "http://asm.ow2.org/license.html"),
                     license("BSD", "http://asm.objectweb.org/license.html"),
                     license("BSD", "LICENSE.txt")),
-            bouncycastle to listOf("Bouncy Castle Licence"),
             w3c to listOf("W3C License",
                     "W3C Software Copyright Notice and License",
                     "The W3C Software License"),
@@ -272,6 +270,8 @@ downloadLicenses {
     excludeDependencies = listOf(
             "org.eclipse.tahu:*:*"
     )
+
+
 }
 
 
@@ -291,23 +291,28 @@ sourceSets {
     }
 }
 
+//Fetches created tck-audit file from specification project.
 tasks.register("audit") {
-    org.jboss.test.audit.generate.SectionsClassGenerator.main(arrayOf(
-            projectDir.absolutePath + "/../specification/target/tck-audit/tck-audit.xml",
-            "org.eclipse.sparkplug.tck",
-            projectDir.absolutePath + "/build/generated/sources/audit/"))
+    dependsOn(gradle.includedBuild("specification").task(":xsltAudit"))
+
+    doLast {
+        org.jboss.test.audit.generate.SectionsClassGenerator.main(arrayOf(
+                projectDir.absolutePath + "/../specification/build/tck-audit/tck-audit.xml",
+                "org.eclipse.sparkplug.tck",
+                projectDir.absolutePath + "/build/generated/sources/audit/"))
+    }
 }
 
+//Creates coverage-report with jboss audit annotation processor
 tasks.named("compileJava", JavaCompile::class.java) {
     dependsOn("audit")
     options.compilerArgs.addAll(listOf(
-            "-AauditXml=${projectDir}/../specification/target/tck-audit/tck-audit.xml",
+            "-AauditXml=${projectDir}/../specification/build/tck-audit/tck-audit.xml",
             "-AoutputDir=${projectDir}/build/coverage-report"))
 }
 
 
-
-
+//Is this still necessary?
 /*
 <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
