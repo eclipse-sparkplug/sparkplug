@@ -48,7 +48,7 @@ tasks.hivemqExtensionResources {
         into("coverage")
     }
     from("LICENSE")
-    from(buildDir.resolve("report/license/license-dependency.html")) {
+    from(buildDir.resolve("reports/license/license-dependency.html")) {
         into("third-party-licenses")
     }
 }
