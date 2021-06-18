@@ -61,6 +61,7 @@ public class SendCommandTest extends TCKTest {
     private String state = null;
     private TCK theTCK = null;
     private String host_application_id = null;
+    private String edge_node_id = null;
 	private PublishService publishService = Services.publishService();
     
     public SendCommandTest(TCK aTCK, String[] parms) {
@@ -76,9 +77,13 @@ public class SendCommandTest extends TCKTest {
         host_application_id = parms[0];
         logger.info("Host application id is "+host_application_id);
         
-        // First we have to connect an edge node and device      
+        edge_node_id = parms[1];
+        logger.info("Edge node id is "+edge_node_id);
+        
+        // First we have to connect an edge node and device.
+        // We do this by sending an MQTT control message to the TCK device utility.
         state = "ConnectingDevice";
-        String payload = "NEW DEVICE";
+        String payload = "NEW DEVICE "+host_application_id+" "+edge_node_id;
 		Publish message = Builders.publish().topic("SPARKPLUG_TCK/DEVICE_CONTROL").qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(payload.getBytes()))
 				.build();

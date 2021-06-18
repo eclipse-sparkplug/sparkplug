@@ -53,6 +53,8 @@ public class DeviceConnect {
 
 	private String state = null;
 	
+	private String namespace = "spBv1.0";
+	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
 	private String log_topic = "SPARKPLUG_TCK/LOG";
 	
@@ -91,9 +93,12 @@ public class DeviceConnect {
 			while (true) {
 				MqttMessage msg = control_listener.getNextMessage();
 				
-				if (msg != null && msg.toString().equals("NEW DEVICE")) {
-					log("NEW DEVICE");
-					deviceCreate("hostid");
+				if (msg != null) {
+					String[] words = msg.toString().split(" ");
+					if (words.length == 4 && words[0].equals("NEW") && words[1].equals("DEVICE")) {
+						log(msg.toString());
+						deviceCreate(words[2], words[3]);
+					}
 				}
 				Thread.sleep(100);
 			}
@@ -103,11 +108,10 @@ public class DeviceConnect {
 		}
 	}
 	
-	public void deviceCreate(String host_application_id) {
+	public void deviceCreate(String host_application_id, String edge_node_id) throws Exception {
 		edge = new MqttClient(brokerURI, "Sparkplug TCK edge node 1");
 	    edge_listener = new MessageListener();
 	    edge.setCallback(edge_listener);
-		String host_topic = edge.getTopic("STATE/#");
 		
 		edge.connect();
 		
@@ -119,7 +123,9 @@ public class DeviceConnect {
 			MqttMessage msg = edge_listener.getNextMessage();
 			
 			if (msg != null) {
-				if (!msg.toString().equals("ONLINE")) {
+				if (msg.toString().equals("ONLINE")) {
+					break;
+				} else {
 					log("Error: host application not online");
 					return;
 				}
