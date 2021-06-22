@@ -14,10 +14,18 @@
 package org.eclipse.sparkplug.tck.test.host;
 
 /*
- * This is the primary host Sparkplug send command test.  
+ * This is the primary host Sparkplug send command test: 
+ * 
+ * to check that a command from a primary host under test is correct to both an
+ * edge node (NCMD) and a device (DCMD).
  * 
  * There will be a prompt to the person executing the test to send a command to 
  * a device and edge node we will connect.
+ * 
+ * The host application under test must be connected and online prior to starting this test.
+ * The id of the host application must be passed as the firt parameter to this test.
+ * The second parameter is the id of the edge node to be used.
+ * The third parameter is the id of the device to be used.
  * 
  */
 
@@ -74,6 +82,10 @@ public class SendCommandTest extends TCKTest {
             testResults.put(testIds[i], "");
         }
         
+        if (parms.length < 2) {
+        	logger.info("Parameters to send command test must be: host_application_id edge_node_id");
+        	return;
+        }
         host_application_id = parms[0];
         logger.info("Host application id is "+host_application_id);
         

@@ -42,21 +42,24 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			@NotNull PublishInboundOutput publishInboundOutput) {
 		try {
 			String clientId = publishInboundInput.getClientInformation().getClientId();
-			logger.info("Inbound publish from '{}'", clientId);
+			logger.debug("Inbound publish from '{}'", clientId);
 					
 			PublishPacket packet = publishInboundInput.getPublishPacket();
 			
 			String topic = packet.getTopic();
-			logger.info("\tTopic {}", topic);
+			logger.debug("\tTopic {}", topic);
 			
 			String payload = null;
 			ByteBuffer bpayload = packet.getPayload().orElseGet(null);
 			if (bpayload != null) {
 				payload = StandardCharsets.UTF_8.decode(bpayload).toString();
 			}
-			logger.info("\tPayload {}", payload);
+			logger.debug("\tPayload {}", payload);
 			
-
+			if (topic.equals("SPARKPLUG_TCK/LOG")) {
+				logger.info(clientId + ": " + payload);  // display log messsage
+			}
+			
 			if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
 				String cmd = "NEW ";
 				if (payload.startsWith(cmd)) {

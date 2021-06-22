@@ -14,10 +14,9 @@
 package org.eclipse.sparkplug.tck.utility;
 
 /*
- * This is a utility to connect an MQTT client to a broker.
+ * This the Sparkplug Host Application utility.
  * 
- * There will be a prompt to the person executing the test to send a command to 
- * a device and edge node we will connect.
+ * It mimics the behavior of a Host Application for use in Device/Edge node tests.
  * 
  */
 
@@ -49,35 +48,35 @@ import java.nio.ByteBuffer;
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
-public class DeviceConnect {
+public class HostApplication {
 
 	private String state = null;
 	
 	private String namespace = "spBv1.0";
 	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
-	private String log_topic = "SPARKPLUG_TCK/LOG";
+	private String log_topic_name = "SPARKPLUG_TCK/LOG";
 	
-	private String controlId = "Sparkplug TCK device utility"; 
+	private String controlId = "Sparkplug TCK host application utility"; 
 	private MqttClient control = null;
-	private MqttTopic control_topic = null;
+	private MqttTopic log_topic = null;
 	private MessageListener control_listener = null;
 	
-	private MqttClient edge = null;
-	private MqttTopic edge_topic = null;
-	private MessageListener edge_listener = null;
+	private MqttClient host = null;
+	private MqttTopic state_topic = null;
+	private MessageListener host_listener = null;
 
 	public void log(String message) {
 		try {
 			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
-			control_topic.publish(mqttmessage);
+			log_topic.publish(mqttmessage);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static void main(String[] args) {	
-		new DeviceConnect().run(args);
+		new HostApplication().run(args);
 	}
 	
 	public void run(String[] args) {
@@ -85,19 +84,21 @@ public class DeviceConnect {
 			control = new MqttClient(brokerURI, controlId);
 		    control_listener = new MessageListener();
 		    control.setCallback(control_listener);
-			control_topic = control.getTopic(log_topic);
+			log_topic = control.getTopic(log_topic_name);
 			control.connect();
-			log("Sparkplug device utility starting");
-			control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
-
+			log("starting");
+			control.subscribe("SPARKPLUG_TCK/HOST_CONTROL");
 			while (true) {
-				MqttMessage msg = control_listener.getNextMessage();
-				
+				MqttMessage msg = control_listener.getNextMessage();			
 				if (msg != null) {
+					System.out.println("got message "+msg.toString());
 					String[] words = msg.toString().split(" ");
-					if (words.length == 4 && words[0].equals("NEW") && words[1].equals("DEVICE")) {
+					if (words.length == 3 && words[0].equals("NEW") && words[1].equals("HOST")) {
 						log(msg.toString());
-						deviceCreate(words[2], words[3]);
+						hostCreate(words[2]);
+					}
+					else {
+						log("Command not understood: "+msg);
 					}
 				}
 				Thread.sleep(100);
@@ -108,44 +109,43 @@ public class DeviceConnect {
 		}
 	}
 	
-	public void deviceCreate(String host_application_id, String edge_node_id) throws Exception {
-		edge = new MqttClient(brokerURI, "Sparkplug TCK edge node 1");
-	    edge_listener = new MessageListener();
-	    edge.setCallback(edge_listener);
-		
-		edge.connect();
-		
-		edge.subscribe("STATE/"+host_application_id); /* look for status of the host application we are to use */
-		
-		/* wait for retained message indicating state of host application under test */
-		int count = 0;
-		while (true) {
-			MqttMessage msg = edge_listener.getNextMessage();
-			
-			if (msg != null) {
-				if (msg.toString().equals("ONLINE")) {
-					break;
-				} else {
-					log("Error: host application not online");
-					return;
-				}
-			}
-			Thread.sleep(100);
-			if (count >= 5) {
-				log("Error: no host application state");
-				return;
-			}
+	public void hostCreate(String host_application_id) throws Exception {
+		if (host != null) {
+			log("host application in use");
+			return;
 		}
+		host = new MqttClient(brokerURI, "Sparkplug TCK host "+host_application_id);
+	    host_listener = new MessageListener();
+	    host.setCallback(host_listener);
+	    
+	    state_topic = host.getTopic("STATE/"+host_application_id);
+	    
+	    MqttConnectOptions connectOptions = new MqttConnectOptions(); 
+	    connectOptions.setWill(state_topic, "OFFLINE".getBytes(), 1, true);
+		host.connect(connectOptions);
 		
-		// subscribe to NCMD topic
-		edge.subscribe(namespace+"/"+group_id+"/NCMD/"+edge_node_id); 
+		// subscribe to topic namespace
+		host.subscribe(namespace+"/#"); 
 		
-		// issue NBIRTH for the edge node
-		String payload = "";
-		MqttMessage mqttmessage = new MqttMessage(payload.getBytes());
-		edge_topic.publish(mqttmessage);
+		// send ONLINE state message 
+		String payload = "ONLINE";
+		MqttMessage online = new MqttMessage(payload.getBytes());
+		online.setQos(1);
+		online.setRetained(true);
+		state_topic.publish(online);
 	}
 
+	
+	public void hostDestroy() throws MqttException {
+		// send ONLINE state message 
+		String payload = "OFFLINE";
+		MqttMessage mqttmessage = new MqttMessage(payload.getBytes());
+		state_topic.publish(mqttmessage);
+		host.disconnect();
+		host.close();
+		host = null;
+	}
+	
 	class MessageListener implements MqttCallback {
 		ArrayList<MqttMessage> messages;
 
@@ -155,15 +155,6 @@ public class DeviceConnect {
 
 		public MqttMessage getNextMessage() {
 			synchronized (messages) {
-				if (messages.size() == 0) {
-					try {
-						messages.wait(1000);
-					}
-					catch (InterruptedException e) {
-						// empty
-					}
-				}
-
 				if (messages.size() == 0) {
 					return null;
 				}
@@ -180,7 +171,7 @@ public class DeviceConnect {
 		}
 
 		public void messageArrived(String topic, MqttMessage message) throws Exception {
-			log("message arrived: " + new String(message.getPayload()) + "'");
+			log("message arrived: " + new String(message.getPayload()));
 
 			synchronized (messages) {
 				messages.add(message);
