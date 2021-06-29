@@ -35,3 +35,5 @@ MQTT Client credentials and some considerations on setting up proper ACL’s on 
 
 [[security_implementation_notes]]
 === Implementation Notes
+
+// TODO: Add section
