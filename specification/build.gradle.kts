@@ -271,11 +271,11 @@ val createNormativeAppendix = tasks.register("createNormativeAppendix") {
     inputs.files(copySpec.get().outputs.files)
     inputs.file(normativeStatements.get().outputs.files.singleFile)
 
-    val origAppendixFile = file(buildDir.resolve("spec/chapters/Sparkplug_Appendix_C.adoc"))
+    val origAppendixFile = file(buildDir.resolve("spec/chapters/Sparkplug_Appendix_B.adoc"))
     val createdStatements = normativeStatements.get().outputs.files.singleFile
 
     val outputFolder = buildDir.resolve("spec/chapters")
-    val outputFile = outputFolder.resolve("Sparkplug_Appendix_C.adoc")
+    val outputFile = outputFolder.resolve("Sparkplug_Appendix_B.adoc")
 
     outputs.file(outputFile)
 

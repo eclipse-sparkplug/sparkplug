@@ -21,13 +21,15 @@ standpoint, the payload is treated as an agnostic binary array of bytes that can
 payload at all, to a maximum of 256MB. But for applications within a known solution space to work
 using MQTT the payload representation does need to be defined.
 
-This section of the Eclipse Sparkplug™ specification defines how an MQTT Sparkplug payloads are
-encoded and the data that is required. Sparkplug supports multiple payloads encoding definitions.
-There is an 'A' payload format as well as a 'B' payload format. This section will cover the details
-of each of these payload formats.
+This section of the Eclipse Sparkplug™ specification defines how MQTT Sparkplug payloads are encoded
+and the data that is required. Sparkplug supports multiple payloads encoding definitions. There is
+an 'A' payload format as well as a 'B' payload format. As described in the
+link:#introduction_define_the_mqtt_payload[Introduction Section] Sparkplug A is deprecated and is
+not included in this document. This section will only cover the details of the Sparkplug 'B' payload
+format.
 
-The majority of devices connecting into next generation IIoT infrastructure are legacy equipment
-using poll/response protocols. This means we MUST take in account register based data from devices
+The majority of devices connecting into next generation IIoT infrastructures are legacy equipment
+using poll/response protocols. This means we must take in account register based data from devices
 that talk protocols like Modbus. The existing legacy equipment needs to work in concert with
 emerging IIoT equipment that is able to leverage message transports like MQTT natively.
 
@@ -56,7 +58,9 @@ https://developers.google.com/protocol-buffers/
 
 [[payloads_sparkplug_a_mqtt_payload_definition]]
 === Sparkplug A MQTT Payload Definition
-// TODO: Github Issue #55
+
+As described in the link:#introduction_define_the_mqtt_payload[Introduction Section] Sparkplug A is
+deprecated and is not included in this document.
 
 [[payloads_sparkplug_b_mqtt_payload_definition]]
 === Sparkplug B MQTT Payload Definition
@@ -68,9 +72,9 @@ simple and straightforward binary message encoding that could be used primarily 
 based process variables (Modbus register value for example).
 
 The Sparkplug B MQTT payload format has come about based on the feedback from many system
-integrators and end user customers who wanted to be able to natively support a much richer data
-model within the MQTT infrastructures that they were designing and deploying. Using the feedback
-from the user community Sparkplug B provides support for:
+integrators and end users who wanted to be able to natively support a much richer data model within
+the MQTT infrastructures that they were designing and deploying. Using the feedback from the user
+community Sparkplug B provides support for:
 
 * Complex data types using templates.
 * Datasets.
@@ -83,9 +87,9 @@ Sparkplug B definition creates a bandwidth efficient data transport for real tim
 WAN based SCADA/IIoT infrastructures this equates to lower latency data updates while minimizing the
 amount of traffic and therefore cellular and/or VSAT bandwidth required. In situations where
 bandwidth savings is not the primary concern, the efficient use enables higher throughput of more
-and interesting data eliminating sensor data that have been left stranded in the field. It is also
-ideal for LAN based SCADA infrastructures equating to higher throughput of real time data to
-consumer applications without requiring extreme networking topologies and/or equipment.
+and interesting data eliminating sensor data that may have previously been left stranded in the
+field. It is also ideal for LAN based SCADA infrastructures equating to higher throughput of real
+time data to consumer applications without requiring extreme networking topologies and/or equipment.
 
 There are many data encoding technologies available that can all be used in conjunction with MQTT. 
 Sparkplug B selected an existing, open, and highly available encoding scheme that efficiently
@@ -370,7 +374,7 @@ applications consuming the metric values. For example, in an application where a
 connected to several devices or data sources, the ‘name’ could represent discrete folder structures
 of:
 
-‘Metric Level 1/Metric Level 2/Metric Name’
+‘Folder 1/Folder 2/Metric Name’
 
 Using this convention in conjunction with the *group_id*, *edge_node_id* and *device_id* already
 defined in the Topic Namespace, consuming applications can organize metrics in the same hierarchical
@@ -401,9 +405,6 @@ A Sparkplug B payload is the top-level component that is encoded and used in an 
 contains some basic information such as a timestamp and a sequence number as well as an array of
 metrics which contain key/value pairs of data. A Sparkplug B payload includes the following
 components.
-
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#
-[tck-not-testable tck-id-payloads_]##
 
 * *payload*
 ** _timestamp_
@@ -1459,7 +1460,8 @@ that occurred previously.
 [[payloads_b_ddeath]]
 ==== DDEATH
 
-The DDEATH messages are published by an Edge Node on behalf of an attached device. If the Edge Node determines that a device is no longer accessible (i.e. it has turned off, stopped responding, etc.)
+The DDEATH messages are published by an Edge Node on behalf of an attached device. If the Edge Node
+determines that a device is no longer accessible (i.e. it has turned off, stopped responding, etc.)
 the Edge Node should publish a DDEATH to denote that device connectivity has been lost.
 
 * [tck-testable tck-id-payloads_ddeath_timestamp]#[yellow-background]*DDEATH messages MUST include a
@@ -1491,8 +1493,9 @@ Consider the following Sparkplug B payload in the DDEATH message shown above:
 }
 ----
 
-A sequence number MUST be included with the DDEATH messages so the Host Application can ensure order
-of  messages and maintain the state of the data.
+[tck-testable tck-id-payloads_ddeath_seq_number]#[yellow-background]*A sequence number MUST be
+included with the DDEATH messages so the Host Application can ensure order of messages and maintain
+the state of the data.*#
 
 [[payloads_b_state]]
 ==== STATE

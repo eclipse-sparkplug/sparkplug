@@ -60,7 +60,7 @@ Sparkplug MQTT message payloads.
 ==== group_id Element
 
 The Group ID element of the topic namespace provides for a logical grouping of Sparkplug Edge
-Nodes into the MQTT Server and back out to the consuming MQTT Clients.
+Nodes into the MQTT Server and back out to the consuming Sparkplug Host Applications.
 
 [tck-testable tck-id-topic-structure-namespace-valid-group-id]#[yellow-background]*The format of the
 Group ID MUST be a valid UTF-8 string with the exception of the reserved characters of + (plus),
@@ -87,7 +87,7 @@ The following message_type elements are defined for the Sparkplug topic namespac
 * *DDATA* – Device data message
 * *NCMD* – Node command message
 * *DCMD* – Device command message
-* *STATE* – Primary Host application state message
+* *STATE* – Primary Host Application state message
 
 The specification for each of these _message_type_ elements are detailed later in this document.
 
@@ -110,18 +110,21 @@ The topic element edge_node_id travels with every message published and should b
 
 The device_id element of the Sparkplug topic namespace identifies a device attached (physically
 or logically) to the Sparkplug Edge Node. Note that the device_id is an optional element within
-thetopic namespace as some messages will be either originating or destined to the edge_node_id
+the topic namespace as some messages will be either originating or destined to the edge_node_id
 and the device_id would not be required.
 [tck-testable tck-id-topic-structure-namespace-valid-device-id]#[yellow-background]*The format of
 the device_id MUST be a valid UTF-8 string except for the reserved characters of + (plus), /
 (forward slash), and # (number sign).*#
 [tck-testable tck-id-topic-structure-namespace-unique-device-id]#[yellow-background]*The device_id
-MUST be unique from other devices connected to the same Edge Node.*#
+MUST be unique from other devices being reported on by the same Edge Node.*#
 [tck-testable tck-id-topic-structure-namespace-duplicate-device-id-across-edge-node]#[yellow-background]*The
 device_id MAY be duplicated from Edge Node to other Edge Nodes.*#
-The device_id element travels  with every message published and should be as short as possible.
+The device_id element travels with every message published and should be as short as possible.
 [tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#[yellow-background]*The
 device_id MUST be included with message_type elements DBIRTH, DDEATH, DDATA, and DCMD based topics*#
+[tck-testable tck-id-topic-structure-namespace-device-id-non-associated-message-types]#[yellow-background]*The
+device_id MUST NOT be included with message_type elements NBIRTH, NDEATH, NDATA, NCMD, and STATE
+based topics*#
 
 [[topics_message_type_overview]]
 === Message Types and Contents
@@ -141,7 +144,7 @@ are:
 * *DCMD* – Device command message
 * *STATE* – Primary Host application state message
 
-Using these defined messages host applications can:
+Using these defined messages Host Applications can:
 
 * Discover all metadata and monitor state of all Edge Nodes and Devices connected to the MQTT
 infrastructure.
@@ -169,41 +172,57 @@ The Birth Certificate topic for an Sparkplug Edge Node is:
 ====== Payload (NBIRTH)
 
 The Sparkplug Edge Node Birth Certificate payload contains everything required to build out a data
-structure for all metrics for this Edge Node. At the time any host application receives and NBIRTH,
-the ONLINE state of this Edge Node should be set to TRUE along with the associated ONLINE Date Time
-parameter. Note that the Edge Node Birth Certificate ONLY indicates the node itself is online and in
-an MQTT Session, but any devices that have previously published a DBIRTH will still have “*STALE*”
-metric quality until the host application receives the associated DBIRTH messages.
+structure for all metrics for this Edge Node. At the time any Host Application receives an NBIRTH,
+the ONLINE state of this Edge Node should be set to TRUE along with the associated ONLINE Date/Time
+parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself is online
+and in an MQTT Session, but any devices that have previously published a DBIRTH will still have
+“STALE” metric quality until the Host Application receives the associated DBIRTH messages.
 
 The NBIRTH message requires the following payload components.
 
-* The NBIRTH must include the a seq number in the payload and it must have a value of 0.
-* The NBIRTH must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The NBIRTH must include every metric the Edge Node will ever report on. At a minimum these metrics
-must include:
+* [tck-testable tck-id-topics_nbirth_mqtt]#[yellow-background]*NBIRTH messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_nbirth_seq_num]#[yellow-background]*The NBIRTH MUST include a sequence
+number in the payload and it MUST have a value of 0.*#
+* [tck-testable tck-id-topics_nbirth_timestamp]#[yellow-background]*The NBIRTH MUST include a
+timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+* [tck-testable tck-id-topics_nbirth_metric_reqs]#[yellow-background]*The NBIRTH MUST include every
+metric the Edge Node will ever report on.*#
+* [tck-testable tck-id-topics_nbirth_metrics]#[yellow-background]*At a minimum each metric MUST
+include the following:*#
 ** The metric name
 ** The metric datatype
 ** The current value
-* If Template instances will be published by this Edge Node or any devices, all Template definitions
-must be published in the NBIRTH.
-* A bdSeq number as a metric must be included in the payload. This should match the bdSeq number
-provided in the MQTT CONNECT packet’s LW&T payload. This allows backend applications to correlate
-NBIRTHs to NDEATHs. The bdSeq number must start at zero and increment by one on every new MQTT
-CONNECT packet.
+* [tck-testable tck-id-topics_nbirth_templates]#[yellow-background]*If Template instances will be
+published by this Edge Node or any devices, all Template definitions MUST be published in the
+NBIRTH.*#
+* [tck-testable tck-id-topics_nbirth_bdseq_included]#[yellow-background]*A bdseq number as a metric
+MUST be included in the payload.*#
+* [tck-testable tck-id-topics_nbirth_bdseq_matching]#[yellow-background]*This MUST match the bdseq
+number provided in the MQTT CONNECT packet’s Will Message payload.*#
+This allows Host Applications to correlate NBIRTHs to NDEATHs.
+* [tck-testable tck-id-topics_nbirth_bdseq_increment]#[yellow-background]*The bdseq number MUST
+start at zero and increment by one on every new MQTT CONNECT packet.*#
 
-The NBIRTH message can also include optional ‘Node Control’ payload components. These are used by a
-backend application to control aspects of the Edge Node. The following are examples of Node Control
-metrics.
+[tck-testable tck-id-topics_nbirth_rebirth_metric]#[yellow-background]*The NBIRTH message MUST
+include the following metric:*#
+
+* Metric name: ‘Node Control/Rebirth’
+** Used by Host Application(s) to request a new NBIRTH and DBIRTH(s) from an Edge Node.
+** Datatype: boolean
+** Value: false
+
+The NBIRTH message can also include additional Node Control payload components. These are used by a
+Sparkplug Host Application to control aspects of the Edge Node. The following are examples of Node
+Control metrics.
 
 * Metric name: ‘Node Control/Reboot’
-** Used by backend application(s) to reboot an Edge Node.
-* Metric name: ‘Node Control/Rebirth’
-** Used by backend application(s) to request a new NBIRTH and DBIRTH(s) from an Edge Node.
+** Used by Host Application(s) to reboot an Edge Node.
 * Metric name: ‘Node Control/Next Server’
-** Used by backend application(s) to request an Edge Node to walk to the next MQTT Server in its
+** Used by Host Application(s) to request an Edge Node to walk to the next MQTT Server in its
 list in multi-MQTT Server environments.
-* Metric name: ‘Node Control/Scan rate’
-** Used by backed application(s) to modify a poll rate on an Edge Node.
+* Metric name: ‘Node Control/Scan Rate’
+** Used by Host Application(s) to modify a poll rate on an Edge Node.
 
 The NBIRTH message can also include optional ‘Properties’ of an Edge Node. The following are
 examples of Property metrics.
@@ -223,7 +242,7 @@ examples of Property metrics.
 Once an Sparkplug Edge Node is online with a proper NBIRTH it is in a mode of quiescent Report by
 Exception (RBE) or time based reporting of metric information that changes. This enables the
 advantages of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
-Sparkplug Edge Node and to rely on Report by Exception (RBE) messages for metric state changes over
+Sparkplug Edge Nodes and to rely on Report by Exception (RBE) messages for metric state changes over
 the MQTT session connection. Time based reporting is not explicitly disallowed by the Sparkplug
 Specification but it is discouraged. Due to the session awareness provided by MQTT and Sparkplug it
 is not necessary to send the same data again on a periodic basis.
@@ -243,12 +262,16 @@ to be reported to any subscribing MQTT clients.
 
 The NDATA message requires the following payload components.
 
-* The NDATA must include the a seq number in the payload and it must have a value of one greater
-than the previous MQTT message from the Edge Node contained unless the previous MQTT message
-contained a value of 255. In this case the seq number must be 0.
-* The NDATA must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The NDATA must include the Edge Node’s metrics that have changed since the last NBIRTH or NDATA
-message.
+* [tck-testable tck-id-topics_ndata_mqtt]#[yellow-background]*NDATA messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_ndata_seq_num]#[yellow-background]*The NDATA MUST include a sequence
+number in the payload and it MUST have a value of one greater than the previous MQTT message from
+the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the
+sequence number MUST be 0.*#
+* [tck-testable tck-id-topics_ndata_timestamp]#[yellow-background]*The NDATA MUST include a timestamp
+denoting the Date/Time the message was sent from the Edge Node.*#
+* [tck-testable tck-id-topics_ndata_payload]#[yellow-background]*The NDATA MUST include the Edge
+Node’s metrics that have changed since the last NBIRTH or NDATA message.*#
 
 [[death_message_ndeath]]
 ===== Death Message (NDEATH)
@@ -271,10 +294,13 @@ The Death Certificate topic for an Sparkplug Edge Node is:
 [[payloads_desc_ndeath]]
 ====== Payload (NDEATH)
 
-The NDEATH message contains a very simple payload that MUST only include a single metric, the bdSeq
-number, so that the NDEATH event can be associated with the NBIRTH. Since this is typically
-published by the MQTT Server on behalf of the Edge Node, information about the current state of the
-Edge Node and its devices is not and cannot be known.
+* [tck-testable tck-id-topics_ndeath_payload]#[yellow-background]*The NDEATH message contains a very
+simple payload that MUST only include a single metric, the bdseq number, so that the NDEATH event
+can be associated with the NBIRTH.*#
+Since this is typically published by the MQTT Server on behalf of the Edge Node, information about
+the current state of the Edge Node and its devices is not and cannot be known. As a result,
+[tck-testable tck-id-topics_ndeath_seq]#[yellow-background]*the NDEATH message MUST NOT include
+a sequence number.*#
 
 The MQTT payload typically associated with this topic can include a Birth/Death sequence number used
 to track and synchronize Birth and Death sequences across the MQTT infrastructure. Since this
@@ -299,9 +325,12 @@ metric list.
 
 The NCMD message requires the following payload components.
 
-* The NCMD must include a timestamp denoting the DateTime the message was sent from the backend 
-application’s MQTT client.
-* The NCMD must include the metrics that need to be written to on the Edge Node.
+* [tck-testable tck-id-topics_ncmd_mqtt]#[yellow-background]*NCMD messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_ncmd_timestamp]#[yellow-background]*The NCMD MUST include a timestamp
+denoting the Date/Time the message was sent from the Host Application’s MQTT client.*#
+* [tck-testable tck-id-topics_ncmd_payload]#[yellow-background]*The NCMD MUST include the metrics
+that need to be written to on the Edge Node.*#
 
 [[topics_device_sensor]]  
 ==== Device / Sensor
@@ -311,15 +340,15 @@ application’s MQTT client.
 ===== Birth Message (DBIRTH)
 
 The Sparkplug Edge Node is responsible for the management of all attached physical and/or logical
-devices. Once the Edge Node has published its NBIRTH, any consumer application ensures that the
-metric structure has the Edge Node in an ONLINE state. But each physical and/or logical device
-connected to this node will still need to provide this DBIRTH before consumer applications
+devices. Once the Edge Node has published its NBIRTH, any Sparkplug Host Application ensures that
+the metric structure has the Edge Node in an ONLINE state. But each physical and/or logical device
+connected to this node will still need to provide this DBIRTH before Host Applications
 create/update the metric structure (if this is the first time this device has been seen) and set any
 associated metrics in the application to a “*GOOD*” state.
 
 The DBIRTH payload contains everything required to build out a data structure for all metrics for
 this device. The ONLINE state of this device should be set to TRUE along with the associated ONLINE
-date time this message was received.
+Date/Time this message was received.
 
 [[topics_birth_message_dbirth]]
 ====== Topic (DBIRTH)
@@ -333,26 +362,32 @@ The topic namespace for a Birth Certificate for a device is:
 
 The DBIRTH message requires the following payload components.
 
-* The DBIRTH must include the a seq number in the payload and it must have a value of one greater
-than the previous MQTT message from the Edge Node contained unless the previous MQTT message
-contained a value of 255. In this case the seq number must be 0.
-* The DBIRTH must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The DBIRTH must include every metric the device will ever report on. At a minimum these metrics
-must include:
+* [tck-testable tck-id-topics_dbirth_mqtt]#[yellow-background]*DBIRTH messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_dbirth_seq]#[yellow-background]*The DBIRTH MUST include a sequence
+number in the payload and it MUST have a value of one greater than the previous MQTT message from
+the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the
+sequence number MUST be 0.*#
+* [tck-testable tck-id-topics_dbirth_timestamp]#[yellow-background]*The DBIRTH MUST include a
+timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+* [tck-testable tck-id-topics_dbirth_metric_reqs]#[yellow-background]*The DBIRTH MUST include every
+metric the Edge Node will ever report on.*#
+* [tck-testable tck-id-topics_dbirth_metrics]#[yellow-background]*At a minimum each metric MUST
+include the following:*#
 ** The metric name
 ** The metric datatype
 ** The current value
 
 The DBIRTH message can also include optional ‘Device Control’ payload components. These are used by
-a backend application to control aspects of a device. The following are examples of Device Control
+a Host Application to control aspects of a device. The following are examples of Device Control
 metrics.
 
 * Metric name: ‘Device Control/Reboot’
-** Used by backend application(s) to reboot a device.
+** Used by Host Application(s) to reboot a device.
 * Metric name: ‘Device Control/Rebirth’
-** Used by backend application(s) to request a new DBIRTH from a device.
+** Used by Host Application(s) to request a new DBIRTH from a device.
 * Metric name: ‘Device Control/Scan rate’
-** Used by backed application(s) to modify a poll rate on a device.
+** Used by Host Application(s) to modify a poll rate on a device.
 
 The DBIRTH message can also include optional ‘Properties’ of a device. The following are examples of 
 Property metrics.
@@ -367,7 +402,7 @@ Property metrics.
 [[data_message_ddata]]
 ===== Data Message (DDATA)
 
-Once an Sparkplug Edge Node and associated devices are all online with proper Birth Certificates it
+Once a Sparkplug Edge Node and associated Devices are all online with proper Birth Certificates it
 is in a mode of quiescent Report by Exception (RBE) reporting of any metric that changes. This takes
 advantage of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
 devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT
@@ -388,12 +423,16 @@ The payload of DDATA messages can contain one or more metric values that need to
 
 The DDATA message requires the following payload components.
 
-* The DDATA must include the a seq number in the payload and it must have a value of one greater
-than the previous MQTT message from the Edge Node contained unless the previous MQTT message
-contained a value of 255. In this case the seq number must be 0.
-* The DDATA must include a timestamp denoting the DateTime the message was sent from the Edge Node.
-* The DDATA must include the device’s metrics that have changed since the last DBIRTH or DDATA
-message.
+* [tck-testable tck-id-topics_ddata_mqtt]#[yellow-background]*DDATA messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_ddata_seq_num]#[yellow-background]*The DDATA MUST include a sequence
+number in the payload and it MUST have a value of one greater than the previous MQTT message from
+the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the
+sequence number MUST be 0.*#
+* [tck-testable tck-id-topics_ddata_timestamp]#[yellow-background]*The DDATA MUST include a
+timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+* [tck-testable tck-id-topics_ddata_payload]#[yellow-background]*The DDATA MUST include the Device’s
+metrics that have changed since the last DBIRTH or DDATA message.*#
 
 [[death_message_ddeath]]
 ===== Death Message (DDEATH)
@@ -404,8 +443,8 @@ becomes unavailable for any reason (no response, CRC error, etc.) it is the resp
 Edge Node to publish a DDEATH on behalf of the end device.
 
 Immediately upon reception of a DDEATH, any MQTT client subscribed to this device should set the
-data quality of all metrics to “*STALE”* and should note the time stamp when the DDEATH message was
-received.
+data quality of all metrics for the Device to “*STALE”* and should note the time stamp when the
+DDEATH message was received.
 
 [[topics_death_message_ddeath]]
 ====== Topic (DDEATH)
@@ -419,9 +458,12 @@ The Sparkplug topic namespace for a device Death Certificate is:
 
 The DDEATH message requires the following payload components.
 
-* The DDEATH must include the a seq number in the payload and it must have a value of one greater
-than the previous MQTT message from the Edge Node contained unless the previous MQTT message
-contained a value of 255. In this case the seq number must be 0.
+* [tck-testable tck-id-topics_ddeath_mqtt]#[yellow-background]*DDEATH messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_ddeath_seq_num]#[yellow-background]*The DDEATH MUST include a sequence
+number in the payload and it MUST have a value of one greater than the previous MQTT message from
+the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the
+sequence number MUST be 0.*#
 
 [[command_dcmd]]
 ===== Command (DCMD)
@@ -440,9 +482,12 @@ means sending a new metric value to an associated metric included in the DBIRTH 
 
 The DCMD message requires the following payload components.
 
-* The DCMD must include a timestamp denoting the DateTime the message was sent from the backend 
-application’s MQTT client.
-* The DCMD must include the metrics that need to be written to on the device.
+* [tck-testable tck-id-topics_dcmd_mqtt]#[yellow-background]*DCMD messages MUST be published
+with MQTT QoS equal to 0 and retain equal to false.*#
+* [tck-testable tck-id-topics_dcmd_timestamp]#[yellow-background]*The DCMD MUST include a timestamp
+denoting the Date/Time the message was sent from the Host Application’s MQTT client.*#
+* [tck-testable tck-id-topics_dcmd_payload]#[yellow-background]*The DCMD MUST include the metrics
+that need to be written to on the Device.*#
 
 [[topics_primary_host]]
 ==== Primary Host Application
@@ -466,22 +511,21 @@ Host Application MQTT Client applications.
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
 Certificate:
 [subs="quotes"]
-  *STATE*/host_application_id
+  *STATE*/primary_host_application_id
 
-[tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
+* [tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
 Payload MUST be the UTF-8 string “ONLINE”*#
-
-[tck-testable tck-id-host-topic-phid-birth-qos]#[yellow-background]*The MQTT Quality of Service
+* [tck-testable tck-id-host-topic-phid-birth-qos]#[yellow-background]*The MQTT Quality of Service
 (QoS) MUST be set to 1*#
-
-[tck-testable tck-id-host-topic-phid-birth-retain]#[yellow-background]*The MQTT retain flag for the
-Birth Certificate MUST be set to TRUE*#
+* [tck-testable tck-id-host-topic-phid-birth-retain]#[yellow-background]*The MQTT retain flag for
+the Birth Certificate MUST be set to TRUE*#
 
 [[payloads_desc_state]]
 ====== Payload (STATE)
 
-The STATE messages from the primary host application must include a payload that is a UTF-8 string
-that is one of the following:
+* [tck-testable tck-id-host-topic-phid-birth-payload-on-off]#[yellow-background]*The STATE messages
+from the primary host application MUST include a payload that is a UTF-8 string that is one of the
+following:*#
 
 * OFFLINE
 ** If the application is not connected
@@ -503,22 +547,21 @@ packet.
 
 The *Will Topic* as defined above will be:
 [subs="quotes"]
-  *STATE*/host_application_id
+  *STATE*/primary_host_application_id
 
-[tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Primary Host Application MUST
-provide a Will message in the MQTT CONNECT packet*#
-
-[tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*The MQTT Will Payload MUST
+* [tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Primary Host Application
+MUST provide a Will message in the MQTT CONNECT packet*#
+* [tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*The MQTT Will Payload MUST
 be the UTF-8 string “OFFLINE”*#
-
-[tck-testable tck-id-host-topic-phid-death-qos]#[yellow-background]*The MQTT Will QoS MUST be set to
-1*#
-
-[tck-testable tck-id-host-topic-phid-death-retain]#[yellow-background]*The MQTT Will retain flag
+* [tck-testable tck-id-host-topic-phid-death-qos]#[yellow-background]*The MQTT Will QoS MUST be set
+to 1*#
+* [tck-testable tck-id-host-topic-phid-death-retain]#[yellow-background]*The MQTT Will retain flag
 MUST be set to TRUE*#
 
 [[payloads_desc_state_death]]
 ====== Payload (STATE)
 
-As for Host Application birth message.
-
+* [tck-testable tck-id-host-topic-phid-death-payload-off]#[yellow-background]*The STATE messages
+from the primary host application MUST include a payload that is a UTF-8 string that is the
+following:*#
+** OFFLINE

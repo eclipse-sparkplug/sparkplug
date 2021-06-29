@@ -11,4 +11,4 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 ////
 
 [[appendix_b]]
-== Appendix B: MQTT Required Features (non-normative)
+== Appendix B: List of Normative Statements (non-normative)
