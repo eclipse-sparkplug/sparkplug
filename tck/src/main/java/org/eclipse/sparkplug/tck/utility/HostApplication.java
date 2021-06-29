@@ -80,6 +80,7 @@ public class HostApplication {
 	}
 	
 	public void run(String[] args) {
+		System.out.println("*** Sparkplug TCK Host Application Utility ***");
 		try {
 			control = new MqttClient(brokerURI, controlId);
 		    control_listener = new MessageListener();
@@ -91,10 +92,9 @@ public class HostApplication {
 			while (true) {
 				MqttMessage msg = control_listener.getNextMessage();			
 				if (msg != null) {
-					System.out.println("got message "+msg.toString());
 					String[] words = msg.toString().split(" ");
-					if (words.length == 3 && words[0].equals("NEW") && words[1].equals("HOST")) {
-						log(msg.toString());
+					if (words.length == 3 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("HOST")) {
+						//log(msg.toString());
 						hostCreate(words[2]);
 					}
 					else {
@@ -114,6 +114,7 @@ public class HostApplication {
 			log("host application in use");
 			return;
 		}
+		log("Creating new host \""+host_application_id+"\"");
 		host = new MqttClient(brokerURI, "Sparkplug TCK host "+host_application_id);
 	    host_listener = new MessageListener();
 	    host.setCallback(host_listener);
@@ -133,6 +134,7 @@ public class HostApplication {
 		online.setQos(1);
 		online.setRetained(true);
 		state_topic.publish(online);
+		log("Host "+host_application_id+" successfully created");
 	}
 
 	
@@ -171,7 +173,7 @@ public class HostApplication {
 		}
 
 		public void messageArrived(String topic, MqttMessage message) throws Exception {
-			log("message arrived: " + new String(message.getPayload()));
+			//log("message arrived: " + new String(message.getPayload()));
 
 			synchronized (messages) {
 				messages.add(message);

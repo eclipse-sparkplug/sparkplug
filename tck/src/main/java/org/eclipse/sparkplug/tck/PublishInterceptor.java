@@ -62,7 +62,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			
 			if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
 				String cmd = "NEW ";
-				if (payload.startsWith(cmd)) {
+				if (payload.toUpperCase().startsWith(cmd)) {
 					String[] strings = payload.split(" ");
 					if (strings.length < 3) {
 						throw new Exception("New test syntax is: NEW profile testname <parameters>");
@@ -75,7 +75,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 					theTCK.newTest(strings[1], strings[2], parms);
 				} else {	
 					cmd = "END TEST";
-					if (payload.trim().equals(cmd)) {
+					if (payload.toUpperCase().trim().equals(cmd)) {
 						theTCK.endTest();
 					}	
 				}
