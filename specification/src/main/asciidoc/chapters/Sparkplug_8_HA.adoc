@@ -42,19 +42,29 @@ There are two options available for deploying HA MQTT Server clusters:
 . High Availability Cluster with Load Balancer
 
 
+[[high_availability_cluster]]
+==== High Availability Cluster
 
-==== High Availability Cluster without Load Balancer
+In traditional clustered MQTT Server settings, each MQTT Server is reachable by all MQTT Edge Nodes, Primary Host Applications, Secondary Host Applications and MQTT enabled Devices. Each component can connect directly to any MQTT Server. A message sent to any MQTT Server will be distributed to all available MQTT Servers in the cluster (which will distribute the message to all subscribing Sparkplug™ components).
 
 
+// TODO: Add Picture
 
+Figure X – High Availability MQTT Server Cluster
+
+If any MQTT Server would fail, the MQTT connection for components connected to the broker will break and the component can connect to any other MQTT Server to resume operations.
+
+
+[[high_availability_cluster_with_load_balancer]]
 ==== High Availability Cluster with Load Balancer
 
+For dynamic environments where the IP addresses of the MQTT Servers might not be available beforehand (like in cloud native deployment environments such as Kubernetes) or for cases where it's not desired that all IP addresses (or DNS lookup names) are configured on the Sparkplug™ components, a load balancer might be used.
 
-Pro
+Figure X – High Availability MQTT Server Cluster with Load Balancer
 
-- No configuration change on any Sparkplug component needed
+A load balancer acts as the single point of contact for Sparkplug™ components, so only a single IP address or DNS name needs to be configured on the components. The load balancer will proxy the MQTT connections of the components and route to one available MQTT Server. In case of a MQTT Server failure, the component only needs to reconnect to the load balancer again.
 
-Con
+The use of a specific load balancer depends on the MQTT Server used. Usually most load balancers work with most Sparkplug™ compatible MQTT Servers on the market.
 
 
 [[high_availability_multiple_mqtt_server_topology]]
