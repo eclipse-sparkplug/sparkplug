@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 
 = Sparkplug 3.0.0-SNAPSHOT: Sparkplug Specification
 Eclipse Sparkplug Contributors
-Version 3.0.0-SNAPSHOT Snapshot Release, TBD 2021
+Version 3.0.0-SNAPSHOT Snapshot Release, {docdate}
 
 image::extracted-media/media/image3.png[image,width=195,height=90]
 image::extracted-media/media/image4.png[image,width=200,height=80]
