@@ -33,6 +33,20 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
+import org.eclipse.tahu.SparkplugException;
+import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
+import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
+import org.eclipse.tahu.message.model.MessageType;
+import org.eclipse.tahu.message.model.MetricDataType;
+import org.eclipse.tahu.message.model.SparkplugBPayload;
+import org.eclipse.tahu.message.model.Topic;
+import org.eclipse.tahu.message.model.Metric.MetricBuilder;
+import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
+import org.eclipse.tahu.util.TopicUtil;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -64,7 +78,7 @@ public class HostApplication {
 	
 	private MqttClient host = null;
 	private MqttTopic state_topic = null;
-	private MessageListener host_listener = null;
+	private HostListener host_listener = null;
 
 	public void log(String message) {
 		try {
@@ -116,7 +130,7 @@ public class HostApplication {
 		}
 		log("Creating new host \""+host_application_id+"\"");
 		host = new MqttClient(brokerURI, "Sparkplug TCK host "+host_application_id);
-	    host_listener = new MessageListener();
+	    host_listener = new HostListener();
 	    host.setCallback(host_listener);
 	    
 	    state_topic = host.getTopic("STATE/"+host_application_id);
@@ -181,5 +195,44 @@ public class HostApplication {
 			}
 		}
 	}
+	
+	class HostListener implements MqttCallback {
+
+		public void connectionLost(Throwable cause) {
+			log("connection lost: " + cause.getMessage());
+		}
+
+		public void deliveryComplete(IMqttDeliveryToken token) {
+			
+		}
+
+		public void messageArrived(String topic, MqttMessage message) {
+			System.out.println("Message arrived on topic "+topic);
+			try {
+			Topic sparkplugTopic = TopicUtil.parseTopic(topic);
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			
+			SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
+			SparkplugBPayload inboundPayload = decoder.buildFromByteArray(message.getPayload());
+
+			/*if (sparkplugTopic.isType(MessageType.NBIRTH)) {
+				try {*/
+					System.out.println("\n\nReceived Node Birth");
+					System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inboundPayload));
+					System.out.print("\n\n> ");
+				/*} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}*/
+			} catch (Exception e) {
+				System.out.println("Exception");
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
+	
 
 }

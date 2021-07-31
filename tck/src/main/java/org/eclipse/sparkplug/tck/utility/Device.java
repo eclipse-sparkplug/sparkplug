@@ -223,6 +223,8 @@ public class Device {
 		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
 		payload.addMetric(new MetricBuilder("Node Control/Rebirth", Boolean, false).createMetric());
 
+		payload.addMetric(new MetricBuilder("TCK_metric/0", Boolean, true).createMetric());
+		
 		PropertySet propertySet = new PropertySetBuilder()
 				.addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
 				.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
@@ -234,7 +236,7 @@ public class Device {
 				 */
 				.createPropertySet();
 		payload.addMetric(
-				new MetricBuilder("MyMetric", String, "My Value").properties(propertySet).createMetric());
+				new MetricBuilder("Metric", String, "My Value").properties(propertySet).createMetric());
 		
 		payload.setTimestamp(new Date());
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
