@@ -59,6 +59,7 @@ tasks.hivemqExtensionResources {
 /* ******************** dependencies ******************** */
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url = uri("https://repository.jboss.org/nexus/content/groups/public-jboss/")
@@ -70,6 +71,7 @@ dependencies {
 
     compileOnly("org.slf4j:slf4j-api:${property("slf4j.version")}")
     implementation("org.slf4j:slf4j-simple:${property("slf4j.version")}")
+    implementation("log4j:log4j:${property("log4j.version")}")
 
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${property("paho.version")}")
     implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")
@@ -80,6 +82,11 @@ dependencies {
     runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit-jupiter.version")}")
     implementation("jakarta.annotation:jakarta.annotation-api:${property("jakarta.annotation.version")}")
     implementation("jakarta.validation:jakarta.validation-api:${property("jakarta.validation.version")}")
+    
+    implementation("org.eclipse.tahu:tahu-java:${property("tahu.version")}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${property("jackson.version")}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${property("jackson.version")}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
 }
 
 
