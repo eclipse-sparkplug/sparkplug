@@ -31,10 +31,11 @@ device_id = "TCK_device"
 subscribed = False
 host_created = False
 
+finished = False
 messages = []
 def control_on_message(client, userdata, msg):
     messages.append(msg)
-    global host_created
+    global host_created, finished
     if msg.topic == "SPARKPLUG_TCK/LOG":
         payload = msg.payload.decode("ascii")
         print("***", payload)
@@ -43,7 +44,10 @@ def control_on_message(client, userdata, msg):
             print("Host created")
     elif msg.topic == "SPARKPLUG_TCK/CONSOLE_PROMPT":
         payload = msg.payload.decode("ascii")
-        print("***", payload)
+        print(">>>", payload)
+    elif msg.topic == "SPARKPLUG_TCK/RESULT":
+        print("*** Result ***",  msg.payload)
+        finished = True
 
 def control_on_connect(client, userdata, flags, rc):
     print("Control client connected with result code "+str(rc))
@@ -110,8 +114,8 @@ if not online:
 
 publish("SPARKPLUG_TCK/TEST_CONTROL", "New host SendCommandTest "+host_id+" "+edge_node_id+" "+device_id)
 
-print("Hit enter to continue")
-cmdline = input()
+while not finished:
+    time.sleep(0.2)
 
 print("Stopping MQTT client")
 control_client.loop_stop()

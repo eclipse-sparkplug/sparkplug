@@ -93,7 +93,9 @@ public class SendCommandTest extends TCKTest {
     private TCK theTCK = null;
     private String host_application_id = null;
     private String edge_node_id = null;
+    private String edge_metric = "TCK_metric/0";
     private String device_id = null;
+    private String device_metric = "Inputs/0";
 	private PublishService publishService = Services.publishService();
     
     public SendCommandTest(TCK aTCK, String[] parms) {
@@ -206,7 +208,7 @@ public class SendCommandTest extends TCKTest {
 			if (payload.equals("Device "+device_id+" successfully created")) {
 				logger.info("SendCommandTest: Device was created");
 				
-		        payload = "Send an edge command to edge node "+edge_node_id;
+		        payload = "Send an edge command to edge node "+edge_node_id + " metric "+edge_metric;
 				Publish message = Builders.publish().topic("SPARKPLUG_TCK/CONSOLE_PROMPT").qos(Qos.AT_LEAST_ONCE)
 						.payload(ByteBuffer.wrap(payload.getBytes()))
 						.build();
@@ -219,12 +221,22 @@ public class SendCommandTest extends TCKTest {
 		{
 			if (state.equals("EXPECT NODE COMMAND")) {
 				checkNodeCommand(clientId, packet);
+				
+		        String payload = "Send an edge command to device "+device_id+" at edge node "+edge_node_id + " metric "+device_metric;
+				Publish message = Builders.publish().topic("SPARKPLUG_TCK/CONSOLE_PROMPT").qos(Qos.AT_LEAST_ONCE)
+						.payload(ByteBuffer.wrap(payload.getBytes()))
+						.build();
+				logger.info("Requesting command to device id: "+device_id);
+				publishService.publish(message);
+				
+				state = "EXPECT DEVICE COMMAND";
 			}
 		}
 		else if (packet.getTopic().equals("spBv1.0/SparkplugTCK/DCMD/"+edge_node_id+"/"+device_id))
 		{
 			if (state.equals("EXPECT DEVICE COMMAND")) {
 				checkDeviceCommand(clientId, packet);
+				theTCK.endTest();
 			}
 		}
 	}
@@ -270,22 +282,19 @@ public class SendCommandTest extends TCKTest {
 		}
 		testResults.put("topics_ncmd_timestamp", result);
 		
-		// Check for metric TCK_metric/0
 		result = "FAIL";
 		if (inboundPayload != null) {
 			List<Metric> metrics = inboundPayload.getMetrics();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
-				if (current.getName().equals("TCK_metric/0")) {
+				if (current.getName().equals(edge_metric)) {
 					result = "PASS"; 
 				}
 			}
 		}
 		testResults.put("topics_ncmd_payload", result);
 		logger.info("Send command test payload "+result);
-						
-		state = "EXPECT DEVICE COMMAND";
 	}
 	
 	@SpecAssertion(
@@ -336,15 +345,13 @@ public class SendCommandTest extends TCKTest {
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
-				if (current.getName().equals("Inputs/0")) {
+				if (current.getName().equals(device_metric)) {
 					result = "PASS"; 
 				}
 			}
 		}
 		testResults.put("topics_dcmd_payload", result);
 		logger.info("Send command test payload "+result);
-						
-		theTCK.endTest();
 	}
 	
 }
