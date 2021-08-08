@@ -1,0 +1,4 @@
+extends: default
+role:
+  yellow-background:
+    background_color: #FFFF00

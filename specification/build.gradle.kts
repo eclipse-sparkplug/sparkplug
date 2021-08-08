@@ -90,7 +90,9 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
                 "linkcss" to "false",
                 "toc" to "true",
                 "project-version" to project.version,
-                "imagesdir" to "assets/images"
+                "imagesdir" to "assets/images",
+                "pdf-themesdir" to "themes",
+                "pdf-theme" to "sparkplug"
         ))
     }
 
