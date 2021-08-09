@@ -23,7 +23,7 @@ any of the real time data without impacting the Primary Host Application.
 
 Due to the nature of real time SCADA solutions, it is very important for the Primary Host
 Application and all connected Eclipse Sparkplug™ Edge Nodes to have the MQTT Session STATE
-information for each other. In order to accomplish this the Sparkplug™ Topic Namespace definitions
+information for each other. In order to accomplish this the Sparkplug Topic Namespace definitions
 for Birth/Death Certificates along with the defined payloads provide both state and context between
 the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios
 there are two primary reasons for this "designation" of a Primary Host Application:
@@ -217,7 +217,7 @@ basis using the DDATA message format.
 Specification requires that an DDEATH be published. This will inform the Primary Host Application
 that all metric information associated with that Sparkplug Device be set to a STALE data quality.
 
-[[operational_behavior_primary host_application_and_secondary_host_applications]]
+[[operational_behavior_primary_host_application_and_secondary_host_applications]]
 === Primary Host Application and Secondary Host Applications
 
 As noted above, there is the notion of a Primary Host Application in the infrastructure that has the
