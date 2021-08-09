@@ -44,7 +44,7 @@ A Sparkplug Primary Host Application is typically at a 'central location' and pr
 data from multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes
 to write to outputs at Sparkplug devices. A Primary Host Application also sends rebirth requests to
 Edge Nodes when required.
-[tck-testable tck-id-conformance_primary_host]#[yellow-background]*Primary Host Application MUST
+[tck-testable tck-id-conformance-primary-host]#[yellow-background]*Primary Host Application MUST
 publish 'STATE' messages that represent its Birth and Death Certificates.*#
 
 [[conformance_sparkplug_secondary_host_application]]
@@ -54,7 +54,7 @@ A Sparkplug Secondary Host Application is typically at a 'central location' and 
 data from multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes
 to write to outputs at Sparkplug devices. A Secondary Host Application also sends rebirth requests
 to Edge Nodes when required.
-[tck-testable tck-id-conformance_secondary_host]#[yellow-background]*Secondary Host Application MUST
+[tck-testable tck-id-conformance-secondary-host]#[yellow-background]*Secondary Host Application MUST
 NOT publish 'STATE' messages that represent its Birth and Death Certificates.*#
 
 [[conformance_sparkplug_mqtt_server]]
@@ -65,13 +65,13 @@ v3.1.1 or v5.0 MQTT Server will meet the requirements of Sparkplug infrastructur
 of the features of the MQTT Specification are required. The following are the required portions of
 the MQTT Specification.
 
-* [tck-testable tck-id-conformance_mqtt_qos0]#[yellow-background]*A Sparkplug conformant MQTT Server
+* [tck-testable tck-id-conformance-mqtt-qos0]#[yellow-background]*A Sparkplug conformant MQTT Server
 MUST support publish and subscribe on QoS 0*#
-* [tck-testable tck-id-conformance_mqtt_qos1]#[yellow-background]*A Sparkplug conformant MQTT Server
+* [tck-testable tck-id-conformance-mqtt-qos1]#[yellow-background]*A Sparkplug conformant MQTT Server
 MUST support publish and subscribe on QoS 1*#
-* [tck-testable tck-id-conformance_mqtt_will_messages]#[yellow-background]*A Sparkplug conformant
+* [tck-testable tck-id-conformance-mqtt-will-messages]#[yellow-background]*A Sparkplug conformant
 MQTT Server MUST support all aspects of Will Messages including use of the 'retain flag' and QoS 1*#
-* [tck-testable tck-id-conformance_mqtt_retained]#[yellow-background]*A Sparkplug conformant MQTT
+* [tck-testable tck-id-conformance-mqtt-retained]#[yellow-background]*A Sparkplug conformant MQTT
 Server MUST support all aspects of the 'retain flag'*#
 
 

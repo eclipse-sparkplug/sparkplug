@@ -143,13 +143,13 @@ will be set to a STALE data quality.
 
 Edge Nodes for various reasons may disconnect intentionally.
 When this is done,
-[tck-testable tck-id-operational_behavior_edge_node_intentional_disconnect]#[yellow-background]*an
+[tck-testable tck-id-operational-behavior-edge-node-intentional-disconnect]#[yellow-background]*an
 Edge Node MAY publish an NDEATH before terminating the connection.*#
 If an NDEATH is published,
-[tck-testable tck-id-operational_behavior_edge_node_intentional_disconnect]#[yellow-background]*it
+[tck-testable tck-id-operational-behavior-edge-node-intentional-disconnect]#[yellow-background]*it
 MUST include a bdseq number metric that matches the bdseq number that was included in the previous
 NBIRTH message.*#
-[tck-testable tck-id-operational_behavior_edge_node_intentional_disconnect]#[yellow-background]*When
+[tck-testable tck-id-operational-behavior-edge-node-intentional-disconnect]#[yellow-background]*When
 disconnecting, an MQTT DISCONNECT packet MUST NOT be sent.*#
 Because there is no guarantee that a published NDEATH will arrive at the Host Application(s), a
 DISCONNECT packet can not be sent because it would cause the MQTT Server to not send an NDEATH on
@@ -247,7 +247,7 @@ not able to receive the messages.
 When using multiple MQTT Servers, the Primary Host Application instance must be configured to
 publish a STATE Birth Certificate and all Edge Nodes need to subscribe to this STATE message.
 
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-state]#[yellow-background]*Regardless
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-state]#[yellow-background]*Regardless
 of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application
 establishes a new MQTT Session with an MQTT Server, the STATE Birth Certificate defined in the
 link:#payloads_desc_state[STATE description section] MUST be the first message that is published
@@ -256,7 +256,7 @@ after a successful MQTT Session is established with each MQTT Server.*#
 Sparkplug Edge Nodes in an infrastructure that provides multiple MQTT Servers can establish a
 session to any one of the MQTT Servers.
 
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-single-server]#[yellow-background]*The
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-single-server]#[yellow-background]*The
 Edge Nodes MUST not connected to more than one server at any point in time.*#
 
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
@@ -266,12 +266,12 @@ examine the payload of this message to ensure that it is a value of "ONLINE". If
 "OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT
 Server.
 
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#[yellow-background]*If
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*If
 the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST
 terminate its session with this MQTT Server and move to the next available MQTT Server that is
 available.*#
 
-[tck-testable tck-id-operational_behavior_primary_application_state_with_multiple_servers-walk]#[yellow-background]*The
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*The
 Edge Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received
 by the Edge Node.*#
 This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server

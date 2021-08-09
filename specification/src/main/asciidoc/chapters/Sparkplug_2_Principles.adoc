@@ -79,7 +79,7 @@ More information on Death certificates can be found in
 link:#payloads_b_ndeath[Edge Node Death Certificates] and
 link:#payloads_b_state[Primary Host Death Certificates]
 
-[tck-testable tck-id-principles_birth_certificates_order]#[yellow-background]*Birth Certificates
+[tck-testable tck-id-principles-birth-certificates-order]#[yellow-background]*Birth Certificates
 MUST be the first messages published by any Edge Node or any Primary Host Application'.*#
 They denote to any sunscribing MQTT clients that they are now online. For Edge Nodes, the Birth
 Certificate uses the NBIRTH Sparkplug verb in the topic. For Primary Host Applications, the
