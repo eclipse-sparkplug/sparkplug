@@ -25,7 +25,7 @@ components are the overhead of an MQTT message as measured in bytes on the wire.
 Sparkplug™ Specification is designed to keep these components meaningful and easy to understand, but
 not to get so verbose as to negatively impact bandwidth/time sensitive data exchange.
 
-[[topics_sparkplug_topic_namesapce_elements]]
+[[topics_sparkplug_topic_namespace_elements]]
 === Topic Namespace Elements
 
 [tck-testable tck-id-topic-structure]#[yellow-background]*All MQTT clients using the Sparkplug
@@ -39,12 +39,7 @@ specification MUST use the following topic namespace structure:*#
 The namespace element of the topic namespace is the root element that will define both the
 structure of the remaining namespace elements as well as the encoding used for the associated
 payload data. The Sparkplug specification defines two (2) namespaces. One is for Sparkplug payload
-definition A, and another one of for the Sparkplug payload definition B.
-
-[tck-testable tck-id-topic-structure-namespace-a]#[yellow-background]*For the Sparkplug A version of
-the payload definition, the UTF-8 string constant for the namespace element MUST be:*#
-
-  spAv1.0
+definition A (now deprecated), and another one of for the Sparkplug payload definition B.
 
 [tck-testable tck-id-topic-structure-namespace-a]#[yellow-background]*For the Sparkplug B version of
 the payload definition, the UTF-8 string constant for the namespace element MUST be:*#
@@ -100,8 +95,8 @@ Node within the infrastructure.
 group_id combined with the _edge_node_id_ element MUST be unique from any other
 group_id/edge_node_id assigned in the MQTT infrastructure.*#
 [tck-testable tck-id-topic-structure-namespace-valid-edge-node-id]#[yellow-background]*The format of
-the _edge_node_id_ MUST be a valid UTF-8 string with the exception of the reserved characters of +
-(plus), / (forward slash), and # (number sign).*#
+the _edge_node_id_ MUST be a valid UTF-8 string with the exception of the reserved characters of
++ (plus), / (forward slash), and # (number sign).*#
 The topic element edge_node_id travels with every message published and should be as short as
  possible.
 
