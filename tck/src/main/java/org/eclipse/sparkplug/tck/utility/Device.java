@@ -54,6 +54,7 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -85,10 +86,15 @@ public class Device {
 	private MqttTopic log_topic = null;
 	private MessageListener control_listener = null;
 	
+	private String edge_node_id = null;
+	private String device_id = null;
+	
 	private MqttClient edge = null;
 	private MqttTopic edge_topic = null;
 	private MqttTopic device_topic = null;
 	private MessageListener edge_listener = null;
+	
+	private Calendar calendar = Calendar.getInstance();
 	
 	private int bdSeq = 0;
 	private int seq = 0;
@@ -121,11 +127,20 @@ public class Device {
 				if (msg != null) {
 					String[] words = msg.toString().split(" ");
 					if (words.length == 5 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("DEVICE")) {
+						/* NEW DEVICE host application id, edge node id, device id */
 						edgeCreate(words[2], words[3]);
 						deviceCreate(words[3], words[4]);
 					}
+					else if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
+						/* SEND_EDGE_DATA host application id, edge node id, metric name */
+						publishEdgeData(words[3]);
+					}
+					else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
+						/* SEND_EDGE_DATA host application id, edge node id, device id, metric name */
+						publishDeviceData(words[4]);
+					}
 					else {
-						log("Command not understood: "+msg);
+						log("Command not understood: "+msg + " "+words.length);
 					}
 				}
 				Thread.sleep(100);
@@ -136,11 +151,13 @@ public class Device {
 		}
 	}
 	
-	public void edgeCreate(String host_application_id, String edge_node_id) throws Exception {
+	public void edgeCreate(String host_application_id, String an_edge_node_id) throws Exception {
 		if (edge != null) {
 			log("Edge node already created");
+			log("Edge node "+edge_node_id+" successfully created");
 			return;
 		}
+		edge_node_id = an_edge_node_id;
 		log("Creating new edge node \""+edge_node_id+"\"");
 		edge = new MqttClient(brokerURI, "Sparkplug TCK edge "+edge_node_id);
 	    edge_listener = new MessageListener();
@@ -183,12 +200,19 @@ public class Device {
 		log("Edge node "+edge_node_id+" successfully created");
 	}
 	
-	public void deviceCreate(String edge_node_id, String device_id) throws Exception {
+	public void deviceCreate(String edge_node_id, String a_device_id) throws Exception {
 		if (edge == null) {
 			log("No edge node");		
 			return;
 		}
 		
+		if (device_id != null) {
+			log("Device "+device_id+" already created");	
+			log("Device "+device_id+" successfully created");
+			return;
+		}
+		
+		device_id = a_device_id;
 		log("Creating new device \""+device_id+"\"");
 		// Publish device birth message
 		byte[] payload = createDeviceBirthPayload();
@@ -223,7 +247,8 @@ public class Device {
 		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
 		payload.addMetric(new MetricBuilder("Node Control/Rebirth", Boolean, false).createMetric());
 
-		payload.addMetric(new MetricBuilder("TCK_metric/0", Boolean, true).createMetric());
+		payload.addMetric(new MetricBuilder("TCK_metric/Boolean", Boolean, true).createMetric());
+		payload.addMetric(new MetricBuilder("TCK_metric/Int32", Int32, 0).createMetric());
 		
 		PropertySet propertySet = new PropertySetBuilder()
 				.addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
@@ -464,10 +489,62 @@ public class Device {
 				.createDataSet();
 	}
 	
+	private void publishEdgeData(String metric_name) throws Exception {
+		List<Metric> nodeMetrics = new ArrayList<Metric>();
+
+		Random random = new Random();
+		int value = random.nextInt(100) + 10;
+		
+		// Add a 'real time' metric
+		nodeMetrics.add(new MetricBuilder(metric_name, Int32, value)
+				.timestamp(calendar.getTime())
+				.createMetric());
+		
+		log("Updating metric "+metric_name+ " to "+value);
+
+		SparkplugBPayload nodePayload = new SparkplugBPayload(
+				new Date(), 
+				nodeMetrics, 
+				getSeqNum(),
+				null, 
+				null);
+
+		edge.publish(namespace + "/" + group_id + "/NDATA/" + edge_node_id, 
+				new SparkplugBPayloadEncoder().getBytes(nodePayload), 0, false);
+
+	}
+	
+	private void publishDeviceData(String metric_name) throws Exception {
+		List<Metric> deviceMetrics = new ArrayList<Metric>();
+		
+		Random random = new Random();
+		int value = random.nextInt(100) + 10;
+
+		// Add a 'real time' metric
+		deviceMetrics.add(new MetricBuilder(metric_name, Int32, value)
+				.timestamp(calendar.getTime())
+				.createMetric());
+
+		log("Updating metric "+metric_name+ " to "+value);
+
+		SparkplugBPayload devicePayload = new SparkplugBPayload(
+				new Date(),
+				deviceMetrics,
+				getSeqNum(),
+				null, 
+				null);
+
+		edge.publish(namespace + "/" + group_id + "/DDATA/" + edge_node_id + "/" + device_id, 
+				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
+
+	}
+	
 	public void deviceDestroy() throws MqttException {
 		edge.disconnect();
 		edge.close();
 		edge = null;
+		edge_node_id = null;
+		device_id = null;
 	}
 	
 	class MessageListener implements MqttCallback {
