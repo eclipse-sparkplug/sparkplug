@@ -48,14 +48,14 @@ public class SessionEstablishmentTest extends TCKTest {
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
     private HashMap testResults = new HashMap<String, String>();
     String[] testIds = {
+    	"host-topic-phid-required",
     	"host-topic-phid-birth-payload",
     	"host-topic-phid-death-payload", 
     	"host-topic-phid-death-qos",
     	"host-topic-phid-death-retain",
-    	"primary-application-connect",
-    	"primary-application-death-cert",
-    	"primary-application-subscribe",
-    	"primary-application-state-publish",
+    	"host-topic-phid-death-payload-off",
+    	"message-flow-phid-sparkplug-subscription",
+    	"message-flow-phid-sparkplug-state-publish",
     	"components-ph-state"
     };
     private String myClientId = null;
@@ -102,6 +102,9 @@ public class SessionEstablishmentTest extends TCKTest {
     		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
     		id = "host-topic-phid-death-payload")
     @SpecAssertion(
+    		section = Sections.PAYLOADS_DESC_STATE_DEATH,
+    		id = "host-topic-phid-death-payload-off")
+    @SpecAssertion(
     		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
     		id = "host-topic-phid-death-qos")
     @SpecAssertion(
@@ -118,6 +121,7 @@ public class SessionEstablishmentTest extends TCKTest {
     			result = "PASS";
     		} 
     		testResults.put("host-topic-phid-death-payload", result);
+    		testResults.put("host-topic-phid-death-payload-off", result);
     		
     		result = "FAIL";
     		if (willPublishPacket.getQos() == Qos.AT_LEAST_ONCE) {
@@ -136,11 +140,8 @@ public class SessionEstablishmentTest extends TCKTest {
 
     @Test
     @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-connect")
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-death-cert")          
+            section = Sections.TOPICS_DEATH_MESSAGE_STATE,
+            id = "host-topic-phid-required")          
     public void connect(String clientId, ConnectPacket packet) {
         logger.info("Primary host session establishment test - connect");
         
@@ -152,7 +153,7 @@ public class SessionEstablishmentTest extends TCKTest {
         	if (willPublishPacketOptional != null) {
         		result = "PASS";
         	}
-        	testResults.put("primary-application-death-cert", result);
+        	testResults.put("host-topic-phid-required", result);
         } catch (Exception e) {
         	logger.info("Exception", e);
         }
@@ -170,30 +171,28 @@ public class SessionEstablishmentTest extends TCKTest {
         	logger.info("Test failed "+e.getMessage());
         	result = "FAIL "+e.getMessage();
         }
-        testResults.put("primary-application-connect", result);
     }
     
     @Test
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-subscribe")
+            id = "message-flow-phid-sparkplug-subscription")
     public void subscribe(String clientId, SubscribePacket packet) {
         logger.info("Primary host session establishment test - subscribe");
 
-        if (myClientId.equals(clientId)) {
+        if (myClientId.equals(clientId) && packet.getSubscriptions().get(0).getTopicFilter().equals("spAv1.0/#")) {
         	String result = "FAIL";
         	try {
         		if (!state.equals("CONNECTED"))
-        			throw new Exception("State should be connected");
-        		if (!packet.getSubscriptions().get(0).getTopicFilter().equals("spAv1.0/#"))
-        			throw new Exception("Topic string wrong");
+        			throw new Exception("State should be connected, is "+state);
+
         		// TODO: what else do we need to check?
         		result = "PASS";
          		state = "SUBSCRIBED";
         	} catch (Exception e) {
         		result = "FAIL "+e.getMessage();
         	}
-        	testResults.put("primary-application-subscribe", result);
+        	testResults.put("message-flow-phid-sparkplug-subscription", result);
         }
     }
 
@@ -203,7 +202,7 @@ public class SessionEstablishmentTest extends TCKTest {
     		id = "host-topic-phid-birth-payload")
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-            id = "primary-application-state-publish")
+            id = "message-flow-phid-sparkplug-state-publish")
     @SpecAssertion(
             section = Sections.COMPONENTS_PRIMARY_HOST_APPLICATION,
             id = "components-ph-state")
@@ -234,7 +233,7 @@ public class SessionEstablishmentTest extends TCKTest {
         	} catch (Exception e) {
         		result = "FAIL " + e.getMessage();
         	}
-        	testResults.put("primary-application-state-publish", result);
+        	testResults.put("message-flow-phid-sparkplug-state-publish", result);
         	testResults.put("host-topic-phid-birth-payload", result);
         	testResults.put("components-ph-state", result);
         }

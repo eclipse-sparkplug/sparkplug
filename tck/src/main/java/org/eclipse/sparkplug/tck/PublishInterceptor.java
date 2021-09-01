@@ -42,12 +42,12 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			@NotNull PublishInboundOutput publishInboundOutput) {
 		try {
 			String clientId = publishInboundInput.getClientInformation().getClientId();
-			logger.debug("Inbound publish from '{}'", clientId);
+			logger.info("Inbound publish from '{}'", clientId);
 					
 			PublishPacket packet = publishInboundInput.getPublishPacket();
 			
 			String topic = packet.getTopic();
-			logger.debug("\tTopic {}", topic);
+			logger.info("\tTopic {}", topic);
 			
 			String payload = null;
 			ByteBuffer bpayload = packet.getPayload().orElseGet(null);
@@ -85,6 +85,8 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			
 		} catch (Exception e) {
 			logger.error("Exception", e);
+		} catch (Error e) {
+			System.out.println("Error");
 		}
 	}
 }

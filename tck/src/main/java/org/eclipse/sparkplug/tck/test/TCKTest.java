@@ -27,6 +27,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.lang.System;
 
 public abstract class TCKTest {
 	
@@ -51,7 +52,7 @@ public abstract class TCKTest {
 		    payload.append(key);
 		    payload.append(": ");
 		    payload.append(result);
-		    payload.append("; ");
+		    payload.append(";"+System.lineSeparator());
 		    
 		    if (!result.equals("PASS")) {
 		    	overall = "FAIL";
@@ -60,7 +61,7 @@ public abstract class TCKTest {
 		
 	    payload.append("OVERALL: ");
 	    payload.append(overall);
-	    payload.append("; ");
+	    payload.append(";"+System.lineSeparator());
 	    
 	    logger.info("Test results "+payload.toString());
 		
