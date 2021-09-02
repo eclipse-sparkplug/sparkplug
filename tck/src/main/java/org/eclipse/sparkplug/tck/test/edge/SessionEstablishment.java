@@ -296,7 +296,7 @@ public class SessionEstablishment extends TCKTest {
 		}
 		testResults.put("edge-birth-qos", result);
 		
-        result = "FAIL";
+		result = "FAIL";
 		if (!packet.getRetain()) {
 			result = "PASS";
 		}
