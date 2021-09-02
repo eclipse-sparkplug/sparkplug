@@ -52,10 +52,24 @@ public class SessionEstablishment extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private HashMap<String, String> testResults = new HashMap<String, String>();
-	String[] testIds = { "edge-death-qos", "edge-death-seq", "edge-death-retain", "edge-death-cert", "edge-death-bdseq",
-			"edge-birth-qos", "edge-birth-retain", "edge-birth-seq", "edge-birth-bdseq", "edge-birth-metrics",
-			"edge-birth-timestamp", "edge-rebirth", "edge-bdseq", "edge-subscribe-ncmd", "edge-subscribe-dcmd",
-			"edge-subscribe-state", };
+	String[] testIds = {
+		"edge-death-qos", 
+		"edge-death-seq", 
+		"edge-death-retain", 
+		"edge-death-cert", 
+		"edge-death-bdseq",
+		"edge-birth-qos", 
+		"edge-birth-retain", 
+		"edge-birth-seq", 
+		"edge-birth-bdseq", 
+		"edge-birth-metrics",
+		"edge-birth-timestamp", 
+		"edge-rebirth", 
+		"edge-bdseq", 
+		"edge-subscribe-ncmd", 
+		"edge-subscribe-dcmd",
+		"edge-subscribe-state"
+	};
 	private String myClientId = null;
 	private String state = null;
 	private TCK theTCK = null;
