@@ -102,8 +102,7 @@ public class SessionEstablishment extends TCKTest {
 		}
 
 		if (parms.length < 3) {
-			logger.info(
-					"Parameters to edge session establishment test must be: host_application_id group_id edge_node_id");
+			logger.info("Parameters to edge session establishment test must be: host_application_id group_id edge_node_id");
 			return;
 		}
 
