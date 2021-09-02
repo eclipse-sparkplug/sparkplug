@@ -141,10 +141,18 @@ public class SessionEstablishment extends TCKTest {
 		return testResults;
 	}
 
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-death-qos")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-death-seq")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-death-retain")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-death-bdseq")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-death-qos")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-death-seq")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-death-retain")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-death-bdseq")
 	public Optional<WillPublishPacket> checkWillMessage(ConnectPacket packet) throws Exception {
 		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
 		if (willPublishPacketOptional.isPresent()) {
