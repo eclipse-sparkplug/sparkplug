@@ -73,12 +73,12 @@ public class SessionEstablishment extends TCKTest {
     private String myClientId = null;
     private String state = null;
     private TCK theTCK = null;
-    private String host_application_id = "testing"; // The primary host application id to be used
+    private String host_application_id = null; // The primary host application id to be used
     private boolean commands_supported = true; // Are commands supported by the edge node?
     private long death_bdSeq = -1;
     private long birth_bdSeq = -1;
-    private String group_id = "";
-    private String edge_node_id = "";
+    private String group_id = null;
+    private String edge_node_id = null;
     private ArrayList<String> subscribe_topics = new ArrayList<String>();
     
     enum TestType {
@@ -103,12 +103,22 @@ public class SessionEstablishment extends TCKTest {
             testResults.put(testIds[i], "");
         }
         
-        host_application_id = parms[0];
-        logger.info("Host application id is "+host_application_id);
-        
-        if (parms.length > 1 && parms[1].equals("false")) {
-        	commands_supported = false;
+        if (parms.length < 3) {
+        	logger.info("Parameters to edge session establishment test must be: host_application_id group_id edge_node_id");
+        	return;
         }
+        
+        host_application_id = parms[0];
+        group_id = parms[1];
+        edge_node_id = parms[2];
+        
+        logger.info("Host application id is "+host_application_id);
+        logger.info("Group id is "+group_id);
+        logger.info("Edge node id is "+edge_node_id);
+        
+        //if (parms.length > 1 && parms[1].equals("false")) {
+        	//commands_supported = false;
+        //}
         	
     }
     
@@ -149,11 +159,6 @@ public class SessionEstablishment extends TCKTest {
     	Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
     	if (willPublishPacketOptional.isPresent()) {
     		WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
-    		
-    		String topic = willPublishPacket.getTopic();
-    		String[] topic_parts = topic.split("/");
-    		group_id = topic_parts[1];
-    		edge_node_id = topic_parts[3];
     		
     		String result = "FAIL";
     		if (willPublishPacket.getQos().getQosNumber()==1) {
@@ -281,14 +286,6 @@ public class SessionEstablishment extends TCKTest {
         Date received_birth = new Date();
         long millis_received_birth = received_birth.getTime();
         long millis_past_five_min = millis_received_birth - (5 * 60 * 1000);
-        //i dont think i even need to create this date object, just need the millis
-        Date past_five_minutes = new Date(millis_received_birth - (5 * 60 * 1000));
-        logger.info("past five minutes= "+past_five_minutes);
-        logger.info("past five minutes millis= " + millis_past_five_min);
-        logger.info("--------------");
-        logger.info("received_birth= "+received_birth);
-        logger.info("received birth millis= "+millis_received_birth);
-        logger.info("---------------");
 
         ByteBuffer payload = packet.getPayload().orElseGet(null);
         SparkplugBPayload sparkplugPayload = decode(payload);
@@ -313,11 +310,8 @@ public class SessionEstablishment extends TCKTest {
 		
 		result = "FAIL";
 		Date ts = sparkplugPayload.getTimestamp();
-		logger.info("time inside birth payload= " + ts);
 		if (ts != null) {
 			long millis_payload = ts.getTime();
-			logger.info("time inside birth payload millis = " + millis_payload);
-			logger.info("-------------");
 			if (millis_payload > millis_past_five_min && millis_payload < (millis_received_birth)) {
 				result = "PASS";
 			}
