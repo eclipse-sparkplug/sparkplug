@@ -197,7 +197,9 @@ public class SessionEstablishment extends TCKTest {
 		return willPublishPacketOptional;
 	}
 
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-death-cert")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-death-cert")
 	public void connect(String clientId, ConnectPacket packet) {
 		logger.info("Edge session establishment test - connect");
 
@@ -251,14 +253,30 @@ public class SessionEstablishment extends TCKTest {
 		// }
 	}
 
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-birth-bdseq")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-birth-qos")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-birth-retain")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-birth-seq")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-birth-timestamp")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-rebirth")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-bdseq")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-birth-metrics")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-birth-bdseq")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-birth-qos")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-birth-retain")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-birth-seq")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-birth-timestamp")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-rebirth")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-bdseq")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-birth-metrics")
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Edge session establishment test - publish");
 
@@ -413,9 +431,15 @@ public class SessionEstablishment extends TCKTest {
 		}
 	}
 
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-ncmd")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-dcmd")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-state")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-subscribe-ncmd")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-subscribe-dcmd")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-subscribe-state")
 	public void check_subscribe_topics() {
 		boolean ncmd_found = false;
 		boolean dcmd_found = false;
