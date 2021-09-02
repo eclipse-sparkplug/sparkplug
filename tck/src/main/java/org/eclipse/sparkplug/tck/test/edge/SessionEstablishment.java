@@ -45,7 +45,9 @@ import java.util.Optional;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
-@SpecVersion(spec = "sparkplug", version = "3.0.0-SNAPSHOT")
+@SpecVersion(
+		spec = "sparkplug", 
+		version = "3.0.0-SNAPSHOT")
 public class SessionEstablishment extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
