@@ -115,7 +115,7 @@ public class SessionEstablishment extends TCKTest {
 		logger.info("Edge node id is " + edge_node_id);
 
 		// if (parms.length > 1 && parms[1].equals("false")) {
-		// commands_supported = false;
+		// 		commands_supported = false;
 		// }
 
 	}
