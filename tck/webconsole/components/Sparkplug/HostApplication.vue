@@ -62,6 +62,12 @@ export default {
     update(key, value) {
       const emitValue = tap(cloneDeep(this.local), (v) => set(v, key, value));
       this.$emit("on-updated", emitValue);
+/*
+      if (emitValue.hostId.length !== 0) {
+        this.$emit("on-complete", true);
+      } else {
+        this.$emit("on-complete", false);
+      }*/
     },
   },
 };

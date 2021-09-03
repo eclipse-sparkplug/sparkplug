@@ -20,10 +20,7 @@
 
     <div v-if="test.parameters" class="mt-3">
       <h5>Parameters:</h5>
-      <div
-        v-for="(parameter, parameterName) in test.parameters"
-        :key="parameterName"
-      >
+      <div v-for="(parameter, parameterName) in test.parameters" :key="parameterName">
         <b-form-group
           :id="parameter.parameterName + '-parameter-group'"
           :description="parameter.parameterDescription"
@@ -34,9 +31,7 @@
             :id="parameterName + '-parameter-input'"
             :placeholder="parameterName"
             :value="parameter.parameterValue"
-            @change="
-              update('parameters[' + parameterName + '].parameterValue', $event)
-            "
+            @change="update('parameters[' + parameterName + '].parameterValue', $event)"
           ></b-form-input>
         </b-form-group>
       </div>
@@ -45,13 +40,7 @@
     <div v-if="test.code" class="mt-3">
       <h5>Example Code:</h5>
       <b-input-group>
-        <b-textarea
-          readonly
-          no-resize
-          rows="5"
-          style="white-space: pre"
-          v-model="test.code"
-        />
+        <b-textarea readonly no-resize rows="5" style="white-space: pre" v-model="test.code" />
         <b-input-group-append>
           <b-button
             id="clipboard-button"
@@ -71,17 +60,25 @@
     <div class="mt-3">
       <b-button-toolbar>
         <b-button-group class="mr-5">
-          <b-button variant="success" @click="$emit('start-single-test', test)"
-            >Start Test</b-button
-          >
-          <b-button variant="danger" @click="$emit('abort-single-test', test)"
-            >Abort Test</b-button
-          >
+          <b-button variant="success" @click="$emit('start-single-test', test)">Start Test</b-button>
+          <b-button variant="danger" @click="$emit('abort-single-test', test)">Abort Test</b-button>
         </b-button-group>
-        <b-button variant="info" @click="$emit('reset-single-test', test)"
-          >Reset Test</b-button
-        >
+        <b-button class="mr-5" variant="info" @click="$emit('reset-single-test', test)">Reset Test</b-button>
+
+        <span class="my-auto mr-1">Result: </span>
+        <b-icon class="my-auto h3" v-if="test.result === null" icon="circle-fill" variant="secondary" />
+        <b-icon class="my-auto h3" v-else-if="test.result === true" icon="check-circle-fill" variant="success" />
+        <b-icon class="my-auto h3" v-else-if="test.result === false" icon="x-circle-fill" variant="danger" />
       </b-button-toolbar>
+    </div>
+
+    <div class="mt-3" v-if="test.logging.length > 0">
+      <h5>Logging:</h5>
+      <div>
+        <ul class="list-group" v-for="logMessage in test.logging" :key="logMessage.id">
+          <li class="list-group-item">{{ logMessage.logValue }}</li>
+        </ul>
+      </div>
     </div>
   </b-card>
 </template>

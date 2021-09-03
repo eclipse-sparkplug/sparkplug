@@ -45,9 +45,13 @@
         @start-single-test="(testParameters) => startTestFun(testParameters)"
         @abort-single-test="(testParameters) => abortTestFun(testParameters)"
         @reset-single-test="(testParameters) => resetTestFun(testParameters)"
+        @reset-current-test="resetCurrentTest()"
         :clientType="this.sparkplugClient.clientType"
+        :currentTest="this.currentTest"
+        :currentTestLogging="this.currentTestLogging"
         class="mt-3"
       />
+
       <TckLogging :logging="this.logging" class="mt-3" />
     </div>
 
@@ -94,6 +98,9 @@ export default {
       mqttClient: {
         connected: false,
       },
+
+      currentTest: null,
+      currentTestLogging: null,
 
       /**
        * All information about the possible sparkplug client.
@@ -193,9 +200,13 @@ export default {
         alert("You need to connect to the broker first.");
         return;
       }
+      if (this.currentTest !== null) {
+        alert("You need to finish or end the current test in order to start a new test.");
+        return;
+      }
 
       console.log("index startTest:", testParameter);
-      this.createLogback();
+      this.currentTest = testParameter.name;
 
       if (this.sparkplugClient.clientType === "HOSTAPPLICATION") {
         const profile = "host";
@@ -240,7 +251,9 @@ export default {
         alert("You need to connect to the broker first.");
         return;
       }
-      console.log("Reset test is currently not used.");
+
+      this.abortTestFun(testParameter);
+      this.resetCurrentTest();
     },
 
     /**********************
@@ -274,6 +287,8 @@ export default {
           };
           console.log("logging:", logMessage);
           this.logging.push(logMessage);
+
+          this.currentTestLogging = logMessage;
         }
       });
     },
@@ -304,6 +319,14 @@ export default {
       });
     },
 
+    /**
+     * Reset current test. Nulls currentTest & currentTestLogging.
+     */
+    resetCurrentTest: function () {
+      this.currentTest = null;
+      this.currentTestLogging = null;
+    },
+
     /**********************
      * MQTT functions
      **********************/
@@ -315,6 +338,7 @@ export default {
       this.activeTab = 1;
       this.mqttClient = mqttClient;
       this.createInteractionListener();
+      this.createLogback();
     },
 
     /**
@@ -357,29 +381,29 @@ export default {
         }
       });
     },
-  },
 
-  /**********************
-   * UI functions
-   **********************/
+    /**********************
+     * UI functions
+     **********************/
 
-  /**
-   * Method scrolls user back to the top.
-   */
-  backToTop: function () {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-  },
+    /**
+     * Method scrolls user back to the top.
+     */
+    backToTop: function () {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    },
 
-  /**
-   * Opens or closes the MQTT connect or client connect tab if clicked.
-   */
-  changeMqttConnectFun: function (clickedTab) {
-    if (this.activeTab === clickedTab) {
-      this.tabOpen = !this.tabOpen;
-    } else {
-      this.tabOpen = true;
-    }
+    /**
+     * Opens or closes the MQTT connect or client connect tab if clicked.
+     */
+    changeMqttConnectFun: function (clickedTab) {
+      if (this.activeTab === clickedTab) {
+        this.tabOpen = !this.tabOpen;
+      } else {
+        this.tabOpen = true;
+      }
+    },
   },
 };
 </script>

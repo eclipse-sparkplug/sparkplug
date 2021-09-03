@@ -4,14 +4,16 @@
   <div>
     <h3>Tests</h3>
     <div>
+      <!--
       <TckAllTests
         @start-all-tests="$emit('start-all-tests=', hostTests, eonTests)"
         @abort-all-tests="$emit('abort-all-tests=', hostTests, eonTests)"
         @reset-all-tests="$emit('reset-all-tests=', hostTests, eonTests)"
-        @showAllTests="toggleSidebar"
+        @show-all-tests="toggleSidebar"
       />
+      -->
       <TckTestsInformation :testNames="getTestNames" v-model="sidebar" />
-      <h3>Individual Tests</h3>
+      <!--<h3>Individual Tests</h3>-->
       <div>
         <div v-if="clientType === 'HOSTAPPLICATION'">
           <TckTest
@@ -21,7 +23,7 @@
             :ref="test.testValues.name"
             @start-single-test="(testParameter) => $emit('start-single-test', testParameter)"
             @abort-single-test="(testParameter) => $emit('abort-single-test', testParameter)"
-            @reset-single-test="(testParameter) => $emit('reset-single-test', testParameter)"
+            @reset-single-test="(testParameter) => resetTest(testParameter)"
             v-model="test.testValues"
           />
         </div>
@@ -31,7 +33,7 @@
             :key="test.testValues.name"
             @start-single-test="(testParameter) => $emit('start-single-test', testParameter)"
             @abort-single-test="(testParameter) => $emit('abort-single-test', testParameter)"
-            @reset-single-test="(testParameter) => $emit('reset-single-test', testParameter)"
+            @reset-single-test="(testParameter) => resetTest(testParameter)"
             v-model="test.testValues"
           />
         </div>
@@ -52,6 +54,9 @@ export default {
       required: true,
       default: "HOSTAPPLICATION",
     },
+
+    currentTestLogging: null,
+    currentTest: null,
   },
 
   computed: {
@@ -96,6 +101,37 @@ export default {
     },
   },
 
+  watch: {
+    /**
+     * Updates test with logging.
+     * @param {String} newValue - New current tests logging
+     * @param {String} oldValue - Old current tests logging
+     */
+    currentTestLogging: function (newValue, oldValue) {
+      if (newValue === null) return;
+      if (this.clientType === "HOSTAPPLICATION") {
+        for (const [_, testValue] of Object.entries(this.hostTests)) {
+          if (testValue.testValues.name === this.currentTest) {
+            testValue.testValues.logging.push(newValue);
+            if (newValue.logValue.includes("OVERALL: PASS")) {
+              testValue.testValues.result = true;
+            } else if (newValue.logValue.includes("OVERALL: FAIL")) {
+              testValue.testValues.result = false;
+            }
+          }
+        }
+      } else if (this.clientType === "EONNODE") {
+        for (const [_, testValue] of Object.entries(this.eonTests)) {
+          if (testValue.testValues.name === this.currentTest) {
+            testValue.testValues.logging.push(newValue);
+          }
+        }
+      }
+
+      this.$emit("reset-current-test");
+    },
+  },
+
   data: function () {
     return {
       /**
@@ -131,7 +167,8 @@ export default {
             readableName: "Session Establishment Test",
             description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
             requirements: ["The Host Application under test must be connected and online prior to starting this test."],
-            code: "This is code you can copy \n Multiline text \n Test Senario",
+            //code: "This is code you can copy \n Multiline text \n Test Senario",
+            result: null,
             logging: [],
           },
         },
@@ -155,7 +192,7 @@ export default {
               },
             },
             code: "",
-            result: false,
+            result: null,
             logging: [],
           },
         },
@@ -192,6 +229,26 @@ export default {
      */
     toggleSidebar: function () {
       this.sidebar = !this.sidebar;
+    },
+
+    resetTest: function (testParameter) {
+      this.$emit("reset-single-test", testParameter);
+
+      if (this.clientType === "HOSTAPPLICATION") {
+        for (const [_, testValue] of Object.entries(this.hostTests)) {
+          if (testValue.testValues.name === testParameter.name) {
+            testValue.testValues.logging = [];
+            testValue.testValues.result = null;
+          }
+        }
+      } else if (this.clientType === "EONNODE") {
+        for (const [_, testValue] of Object.entries(this.eonTests)) {
+          if (testValue.testValues.name === testParameter.name) {
+            testValue.testValues.logging = [];
+            testValue.testValues.result = null;
+          }
+        }
+      }
     },
   },
 };
