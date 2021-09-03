@@ -166,7 +166,7 @@ export default {
             name: "SessionEstablishmentTest",
             readableName: "Session Establishment Test",
             description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
-            requirements: ["The Host Application under test must be connected and online prior to starting this test."],
+            requirements: ["The Host Application under test needs to be connected after starting the test."],
             //code: "This is code you can copy \n Multiline text \n Test Senario",
             result: null,
             logging: [],
@@ -180,6 +180,11 @@ export default {
               "To check that a command from a Host Application under test is correct to both an edge node (NCMD) and a device (DCMD).",
             requirements: ["The Host Application under test must be connected and online prior to starting this test."],
             parameters: {
+              group_id: {
+                parameterReadableName: "Group Id",
+                parameterValue: "",
+                parameterDescription: "The Group Id of the Edge Node",
+              },
               edge_node_id: {
                 parameterReadableName: "Edge Node Id",
                 parameterValue: "",

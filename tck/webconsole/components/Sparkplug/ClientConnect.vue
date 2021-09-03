@@ -8,6 +8,7 @@
           <b-form-group label="Sparkplug Client Type:" description="Choose the type of Client you want to test.">
             <b-form-radio-group
               id="radio-group-2"
+              :disabled="currentTest !== null"
               :checked="local.clientType"
               @change="update('clientType', $event)"
               name="clientType"
@@ -50,6 +51,11 @@ export default {
       type: Boolean,
       required: true,
       default: false,
+    },
+
+    currentTest: {
+      validator: (prop) => typeof prop === "string" || prop === null,
+      required: true,
     },
 
     /**
