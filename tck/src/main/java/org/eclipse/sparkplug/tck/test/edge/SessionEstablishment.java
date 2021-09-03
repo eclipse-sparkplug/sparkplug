@@ -175,18 +175,21 @@ public class SessionEstablishment extends TCKTest {
 				}
 			}
 
+			// ensuring that death message has a bdSeq metric
 			result = "FAIL";
 			if (death_bdSeq != -1) {
 				result = "PASS";
 			}
 			testResults.put("edge-death-bdseq", result);
-
+			
+			// death message should not include a sequence number
 			result = "FAIL";
 			if (sparkplugPayload.getSeq() == -1) {
 				result = "PASS";
 			}
 			testResults.put("edge-death-seq", result);
 
+			// retained flag must be false
 			result = "FAIL";
 			if (!willPublishPacket.getRetain()) {
 				result = "PASS";
@@ -287,24 +290,28 @@ public class SessionEstablishment extends TCKTest {
 		ByteBuffer payload = packet.getPayload().orElseGet(null);
 		SparkplugBPayload sparkplugPayload = decode(payload);
 
+		// qos should be 0
 		String result = "FAIL";
 		if (packet.getQos().getQosNumber() == 0) {
 			result = "PASS";
 		}
 		testResults.put("edge-birth-qos", result);
 
+		// retain should be false
 		result = "FAIL";
 		if (!packet.getRetain()) {
 			result = "PASS";
 		}
 		testResults.put("edge-birth-retain", result);
 
+		// sequence number should be 0
 		result = "FAIL";
 		if (sparkplugPayload.getSeq() == 0) {
 			result = "PASS";
 		}
 		testResults.put("edge-birth-seq", result);
 
+		// making sure that the payload timestamp is greater than (recieved_bith_time - 5 min) and less than the received_birth_time
 		result = "FAIL";
 		Date ts = sparkplugPayload.getTimestamp();
 		if (ts != null) {
@@ -350,24 +357,28 @@ public class SessionEstablishment extends TCKTest {
 			}
 		}
 
+		// every nbirth must include a bdSeq
 		result = "FAIL";
 		if (birth_bdSeq != -1) {
 			result = "PASS";
 		}
 		testResults.put("edge-birth-bdseq", result);
 
+		// the birth bdSeq "must match the bdseq number provided in the MQTT CONNECT packet’s Will Message payload" (host app can correlate NBIRTHS to NDEATHS) 
 		result = "FAIL";
 		if (birth_bdSeq != -1 && death_bdSeq != -1 && birth_bdSeq == death_bdSeq) {
 			result = "PASS";
 		}
 		testResults.put("edge-bdseq", result);
 
+		// nbirth message must include 'node control/rebirth' metric
 		result = "FAIL";
 		if (rebirth_found == true && datatype == MetricDataType.Boolean && rebirth_val == false) {
 			result = "PASS";
 		}
 		testResults.put("edge-rebirth", result);
 
+		// at a minimum, each metric must include the metric name, datatype, and current value
 		result = "FAIL";
 		if (bad_metric_found == false) {
 			result = "PASS";
@@ -455,6 +466,8 @@ public class SessionEstablishment extends TCKTest {
 			}
 		}
 
+		// making sure edge node subscribes to ncmd level topics, dcmd, and state
+		
 		String result = "FAIL";
 		if (ncmd_found == true) {
 			result = "PASS";
