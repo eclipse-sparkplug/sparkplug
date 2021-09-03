@@ -111,18 +111,21 @@ export default {
        * @type {Boolean}sparkplugClient.complete
        * @type {String} sparkplugClient.clientType
        * @type {Object} sparkplugClient.eonNode
+       * @type {Boolean} sparkplugClient.eonNode.complete
        * @type {String} sparkplugClient.eonNode.groupId
        * @type {String} sparkplugClient.eonNode.edgeNodeId
        * @type {Object} sparkplugClient.hostApplication
+       * @type {Boolean} sparkplugClient.hostApplication.complete
        * @type {String} sparkplugClient.hostApplication.hostId
        */
       sparkplugClient: {
-        complete: false,
         clientType: "HOSTAPPLICATION",
         hostApplication: {
+          complete: false,
           hostId: "",
         },
         eonNode: {
+          complete: false,
           groupId: "",
           edgeNodeId: "",
         },

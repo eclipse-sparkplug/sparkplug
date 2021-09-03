@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    <!--<client-only>-->
+    <client-only>
     <b-form>
       <b-form-group label="Host Application Host ID:" description="The identifiers of the Host Application">
         <b-form-input
@@ -14,7 +14,7 @@
         />
       </b-form-group>
     </b-form>
-    <!--</client-only>-->
+    </client-only>
   </div>
 </template>
 
@@ -47,6 +47,7 @@ export default {
       return this.hostApplication
         ? this.hostApplication
         : {
+            complete: false,
             hostId: "",
           };
     },
@@ -61,13 +62,12 @@ export default {
      */
     update(key, value) {
       const emitValue = tap(cloneDeep(this.local), (v) => set(v, key, value));
-      this.$emit("on-updated", emitValue);
-/*
+
       if (emitValue.hostId.length !== 0) {
-        this.$emit("on-complete", true);
+        this.$emit("on-updated", set(emitValue, "complete", true));
       } else {
-        this.$emit("on-complete", false);
-      }*/
+        this.$emit("on-updated", set(emitValue, "complete", false));
+      }
     },
   },
 };

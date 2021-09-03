@@ -16,16 +16,16 @@
               <b-form-radio value="EONNODE">Edge of Network Node</b-form-radio>
             </b-form-radio-group>
           </b-form-group>
-          <SparkplugHostApplication
-            v-if="local.clientType === 'HOSTAPPLICATION'"
-            :hostApplication="local.hostApplication"
-            @on-updated="update('hostApplication', $event)"
-          />
-          <SparkplugEoNNode
-            v-if="local.clientType === 'EONNODE'"
-            :eonNode="local.eonNode"
-            @on-updated="update('eonNode', $event)"
-          />
+          <div v-if="local.clientType === 'HOSTAPPLICATION'">
+            <SparkplugHostApplication
+              :hostApplication="local.hostApplication"
+              @on-updated="update('hostApplication', $event)"
+            />
+          </div>
+          <div v-else-if="local.clientType === 'EONNODE'">
+            <SparkplugEoNNode :eonNode="local.eonNode" @on-updated="update('eonNode', $event)" />
+          </div>
+          <div v-else></div>
         </b-form>
       </b-card>
     </b-collapse>
@@ -59,9 +59,11 @@ export default {
      * @type {Object} sparkplugClient
      * @type {String} sparkplugClient.clientType
      * @type {Object} sparkplugClient.eonNode
+     * @type {Boolean} sparkplugClient.eonNode.complete
      * @type {String} sparkplugClient.eonNode.groupId
      * @type {String} sparkplugClient.eonNode.edgeNodeId
      * @type {Object} sparkplugClient.hostApplication
+     * @type {Boolean} sparkplugClient.hostApplication.complete
      * @type {String} sparkplugClient.hostApplication.hostId
      */
     sparkplugClient: {
@@ -71,6 +73,11 @@ export default {
         default: "HOSTAPPLICATION",
       },
       eonNode: {
+        complete: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
         groupId: {
           type: String,
           required: true,
@@ -83,6 +90,11 @@ export default {
         },
       },
       hostApplication: {
+        complete: {
+          type: Boolean,
+          required: true,
+          default: false,
+        },
         hostId: {
           type: String,
           required: true,
@@ -102,6 +114,7 @@ export default {
       return this.sparkplugClient
         ? this.sparkplugClient
         : {
+            complete: false,
             clientType: "HOSTAPPLICATION",
             hostApplication: {
               hostId: "",

@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    <!--<client-only>-->
+    <client-only>
     <b-form>
       <b-form-group label="Edge of Network Node ID:" description="The identifiers of the Edge of Network node">
         <b-input-group class="mb-2">
@@ -24,7 +24,7 @@
         </b-input-group>
       </b-form-group>
     </b-form>
-    <!--</client-only>-->
+    </client-only>
   </div>
 </template>
 
@@ -63,6 +63,7 @@ export default {
       return this.eonNode
         ? this.eonNode
         : {
+            complete: false,
             groupId: "",
             edgeNodeId: "",
           };
@@ -78,7 +79,12 @@ export default {
      */
     update(key, value) {
       const emitValue = tap(cloneDeep(this.local), (v) => set(v, key, value));
-      this.$emit("on-updated", emitValue);
+
+      if (emitValue.groupId.length !== 0 && emitValue.edgeNodeId.length !== 0) {
+        this.$emit("on-updated", set(emitValue, "complete", true));
+      } else {
+        this.$emit("on-updated", set(emitValue, "complete", false));
+      }
     },
   },
 };
