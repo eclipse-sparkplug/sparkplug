@@ -68,7 +68,8 @@ public class SessionEstablishment extends TCKTest {
 		"edge-bdseq", 
 		"edge-subscribe-ncmd", 
 		"edge-subscribe-dcmd",
-		"edge-subscribe-state"
+		"edge-subscribe-state",
+		"edge-state-before-birth"
 	};
 	private String myClientId = null;
 	private String state = null;
@@ -79,7 +80,9 @@ public class SessionEstablishment extends TCKTest {
 	private long birth_bdSeq = -1;
 	private String group_id = null;
 	private String edge_node_id = null;
-	private ArrayList<String> subscribe_topics = new ArrayList<String>();
+	private boolean ncmd_found = false;
+	private boolean dcmd_found = false;
+	private boolean state_found = false;
 
 	enum TestType {
 		GOOD, HOST_OFFLINE
@@ -227,8 +230,13 @@ public class SessionEstablishment extends TCKTest {
 		List<Subscription> subscriptions = packet.getSubscriptions();
 		for (Subscription s : subscriptions) {
 			topic = s.getTopicFilter();
-			subscribe_topics.add(topic);
-			// logger.info(topic);
+			if (topic.startsWith("spBv1.0/" + group_id + "/NCMD/" + edge_node_id)) {
+				ncmd_found = true;
+			} else if (topic.startsWith("spBv1.0/" + group_id + "/DCMD/" + edge_node_id)) {
+				dcmd_found = true;
+			} else if (topic.startsWith("STATE/" + host_application_id)) {
+				state_found = true;
+			}
 		}
 		// logger.info("--------");
 
@@ -280,6 +288,9 @@ public class SessionEstablishment extends TCKTest {
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
 		id = "edge-birth-metrics")
+	@SpecAssertion(
+		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+		id = "edge-state-before-birth")
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Edge session establishment test - publish");
 
@@ -287,11 +298,18 @@ public class SessionEstablishment extends TCKTest {
 		long millis_received_birth = received_birth.getTime();
 		long millis_past_five_min = millis_received_birth - (5 * 60 * 1000);
 
+		// edge node must subscribe to state before publishing nbirth
+		String result = "FAIL";
+		if (state_found == true) {
+			result = "PASS";
+		}
+		testResults.put("edge-state-before-birth",result);
+		
 		ByteBuffer payload = packet.getPayload().orElseGet(null);
 		SparkplugBPayload sparkplugPayload = decode(payload);
 
 		// qos should be 0
-		String result = "FAIL";
+		result = "FAIL";
 		if (packet.getQos().getQosNumber() == 0) {
 			result = "PASS";
 		}
@@ -452,20 +470,7 @@ public class SessionEstablishment extends TCKTest {
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
 		id = "edge-subscribe-state")
 	public void check_subscribe_topics() {
-		boolean ncmd_found = false;
-		boolean dcmd_found = false;
-		boolean state_found = false;
-
-		for (String topic : subscribe_topics) {
-			if (topic.startsWith("spBv1.0/" + group_id + "/NCMD/" + edge_node_id)) {
-				ncmd_found = true;
-			} else if (topic.startsWith("spBv1.0/" + group_id + "/DCMD/" + edge_node_id)) {
-				dcmd_found = true;
-			} else if (topic.startsWith("STATE/" + host_application_id)) {
-				state_found = true;
-			}
-		}
-
+		
 		// making sure edge node subscribes to ncmd level topics, dcmd, and state
 		
 		String result = "FAIL";
