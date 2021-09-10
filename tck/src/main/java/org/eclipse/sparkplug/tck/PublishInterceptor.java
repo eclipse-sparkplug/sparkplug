@@ -61,7 +61,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			}
 			
 			if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
-				String cmd = "NEW ";
+				String cmd = "NEW_TEST";
 				if (payload.toUpperCase().startsWith(cmd)) {
 					String[] strings = payload.split(" ");
 					if (strings.length < 3) {
@@ -74,7 +74,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 					}
 					theTCK.newTest(strings[1], strings[2], parms);
 				} else {	
-					cmd = "END TEST";
+					cmd = "END_TEST";
 					if (payload.toUpperCase().trim().equals(cmd)) {
 						theTCK.endTest();
 					}	
