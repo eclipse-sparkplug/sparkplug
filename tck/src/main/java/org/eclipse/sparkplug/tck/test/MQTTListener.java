@@ -76,9 +76,6 @@ public class MQTTListener implements MqttCallbackExtended {
 			client.setCallback(this);
 			log_topic = client.getTopic(log_topic_name);
 			client.connect(options);
-			
-			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
-			client.subscribe(new String[]{"spBv1.0/#", "STATE/#"}, new int[]{2, 2});
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -87,6 +84,13 @@ public class MQTTListener implements MqttCallbackExtended {
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
 		System.out.println("Connected!");
+		
+		try {
+			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
+			client.subscribe(new String[]{"spBv1.0/#", "STATE/#", log_topic_name}, new int[]{2, 2, 2});
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -96,19 +100,25 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		Topic sparkplugTopic = TopicUtil.parseTopic(topic);
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(Include.NON_NULL);
-		
-		System.out.println("Message Arrived on Sparkplug topic " + sparkplugTopic.toString());
-		
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
-		SparkplugBPayload inboundPayload = decoder.buildFromByteArray(message.getPayload());
-		
-		// Convert the message to JSON and print to system.out
 		try {
-			String payloadString = mapper.writeValueAsString(inboundPayload);
-			System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inboundPayload));
+			if (topic.startsWith("STATE/") ) {
+				System.out.println("Sparkplug message: "+ topic + " " + new String(message.getPayload()));
+			} else if (topic.equals(log_topic_name)) {
+				System.out.println("TCK log: "+ new String(message.getPayload()));
+			} else {
+				Topic sparkplugTopic = TopicUtil.parseTopic(topic);
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.setSerializationInclusion(Include.NON_NULL);
+
+				System.out.println("Message arrived on Sparkplug topic " + sparkplugTopic.toString());
+
+				SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
+				SparkplugBPayload inboundPayload = decoder.buildFromByteArray(message.getPayload());
+
+				// Convert the message to JSON and print to system.out
+				String payloadString = mapper.writeValueAsString(inboundPayload);
+				System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inboundPayload));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

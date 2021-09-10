@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.services.Services;
@@ -36,6 +37,7 @@ public abstract class TCKTest {
 	public abstract void connect(String clientId, ConnectPacket packet);
 	public abstract void subscribe(String clientId, SubscribePacket packet);
 	public abstract void publish(String clientId, PublishPacket packet);
+	public abstract void disconnect(String clientId, DisconnectPacket packet);
 	
 	public abstract String getName();
 	public abstract String[] getTestIds();

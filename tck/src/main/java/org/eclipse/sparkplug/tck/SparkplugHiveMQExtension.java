@@ -47,6 +47,7 @@ public class SparkplugHiveMQExtension implements ExtensionMain {
 			
 			final SubscribeInterceptor subscribeInterceptor = new SubscribeInterceptor(aTCK);
 			final PublishInterceptor publishInterceptor = new PublishInterceptor(aTCK);
+			final DisconnectInterceptor disconnectInterceptor = new DisconnectInterceptor(aTCK);
 			// create a new client initializer
 		    final ClientInitializer clientInitializer = new ClientInitializer() {
 		        @Override
@@ -56,6 +57,7 @@ public class SparkplugHiveMQExtension implements ExtensionMain {
 		            // add the interceptors to the context of the connecting client
 		            clientContext.addSubscribeInboundInterceptor(subscribeInterceptor);
 		            clientContext.addPublishInboundInterceptor(publishInterceptor);
+		            clientContext.addDisconnectInboundInterceptor(disconnectInterceptor);
 		        }
 		    };
 

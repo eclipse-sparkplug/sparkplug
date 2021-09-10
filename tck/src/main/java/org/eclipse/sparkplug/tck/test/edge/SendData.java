@@ -17,6 +17,9 @@ package org.eclipse.sparkplug.tck.test.edge;
  * This is the edge node Sparkplug send data test.  Data can be sent from edge
  * nodes and devices.
  * 
+ * We will need to prompt the user to initiate sending some data messages from
+ * an edge node and device, and then check that those messages adhere to the 
+ * Sparkplug standard.
  *  
  */
 
@@ -24,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
@@ -94,6 +98,12 @@ public class SendData extends TCKTest {
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
 		
 	}

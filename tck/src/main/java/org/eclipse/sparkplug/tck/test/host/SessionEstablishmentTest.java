@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
@@ -173,6 +174,12 @@ public class SessionEstablishmentTest extends TCKTest {
         }
     }
     
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+    
     @Test
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
@@ -180,7 +187,7 @@ public class SessionEstablishmentTest extends TCKTest {
     public void subscribe(String clientId, SubscribePacket packet) {
         logger.info("Primary host session establishment test - subscribe");
 
-        if (myClientId.equals(clientId) && packet.getSubscriptions().get(0).getTopicFilter().equals("spAv1.0/#")) {
+        if (myClientId.equals(clientId) && packet.getSubscriptions().get(0).getTopicFilter().equals("spBv1.0/#")) {
         	String result = "FAIL";
         	try {
         		if (!state.equals("CONNECTED"))

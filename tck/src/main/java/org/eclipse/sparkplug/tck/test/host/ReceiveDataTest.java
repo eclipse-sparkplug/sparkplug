@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
@@ -170,6 +171,12 @@ public class ReceiveDataTest extends TCKTest {
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
 		
 	}
