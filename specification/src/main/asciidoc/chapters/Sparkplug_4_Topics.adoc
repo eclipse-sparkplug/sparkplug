@@ -171,7 +171,7 @@ structure for all metrics for this Edge Node. At the time any Host Application r
 the ONLINE state of this Edge Node should be set to TRUE along with the associated ONLINE Date/Time
 parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself is online
 and in an MQTT Session, but any devices that have previously published a DBIRTH will still have
-“STALE” metric quality until the Host Application receives the associated DBIRTH messages.
+STALE metric quality until the Host Application receives the associated DBIRTH messages.
 
 The NBIRTH message requires the following payload components.
 
@@ -275,9 +275,9 @@ The Death Certificate topic and payload described here are not “published” a
 client, but provided as parameters within the MQTT CONNECT control packet when this Sparkplug Edge
 Node first establishes the MQTT Client session.
 
-Immediately upon reception of an Edge Node Death Certificate, any MQTT client subscribed to this
-Edge Node should set the data quality of all metrics to STALE and should note the time stamp when
-the NDEATH message was received.
+Immediately upon reception of an Edge Node Death Certificate (NDEATH message), any Host Application
+subscribed to this Edge Node should set the data quality of all metrics to STALE and should note the
+timestamp when the NDEATH message was received.
 
 [[topics_death_message_ndeath]]
 ====== Topic (NDEATH)
@@ -437,8 +437,8 @@ physical legacy device using poll/response protocols and/or local logical device
 becomes unavailable for any reason (no response, CRC error, etc.) it is the responsibility of the
 Edge Node to publish a DDEATH on behalf of the end device.
 
-Immediately upon reception of a DDEATH, any MQTT client subscribed to this device should set the
-data quality of all metrics for the Device to “*STALE”* and should note the time stamp when the
+Immediately upon reception of a DDEATH, any Host Application subscribed to this device should set
+the data quality of all metrics for the Device to STALE and should note the timestamp when the
 DDEATH message was received.
 
 [[topics_death_message_ddeath]]
