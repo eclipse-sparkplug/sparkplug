@@ -86,13 +86,11 @@ public class ReceiveDataTest extends TCKTest {
             testResults.put(testIds[i], "");
         }
         
-        host_application_id = parms[0];
-        logger.info("Host application id is "+host_application_id);
-        
         if (parms.length < 3) {
         	logger.info("Parameters to receive data test must be: host_application_id edge_node_id device_id");
         	return;
         }
+
         host_application_id = parms[0];
         logger.info("Host application id is "+host_application_id);
         
