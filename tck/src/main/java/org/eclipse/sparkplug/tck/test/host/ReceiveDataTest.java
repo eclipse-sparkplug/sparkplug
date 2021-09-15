@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
@@ -85,13 +86,11 @@ public class ReceiveDataTest extends TCKTest {
             testResults.put(testIds[i], "");
         }
         
-        host_application_id = parms[0];
-        logger.info("Host application id is "+host_application_id);
-        
         if (parms.length < 3) {
         	logger.info("Parameters to receive data test must be: host_application_id edge_node_id device_id");
         	return;
         }
+
         host_application_id = parms[0];
         logger.info("Host application id is "+host_application_id);
         
@@ -170,6 +169,12 @@ public class ReceiveDataTest extends TCKTest {
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
@@ -168,6 +169,12 @@ public class SessionEstablishment extends TCKTest {
         }
         testResults.put("message-flow-edge-node-birth-publish-connect", result);
     }
+    
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
     
     @Test
     @SpecAssertion(

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 
@@ -61,6 +62,12 @@ public class TCK {
 	public void connect(String clientId, ConnectPacket packet) {
 		if (current != null) {
 			current.connect(clientId, packet);
+		}
+	}
+	
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		if (current != null) {
+			current.disconnect(clientId, packet);
 		}
 	}
 	

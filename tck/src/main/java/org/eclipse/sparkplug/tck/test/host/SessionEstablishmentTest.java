@@ -19,6 +19,9 @@ package org.eclipse.sparkplug.tck.test.host;
  */
 
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
@@ -168,7 +171,13 @@ public class SessionEstablishmentTest extends TCKTest {
             result = "FAIL " + e.getMessage();
         }
     }
-
+    
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+    
     @Test
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
@@ -176,19 +185,19 @@ public class SessionEstablishmentTest extends TCKTest {
     public void subscribe(String clientId, SubscribePacket packet) {
         logger.info("Primary host session establishment test - subscribe");
 
-        if (myClientId.equals(clientId) && packet.getSubscriptions().get(0).getTopicFilter().equals("spAv1.0/#")) {
-            String result = "FAIL";
-            try {
-                if (!state.equals("CONNECTED"))
-                    throw new Exception("State should be connected, is " + state);
+        if (myClientId.equals(clientId) && packet.getSubscriptions().get(0).getTopicFilter().equals("spBv1.0/#")) {
+        	String result = "FAIL";
+        	try {
+        		if (!state.equals("CONNECTED"))
+        			throw new Exception("State should be connected, is "+state);
 
-                // TODO: what else do we need to check?
-                result = "PASS";
-                state = "SUBSCRIBED";
-            } catch (Exception e) {
-                result = "FAIL " + e.getMessage();
-            }
-            testResults.put("message-flow-phid-sparkplug-subscription", result);
+        		// TODO: what else do we need to check?
+        		result = "PASS";
+         		state = "SUBSCRIBED";
+        	} catch (Exception e) {
+        		result = "FAIL "+e.getMessage();
+        	}
+        	testResults.put("message-flow-phid-sparkplug-subscription", result);
         }
     }
 
