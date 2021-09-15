@@ -84,6 +84,8 @@ public class SendDataTest extends TCKTest {
     private String host_application_id = null;
     private String edge_node_id = null;
     private String device_id = null;
+    private boolean edge_node_checked = false,
+    		device_checked = false;
     
     public SendDataTest(TCK aTCK, String[] parms) {
         logger.info(getName());
@@ -94,9 +96,6 @@ public class SendDataTest extends TCKTest {
         for (int i = 0; i < testIds.length; ++i) {
             testResults.put(testIds[i], "");
         }
-        
-        host_application_id = parms[0];
-        logger.info("Host application id is "+host_application_id);
         
         if (parms.length < 3) {
         	logger.info("Parameters to edge send data test must be: host_application_id edge_node_id device_id");
@@ -111,8 +110,6 @@ public class SendDataTest extends TCKTest {
         
         device_id = parms[2];
         logger.info("Device id is "+device_id);
-        
-        
     }
     
     public void endTest() {
@@ -170,6 +167,10 @@ public class SendDataTest extends TCKTest {
 		} else if (cmd.equals("DDATA")) {
 			// namespace/group_id/DDATA/edge_node_id/device_id
 			checkDeviceData(clientId, packet);
+		}
+
+		if (edge_node_checked && device_checked) {
+			theTCK.endTest();
 		}
 	}
 	
@@ -241,6 +242,7 @@ public class SendDataTest extends TCKTest {
 		}
 		testResults.put("topics-ndata-payload", result);
 		logger.info("Send data test payload "+result);
+		edge_node_checked = true;
 	}
 	
 	@SpecAssertion(
@@ -296,14 +298,13 @@ public class SendDataTest extends TCKTest {
 		}
 		testResults.put("topics-ddata-timestamp", result);
 		
-		// Check for metric Inputs/0
 		result = "FAIL";
 		if (inboundPayload != null) {
 			List<Metric> metrics = inboundPayload.getMetrics();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				// TODO: Must include metrics that have changed - how do we check that? 
-				//Metric current = metricIterator.next();
+				Metric current = metricIterator.next();
 				//if (current.getName().equals(device_metric)) {
 					result = "PASS"; 
 				//}
@@ -311,6 +312,7 @@ public class SendDataTest extends TCKTest {
 		}
 		testResults.put("topics-ddata-payload", result);
 		logger.info("Send data test payload "+result);
+		device_checked = true;
 	}
 
 }

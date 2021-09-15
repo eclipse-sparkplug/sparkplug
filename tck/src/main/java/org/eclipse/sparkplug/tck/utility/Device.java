@@ -144,7 +144,7 @@ public class Device {
 						publishEdgeData(words[3]);
 					}
 					else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
-						/* SEND_EDGE_DATA host application id, edge node id, device id, metric name */
+						/* SEND_DEVICE_DATA host application id, edge node id, device id, metric name */
 						publishDeviceData(words[4]);
 					}
 					else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
