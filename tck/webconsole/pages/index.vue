@@ -33,7 +33,12 @@
             "
           >
             <template #title> Sparkplug Client Configuration </template>
-            <SparkplugClientConnect :change="tabOpen" :currentTest="currentTest" v-model="sparkplugClient" class="mt-3" />
+            <SparkplugClientConnect
+              :change="tabOpen"
+              :currentTest="currentTest"
+              v-model="sparkplugClient"
+              class="mt-3"
+            />
           </b-tab>
         </b-tabs>
       </div>
