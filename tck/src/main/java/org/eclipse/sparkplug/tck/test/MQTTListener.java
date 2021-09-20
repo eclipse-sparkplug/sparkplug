@@ -32,6 +32,8 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
+
 @SpecVersion(
         spec = "sparkplug",
         version = "3.0.0-SNAPSHOT")
@@ -46,6 +48,13 @@ public class MQTTListener implements MqttCallbackExtended {
 	private MqttTopic log_topic = null;
 	private MqttClient client;
 	
+	private String primary_host_application_id = null;
+	
+    private HashMap testResults = new HashMap<String, String>();
+    String[] testIds = {
+    	"intro-secondary-host-state"
+    };
+	
 	public void log(String message) {
 		try {
 			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
@@ -57,11 +66,26 @@ public class MQTTListener implements MqttCallbackExtended {
 	
 	public static void main(String[] args) {
 		MQTTListener listener = new MQTTListener();
-		listener.run();
+		listener.run(args);
 	}
 	
-	public void run() {
+	public void run(String[] args) {
 		System.out.println("*** Sparkplug TCK MQTT Listener ***");
+		
+        if (args.length < 1) {
+        	System.out.println("Parameter must be: primary_host_application_id");
+        	return;
+        }
+        
+        primary_host_application_id = args[0];
+        System.out.println("Primary host application id is "+primary_host_application_id);
+        
+        testResults = new HashMap<String, String>();
+        
+        for (int i = 0; i < testIds.length; ++i) {
+            testResults.put(testIds[i], "PASS");
+        }
+		
 		try {
 			// Connect to the MQTT Server
 			MqttConnectOptions options = new MqttConnectOptions();
@@ -103,6 +127,7 @@ public class MQTTListener implements MqttCallbackExtended {
 		try {
 			if (topic.startsWith("STATE/") ) {
 				System.out.println("Sparkplug message: "+ topic + " " + new String(message.getPayload()));
+				checkState(topic, message);
 			} else if (topic.equals(log_topic_name)) {
 				System.out.println("TCK log: "+ new String(message.getPayload()));
 			} else {
@@ -127,6 +152,20 @@ public class MQTTListener implements MqttCallbackExtended {
 	@Override
 	public void deliveryComplete(IMqttDeliveryToken token) {
 		System.out.println("Published message: " + token);
+	}
+	
+	@SpecAssertion(
+    		section = Sections.INTRODUCTION_SECONDARY_HOST_APPLICATION,
+    		id = "intro-secondary-host-state")
+	public void checkState(String topic, MqttMessage message) {
+		String[] words = topic.split("/");
+		if (words.length == 2) {
+			if (!words[1].equals(primary_host_application_id)) {
+				testResults.put("intro-secondary-host-state", "FAIL");
+			}
+		} else {
+			log("STATE message with wrong topic "+topic);
+		}
 	}
 	
     @SpecAssertion(
