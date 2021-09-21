@@ -57,9 +57,9 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-ndeath-will-message-qos", 
 		"payloads-ndeath-seq",
 		"topics-ndeath-seq",
+		"topics-ndeath-payload",
 		"payloads-ndeath-will-message-retain", 
 		"payloads-ndeath-will-message", 
-		"edge-death-bdseq",
 		"payloads-nbirth-qos", 
 		"payloads-nbirth-retain", 
 		"payloads-nbirth-seq",
@@ -158,8 +158,8 @@ public class SessionEstablishment extends TCKTest {
 		section = Sections.PAYLOADS_B_NDEATH, 
 		id = "payloads-ndeath-will-message-retain")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-death-bdseq")
+		section = Sections.PAYLOADS_DESC_NDEATH, 
+		id = "topics-ndeath-payload")
 	public Optional<WillPublishPacket> checkWillMessage(ConnectPacket packet) throws Exception {
 		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
 		if (willPublishPacketOptional.isPresent()) {
@@ -176,6 +176,7 @@ public class SessionEstablishment extends TCKTest {
 			SparkplugBPayload sparkplugPayload = decode(payload);
 
 			List<Metric> metrics = sparkplugPayload.getMetrics();
+			
 			for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
 					death_bdSeq = (long) m.getValue();
@@ -183,12 +184,13 @@ public class SessionEstablishment extends TCKTest {
 				}
 			}
 
-			// ensuring that death message has a bdSeq metric
+			// NDEATH message should contain a very simple payload that MUST only
+			// include a single metric, the bdseq number
 			result = "FAIL";
-			if (death_bdSeq != -1) {
+			if (death_bdSeq != -1 && metrics.size() == 1) {
 				result = "PASS";
 			}
-			testResults.put("edge-death-bdseq", result);
+			testResults.put("topics-ndeath-payload", result);
 			
 			// death message should not include a sequence number
 			result = "FAIL";
