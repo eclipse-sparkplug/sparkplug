@@ -118,10 +118,6 @@ public class SessionEstablishment extends TCKTest {
 		logger.info("Group id is " + group_id);
 		logger.info("Edge node id is " + edge_node_id);
 
-		// if (parms.length > 1 && parms[1].equals("false")) {
-		// 	commands_supported = false;
-		// }
-
 	}
 
 	public void endTest() {
@@ -252,30 +248,6 @@ public class SessionEstablishment extends TCKTest {
 				state_found = true;
 			}
 		}
-		// logger.info("--------");
-
-		// if (myClientId.equals(clientId)) {
-		// String result = "FAIL";
-		// try {
-		// if (!state.equals("CONNECTED"))
-		// throw new Exception("State should be connected");
-		// if
-		// (!packet.getSubscriptions().get(0).getTopicFilter().equals("STATE/"+host_application_id))
-		// throw new Exception("Topic string wrong");
-		// TODO: what else do we need to check?
-		// result = "PASS";
-		// state = "SUBSCRIBED";
-		// } catch (Exception e) {
-		// result = "FAIL "+e.getMessage();
-		// }
-		// testResults.put("message-flow-edge-node-birth-publish-subscribe", result);
-
-		// A retained message should have been set on the STATE/host_application_id
-		// topic to indicate the
-		// status of the primary host. The edge node's behavior will vary depending on
-		// the result.
-
-		// }
 	}
 
 	@SpecAssertion(
