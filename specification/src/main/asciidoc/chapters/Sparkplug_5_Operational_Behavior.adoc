@@ -85,8 +85,8 @@ Host Application.
 Server(s), the ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the
 Primary Host Application.
 [tck-not-testable]#[yellow-background]*All metric data associated with any Sparkplug Edge Node that
-was connected to that MQTT Server MUST be updated to a "STALE" data quality if the Host Application
-loses connection to the MQTT Server.*#
+was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data
+quality if the Host Application loses connection to the MQTT Server.*#
 
 [[operational_behavior_edge_node_session_establishment]]
 === Edge Node Session Establishment

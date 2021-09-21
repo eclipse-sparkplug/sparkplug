@@ -102,8 +102,8 @@ infrastructure. In these use cases, all the Device needs to do is to issue an MQ
 control packet prior to going offline to leave the MQTT infrastructure “gracefully”. In this case an
 MQTT device or associated DEATH certificate will most normally not be seen. System designers just
 need to be aware that the metric in the _Primary Host Application_ will represent “Last Known Good”
-values with a time stamp of this data where the current state of the of the MQTT Device is not a
-real-time indication. The _Primary Host Application_ metric time stamp values can be used to
+values with a timestamp of this data where the current state of the of the MQTT Device is not a
+real-time indication. The _Primary Host Application_ metric timestamp values can be used to
 determine when the values from this node were last updated.
 
 Non-persistent MQTT Enabled Devices should still register a proper DEATH Certificate upon the

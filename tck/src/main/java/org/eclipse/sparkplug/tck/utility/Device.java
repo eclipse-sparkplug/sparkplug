@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -93,6 +93,7 @@ public class Device {
 	private MqttTopic edge_topic = null;
 	private MqttTopic device_topic = null;
 	private MessageListener edge_listener = null;
+	private byte[] deathBytes = null;
 	
 	private Calendar calendar = Calendar.getInstance();
 	
@@ -115,13 +116,20 @@ public class Device {
 	public void run(String[] args) {
 		System.out.println("*** Sparkplug TCK Device and Edge Node Utility ***");
 		try {
+			
+			MqttConnectOptions options = new MqttConnectOptions();
+			options.setAutomaticReconnect(true);
+			options.setCleanSession(true);
+			options.setConnectionTimeout(30);
+			options.setKeepAliveInterval(30);
+			
 			control = new MqttClient(brokerURI, controlId);
 		    control_listener = new MessageListener();
 		    control.setCallback(control_listener);
 			log_topic = control.getTopic(log_topic_name);
-			control.connect();
+			control.connect(options);
 			log("starting");
-			control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
+			//control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
 			while (true) {
 				MqttMessage msg = control_listener.getNextMessage();			
 				if (msg != null) {
@@ -136,8 +144,12 @@ public class Device {
 						publishEdgeData(words[3]);
 					}
 					else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
-						/* SEND_EDGE_DATA host application id, edge node id, device id, metric name */
+						/* SEND_DEVICE_DATA host application id, edge node id, device id, metric name */
 						publishDeviceData(words[4]);
+					}
+					else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
+						/* DISCONNECT_EDGE_NODE host application id, edge node id */
+						edgeDisconnect(words[1], words[2]);
 					}
 					else {
 						log("Command not understood: "+msg + " "+words.length);
@@ -149,6 +161,19 @@ public class Device {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	// Used to add the birth/death sequence number
+	private SparkplugBPayloadBuilder addBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
+		if (payload == null) {
+			payload = new SparkplugBPayloadBuilder();
+		}
+		if (bdSeq == 256) {
+			bdSeq = 0;
+		}
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long)bdSeq).createMetric());
+		bdSeq++;
+		return payload;
 	}
 	
 	public void edgeCreate(String host_application_id, String an_edge_node_id) throws Exception {
@@ -163,9 +188,21 @@ public class Device {
 	    edge_listener = new MessageListener();
 	    edge.setCallback(edge_listener);
 	    
-	    //TODO: set edge death message as MQTT will
+		// Build up DEATH payload - note DEATH payloads don't have a regular sequence number
+		SparkplugBPayloadBuilder deathPayload = new SparkplugBPayloadBuilder().setTimestamp(new Date());
+		deathPayload = addBdSeqNum(deathPayload);
+		deathBytes = new SparkplugBPayloadEncoder().getBytes(deathPayload.createPayload());
 		
-		edge.connect();
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setAutomaticReconnect(true);
+		options.setCleanSession(true);
+		options.setConnectionTimeout(30);
+		options.setKeepAliveInterval(30);
+		//options.setUserName(username);
+		//options.setPassword(password.toCharArray());
+		options.setWill(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 0, false);
+		
+		edge.connect(options);
 		
 		edge.subscribe("STATE/"+host_application_id); /* look for status of the host application we are to use */
 		
@@ -198,6 +235,20 @@ public class Device {
 		edge_topic = edge.getTopic(namespace+"/"+group_id+"/NBIRTH/"+edge_node_id);
 		edge_topic.publish(mqttmessage);
 		log("Edge node "+edge_node_id+" successfully created");
+	}
+	
+	public void edgeDisconnect(String host_application_id, String an_edge_node_id) throws Exception {
+		if (edge == null) {
+			log("Edge node "+edge_node_id+" does not exist");
+			return;
+		}
+		// The intention here is to "disconnect" without sending the MQTT disconnect packet
+		// Will this work?
+		edge.publish(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 0, false);
+		edge.disconnect(0);
+		edge.close();
+		edge = null;
+		log("Edge node "+edge_node_id+" disconnected");
 	}
 	
 	public void deviceCreate(String edge_node_id, String a_device_id) throws Exception {
@@ -547,7 +598,7 @@ public class Device {
 		device_id = null;
 	}
 	
-	class MessageListener implements MqttCallback {
+	class MessageListener implements MqttCallbackExtended {
 		ArrayList<MqttMessage> messages;
 
 		public MessageListener() {
@@ -560,6 +611,17 @@ public class Device {
 					return null;
 				}
 				return messages.remove(0);
+			}
+		}
+		
+		@Override
+		public void connectComplete(boolean reconnect, String serverURI) {
+			System.out.println("Connected!");
+			
+			try {
+				control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
 		}
 

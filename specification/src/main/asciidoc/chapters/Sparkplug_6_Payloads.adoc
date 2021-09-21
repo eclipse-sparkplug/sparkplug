@@ -596,6 +596,29 @@ to true the value can be omitted altogether.
 *** _PropertySetList_
 **** Defined link:#payloads_b_propertysetlist[here].
 
+[[payloads_b_quality_codes]]
+===== Quality Codes
+
+There is one specific property key in Sparkplug called 'Quality'. This defines the quality of the
+value associated with the metric. This property is optional and is only required if the quality of
+the metric is not GOOD.
+
+There are three possible quality code values. These are defined below with their associated
+meanings.
+
+* *0*
+** BAD
+* *192*
+** GOOD
+* *500*
+** STALE
+
+[tck-testable tck-id-payloads-propertyset-quality-value-type]#[yellow-background]*The 'type' of the
+Property Value MUST be a value of 3 which represents a Signed 32-bit Integer.*#
+
+[tck-testable tck-id-payloads-propertyset-quality-value-value]#[yellow-background]*The 'value' of
+the Property Value MUST be an int_value and be one of the valid quality codes of 0, 192, or 500.*#
+
 [[payloads_b_propertysetlist]]
 ==== PropertySetList
 

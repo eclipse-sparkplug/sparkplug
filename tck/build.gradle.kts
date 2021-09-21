@@ -82,7 +82,7 @@ dependencies {
     runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit-jupiter.version")}")
     implementation("jakarta.annotation:jakarta.annotation-api:${property("jakarta.annotation.version")}")
     implementation("jakarta.validation:jakarta.validation-api:${property("jakarta.validation.version")}")
-    
+
     implementation("org.eclipse.tahu:tahu-java:${property("tahu.version")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${property("jackson.version")}")
@@ -206,70 +206,96 @@ downloadLicenses {
     val cc0 = license("CC0", "https://creativecommons.org/publicdomain/zero/1.0/")
 
     aliases = mapOf(
-            apache_2 to listOf("Apache 2",
-                    "Apache 2.0",
-                    "Apache License 2.0",
-                    "Apache License, 2.0",
-                    "Apache License v2.0",
-                    "Apache License, Version 2",
-                    "Apache License Version 2.0",
-                    "Apache License, Version 2.0",
-                    "Apache License, version 2.0",
-                    "The Apache License, Version 2.0",
-                    "Apache Software License - Version 2.0",
-                    "Apache Software License, version 2.0",
-                    "The Apache Software License, Version 2.0"),
-            mit to listOf("MIT License",
-                    "MIT license",
-                    "The MIT License",
-                    "The MIT License (MIT)"),
-            cddl_1_0 to listOf("CDDL, Version 1.0",
-                    "Common Development and Distribution License 1.0",
-                    "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
-                    license("CDDL", "https://glassfish.dev.java.net/public/CDDLv1.0.html")),
-            cddl_1_1 to listOf("CDDL 1.1",
-                    "CDDL, Version 1.1",
-                    "Common Development And Distribution License 1.1",
-                    "CDDL+GPL License",
-                    "CDDL + GPLv2 with classpath exception",
-                    "Dual license consisting of the CDDL v1.1 and GPL v2",
-                    "CDDL or GPLv2 with exceptions",
-                    "CDDL/GPLv2+CE"),
-            lgpl_2_0 to listOf("LGPL, Version 2.0",
-                    "GNU General Public License, version 2"),
-            lgpl_2_1 to listOf("LGPL, Version 2.1",
-                    "LGPL, version 2.1",
-                    "GNU Lesser General Public License version 2.1 (LGPLv2.1)",
-                    license("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")),
-            lgpl_3_0 to listOf("LGPL, Version 3.0",
-                    "Lesser General Public License, version 3 or greater"),
-            epl_1_0 to listOf("EPL, Version 1.0",
-                    "Eclipse Public License - v 1.0",
-                    "Eclipse Public License - Version 1.0",
-                    license("Eclipse Public License", "http://www.eclipse.org/legal/epl-v10.html")),
-            epl_2_0 to listOf("EPL 2.0",
-                    "EPL, Version 2.0"),
-            edl_1_0 to listOf("EDL 1.0",
-                    "EDL, Version 1.0",
-                    "Eclipse Distribution License - v 1.0"),
-            bsd_3clause to listOf("BSD 3-clause",
-                    "BSD-3-Clause",
-                    "BSD 3-Clause License",
-                    "3-Clause BSD License",
-                    "New BSD License",
-                    license("BSD", "http://asm.ow2.org/license.html"),
-                    license("BSD", "http://asm.objectweb.org/license.html"),
-                    license("BSD", "LICENSE.txt")),
-            w3c to listOf("W3C License",
-                    "W3C Software Copyright Notice and License",
-                    "The W3C Software License"),
-            cc0 to listOf("CC0",
-                    "Public Domain")
+        apache_2 to listOf(
+            "Apache 2",
+            "Apache 2.0",
+            "Apache License 2.0",
+            "Apache License, 2.0",
+            "Apache License v2.0",
+            "Apache License, Version 2",
+            "Apache License Version 2.0",
+            "Apache License, Version 2.0",
+            "Apache License, version 2.0",
+            "The Apache License, Version 2.0",
+            "Apache Software License - Version 2.0",
+            "Apache Software License, version 2.0",
+            "The Apache Software License, Version 2.0"
+        ),
+        mit to listOf(
+            "MIT License",
+            "MIT license",
+            "The MIT License",
+            "The MIT License (MIT)"
+        ),
+        cddl_1_0 to listOf(
+            "CDDL, Version 1.0",
+            "Common Development and Distribution License 1.0",
+            "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
+            license("CDDL", "https://glassfish.dev.java.net/public/CDDLv1.0.html")
+        ),
+        cddl_1_1 to listOf(
+            "CDDL 1.1",
+            "CDDL, Version 1.1",
+            "Common Development And Distribution License 1.1",
+            "CDDL+GPL License",
+            "CDDL + GPLv2 with classpath exception",
+            "Dual license consisting of the CDDL v1.1 and GPL v2",
+            "CDDL or GPLv2 with exceptions",
+            "CDDL/GPLv2+CE"
+        ),
+        lgpl_2_0 to listOf(
+            "LGPL, Version 2.0",
+            "GNU General Public License, version 2"
+        ),
+        lgpl_2_1 to listOf(
+            "LGPL, Version 2.1",
+            "LGPL, version 2.1",
+            "GNU Lesser General Public License version 2.1 (LGPLv2.1)",
+            license("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+        ),
+        lgpl_3_0 to listOf(
+            "LGPL, Version 3.0",
+            "Lesser General Public License, version 3 or greater"
+        ),
+        epl_1_0 to listOf(
+            "EPL, Version 1.0",
+            "Eclipse Public License - v 1.0",
+            "Eclipse Public License - Version 1.0",
+            license("Eclipse Public License", "http://www.eclipse.org/legal/epl-v10.html")
+        ),
+        epl_2_0 to listOf(
+            "EPL 2.0",
+            "EPL, Version 2.0"
+        ),
+        edl_1_0 to listOf(
+            "EDL 1.0",
+            "EDL, Version 1.0",
+            "Eclipse Distribution License - v 1.0"
+        ),
+        bsd_3clause to listOf(
+            "BSD 3-clause",
+            "BSD-3-Clause",
+            "BSD 3-Clause License",
+            "3-Clause BSD License",
+            "New BSD License",
+            license("BSD", "http://asm.ow2.org/license.html"),
+            license("BSD", "http://asm.objectweb.org/license.html"),
+            license("BSD", "LICENSE.txt")
+        ),
+        w3c to listOf(
+            "W3C License",
+            "W3C Software Copyright Notice and License",
+            "The W3C Software License"
+        ),
+        cc0 to listOf(
+            "CC0",
+            "Public Domain"
+        )
     )
 
     dependencyConfiguration = "runtimeClasspath"
     excludeDependencies = listOf(
-            "org.eclipse.tahu:*:*"
+        "org.eclipse.tahu:*:*"
     )
 
 
@@ -297,12 +323,14 @@ tasks.register("audit") {
     dependsOn(gradle.includedBuild(specFolderName).task(":${auditCreationTaskName}"))
 
     doLast {
-        org.jboss.test.audit.generate.SectionsClassGenerator.main(arrayOf(
+        org.jboss.test.audit.generate.SectionsClassGenerator.main(
+            arrayOf(
                 gradle.includedBuild(specFolderName)
-                        .projectDir.resolve("build/tck-audit/tck-audit.xml")
-                        .absolutePath,
+                    .projectDir.resolve("build/tck-audit/tck-audit.xml")
+                    .absolutePath,
                 "org.eclipse.sparkplug.tck",
-                buildDir.resolve("generated/sources/audit/").absolutePath)
+                buildDir.resolve("generated/sources/audit/").absolutePath
+            )
         )
     }
 }
@@ -310,13 +338,16 @@ tasks.register("audit") {
 //Creates coverage-report with jboss audit annotation processor
 tasks.named("compileJava", JavaCompile::class.java) {
     dependsOn("audit")
-    options.compilerArgs.addAll(listOf(
+    options.compilerArgs.addAll(
+        listOf(
             "-AauditXml=${
                 gradle.includedBuild(specFolderName)
-                        .projectDir.resolve("build/tck-audit/tck-audit.xml")
-                        .absolutePath
+                    .projectDir.resolve("build/tck-audit/tck-audit.xml")
+                    .absolutePath
             }",
-            "-AoutputDir=${buildDir.resolve("coverage-report").absolutePath}"))
+            "-AoutputDir=${buildDir.resolve("coverage-report").absolutePath}"
+        )
+    )
 }
 
 
@@ -337,11 +368,17 @@ val unzipHivemq by tasks.registering(Sync::class) {
 
 tasks.prepareHivemqHome {
     hivemqFolder.set(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") } as Any)
+    from(projectDir.resolve("hivemq-config.xml")) {
+        rename { "config.xml" }
+        into("conf")
+    }
+
 }
 
 tasks.runHivemqWithExtension {
+    environment["HIVEMQ_LOG_LEVEL"] = "DEBUG"
     debugOptions {
-        enabled.set(true)
+        enabled.set(false)
     }
 }
 

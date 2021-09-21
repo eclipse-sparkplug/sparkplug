@@ -27,6 +27,7 @@ import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import org.eclipse.sparkplug.tck.test.TCK;
+import java.util.ArrayList;
 
 public class PublishInterceptor implements PublishInboundInterceptor {
 
@@ -35,6 +36,39 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 	
 	public PublishInterceptor(TCK aTCK) {
 		theTCK = aTCK;
+	}
+	
+	private int pos = 0;
+	private String getToken(String payload) {
+		String rc = null;
+
+		try {
+			while (payload.charAt(pos) == ' ')
+				pos++;
+
+			int startpos = -1;
+			int endpos = -1;
+			if (payload.charAt(pos) == '\"') {
+				startpos = ++pos;
+				while (payload.charAt(pos) != '\"') {
+					pos++;
+				}
+				endpos = pos++;
+			} else {
+				startpos = pos;
+				while (payload.charAt(pos) != ' ') {
+					pos++;
+				}
+				endpos = pos;
+			}
+			rc = payload.substring(startpos, endpos);
+		} catch (Exception e) {
+
+		}
+		if (rc == null) {
+			pos = 0;
+		}
+		return rc;
 	}
 
 	@Override
@@ -54,18 +88,25 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			if (bpayload != null) {
 				payload = StandardCharsets.UTF_8.decode(bpayload).toString();
 			}
-			logger.debug("\tPayload {}", payload);
+			logger.info("\tPayload {}", payload);
 			
 			if (topic.equals("SPARKPLUG_TCK/LOG")) {
 				logger.info(clientId + ": " + payload);  // display log messsage
 			}
 			
 			if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
-				String cmd = "NEW ";
-				if (payload.toUpperCase().startsWith(cmd)) {
-					String[] strings = payload.split(" ");
+				String cmd = "NEW_TEST";
+				if (payload.toUpperCase().startsWith(cmd)) {				
+					ArrayList<String> parmarray = new ArrayList<String>();
+					String token = getToken(payload);
+					while (token != null) {
+						parmarray.add(token);
+						token = getToken(payload);
+					}
+					String[] strings = parmarray.toArray(new String[parmarray.size()]);
+					
 					if (strings.length < 3) {
-						throw new Exception("New test syntax is: NEW profile testname <parameters>");
+						throw new Exception("New test syntax is: NEW_TEST profile testname <parameters>");
 					}
 					int no_parms = strings.length - 3;
 					String[] parms = new String[no_parms];
@@ -74,7 +115,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 					}
 					theTCK.newTest(strings[1], strings[2], parms);
 				} else {	
-					cmd = "END TEST";
+					cmd = "END_TEST";
 					if (payload.toUpperCase().trim().equals(cmd)) {
 						theTCK.endTest();
 					}	
