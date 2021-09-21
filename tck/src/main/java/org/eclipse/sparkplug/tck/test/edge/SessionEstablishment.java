@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
@@ -53,22 +54,22 @@ public class SessionEstablishment extends TCKTest {
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private HashMap<String, String> testResults = new HashMap<String, String>();
 	String[] testIds = {
-		"edge-death-qos", 
-		"edge-death-seq", 
-		"edge-death-retain", 
-		"edge-death-cert", 
+		"payloads-ndeath-will-message-qos", 
+		"payloads-ndeath-seq", 
+		"payloads-ndeath-will-message-retain", 
+		"payloads-ndeath-will-message", 
 		"edge-death-bdseq",
-		"edge-birth-qos", 
-		"edge-birth-retain", 
-		"edge-birth-seq", 
-		"edge-birth-bdseq", 
+		"payloads-nbirth-qos", 
+		"payloads-nbirth-retain", 
+		"payloads-nbirth-seq", 
+		"payloads-nbirth-bdseq", 
 		"edge-birth-metrics",
-		"edge-birth-timestamp", 
-		"edge-rebirth", 
-		"edge-bdseq", 
+		"payloads-nbirth-timestamp", 
+		"payloads-nbirth-bdseq-inc", 
+		"payloads-ndeath-bdseq", 
 		"edge-subscribe-ncmd", 
 		"edge-subscribe-dcmd",
-		"edge-subscribe-state",
+		"message-flow-edge-node-birth-publish-subscribe",
 		"edge-state-before-birth"
 	};
 	private String myClientId = null;
@@ -145,14 +146,14 @@ public class SessionEstablishment extends TCKTest {
 	}
 
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-death-qos")
+		section = Sections.PAYLOADS_B_NDEATH, 
+		id = "payloads-ndeath-will-message-qos")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-death-seq")
+		section = Sections.PAYLOADS_B_NDEATH, 
+		id = "payloads-ndeath-seq")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-death-retain")
+		section = Sections.PAYLOADS_B_NDEATH, 
+		id = "payloads-ndeath-will-message-retain")
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
 		id = "edge-death-bdseq")
@@ -160,12 +161,13 @@ public class SessionEstablishment extends TCKTest {
 		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
 		if (willPublishPacketOptional.isPresent()) {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
-
+			
+			// NDEATH message must set MQTT Will QoS to 1
 			String result = "FAIL";
 			if (willPublishPacket.getQos().getQosNumber() == 1) {
 				result = "PASS";
 			}
-			testResults.put("edge-death-qos", result);
+			testResults.put("payloads-ndeath-will-message-qos", result);
 
 			ByteBuffer payload = willPublishPacket.getPayload().orElseGet(null);
 			SparkplugBPayload sparkplugPayload = decode(payload);
@@ -190,22 +192,22 @@ public class SessionEstablishment extends TCKTest {
 			if (sparkplugPayload.getSeq() == -1) {
 				result = "PASS";
 			}
-			testResults.put("edge-death-seq", result);
+			testResults.put("payloads-ndeath-seq", result);
 
 			// retained flag must be false
 			result = "FAIL";
 			if (!willPublishPacket.getRetain()) {
 				result = "PASS";
 			}
-			testResults.put("edge-death-retain", result);
+			testResults.put("payloads-ndeath-will-message-retain", result);
 
 		}
 		return willPublishPacketOptional;
 	}
 
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-death-cert")
+		section = Sections.PAYLOADS_B_NDEATH, 
+		id = "payloads-ndeath-will-message")
 	public void connect(String clientId, ConnectPacket packet) {
 		logger.info("Edge session establishment test - connect");
 
@@ -216,12 +218,18 @@ public class SessionEstablishment extends TCKTest {
 			if (willPublishPacketOptional.isPresent()) {
 				result = "PASS";
 			}
-			testResults.put("edge-death-cert", result);
+			testResults.put("payloads-ndeath-will-message", result);
 		} catch (Exception e) {
 			logger.info("Exception", e);
 		}
 	}
-
+	
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public void subscribe(String clientId, SubscribePacket packet) {
 		logger.info("Edge session establishment test - subscribe");
 
@@ -265,26 +273,26 @@ public class SessionEstablishment extends TCKTest {
 	}
 
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-birth-bdseq")
+		section = Sections.PAYLOADS_B_NBIRTH, 
+		id = "payloads-nbirth-bdseq")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-birth-qos")
+		section = Sections.PAYLOADS_B_NBIRTH, 
+		id = "payloads-nbirth-qos")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-birth-retain")
+		section = Sections.PAYLOADS_B_NBIRTH, 
+		id = "payloads-nbirth-retain")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-birth-seq")
+		section = Sections.PAYLOADS_B_NBIRTH, 
+		id = "payloads-nbirth-seq")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-birth-timestamp")
+		section = Sections.PAYLOADS_B_NBIRTH, 
+		id = "payloads-nbirth-timestamp")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-rebirth")
+		section = Sections.PAYLOADS_B_NBIRTH, 
+		id = "payloads-nbirth-bdseq-inc")
 	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-bdseq")
+		section = Sections.PAYLOADS_B_NDEATH, 
+		id = "payloads-ndeath-bdseq")
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
 		id = "edge-birth-metrics")
@@ -313,21 +321,21 @@ public class SessionEstablishment extends TCKTest {
 		if (packet.getQos().getQosNumber() == 0) {
 			result = "PASS";
 		}
-		testResults.put("edge-birth-qos", result);
+		testResults.put("payloads-nbirth-qos", result);
 
 		// retain should be false
 		result = "FAIL";
 		if (!packet.getRetain()) {
 			result = "PASS";
 		}
-		testResults.put("edge-birth-retain", result);
+		testResults.put("payloads-nbirth-retain", result);
 
 		// sequence number should be 0
 		result = "FAIL";
 		if (sparkplugPayload.getSeq() == 0) {
 			result = "PASS";
 		}
-		testResults.put("edge-birth-seq", result);
+		testResults.put("payloads-nbirth-seq", result);
 
 		// making sure that the payload timestamp is greater than (recieved_bith_time - 5 min) and less than the received_birth_time
 		result = "FAIL";
@@ -338,7 +346,7 @@ public class SessionEstablishment extends TCKTest {
 				result = "PASS";
 			}
 		}
-		testResults.put("edge-birth-timestamp", result);
+		testResults.put("payloads-nbirth-timestamp", result);
 
 		boolean rebirth_found = false;
 		boolean bdSeq_found = false;
@@ -380,21 +388,21 @@ public class SessionEstablishment extends TCKTest {
 		if (birth_bdSeq != -1) {
 			result = "PASS";
 		}
-		testResults.put("edge-birth-bdseq", result);
+		testResults.put("payloads-nbirth-bdseq", result);
 
-		// the birth bdSeq "must match the bdseq number provided in the MQTT CONNECT packet’s Will Message payload" (host app can correlate NBIRTHS to NDEATHS) 
+		// the birth bdSeq "must match the bdseq number provided in the MQTT CONNECT packets Will Message payload"
 		result = "FAIL";
 		if (birth_bdSeq != -1 && death_bdSeq != -1 && birth_bdSeq == death_bdSeq) {
 			result = "PASS";
 		}
-		testResults.put("edge-bdseq", result);
+		testResults.put("payloads-ndeath-bdseq", result);
 
 		// nbirth message must include 'node control/rebirth' metric
 		result = "FAIL";
 		if (rebirth_found == true && datatype == MetricDataType.Boolean && rebirth_val == false) {
 			result = "PASS";
 		}
-		testResults.put("edge-rebirth", result);
+		testResults.put("payloads-nbirth-bdseq-inc", result);
 
 		// at a minimum, each metric must include the metric name, datatype, and current value
 		result = "FAIL";
@@ -468,7 +476,7 @@ public class SessionEstablishment extends TCKTest {
 		id = "edge-subscribe-dcmd")
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-subscribe-state")
+		id = "message-flow-edge-node-birth-publish-subscribe")
 	public void check_subscribe_topics() {
 		
 		// making sure edge node subscribes to ncmd level topics, dcmd, and state
@@ -489,7 +497,7 @@ public class SessionEstablishment extends TCKTest {
 		if (state_found == true) {
 			result = "PASS";
 		}
-		testResults.put("edge-subscribe-state", result);
+		testResults.put("message-flow-edge-node-birth-publish-subscribe", result);
 
 	}
 }
