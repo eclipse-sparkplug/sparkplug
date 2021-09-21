@@ -69,8 +69,7 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-ndeath-bdseq", 
 		"edge-subscribe-ncmd", 
 		"edge-subscribe-dcmd",
-		"message-flow-edge-node-birth-publish-subscribe",
-		"edge-state-before-birth"
+		"message-flow-edge-node-birth-publish-subscribe"
 	};
 	private String myClientId = null;
 	private String state = null;
@@ -298,7 +297,7 @@ public class SessionEstablishment extends TCKTest {
 		id = "edge-birth-metrics")
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-state-before-birth")
+		id = "message-flow-edge-node-birth-publish-subscribe")
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Edge session establishment test - publish");
 
@@ -311,7 +310,7 @@ public class SessionEstablishment extends TCKTest {
 		if (state_found == true) {
 			result = "PASS";
 		}
-		testResults.put("edge-state-before-birth",result);
+		testResults.put("message-flow-edge-node-birth-publish-subscribe",result);
 		
 		ByteBuffer payload = packet.getPayload().orElseGet(null);
 		SparkplugBPayload sparkplugPayload = decode(payload);
@@ -474,12 +473,9 @@ public class SessionEstablishment extends TCKTest {
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
 		id = "edge-subscribe-dcmd")
-	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "message-flow-edge-node-birth-publish-subscribe")
 	public void check_subscribe_topics() {
 		
-		// making sure edge node subscribes to ncmd level topics, dcmd, and state
+		// making sure edge node subscribes to ncmd and dcmd
 		
 		String result = "FAIL";
 		if (ncmd_found == true) {
@@ -492,12 +488,6 @@ public class SessionEstablishment extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("edge-subscribe-dcmd", result);
-
-		result = "FAIL";
-		if (state_found == true) {
-			result = "PASS";
-		}
-		testResults.put("message-flow-edge-node-birth-publish-subscribe", result);
 
 	}
 }
