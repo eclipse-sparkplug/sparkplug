@@ -55,15 +55,16 @@ public class SessionEstablishment extends TCKTest {
 	private HashMap<String, String> testResults = new HashMap<String, String>();
 	String[] testIds = {
 		"payloads-ndeath-will-message-qos", 
-		"payloads-ndeath-seq", 
+		"payloads-ndeath-seq",
+		"topics-ndeath-seq",
 		"payloads-ndeath-will-message-retain", 
 		"payloads-ndeath-will-message", 
 		"edge-death-bdseq",
 		"payloads-nbirth-qos", 
 		"payloads-nbirth-retain", 
-		"payloads-nbirth-seq", 
-		"payloads-nbirth-bdseq", 
-		"edge-birth-metrics",
+		"payloads-nbirth-seq",
+		"payloads-sequence-num-zero-nbirth",
+		"payloads-nbirth-bdseq",
 		"payloads-nbirth-timestamp", 
 		"payloads-nbirth-bdseq-inc", 
 		"payloads-ndeath-bdseq", 
@@ -151,6 +152,9 @@ public class SessionEstablishment extends TCKTest {
 		section = Sections.PAYLOADS_B_NDEATH, 
 		id = "payloads-ndeath-seq")
 	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NDEATH, 
+		id = "topics-ndeath-seq")
+	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NDEATH, 
 		id = "payloads-ndeath-will-message-retain")
 	@SpecAssertion(
@@ -192,6 +196,7 @@ public class SessionEstablishment extends TCKTest {
 				result = "PASS";
 			}
 			testResults.put("payloads-ndeath-seq", result);
+			testResults.put("topics-ndeath-seq", result);
 
 			// retained flag must be false
 			result = "FAIL";
@@ -284,6 +289,9 @@ public class SessionEstablishment extends TCKTest {
 		section = Sections.PAYLOADS_B_NBIRTH, 
 		id = "payloads-nbirth-seq")
 	@SpecAssertion(
+		section = Sections.PAYLOADS_B_PAYLOAD, 
+		id = "payloads-sequence-num-zero-nbirth")
+	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NBIRTH, 
 		id = "payloads-nbirth-timestamp")
 	@SpecAssertion(
@@ -292,9 +300,6 @@ public class SessionEstablishment extends TCKTest {
 	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NDEATH, 
 		id = "payloads-ndeath-bdseq")
-	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-birth-metrics")
 	@SpecAssertion(
 		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
 		id = "message-flow-edge-node-birth-publish-subscribe")
@@ -335,6 +340,7 @@ public class SessionEstablishment extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("payloads-nbirth-seq", result);
+		testResults.put("payloads-sequence-num-zero-nbirth",result);
 
 		// making sure that the payload timestamp is greater than (recieved_bith_time - 5 min) and less than the received_birth_time
 		result = "FAIL";
@@ -353,17 +359,10 @@ public class SessionEstablishment extends TCKTest {
 		MetricDataType datatype = null;
 		boolean rebirth_val = true;
 
-		boolean bad_metric_found = false;
 
 		if (sparkplugPayload != null) {
 			List<Metric> metrics = sparkplugPayload.getMetrics();
 			for (Metric m : metrics) {
-				logger.info(m.getName());
-				// if bad_metric_found becomes true because of one of the metrics,
-				// why check the rest of the metrics if the test result is already fail?
-				if (bad_metric_found == false) {
-					bad_metric_found = is_metric_bad(m);
-				}
 				if (m.getName().equals("bdSeq")) {
 					bdSeq_found = true;
 					birth_bdSeq = (long) m.getValue();
@@ -371,12 +370,9 @@ public class SessionEstablishment extends TCKTest {
 					rebirth_found = true;
 					datatype = m.getDataType();
 					rebirth_val = (boolean) m.getValue();
-				} else if (bdSeq_found == true && rebirth_found == true && bad_metric_found == true) {
-					// if bdseq and rebirth were already found, and if we already found a bad
-					// metric,
-					// then we have the info we need and we can break out of this loop.
-					// but, if bad_metric_found is still false, then we need to stay in the loop to
-					// make sure that none of the other metrics are bad
+				} else if (bdSeq_found == true && rebirth_found == true) {
+					// if bdseq and rebirth were already found, then we have
+					// the info we need and we can break out of this loop
 					break;
 				}
 			}
@@ -403,38 +399,6 @@ public class SessionEstablishment extends TCKTest {
 		}
 		testResults.put("payloads-nbirth-bdseq-inc", result);
 
-		// at a minimum, each metric must include the metric name, datatype, and current value
-		result = "FAIL";
-		if (bad_metric_found == false) {
-			result = "PASS";
-		}
-		testResults.put("edge-birth-metrics", result);
-
-		// testResults.put("edge-bdseq",result);
-		// logger.info("client id is " + clientId);
-		// if (myClientId.equals(clientId)) {
-		// String result = "FAIL";
-		// try {
-		// if (!state.equals("SUBSCRIBED"))
-		// throw new Exception("State should be subscribed");
-
-		// String payload = null;
-		// ByteBuffer bpayload = packet.getPayload().orElseGet(null);
-		// if (bpayload != null) {
-		// payload = StandardCharsets.UTF_8.decode(bpayload).toString();
-		// }
-		// if (!payload.equals("ONLINE"))
-		// throw new Exception("Payload should be ONLINE");
-
-		// TODO: what else do we need to check?
-		// result = "PASS";
-		// state = "PUBLISHED";
-		// } catch (Exception e) {
-		// result = "FAIL " + e.getMessage();
-		// }
-		// testResults.put("primary-application-state-publish", result);
-		// }
-
 		check_subscribe_topics();
 
 		theTCK.endTest();
@@ -453,18 +417,6 @@ public class SessionEstablishment extends TCKTest {
 			return sparkplugPayload;
 		}
 		return sparkplugPayload;
-	}
-
-	public boolean is_metric_bad(Metric m) {
-		if (m.hasName() == false) {
-			return true;
-		} else if (m.getDataType() == null) {
-			return true;
-		} else if (m.getValue() == null) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	@SpecAssertion(
