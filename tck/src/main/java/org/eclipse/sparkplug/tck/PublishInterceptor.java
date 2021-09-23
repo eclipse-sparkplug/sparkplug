@@ -20,7 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Ian Craggs
@@ -61,8 +64,15 @@ public class PublishInterceptor implements PublishInboundInterceptor {
                 if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
                     String cmd = "NEW_TEST";
                     if (payload.toUpperCase().startsWith(cmd)) {
-
-                        final String[] strings = Arrays.stream(payload.trim().split("\\s+"))
+                        //find all tokens which are either plain tokens or
+                        //containing whitespaces and therefore surrounded with double quotes
+                        final Pattern tokenPattern = Pattern.compile("(\"(\\w|\\s)+\")|\\w+");
+                        final Matcher matcher = tokenPattern.matcher(payload.trim());
+                        final List<String> tokens = new ArrayList<>();
+                        while (matcher.find()) {
+                            tokens.add(matcher.group());
+                        }
+                        final String[] strings = tokens.stream()
                                 .map(token -> {
                                     if (token.startsWith("\"") && token.endsWith("\"")) {
                                         return token.substring(1, token.length() - 1);
