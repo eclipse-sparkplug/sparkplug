@@ -1013,7 +1013,7 @@ a bdSeq number metric.*#
 include a bdSeq number value that is one greater than the previous NBIRTH's bdSeq number. This value
 MUST never exceed 255. If in the previous NBIRTH a value of 255 was sent, the next NBIRTH MUST have
 a value of 0.*#
-* [tck-testable tck-id-payloads-nbirth-bdseq-inc]#[yellow-background]*Every NBIRTH MUST include a
+* [tck-testable tck-id-payloads-nbirth-rebirth]#[yellow-background]*Every NBIRTH MUST include a
 metric with the name 'Node Control/Rebirth' and have a boolean value of false.*#
 This is used by Host Applications to force an Edge Node to send a new birth sequence (NBIRTH and
 DBIRTH messages) if errors are detected by the Host Application in the data stream.
