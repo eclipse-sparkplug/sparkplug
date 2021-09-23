@@ -66,7 +66,7 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-sequence-num-zero-nbirth",
 		"payloads-nbirth-bdseq",
 		"payloads-nbirth-timestamp", 
-		"payloads-nbirth-bdseq-inc", 
+		"payloads-nbirth-rebirth", 
 		"payloads-ndeath-bdseq", 
 		"edge-subscribe-ncmd", 
 		"edge-subscribe-dcmd",
@@ -270,7 +270,7 @@ public class SessionEstablishment extends TCKTest {
 		id = "payloads-nbirth-timestamp")
 	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-bdseq-inc")
+		id = "payloads-nbirth-rebirth")
 	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NDEATH, 
 		id = "payloads-ndeath-bdseq")
@@ -371,7 +371,7 @@ public class SessionEstablishment extends TCKTest {
 		if (rebirth_found == true && datatype == MetricDataType.Boolean && rebirth_val == false) {
 			result = "PASS";
 		}
-		testResults.put("payloads-nbirth-bdseq-inc", result);
+		testResults.put("payloads-nbirth-rebirth", result);
 
 		check_subscribe_topics();
 
