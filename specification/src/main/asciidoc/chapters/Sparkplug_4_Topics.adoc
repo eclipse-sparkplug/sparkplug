@@ -485,8 +485,8 @@ denoting the Date/Time the message was sent from the Host Application’s MQTT c
 that need to be written to on the Device.*#
 
 [[topics_primary_host]]
-==== Primary Host Application
 [upperalpha, start=1]
+==== Primary Host Application
 
 [[birth_message_state]]
 ===== Birth Message (STATE)
@@ -506,7 +506,7 @@ Host Application MQTT Client applications.
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
 Certificate:
 [subs="quotes"]
-  *STATE*/primary_host_application_id
+  [tck-testable tck-id-host-topic-phid-birth-topic]#*STATE*/primary_host_application_id#
 
 * [tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
 Payload MUST be the UTF-8 string “ONLINE”*#
@@ -542,7 +542,7 @@ packet.
 
 The *Will Topic* as defined above will be:
 [subs="quotes"]
-  *STATE*/primary_host_application_id
+  [tck-testable tck-id-host-topic-phid-death-topic]#*STATE*/primary_host_application_id#
 
 * [tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Primary Host Application
 MUST provide a Will message in the MQTT CONNECT packet*#
