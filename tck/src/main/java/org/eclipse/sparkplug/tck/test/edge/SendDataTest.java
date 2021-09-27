@@ -76,7 +76,15 @@ public class SendDataTest extends TCKTest {
         	"topics-ddata-mqtt",
         	"topics-ddata-seq-num",
         	"topics-ddata-timestamp",
-        	"topics-ddata-payload"
+        	"topics-ddata-payload",
+           	"payloads-ndata-timestamp",
+           	"payloads-ndata-seq", 
+           	"payloads-ndata-qos", 
+           	"payloads-ndata-retain",
+           	"payloads-ddata-timestamp",
+           	"payloads-ddata-seq", 
+           	"payloads-ddata-qos", 
+           	"payloads-ddata-retain"
         };
     private String myClientId = null;
     private String state = null;
@@ -176,6 +184,18 @@ public class SendDataTest extends TCKTest {
 	
 	
 	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NDATA,
+    		id = "payloads-ndata-timestamp")
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NDATA,
+    		id = "payloads-ndata-seq") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NDATA,
+    		id = "payloads-ndata-qos") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NDATA,
+    		id = "payloads-ndata-retain")
+	@SpecAssertion(
     		section = Sections.PAYLOADS_DESC_NDATA,
     		id = "topics-ndata-mqtt") 
 	@SpecAssertion(
@@ -194,6 +214,18 @@ public class SendDataTest extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("topics-ndata-mqtt", result);
+		
+		result = "FAIL";
+		if (packet.getQos() == Qos.AT_MOST_ONCE) {
+			result = "PASS";
+		}
+		testResults.put("payloads-ndata-qos", result);
+		
+		result = "FAIL";
+		if (packet.getRetain() == false) {
+			result = "PASS";
+		}
+		testResults.put("payloads-ndata-retain", result);
 		
 		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();				
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
@@ -218,6 +250,7 @@ public class SendDataTest extends TCKTest {
 			}	
 		}
 		testResults.put("topics-ndata-seq-num", result);
+		testResults.put("payloads-ndata-seq", result);
 		
 		result = "FAIL";
 		if (inboundPayload != null) {
@@ -227,6 +260,7 @@ public class SendDataTest extends TCKTest {
 			}	
 		}
 		testResults.put("topics-ndata-timestamp", result);
+		testResults.put("payloads-ndata-timestamp", result);
 		
 		result = "FAIL";
 		if (inboundPayload != null) {
@@ -246,6 +280,18 @@ public class SendDataTest extends TCKTest {
 	}
 	
 	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DDATA,
+    		id = "payloads-ddata-timestamp")
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DDATA,
+    		id = "payloads-ddata-seq") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DDATA,
+    		id = "payloads-ddata-qos") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DDATA,
+    		id = "payloads-ddata-retain")
+	@SpecAssertion(
     		section = Sections.PAYLOADS_DESC_DDATA,
     		id = "topics-ddata-mqtt") 
 	@SpecAssertion(
@@ -264,6 +310,18 @@ public class SendDataTest extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("topics-ddata-mqtt", result);
+		
+		result = "FAIL";
+		if (packet.getQos() == Qos.AT_MOST_ONCE) {
+			result = "PASS";
+		}
+		testResults.put("payloads-ddata-qos", result);
+		
+		result = "FAIL";
+		if (packet.getRetain() == false) {
+			result = "PASS";
+		}
+		testResults.put("payloads-ddata-retain", result);
 		
 		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();				
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
@@ -288,6 +346,7 @@ public class SendDataTest extends TCKTest {
 			}	
 		}
 		testResults.put("topics-ddata-seq-num", result);
+		testResults.put("payloads-ddata-seq", result);
 		
 		result = "FAIL";
 		if (inboundPayload != null) {
@@ -297,6 +356,7 @@ public class SendDataTest extends TCKTest {
 			}	
 		}
 		testResults.put("topics-ddata-timestamp", result);
+		testResults.put("payloads-ddata-timestamp", result);
 		
 		result = "FAIL";
 		if (inboundPayload != null) {

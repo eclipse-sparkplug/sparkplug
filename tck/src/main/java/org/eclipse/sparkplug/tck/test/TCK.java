@@ -45,8 +45,7 @@ public class TCK {
             final Object[] parameters = {this, parms};
             current = (TCKTest) constructor.newInstance(parameters);
         } catch (final Exception e) {
-            logger.error("Could not find or set test class " + profile + "." + test);
-            logger.error("Test could not be created: ", e);
+            logger.error("Could not find or set test class " + profile + "." + test, e);
         }
     }
 
