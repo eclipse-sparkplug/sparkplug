@@ -42,6 +42,7 @@
   ~ * Create the audit file
   ~
   ~ @author Gunnar Morling
+  ~ @author Lukas Brand
   -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xalan="http://xml.apache.org/xslt"
                 xmlns:exslt="http://exslt.org/common" xmlns:xi="http://www.w3.org/2001/XInclude" version="1.0">
@@ -97,11 +98,31 @@
         </xsl:copy>
     </xsl:template>
 
+    <xsl:template match="/article/upperalpha" mode="addSectionNums">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:attribute name="sectionNum">
+                <xsl:number from="article" level="single"/>
+            </xsl:attribute>
+            <xsl:apply-templates mode="addSectionNums"/>
+        </xsl:copy>
+    </xsl:template>
+
     <xsl:template match="section" mode="addSectionNums">
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="sectionNum">
-                <xsl:number count="section" from="article" level="multiple"/>
+                <xsl:number count="section | upperalpha" from="article" level="multiple"/>
+            </xsl:attribute>
+            <xsl:apply-templates mode="addSectionNums"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="upperalpha" mode="addSectionNums">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:attribute name="sectionNum">
+                <xsl:number count="section | upperalpha" from="article" level="multiple"/>
             </xsl:attribute>
             <xsl:apply-templates mode="addSectionNums"/>
         </xsl:copy>
@@ -173,7 +194,7 @@
         </specification>
     </xsl:template>
 
-    <xsl:template match="section" mode="createAuditFile">
+    <xsl:template match="section | upperalpha" mode="createAuditFile">
         <xsl:call-template name="check-section-id">
             <xsl:with-param name="sectionId">
                 <xsl:value-of select="@xml:id"/>
@@ -190,7 +211,7 @@
                 <xsl:value-of select="normalize-space(translate(title, '’', $apos))"/>
             </xsl:attribute>
             <xsl:attribute name="level">
-                <xsl:value-of select="count(ancestor::section) + 1"/>
+                <xsl:value-of select="count(ancestor::section | ancestor::upperalpha) + 1"/>
             </xsl:attribute>
             <xsl:variable name="sectionIdConstant">
                 <xsl:call-template name="section-id-to-constant">
@@ -203,11 +224,11 @@
             </xsl:comment>
 
             <!-- get all assertions directly under chapter, without a section -->
-            <xsl:apply-templates select="*[not(local-name() = 'section')]" mode="createAuditFile"/>
+            <xsl:apply-templates select="*[not(local-name() = 'section') and not(local-name() = 'upperalpha')]" mode="createAuditFile"/>
         </section>
 
         <!-- get all sections, flattened to one level -->
-        <xsl:apply-templates select="section" mode="createAuditFile"/>
+        <xsl:apply-templates select="section | upperalpha " mode="createAuditFile"/>
     </xsl:template>
 
     <!-- Add an assertion for any element with role="tck..." -->
