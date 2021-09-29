@@ -85,9 +85,17 @@ public class SendCommandTest extends TCKTest {
     	"topics-ncmd-mqtt",
     	"topics-ncmd-timestamp",
     	"topics-ncmd-payload",
+    	"payloads-ncmd-timestamp",
+    	"payloads-ncmd-seq",
+     	"payloads-ncmd-qos",
+     	"payloads-ncmd-retain",
     	"topics-dcmd-mqtt",
     	"topics-dcmd-timestamp",
-    	"topics-dcmd-payload"
+    	"topics-dcmd-payload",
+    	"payloads-dcmd-timestamp",
+    	"payloads-dcmd-seq",
+     	"payloads-dcmd-qos",
+     	"payloads-dcmd-retain"
     };
     private String myClientId = null;
     private String state = null;
@@ -248,6 +256,18 @@ public class SendCommandTest extends TCKTest {
 	}
 	
 	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NCMD,
+    		id = "payloads-ncmd-timestamp") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NCMD,
+    		id = "payloads-ncmd-seq") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NCMD,
+    		id = "payloads-ncmd-qos") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_NCMD,
+    		id = "payloads-ncmd-retain") 
+	@SpecAssertion(
     		section = Sections.PAYLOADS_DESC_NCMD,
     		id = "topics-ncmd-mqtt") 
 	@SpecAssertion(
@@ -264,6 +284,18 @@ public class SendCommandTest extends TCKTest {
 		}
 		testResults.put("topics-ncmd-mqtt", result);
 		
+		result = "FAIL";
+		if (packet.getQos() == Qos.AT_MOST_ONCE) {
+			result = "PASS";
+		}
+		testResults.put("payloads-ncmd-qos", result);
+		
+		result = "FAIL";
+		if (packet.getRetain() == false) {
+			result = "PASS";
+		}
+		testResults.put("payloads-ncmd-retain", result);
+				
 		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();				
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
 		
@@ -287,6 +319,16 @@ public class SendCommandTest extends TCKTest {
 			}	
 		}
 		testResults.put("topics-ncmd-timestamp", result);
+		testResults.put("payloads-ncmd-timestamp", result);
+		
+		result = "FAIL";
+		if (inboundPayload != null) {
+			long seqno = inboundPayload.getSeq();
+			if (seqno < 0) {
+				result = "PASS";
+			}	
+		}
+		testResults.put("payloads-ncmd-seq", result);
 		
 		result = "FAIL";
 		if (inboundPayload != null) {
@@ -304,6 +346,18 @@ public class SendCommandTest extends TCKTest {
 	}
 	
 	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DCMD,
+    		id = "payloads-dcmd-timestamp") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DCMD,
+    		id = "payloads-dcmd-seq") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DCMD,
+    		id = "payloads-dcmd-qos") 
+	@SpecAssertion(
+    		section = Sections.PAYLOADS_B_DCMD,
+    		id = "payloads-dcmd-retain") 
+	@SpecAssertion(
     		section = Sections.PAYLOADS_DESC_DCMD,
     		id = "topics-dcmd-mqtt") 
 	@SpecAssertion(
@@ -319,6 +373,18 @@ public class SendCommandTest extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("topics-dcmd-mqtt", result);
+		
+		result = "FAIL";
+		if (packet.getQos() == Qos.AT_MOST_ONCE) {
+			result = "PASS";
+		}
+		testResults.put("payloads-dcmd-qos", result);
+		
+		result = "FAIL";
+		if (packet.getRetain() == false) {
+			result = "PASS";
+		}
+		testResults.put("payloads-dcmd-retain", result);
 		
 		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();				
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
@@ -343,6 +409,16 @@ public class SendCommandTest extends TCKTest {
 			}	
 		}
 		testResults.put("topics-dcmd-timestamp", result);
+		testResults.put("payloads-dcmd-timestamp", result);
+		
+		result = "FAIL";
+		if (inboundPayload != null) {
+			long seqno = inboundPayload.getSeq();
+			if (seqno < 0) {
+				result = "PASS";
+			}	
+		}
+		testResults.put("payloads-dcmd-seq", result);
 		
 		// Check for metric Inputs/0
 		result = "FAIL";

@@ -2,7 +2,9 @@
 .project
 .mvn
 SparkplugTCKClient*
-tck/src/license/THIRD-PARTY.properties 
+SparkplugTCKedge*
+SparkplugTCKdevice*
+tck/src/license/THIRD-PARTY.properties
 .gradle
 build/
 target/

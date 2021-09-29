@@ -376,7 +376,7 @@ tasks.prepareHivemqHome {
 }
 
 tasks.runHivemqWithExtension {
-    environment["HIVEMQ_LOG_LEVEL"] = "DEBUG"
+    environment["HIVEMQ_LOG_LEVEL"] = "INFO"
     debugOptions {
         enabled.set(false)
     }

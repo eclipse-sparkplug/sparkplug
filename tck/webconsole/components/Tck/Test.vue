@@ -72,11 +72,11 @@
       </b-button-toolbar>
     </div>
 
-    <div class="mt-3" v-if="test.logging.length > 0">
+    <div class="mt-3" v-if="loggingSplitInLines.length > 0">
       <h5>Logging:</h5>
       <div>
-        <ul class="list-group" v-for="logMessage in test.logging" :key="logMessage.id">
-          <li class="list-group-item">{{ logMessage.logValue }}</li>
+        <ul class="list-group" v-for="logLine in loggingSplitInLines" :key="logLine">
+          <li class="list-group-item">{{ logLine }}</li>
         </ul>
       </div>
     </div>
@@ -185,6 +185,21 @@ export default {
         required: true,
         default: () => [],
       },
+    },
+  },
+
+  computed: {
+    loggingSplitInLines: function () {
+      let logLines = [];
+      for (const logMessage of this.test.logging) {
+        const lines = logMessage.logValue.trim().split(/\r\n|\n\r|\n|\r/);
+        logLines = logLines.concat(lines);
+        console.log(lines);
+      }
+      console.log(logLines);
+
+      logLines = logLines.filter((line) => line.trim().length != 0);
+      return logLines;
     },
   },
 
