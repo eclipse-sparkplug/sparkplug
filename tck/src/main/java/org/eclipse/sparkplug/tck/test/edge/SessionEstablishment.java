@@ -70,7 +70,13 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-ndeath-bdseq", 
 		"edge-subscribe-ncmd", 
 		"edge-subscribe-dcmd",
-		"message-flow-edge-node-birth-publish-subscribe"
+		"message-flow-edge-node-birth-publish-subscribe",
+		"topics-nbirth-mqtt",
+		"topics-nbirth-seq-num",
+		"topics-nbirth-timestamp",
+		"topics-nbirth-bdseq-included",
+		"topics-nbirth-bdseq-matching",
+		"topics-nbirth-rebirth-metric"
 	};
 	private String myClientId = null;
 	private String state = null;
@@ -249,13 +255,31 @@ public class SessionEstablishment extends TCKTest {
 			}
 		}
 	}
-
+	
 	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NBIRTH, 
 		id = "payloads-nbirth-bdseq")
 	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NBIRTH, 
 		id = "payloads-nbirth-qos")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NBIRTH, 
+		id = "topics-nbirth-mqtt")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NBIRTH, 
+		id = "topics-nbirth-seq-num")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NBIRTH, 
+		id = "topics-nbirth-timestamp")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NBIRTH, 
+		id = "topics-nbirth-bdseq-included")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NBIRTH, 
+		id = "topics-nbirth-bdseq-matching")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_NBIRTH, 
+		id = "topics-nbirth-rebirth-metric")
 	@SpecAssertion(
 		section = Sections.PAYLOADS_B_NBIRTH, 
 		id = "payloads-nbirth-retain")
@@ -300,6 +324,7 @@ public class SessionEstablishment extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("payloads-nbirth-qos", result);
+		testResults.put("topics-nbirth-mqtt",result);
 
 		// retain should be false
 		result = "FAIL";
@@ -315,6 +340,7 @@ public class SessionEstablishment extends TCKTest {
 		}
 		testResults.put("payloads-nbirth-seq", result);
 		testResults.put("payloads-sequence-num-zero-nbirth",result);
+		testResults.put("topics-nbirth-seq-num", result);
 
 		// making sure that the payload timestamp is greater than (recieved_bith_time - 5 min) and less than the received_birth_time
 		result = "FAIL";
@@ -326,6 +352,7 @@ public class SessionEstablishment extends TCKTest {
 			}
 		}
 		testResults.put("payloads-nbirth-timestamp", result);
+		testResults.put("topics-nbirth-timestamp", result);
 
 		boolean rebirth_found = false;
 		boolean bdSeq_found = false;
@@ -358,6 +385,7 @@ public class SessionEstablishment extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("payloads-nbirth-bdseq", result);
+		testResults.put("topics-nbirth-bdseq-included", result);
 
 		// the birth bdSeq "must match the bdseq number provided in the MQTT CONNECT packets Will Message payload"
 		result = "FAIL";
@@ -365,6 +393,7 @@ public class SessionEstablishment extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("payloads-ndeath-bdseq", result);
+		testResults.put("topics-nbirth-bdseq-matching", result);
 
 		// nbirth message must include 'node control/rebirth' metric
 		result = "FAIL";
@@ -372,6 +401,7 @@ public class SessionEstablishment extends TCKTest {
 			result = "PASS";
 		}
 		testResults.put("payloads-nbirth-rebirth", result);
+		testResults.put("topics-nbirth-rebirth-metric", result);
 
 		check_subscribe_topics();
 
