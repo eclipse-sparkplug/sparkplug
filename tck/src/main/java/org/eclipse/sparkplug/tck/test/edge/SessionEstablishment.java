@@ -82,7 +82,9 @@ public class SessionEstablishment extends TCKTest {
 		"topics-dbirth-mqtt",
 		"topics-dbirth-timestamp",
 		"payloads-dbirth-timestamp",
-		"payloads-dbirth-seq"
+		"payloads-dbirth-seq",
+		"topics-dbirth-seq",
+		"payloads-dbirth-seq-inc"
 	};
 	private String myClientId = null;
 	private String state = null;
@@ -97,6 +99,7 @@ public class SessionEstablishment extends TCKTest {
 	private boolean ncmd_found = false;
 	private boolean dcmd_found = false;
 	private boolean state_found = false;
+	private long seq = -1;
 
 	enum TestType {
 		GOOD, HOST_OFFLINE
@@ -383,7 +386,8 @@ public class SessionEstablishment extends TCKTest {
 
 		// sequence number should be 0
 		result = "FAIL";
-		if (sparkplugPayload.getSeq() == 0) {
+		seq = sparkplugPayload.getSeq();
+		if (seq == 0) {
 			result = "PASS";
 		}
 		testResults.put("payloads-nbirth-seq", result);
@@ -464,11 +468,17 @@ public class SessionEstablishment extends TCKTest {
 		section = Sections.PAYLOADS_B_DBIRTH, 
 		id = "payloads-dbirth-seq")
 	@SpecAssertion(
+		section = Sections.PAYLOADS_B_DBIRTH, 
+		id = "payloads-dbirth-seq-inc")
+	@SpecAssertion(
 		section = Sections.PAYLOADS_DESC_DBIRTH, 
 		id = "topics-dbirth-mqtt")
 	@SpecAssertion(
 		section = Sections.PAYLOADS_DESC_DBIRTH, 
 		id = "topics-dbirth-timestamp")
+	@SpecAssertion(
+		section = Sections.PAYLOADS_DESC_DBIRTH, 
+		id = "topics-dbirth-seq")
 	public void check_dbirth(String clientId, PublishPacket packet) {
 		Date received_birth = new Date();
 		long millis_received_birth = received_birth.getTime();
@@ -546,6 +556,30 @@ public class SessionEstablishment extends TCKTest {
 				testResults.put("payloads-dbirth-seq", result);
 			}
 		}
+		
+		// the sequence number of the dbirth must have a value of one greater than the previous MQTT message from the edge node unless
+		// the previous MQTT message contained a value of 255; in this case, the sequence number must be 0
+		result = "FAIL";
+		prev_result = testResults.getOrDefault("topics-dbirth-seq","");
+		
+		if (!prev_result.equals("FAIL")) {
+			if (seq != 255) {
+				if (sparkplugPayload.getSeq() == (seq+1)) {
+					result = "PASS";
+					seq = sparkplugPayload.getSeq();
+				}
+			} else {
+				if (sparkplugPayload.getSeq() == 0) {
+					result = "PASS";
+					seq = sparkplugPayload.getSeq();
+				}
+			}
+			if (prev_result.equals("")) {
+				testResults.put("topics-dbirth-seq", result);
+				testResults.put("payloads-dbirth-seq-inc", result);
+			}
+		}
+		
 	}
 
 	public SparkplugBPayload decode(ByteBuffer payload) {
