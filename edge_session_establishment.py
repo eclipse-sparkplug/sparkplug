@@ -8,7 +8,8 @@ port = 1883
 host_application_id = "testing"
 group_id = "test_group"
 edge_node_id = "test_edge"
-device_id = "test_device"
+device_id1 = "test_device1"
+device_id2 = "test_device2"
 
 def control_on_message(client, userdata, msg):
     if msg.topic == "SPARKPLUG_TCK/RESULT":
@@ -20,7 +21,7 @@ def control_on_connect(client, userdata, flags, rc):
 
 def control_on_subscribe(client, userdata, mid, granted_qos):
     print("Control client subscribed")
-    rc = client.publish("SPARKPLUG_TCK/TEST_CONTROL", "NEW_TEST edge SessionEstablishment %s %s %s %s" % (host_application_id, group_id, edge_node_id, device_id), qos=1)
+    rc = client.publish("SPARKPLUG_TCK/TEST_CONTROL", "NEW_TEST edge SessionEstablishment %s %s %s %s %s" % (host_application_id, group_id, edge_node_id, device_id1, device_id2), qos=1)
 
 published = False
 def control_on_publish(client, userdata, mid):
