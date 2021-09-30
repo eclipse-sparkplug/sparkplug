@@ -127,17 +127,26 @@ public class SessionEstablishment extends TCKTest {
 		group_id = parms[1];
 		edge_node_id = parms[2];
 		
+		// there is at least one device
 		if (parms.length > 3) {
 			device_ids = new HashMap<>();
 			for(int i = 3; i < parms.length; i++) {
 				device_ids.put(parms[i],false);
 			}
+		} else {
+			// no devices
+			testResults.put("payloads-dbirth-qos","PASS");
+			testResults.put("payloads-dbirth-retain","PASS");
+			testResults.put("payloads-dbirth-timestamp","PASS");
+			testResults.put("payloads-dbirth-seq","PASS");
+			testResults.put("topics-dbirth-mqtt","PASS");
+			testResults.put("topics-dbirth-timestamp","PASS");
 		}
 
 		logger.info("Host application id is " + host_application_id);
 		logger.info("Group id is " + group_id);
 		logger.info("Edge node id is " + edge_node_id);
-
+		logger.info("Device ids are " + Arrays.toString(device_ids.keySet().toArray()));
 	}
 
 	public void endTest() {
@@ -285,6 +294,7 @@ public class SessionEstablishment extends TCKTest {
 		logger.info("topic " + packet.getTopic());
 		
 		if(device_ids == null) {
+			check_subscribe_topics();
 			theTCK.endTest();
 		} else {
 			// if the values in the device_ids map are all true, then the DBIRTHS
