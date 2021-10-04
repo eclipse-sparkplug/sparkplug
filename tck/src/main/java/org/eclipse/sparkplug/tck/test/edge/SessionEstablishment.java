@@ -84,7 +84,8 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-dbirth-timestamp",
 		"payloads-dbirth-seq",
 		"topics-dbirth-seq",
-		"payloads-dbirth-seq-inc"
+		"payloads-dbirth-seq-inc",
+		"payloads-dbirth-order"
 	};
 	private String myClientId = null;
 	private String state = null;
@@ -99,6 +100,8 @@ public class SessionEstablishment extends TCKTest {
 	private boolean ncmd_found = false;
 	private boolean dcmd_found = false;
 	private boolean state_found = false;
+	private boolean ndata_found = false;
+	private boolean ddata_found = false;
 	private long seq = -1;
 
 	enum TestType {
@@ -192,6 +195,7 @@ public class SessionEstablishment extends TCKTest {
 		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
 		if (willPublishPacketOptional.isPresent()) {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String topic = willPublishPacket.getTopic();
 			
 			// NDEATH message must set MQTT Will QoS to 1
 			String result = "FAIL";
@@ -293,19 +297,23 @@ public class SessionEstablishment extends TCKTest {
 			String device = topic_parts[topic_parts.length-1];
 			device_ids.put(device,true);
 			check_dbirth(clientId,packet);
+		} else if (topic.startsWith("spBv1.0/" + group_id + "/NDATA")) {
+			ndata_found = true;
+		} else if (topic.startsWith("spBv1.0/" + group_id + "/DDATA")) {
+			ddata_found = true;
 		}
 		logger.info("topic " + packet.getTopic());
 		
 		if(device_ids == null) {
 			check_subscribe_topics();
 			theTCK.endTest();
-		} else {
+		// } else {
 			// if the values in the device_ids map are all true, then the DBIRTHS
 			// for each device have been received and tested
-			if(!Arrays.asList(device_ids.values().toArray()).contains(false)) {
-				check_subscribe_topics();
-				theTCK.endTest();
-			}
+			// if(!Arrays.asList(device_ids.values().toArray()).contains(false)) {
+				// check_subscribe_topics();
+				// theTCK.endTest();
+			// }
 		}
 	}
 	
@@ -471,6 +479,9 @@ public class SessionEstablishment extends TCKTest {
 		section = Sections.PAYLOADS_B_DBIRTH, 
 		id = "payloads-dbirth-seq-inc")
 	@SpecAssertion(
+		section = Sections.PAYLOADS_B_DBIRTH, 
+		id = "payloads-dbirth-order")
+	@SpecAssertion(
 		section = Sections.PAYLOADS_DESC_DBIRTH, 
 		id = "topics-dbirth-mqtt")
 	@SpecAssertion(
@@ -580,6 +591,18 @@ public class SessionEstablishment extends TCKTest {
 			}
 		}
 		
+		// if this was the final dbirth to check, then we can end the test
+		if(!Arrays.asList(device_ids.values().toArray()).contains(false)) {
+			// dbirth messages must be sent before any ndata or ddata messages are published by the edge node
+			result = "FAIL";
+			if (ndata_found == false || ddata_found == false) {
+				result = "PASS";
+			}
+			testResults.put("payloads-dbirth-order",result);
+			
+			check_subscribe_topics();
+			theTCK.endTest();
+		}
 	}
 
 	public SparkplugBPayload decode(ByteBuffer payload) {
