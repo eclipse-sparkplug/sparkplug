@@ -46,10 +46,10 @@ MQTT Server fail, all data is still present at the other MQTT Servers.
 The main advantage of MQTT Server clusters is operations simplicity. Sparkplug components don't need
 to distribute state themselves between MQTT Servers (which is required for
 <<high_availability_multiple_mqtt_server_topology,Multiple MQTT Server Topologies>>). From the
-perspective of an MQTT Edge node, MQTT enabled Device, Primary Host Application, or Secondary Host
-Application, any of the MQTT Servers can be used and devices are not required to be connected to the
-same MQTT Server. A MQTT cluster provides the illusion to MQTT clients that there is only one MQTT
-server while providing High Availability.
+perspective of an MQTT Edge node, MQTT enabled Device, or Sparkplug Host Application, any of the
+MQTT Servers can be used and devices are not required to be connected to the same MQTT Server. A
+MQTT cluster provides the illusion to MQTT clients that there is only one MQTT server while
+providing High Availability.
 
 There are two options available for deploying HA MQTT Server clusters:
 
@@ -61,10 +61,9 @@ There are two options available for deploying HA MQTT Server clusters:
 ==== High Availability Cluster
 
 In traditional clustered MQTT Server settings, each MQTT Server is reachable by all MQTT Edge Nodes,
-Primary Host Applications, Secondary Host Applications and MQTT enabled Devices. Each component can
-connect directly to any MQTT Server. A message sent to any MQTT Server will be distributed to all
-available MQTT Servers in the cluster (which will distribute the message to all subscribing
-Sparkplug components).
+Sparkplug Host Applications, and MQTT enabled Devices. Each component can connect directly to any
+MQTT Server. A message sent to any MQTT Server will be distributed to all available MQTT Servers in
+the cluster (which will distribute the message to all subscribing Sparkplug components).
 
 image:extracted-media/media/image15.png[image,width=660,height=314]
 
