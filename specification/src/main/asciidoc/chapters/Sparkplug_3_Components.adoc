@@ -58,20 +58,21 @@ Sparkplug Specification. Note that it will be represented as an Edge Node in the
 [[components_primary_host_application]]
 === Primary Host Application
 
-A Primary Host Application is an MQTT client application that subscribes to MQTT Edge Node
-originated messages.
-[tck-testable tck-id-components-ph-state]#[yellow-background]*A Primary Host Application MUST also
-utilize the STATE messages to denote whether it is online or offline at any given point in time.*#
+A Primary Host Application is an MQTT client application that subscribes to MQTT Sparkplug Edge Node
+originated messages. It is deemed 'primary' by the Edge Node. An Edge Node may be configured to
+modify its behavior based on one specific Sparklug Host Application being online or offline.
+
 The Primary Host Application is often also referred to as the SCADA Host or IIoT Host. In typical
 SCADA/IIoT infrastructure implementations, there will be only one Primary Host Application
-responsible for the monitoring and control of a given group of MQTT Edge Nodes. Sparkplug does
-support the notion of multiple Primary Host Applications for any Edge Node. This does not preclude
-any number of additional Secondary Host Applications from participating in the infrastructure that
-are in either a pure monitoring mode, or in the role of a hot standby should the Primary Host
-Application go offline.
+responsible for the monitoring and control of a given MQTT Edge Node. Sparkplug does support the
+notion of multiple Primary Host Applications for any Edge Node. This does not preclude any number of
+additional Sparkplug Host Applications from participating in the infrastructure that are in either a
+pure monitoring mode, or in the role of a hot standby should the Primary Host Application go offline.
 
-[[components_secondary_host_application]]
-=== Secondary Host Application 
+[[components_sparkplug_host_application]]
+=== Sparkplug Host Application
 
-A Secondary Host Application is any non-Primary Host Application that consumes the real-time
+A Sparkplug Host Application is any Sparkplug MQTT client that consumes the real-time Sparkplug
 messages or any other data being published with proper permission and security.
+[tck-testable tck-id-components-ph-state]#[yellow-background]*A Sparkplug Host Application MUST
+utilize the STATE messages to denote whether it is online or offline at any given point in time.*#
