@@ -18,17 +18,16 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[conformance_profiles]]
 === Conformance Profiles
 
-There are four Sparkplug target applications. A Sparkplug infrastructure typically consists of one
+There are three Sparkplug target applications. A Sparkplug infrastructure typically consists of one
 or more of the following application types
 
 * Sparkplug Edge Node
-* Sparkplug Primary Host Application
-* Sparkplug Secondary Host Application
+* Sparkplug Host Application
 * MQTT Server
 
 Each application type has specific conformance requirements that must be met. Typically a Sparkplug
 application would only implement one of these profiles. For example an MQTT client wouldn't
-typically be both an Edge Node and a Primary Host Application.
+typically be both an Edge Node and a Host Application.
 
 [[conformance_sparkplug_edge_node]]
 ==== Sparkplug Edge Node
@@ -37,25 +36,15 @@ A Sparkplug Edge Node is typically an 'Edge Gateway'. It sends and receives data
 using the spBv1.0/# namespace. Edge Nodes typically interact with physical devices to gather data
 and also write to device outputs.
 
-[[conformance_sparkplug_primary_host_application]]
-==== Sparkplug Primary Host Application
+[[conformance_sparkplug_host_application]]
+==== Sparkplug Host Application
 
-A Sparkplug Primary Host Application is typically at a 'central location' and primarily receives
-data from multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes
-to write to outputs at Sparkplug devices. A Primary Host Application also sends rebirth requests to
-Edge Nodes when required.
-[tck-testable tck-id-conformance-primary-host]#[yellow-background]*Primary Host Application MUST
+A Sparkplug Host Application is typically at a 'central location' and primarily receives data from
+multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes to write to
+outputs of Sparkplug Devices. Sparkplug Host Applications may also sends rebirth requests to Edge
+Nodes when required.
+[tck-testable tck-id-conformance-primary-host]#[yellow-background]*Sparkplug Host Applications MUST
 publish 'STATE' messages that represent its Birth and Death Certificates.*#
-
-[[conformance_sparkplug_secondary_host_application]]
-==== Sparkplug Secondary Host Application
-
-A Sparkplug Secondary Host Application is typically at a 'central location' and primarily receives
-data from multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes
-to write to outputs at Sparkplug devices. A Secondary Host Application also sends rebirth requests
-to Edge Nodes when required.
-[tck-testable tck-id-conformance-secondary-host]#[yellow-background]*Secondary Host Application MUST
-NOT publish 'STATE' messages that represent its Birth and Death Certificates.*#
 
 [[conformance_sparkplug_mqtt_server]]
 ==== Sparkplug MQTT Server

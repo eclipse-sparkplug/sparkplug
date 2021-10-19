@@ -127,7 +127,6 @@ public class MQTTListener implements MqttCallbackExtended {
 		try {
 			if (topic.startsWith("STATE/") ) {
 				System.out.println("Sparkplug message: "+ topic + " " + new String(message.getPayload()));
-				checkState(topic, message);
 			} else if (topic.equals(log_topic_name)) {
 				System.out.println("TCK log: "+ new String(message.getPayload()));
 			} else {
@@ -153,21 +152,7 @@ public class MQTTListener implements MqttCallbackExtended {
 	public void deliveryComplete(IMqttDeliveryToken token) {
 		System.out.println("Published message: " + token);
 	}
-	
-	@SpecAssertion(
-    		section = Sections.INTRODUCTION_SECONDARY_HOST_APPLICATION,
-    		id = "intro-secondary-host-state")
-	public void checkState(String topic, MqttMessage message) {
-		String[] words = topic.split("/");
-		if (words.length == 2) {
-			if (!words[1].equals(primary_host_application_id)) {
-				testResults.put("intro-secondary-host-state", "FAIL");
-			}
-		} else {
-			log("STATE message with wrong topic "+topic);
-		}
-	}
-	
+
     @SpecAssertion(
     		section = Sections.TOPICS_SPARKPLUG_TOPIC_NAMESPACE_ELEMENTS,
     		id = "topic-structure")
