@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
@@ -26,34 +27,36 @@ import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
-import java.util.List;
-import java.util.Optional;
 import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
 import org.eclipse.tahu.message.model.SparkplugBPayload;
 import org.eclipse.tahu.message.model.Metric;
 import org.eclipse.tahu.message.model.MetricDataType;
-import java.util.Arrays;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
+import java.util.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.nio.ByteBuffer;
-import java.util.Date;
 
-@SpecVersion(
-	spec = "sparkplug", 
-	version = "3.0.0-SNAPSHOT")
+/**
+ * This is the edge node Sparkplug session establishment.
+ *
+ * @author Ian Craggs
+ * @author Mitchell McPartland
+ */
+@SpecVersion(spec = "sparkplug", version = "3.0.0-SNAPSHOT")
 public class SessionEstablishment extends TCKTest {
-
-	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private HashMap<String, String> testResults = new HashMap<String, String>();
-	String[] testIds = {
+	
+	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	
+	private static final @NotNull String PASS = "PASS";
+	private static final @NotNull String FAIL = "FAIL";
+	
+	private final @NotNull Map<String, String> testResults = new HashMap<>();
+	private final @NotNull List<String> testIds = List.of(
 		"payloads-ndeath-will-message-qos", 
 		"payloads-ndeath-seq",
 		"topics-ndeath-seq",
@@ -86,82 +89,63 @@ public class SessionEstablishment extends TCKTest {
 		"topics-dbirth-seq",
 		"payloads-dbirth-seq-inc",
 		"payloads-dbirth-order"
-	};
-	private String myClientId = null;
-	private String state = null;
-	private TCK theTCK = null;
-	private String host_application_id = null; // The primary host application id to be used
-	private boolean commands_supported = true; // Are commands supported by the edge node?
-	private long death_bdSeq = -1;
-	private long birth_bdSeq = -1;
-	private String group_id = null;
-	private String edge_node_id = null;
-	private HashMap<String, Boolean> device_ids;
-	private boolean ncmd_found = false;
-	private boolean dcmd_found = false;
-	private boolean state_found = false;
-	private boolean ndata_found = false;
-	private boolean ddata_found = false;
-	private long seq = -1;
+	);
+	
+	private final @NotNull TCK theTCK;
+	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
+	
+	private @NotNull String hostApplicationId;
+	private @NotNull String groupId;
+	private @NotNull String edgeNodeId;
+	private @NotNull boolean ncmdFound = false;
+	private @NotNull boolean dcmdFound = false;
+	private @NotNull boolean stateFound = false;
+	private @NotNull boolean ndataFound = false;
+	private @NotNull boolean ddataFound = false;
+	private @NotNull long seq = -1;
+	private @NotNull long deathBdSeq = -1;
+	private @NotNull long birthBdSeq = -1;
 
-	enum TestType {
-		GOOD, HOST_OFFLINE
-	}
-
-	TestType test_type = TestType.GOOD;
-
-	/*
-	 * The session establishment test for an edge node
-	 */
-
-	public SessionEstablishment(TCK aTCK, String[] parms) {
-		logger.info("Edge Node session establishment test");
+	public SessionEstablishment(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+		logger.info("Edge Node session establishment test. Parameters: host_application_id group_id edge_node_id [device_ids]");
 		theTCK = aTCK;
 
-		testResults = new HashMap<String, String>();
-
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
+		for (final String testId : testIds) {
+			testResults.put(testId, "");
 		}
 
 		if (parms.length < 3) {
-			logger.info("Parameters to edge session establishment test must be: host_application_id group_id edge_node_id [device_ids]");
+			logger.info("Parameters to edge session establishment test must be: hostApplicationId groupId edgeNodeId [deviceIds]");
 			return;
 		}
 
-		host_application_id = parms[0];
-		group_id = parms[1];
-		edge_node_id = parms[2];
+		hostApplicationId = parms[0];
+		groupId = parms[1];
+		edgeNodeId = parms[2];
 		
 		// there is at least one device
 		if (parms.length > 3) {
-			device_ids = new HashMap<>();
 			for(int i = 3; i < parms.length; i++) {
-				device_ids.put(parms[i],false);
+				deviceIds.put(parms[i],false);
 			}
 		} else {
 			// no devices
-			testResults.put("payloads-dbirth-qos","PASS");
-			testResults.put("payloads-dbirth-retain","PASS");
-			testResults.put("payloads-dbirth-timestamp","PASS");
-			testResults.put("payloads-dbirth-seq","PASS");
-			testResults.put("topics-dbirth-mqtt","PASS");
-			testResults.put("topics-dbirth-timestamp","PASS");
+			testResults.put("payloads-dbirth-qos",PASS);
+			testResults.put("payloads-dbirth-retain",PASS);
+			testResults.put("payloads-dbirth-timestamp",PASS);
+			testResults.put("payloads-dbirth-seq",PASS);
+			testResults.put("topics-dbirth-mqtt",PASS);
+			testResults.put("topics-dbirth-timestamp",PASS);
 		}
 
-		logger.info("Host application id is " + host_application_id);
-		logger.info("Group id is " + group_id);
-		logger.info("Edge node id is " + edge_node_id);
-		logger.info("Device ids are " + Arrays.toString(device_ids.keySet().toArray()));
+		logger.info("Host application id is " + hostApplicationId);
+		logger.info("Group id is " + groupId);
+		logger.info("Edge node id is " + edgeNodeId);
+		logger.info("Device ids are " + Arrays.toString(deviceIds.keySet().toArray()));
 	}
 
 	public void endTest() {
-		state = null;
-		myClientId = null;
 		reportResults(testResults);
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
 	}
 
 	public String getName() {
@@ -169,94 +153,25 @@ public class SessionEstablishment extends TCKTest {
 	}
 
 	public String[] getTestIds() {
-		return testIds;
+		return testIds.toArray(new String[0]);
 	}
 
-	public HashMap<String, String> getResults() {
+	public Map<String, String> getResults() {
 		return testResults;
 	}
-
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NDEATH, 
-		id = "payloads-ndeath-will-message-qos")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NDEATH, 
-		id = "payloads-ndeath-seq")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NDEATH, 
-		id = "topics-ndeath-seq")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NDEATH, 
-		id = "payloads-ndeath-will-message-retain")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NDEATH, 
-		id = "topics-ndeath-payload")
-	public Optional<WillPublishPacket> checkWillMessage(ConnectPacket packet) throws Exception {
-		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
-		if (willPublishPacketOptional.isPresent()) {
-			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
-			String topic = willPublishPacket.getTopic();
-			
-			// NDEATH message must set MQTT Will QoS to 1
-			String result = "FAIL";
-			if (willPublishPacket.getQos().getQosNumber() == 1) {
-				result = "PASS";
-			}
-			testResults.put("payloads-ndeath-will-message-qos", result);
-
-			ByteBuffer payload = willPublishPacket.getPayload().orElseGet(null);
-			SparkplugBPayload sparkplugPayload = decode(payload);
-
-			List<Metric> metrics = sparkplugPayload.getMetrics();
-			
-			for (Metric m : metrics) {
-				if (m.getName().equals("bdSeq")) {
-					death_bdSeq = (long) m.getValue();
-					break;
-				}
-			}
-
-			// NDEATH message should contain a very simple payload that MUST only
-			// include a single metric, the bdseq number
-			result = "FAIL";
-			if (death_bdSeq != -1 && metrics.size() == 1) {
-				result = "PASS";
-			}
-			testResults.put("topics-ndeath-payload", result);
-			
-			// death message should not include a sequence number
-			result = "FAIL";
-			if (sparkplugPayload.getSeq() == -1) {
-				result = "PASS";
-			}
-			testResults.put("payloads-ndeath-seq", result);
-			testResults.put("topics-ndeath-seq", result);
-
-			// retained flag must be false
-			result = "FAIL";
-			if (!willPublishPacket.getRetain()) {
-				result = "PASS";
-			}
-			testResults.put("payloads-ndeath-will-message-retain", result);
-
-		}
-		return willPublishPacketOptional;
-	}
-
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NDEATH, 
-		id = "payloads-ndeath-will-message")
-	public void connect(String clientId, ConnectPacket packet) {
+	
+	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-will-message")
+	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
 		logger.info("Edge session establishment test - connect");
 
-		String result = "FAIL";
+		String willPresent = FAIL + " (NDEATH not registered as Will in connect packet)";
 		Optional<WillPublishPacket> willPublishPacketOptional = null;
 		try {
 			willPublishPacketOptional = checkWillMessage(packet);
 			if (willPublishPacketOptional.isPresent()) {
-				result = "PASS";
+				willPresent = PASS;
 			}
-			testResults.put("payloads-ndeath-will-message", result);
+			testResults.put("payloads-ndeath-will-message", willPresent);
 		} catch (Exception e) {
 			logger.info("Exception", e);
 		}
@@ -268,7 +183,7 @@ public class SessionEstablishment extends TCKTest {
 		
 	}
 	
-	public void subscribe(String clientId, SubscribePacket packet) {
+	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 		logger.info("Edge session establishment test - subscribe");
 
 		String topic = "";
@@ -276,161 +191,181 @@ public class SessionEstablishment extends TCKTest {
 		List<Subscription> subscriptions = packet.getSubscriptions();
 		for (Subscription s : subscriptions) {
 			topic = s.getTopicFilter();
-			if (topic.startsWith("spBv1.0/" + group_id + "/NCMD/" + edge_node_id)) {
-				ncmd_found = true;
-			} else if (topic.startsWith("spBv1.0/" + group_id + "/DCMD/" + edge_node_id)) {
-				dcmd_found = true;
-			} else if (topic.startsWith("STATE/" + host_application_id)) {
-				state_found = true;
+			if (topic.startsWith("spBv1.0/" + groupId + "/NCMD/" + edgeNodeId)) {
+				ncmdFound = true;
+			} else if (topic.startsWith("spBv1.0/" + groupId + "/DCMD/" + edgeNodeId)) {
+				dcmdFound = true;
+			} else if (topic.startsWith("STATE/" + hostApplicationId)) {
+				stateFound = true;
 			}
 		}
 	}
 	
-	public void publish(String clientId, PublishPacket packet) {
+	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		logger.info("Edge session establishment test - publish");
 		
 		String topic = packet.getTopic();
-		if(topic.equals("spBv1.0/" + group_id + "/NBIRTH/" + edge_node_id)) {
-			check_nbirth(clientId,packet);
-		} else if (topic.startsWith("spBv1.0/" + group_id + "/DBIRTH/")) {
-			String[] topic_parts = topic.split("/");
-			String device = topic_parts[topic_parts.length-1];
-			device_ids.put(device,true);
-			check_dbirth(clientId,packet);
-		} else if (topic.startsWith("spBv1.0/" + group_id + "/NDATA")) {
-			ndata_found = true;
-		} else if (topic.startsWith("spBv1.0/" + group_id + "/DDATA")) {
-			ddata_found = true;
+		if(topic.equals("spBv1.0/" + groupId + "/NBIRTH/" + edgeNodeId)) {
+			checkNBirth(packet);
+		} else if (topic.startsWith("spBv1.0/" + groupId + "/DBIRTH/")) {
+			String[] topicParts = topic.split("/");
+			String device = topicParts[topicParts.length-1];
+			deviceIds.put(device,true);
+			checkDBirth(packet);
+		} else if (topic.startsWith("spBv1.0/" + groupId + "/NDATA")) {
+			ndataFound = true;
+		} else if (topic.startsWith("spBv1.0/" + groupId + "/DDATA")) {
+			ddataFound = true;
 		}
 		logger.info("topic " + packet.getTopic());
 		
-		if(device_ids == null) {
-			check_subscribe_topics();
+		if(deviceIds.size() == 0) {
+			checkSubscribeTopics();
 			theTCK.endTest();
-		// } else {
-			// if the values in the device_ids map are all true, then the DBIRTHS
-			// for each device have been received and tested
-			// if(!Arrays.asList(device_ids.values().toArray()).contains(false)) {
-				// check_subscribe_topics();
-				// theTCK.endTest();
-			// }
 		}
 	}
+
+	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-will-message-qos")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-seq")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NDEATH, id = "topics-ndeath-seq")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-will-message-retain")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NDEATH, id = "topics-ndeath-payload")
+	public Optional<WillPublishPacket> checkWillMessage(final @NotNull ConnectPacket packet) {
+		final Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String topic = willPublishPacket.getTopic();
+			
+			// NDEATH message must set MQTT Will QoS to 1
+			String isQos1 = FAIL + " (NDEATH message must have Qos set to 1)";
+			if (willPublishPacket.getQos().getQosNumber() == 1) {
+				isQos1 = PASS;
+			}
+			testResults.put("payloads-ndeath-will-message-qos", isQos1);
+
+			ByteBuffer payload = willPublishPacket.getPayload().orElseGet(null);
+			SparkplugBPayload sparkplugPayload = decode(payload);
+
+			List<Metric> metrics = sparkplugPayload.getMetrics();
+			
+			for (Metric m : metrics) {
+				if (m.getName().equals("bdSeq")) {
+					deathBdSeq = (long) m.getValue();
+					break;
+				}
+			}
+
+			// NDEATH message contains a very simple payload that MUST only
+			// include a single metric, the bdseq number
+			String onlyBdSeq = FAIL + " (NDEATH payload must only include a single metric, the bdSeq number)";
+			if (deathBdSeq != -1 && metrics.size() == 1) {
+				onlyBdSeq = PASS;
+			}
+			testResults.put("topics-ndeath-payload", onlyBdSeq);
+			
+			// death message must not include a sequence number
+			String noSeq = FAIL + " (NDEATH must not include a sequence number)";
+			if (sparkplugPayload.getSeq() == -1) {
+				noSeq = PASS;
+			}
+			testResults.put("payloads-ndeath-seq", noSeq);
+			testResults.put("topics-ndeath-seq", noSeq);
+
+			// retained flag must be false
+			String retainedFalse = FAIL + " (NDEATH retained flag must be false)";
+			if (!willPublishPacket.getRetain()) {
+				retainedFalse = PASS;
+			}
+			testResults.put("payloads-ndeath-will-message-retain", retainedFalse);
+
+		}
+		return willPublishPacketOptional;
+	}
 	
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-bdseq")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-qos")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NBIRTH, 
-		id = "topics-nbirth-mqtt")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NBIRTH, 
-		id = "topics-nbirth-seq-num")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NBIRTH, 
-		id = "topics-nbirth-timestamp")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NBIRTH, 
-		id = "topics-nbirth-bdseq-included")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NBIRTH, 
-		id = "topics-nbirth-bdseq-matching")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_NBIRTH, 
-		id = "topics-nbirth-rebirth-metric")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-retain")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-seq")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_PAYLOAD, 
-		id = "payloads-sequence-num-zero-nbirth")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-timestamp")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NBIRTH, 
-		id = "payloads-nbirth-rebirth")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_NDEATH, 
-		id = "payloads-ndeath-bdseq")
-	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "message-flow-edge-node-birth-publish-subscribe")
-	public void check_nbirth(String clientId, PublishPacket packet) {
-		Date received_birth = new Date();
-		long millis_received_birth = received_birth.getTime();
-		long millis_past_five_min = millis_received_birth - (5 * 60 * 1000);
+	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-bdseq")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-qos")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-mqtt")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-seq-num")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-timestamp")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-bdseq-included")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-bdseq-matching")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-rebirth-metric")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-retain")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-seq")
+	@SpecAssertion(section = Sections.PAYLOADS_B_PAYLOAD, id = "payloads-sequence-num-zero-nbirth")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-timestamp")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-rebirth")
+	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-bdseq")
+	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "message-flow-edge-node-birth-publish-subscribe")
+	public void checkNBirth(final @NotNull PublishPacket packet) {
+		Date receivedBirth = new Date();
+		long millisReceivedBirth = receivedBirth.getTime();
+		long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
 
 		// edge node must subscribe to state before publishing nbirth
-		String result = "FAIL";
-		if (state_found == true) {
-			result = "PASS";
+		String stateBeforeNBirth = FAIL + " (Edge node must subscribe to state before publishing NBIRTH)";
+		if (stateFound == true) {
+			stateBeforeNBirth = PASS;
 		}
-		testResults.put("message-flow-edge-node-birth-publish-subscribe",result);
+		testResults.put("message-flow-edge-node-birth-publish-subscribe", stateBeforeNBirth);
 		
 		ByteBuffer payload = packet.getPayload().orElseGet(null);
 		SparkplugBPayload sparkplugPayload = decode(payload);
 
-		// qos should be 0
-		result = "FAIL";
+		// qos must be 0
+		String isQos0 = FAIL + " (NBIRTH message must have Qos set to 0)";
 		if (packet.getQos().getQosNumber() == 0) {
-			result = "PASS";
+			isQos0 = PASS;
 		}
-		testResults.put("payloads-nbirth-qos", result);
-		testResults.put("topics-nbirth-mqtt",result);
+		testResults.put("payloads-nbirth-qos", isQos0);
+		testResults.put("topics-nbirth-mqtt", isQos0);
 
-		// retain should be false
-		result = "FAIL";
+		// retained must be false
+		String retainedFalse = FAIL + " (NBIRTH retained flag must be false)";
 		if (!packet.getRetain()) {
-			result = "PASS";
+			retainedFalse = PASS;
 		}
-		testResults.put("payloads-nbirth-retain", result);
+		testResults.put("payloads-nbirth-retain", retainedFalse);
 
-		// sequence number should be 0
-		result = "FAIL";
+		// sequence number must be 0
+		String isSeq0 = FAIL + " (NBIRTH sequence number must be 0)";
 		seq = sparkplugPayload.getSeq();
 		if (seq == 0) {
-			result = "PASS";
+			isSeq0 = PASS;
 		}
-		testResults.put("payloads-nbirth-seq", result);
-		testResults.put("payloads-sequence-num-zero-nbirth",result);
-		testResults.put("topics-nbirth-seq-num", result);
+		testResults.put("payloads-nbirth-seq", isSeq0);
+		testResults.put("payloads-sequence-num-zero-nbirth", isSeq0);
+		testResults.put("topics-nbirth-seq-num", isSeq0);
 
-		// making sure that the payload timestamp is greater than (recieved_bith_time - 5 min) and less than the received_birth_time
-		result = "FAIL";
+		// making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the receivedBirthTime
+		String publishedTs = FAIL + " (NBIRTH must include payload timestamp that denotes the time at which the message was published)";
 		Date ts = sparkplugPayload.getTimestamp();
 		if (ts != null) {
-			long millis_payload = ts.getTime();
-			if (millis_payload > millis_past_five_min && millis_payload < (millis_received_birth)) {
-				result = "PASS";
+			long millisPayload = ts.getTime();
+			if (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth)) {
+				publishedTs = PASS;
 			}
 		}
-		testResults.put("payloads-nbirth-timestamp", result);
-		testResults.put("topics-nbirth-timestamp", result);
+		testResults.put("payloads-nbirth-timestamp", publishedTs);
+		testResults.put("topics-nbirth-timestamp", publishedTs);
 
-		boolean rebirth_found = false;
-		boolean bdSeq_found = false;
+		boolean rebirthFound = false;
+		boolean bdSeqFound = false;
 
 		MetricDataType datatype = null;
-		boolean rebirth_val = true;
+		boolean rebirthVal = true;
 
 		if (sparkplugPayload != null) {
 			List<Metric> metrics = sparkplugPayload.getMetrics();
 			for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
-					bdSeq_found = true;
-					birth_bdSeq = (long) m.getValue();
+					bdSeqFound = true;
+					birthBdSeq = (long) m.getValue();
 				} else if (m.getName().equals("Node Control/Rebirth")) {
-					rebirth_found = true;
+					rebirthFound = true;
 					datatype = m.getDataType();
-					rebirth_val = (boolean) m.getValue();
-				} else if (bdSeq_found == true && rebirth_found == true) {
+					rebirthVal = (boolean) m.getValue();
+				} else if (bdSeqFound == true && rebirthFound == true) {
 					// if bdseq and rebirth were already found, then we have
 					// the info we need and we can break out of this loop
 					break;
@@ -439,168 +374,151 @@ public class SessionEstablishment extends TCKTest {
 		}
 
 		// every nbirth must include a bdSeq
-		result = "FAIL";
-		if (birth_bdSeq != -1) {
-			result = "PASS";
+		String bdSeqIncluded = FAIL + " (NBIRTH must include a bdSeq)";
+		if (birthBdSeq != -1) {
+			bdSeqIncluded = PASS;
 		}
-		testResults.put("payloads-nbirth-bdseq", result);
-		testResults.put("topics-nbirth-bdseq-included", result);
+		testResults.put("payloads-nbirth-bdseq", bdSeqIncluded);
+		testResults.put("topics-nbirth-bdseq-included", bdSeqIncluded);
 
 		// the birth bdSeq "must match the bdseq number provided in the MQTT CONNECT packets Will Message payload"
-		result = "FAIL";
-		if (birth_bdSeq != -1 && death_bdSeq != -1 && birth_bdSeq == death_bdSeq) {
-			result = "PASS";
+		String bdSeqMatches = FAIL + " (NBIRTH bdSeq must match bdSeq provided in Will Message payload of connect packet)";
+		if (birthBdSeq != -1 && deathBdSeq != -1 && birthBdSeq == deathBdSeq) {
+			bdSeqMatches = PASS;
 		}
-		testResults.put("payloads-ndeath-bdseq", result);
-		testResults.put("topics-nbirth-bdseq-matching", result);
+		testResults.put("payloads-ndeath-bdseq", bdSeqMatches);
+		testResults.put("topics-nbirth-bdseq-matching", bdSeqMatches);
 
 		// nbirth message must include 'node control/rebirth' metric
-		result = "FAIL";
-		if (rebirth_found == true && datatype == MetricDataType.Boolean && rebirth_val == false) {
-			result = "PASS";
+		String rebirthIncluded = FAIL + " (NBIRTH must include a 'node control/rebirth' metric)";
+		if (rebirthFound == true && datatype == MetricDataType.Boolean && rebirthVal == false) {
+			rebirthIncluded = PASS;
 		}
-		testResults.put("payloads-nbirth-rebirth", result);
-		testResults.put("topics-nbirth-rebirth-metric", result);
+		testResults.put("payloads-nbirth-rebirth", rebirthIncluded);
+		testResults.put("topics-nbirth-rebirth-metric", rebirthIncluded);
 	}
 	
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_DBIRTH, 
-		id = "payloads-dbirth-qos")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_DBIRTH, 
-		id = "payloads-dbirth-retain")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_DBIRTH, 
-		id = "payloads-dbirth-timestamp")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_DBIRTH, 
-		id = "payloads-dbirth-seq")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_DBIRTH, 
-		id = "payloads-dbirth-seq-inc")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_B_DBIRTH, 
-		id = "payloads-dbirth-order")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_DBIRTH, 
-		id = "topics-dbirth-mqtt")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_DBIRTH, 
-		id = "topics-dbirth-timestamp")
-	@SpecAssertion(
-		section = Sections.PAYLOADS_DESC_DBIRTH, 
-		id = "topics-dbirth-seq")
-	public void check_dbirth(String clientId, PublishPacket packet) {
-		Date received_birth = new Date();
-		long millis_received_birth = received_birth.getTime();
-		long millis_past_five_min = millis_received_birth - (5 * 60 * 1000);
+	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-qos")
+	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-retain")
+	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-timestamp")
+	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-seq")
+	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-seq-inc")
+	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-order")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_DBIRTH, id = "topics-dbirth-mqtt")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_DBIRTH, id = "topics-dbirth-timestamp")
+	@SpecAssertion(section = Sections.PAYLOADS_DESC_DBIRTH, id = "topics-dbirth-seq")
+	public void checkDBirth(final @NotNull PublishPacket packet) {
+		Date receivedBirth = new Date();
+		long millisReceivedBirth = receivedBirth.getTime();
+		long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
 		
 		ByteBuffer payload = packet.getPayload().orElseGet(null);
 		SparkplugBPayload sparkplugPayload = decode(payload);
 
-		// qos should be 0
-		String result = "FAIL";
-		String prev_result = testResults.getOrDefault("payloads-dbirth-qos","");
+		// qos must be 0
+		String isQos0 = FAIL + " (NBIRTH message must have Qos set to 0)";
+		String prevResult = testResults.getOrDefault("payloads-dbirth-qos","");
 		
-		if (!prev_result.equals("FAIL")) {
+		if (!prevResult.contains(FAIL)) {
 			if (packet.getQos().getQosNumber() == 0) {
-				result = "PASS";
-			} 
-			if (prev_result.equals("")) {
-				testResults.put("payloads-dbirth-qos", result);
+				isQos0 = PASS;
+			}
+			if (prevResult.equals("")) {
+				testResults.put("payloads-dbirth-qos", isQos0);
 			}
 		}
 
-		// retain should be false
-		result = "FAIL";
-		prev_result = testResults.getOrDefault("payloads-dbirth-retain","");
+		// retained must be be false
+		String retainedFalse = FAIL + " (NBIRTH retained flag must be false)";
+		prevResult = testResults.getOrDefault("payloads-dbirth-retain","");
 		
-		if (!prev_result.equals("FAIL")) {
+		if (!prevResult.contains(FAIL)) {
 			if (!packet.getRetain()) {
-				result = "PASS";
+				retainedFalse = PASS;
 			}
-			if (prev_result.equals("")) {
-				testResults.put("payloads-dbirth-retain", result);
-			}
-		}
-
-		// for topics-dbirth-mqtt, qos should be 0 and retain should be false
-		result = "FAIL";
-		prev_result = testResults.getOrDefault("topics-dbirth-mqtt","");
-		
-		if (!prev_result.equals("FAIL")) {
-			if (testResults.get("payloads-dbirth-qos") == "PASS" && testResults.get("payloads-dbirth-retain") == "PASS" && !prev_result.equals("FAIL")) {
-				result = "PASS";
-			}
-			if (prev_result.equals("")) {
-				testResults.put("topics-dbirth-mqtt",result);
+			if (prevResult.equals("")) {
+				testResults.put("payloads-dbirth-retain", retainedFalse);
 			}
 		}
 
-		// making sure that the payload timestamp is greater than (recieved_bith_time - 5 min) and less than the received_birth_time
-		result = "FAIL";
-		prev_result = testResults.getOrDefault("topics-dbirth-timestamp","");
+		// for topics-dbirth-mqtt, qos must be 0 and retained must be false
+		String isQos0AndRetainedFalse = FAIL + " (DBIRTH Qos must be 0 and retained must be false)";
+		prevResult = testResults.getOrDefault("topics-dbirth-mqtt","");
 		
-		if (!prev_result.equals("FAIL")) {
+		if (!prevResult.contains(FAIL)) {
+			if (testResults.get("payloads-dbirth-qos") == PASS && testResults.get("payloads-dbirth-retain") == PASS && !prevResult.contains(FAIL)) {
+				isQos0AndRetainedFalse = PASS;
+			}
+			if (prevResult.equals("")) {
+				testResults.put("topics-dbirth-mqtt",isQos0AndRetainedFalse);
+			}
+		}
+
+		// making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the receivedBirthTime
+		String publishedTs = FAIL + " (NBIRTH must include payload timestamp that denotes the time at which the message was published)";
+		prevResult = testResults.getOrDefault("topics-dbirth-timestamp","");
+		
+		if (!prevResult.contains(FAIL)) {
 			Date ts = sparkplugPayload.getTimestamp();
 			if (ts != null) {
-				long millis_payload = ts.getTime();
-				if (millis_payload > millis_past_five_min && millis_payload < (millis_received_birth)) {
-					result = "PASS";
+				long millisPayload = ts.getTime();
+				if (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth)) {
+					publishedTs = PASS;
 				}
 			}
-			if (prev_result.equals("")) {
-				testResults.put("topics-dbirth-timestamp", result);
-				testResults.put("payloads-dbirth-timestamp", result);
+			if (prevResult.equals("")) {
+				testResults.put("topics-dbirth-timestamp", publishedTs);
+				testResults.put("payloads-dbirth-timestamp", publishedTs);
 			}
 		}	
 
 		// every dbirth message must include a sequence number
-		result = "FAIL";
-		prev_result = testResults.getOrDefault("payloads-dbirth-seq","");
+		String seqIncluded = FAIL + " (DBIRTH must include a sequence number)";
+		prevResult = testResults.getOrDefault("payloads-dbirth-seq","");
 		
-		if (!prev_result.equals("FAIL")) {
+		if (!prevResult.contains(FAIL)) {
 			if (sparkplugPayload.getSeq() != -1) {
-				result = "PASS";
+				seqIncluded = PASS;
 			}
-			if (prev_result.equals("")) {
-				testResults.put("payloads-dbirth-seq", result);
+			if (prevResult.equals("")) {
+				testResults.put("payloads-dbirth-seq", seqIncluded);
 			}
 		}
 		
 		// the sequence number of the dbirth must have a value of one greater than the previous MQTT message from the edge node unless
 		// the previous MQTT message contained a value of 255; in this case, the sequence number must be 0
-		result = "FAIL";
-		prev_result = testResults.getOrDefault("topics-dbirth-seq","");
+		String seqValue = FAIL + " (DBIRTH sequence number must have a value of one greater than the previous MQTT message from the"
+				+ "edge node unless the previous MQTT message contained a value of 255; in this case, sequence number must be 0)";
+		prevResult = testResults.getOrDefault("topics-dbirth-seq","");
 		
-		if (!prev_result.equals("FAIL")) {
+		if (!prevResult.contains(FAIL)) {
 			if (seq != 255) {
 				if (sparkplugPayload.getSeq() == (seq+1)) {
-					result = "PASS";
+					seqValue = PASS;
 					seq = sparkplugPayload.getSeq();
 				}
 			} else {
 				if (sparkplugPayload.getSeq() == 0) {
-					result = "PASS";
+					seqValue = PASS;
 					seq = sparkplugPayload.getSeq();
 				}
 			}
-			if (prev_result.equals("")) {
-				testResults.put("topics-dbirth-seq", result);
-				testResults.put("payloads-dbirth-seq-inc", result);
+			if (prevResult.equals("")) {
+				testResults.put("topics-dbirth-seq", seqValue);
+				testResults.put("payloads-dbirth-seq-inc", seqValue);
 			}
 		}
 		
 		// if this was the final dbirth to check, then we can end the test
-		if(!Arrays.asList(device_ids.values().toArray()).contains(false)) {
-			// dbirth messages must be sent before any ndata or ddata messages are published by the edge node
-			result = "FAIL";
-			if (ndata_found == false || ddata_found == false) {
-				result = "PASS";
+		if(!Arrays.asList(deviceIds.values().toArray()).contains(false)) {
+			// dbirth messages must be sent after nbirth and before any ndata or ddata messages are published by the edge node
+			String birthBeforeData = FAIL + " (DBIRTH must be sent before any NDATA/DDATA messages are published by the edge node)";
+			if (ndataFound == false || ddataFound == false) {
+				birthBeforeData = PASS;
 			}
-			testResults.put("payloads-dbirth-order",result);
+			testResults.put("payloads-dbirth-order", birthBeforeData);
 			
-			check_subscribe_topics();
+			checkSubscribeTopics();
 			theTCK.endTest();
 		}
 	}
@@ -619,27 +537,25 @@ public class SessionEstablishment extends TCKTest {
 		return sparkplugPayload;
 	}
 
-	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-subscribe-ncmd")
-	@SpecAssertion(
-		section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
-		id = "edge-subscribe-dcmd")
-	public void check_subscribe_topics() {
+	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-ncmd")
+	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-dcmd")
+	public void checkSubscribeTopics() {
 		
 		// making sure edge node subscribes to ncmd and dcmd
 		
-		String result = "FAIL";
-		if (ncmd_found == true) {
-			result = "PASS";
+		String ncmdSubscribe = FAIL + "(Edge node should subscribe to NCMD level topics to ensure Edge node targeted message from"
+				+ "the primary host application are delivered)";
+		if (ncmdFound == true) {
+			ncmdSubscribe = PASS;
 		}
-		testResults.put("edge-subscribe-ncmd", result);
+		testResults.put("edge-subscribe-ncmd", ncmdSubscribe);
 
-		result = "FAIL";
-		if (dcmd_found == true) {
-			result = "PASS";
+		String dcmdSubscribe = FAIL + "(Edge node should subscribe to DCMD level topics to ensure device targeted message from the"
+				+ "primary host application are delivered)";
+		if (dcmdFound == true) {
+			dcmdSubscribe = PASS;
 		}
-		testResults.put("edge-subscribe-dcmd", result);
+		testResults.put("edge-subscribe-dcmd", dcmdSubscribe);
 
 	}
 }
