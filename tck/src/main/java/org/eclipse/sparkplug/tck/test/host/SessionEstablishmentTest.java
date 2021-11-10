@@ -71,7 +71,14 @@ public class SessionEstablishmentTest extends TCKTest {
             "host-topic-phid-death-payload-off",
             "message-flow-phid-sparkplug-subscription",
             "message-flow-phid-sparkplug-state-publish",
-            "components-ph-state"
+            "components-ph-state",
+            "birth_message_state host-topic-phid-birth-payload",
+            "payloads-state-will-message",
+            "payloads-state-will-message-qos",
+            "payloads-state-subscribe",
+            "payloads-state-will-message-retain",
+            "payloads-state-will-message-payload",
+            "payloads-state-birth"
     );
 
     private final @NotNull TCK theTCK;
@@ -209,7 +216,12 @@ public class SessionEstablishmentTest extends TCKTest {
     }
 
 
-    @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-required")
+    @SpecAssertion(
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE, 
+    		id = "host-topic-phid-required")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_B_STATE, 
+    		id = "payloads-state-will-message")
     private boolean checkConnectMessage(final @NotNull ConnectPacket packet) {
         boolean overallResult = true;
 
@@ -233,14 +245,28 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-required", willExists);
+        testResults.put("payloads-state-will-message", willExists);
         return overallResult;
     }
 
     @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-death-topic")
     @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-death-payload")
     @SpecAssertion(section = Sections.PAYLOADS_DESC_STATE_DEATH, id = "host-topic-phid-death-payload-off")
-    @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-death-qos")
-    @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-death-retain")
+    @SpecAssertion(
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE, 
+    		id = "host-topic-phid-death-qos")
+    @SpecAssertion(
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
+    		id = "host-topic-phid-death-retain")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_B_STATE, 
+    		id = "payloads-state-will-message-qos")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_B_STATE, 
+    		id = "payloads-state-will-message-retain")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_B_STATE, 
+    		id = "payloads-state-will-message-payload")
     private boolean checkDeathMessage(final @NotNull ConnectPacket packet) {
         boolean overallResult = true;
 
@@ -279,6 +305,7 @@ public class SessionEstablishmentTest extends TCKTest {
                     overallResult = false;
                 }
                 testResults.put("host-topic-phid-death-payload-off", payloadIsOffline);
+                testResults.put("payloads-state-will-message-payload", payloadIsOffline);
             }
 
             //Will publish is QoS 1
@@ -290,6 +317,7 @@ public class SessionEstablishmentTest extends TCKTest {
                 overallResult = false;
             }
             testResults.put("host-topic-phid-death-qos", isQos1);
+            testResults.put("payloads-state-will-message-qos", isQos1);
 
             //Retain flag is set
             final String isRetain;
@@ -300,12 +328,16 @@ public class SessionEstablishmentTest extends TCKTest {
                 overallResult = false;
             }
             testResults.put("host-topic-phid-death-retain", isRetain);
+            testResults.put("payloads-state-will-message-retain", isRetain);
         } else {
             overallResult = false;
         }
         return overallResult;
     }
 
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_B_STATE,
+            id = "payloads-state-subscribe")
     private void checkSubscribes(final boolean shouldBeSubscribed) {
         final List<String> namespaceTopicFilter = List.of("spBv1.0/#");
         final List<String> stateTopicFilter = List.of("STATE/" + hostApplicationId, "STATE/+", "STATE/#");
@@ -313,6 +345,7 @@ public class SessionEstablishmentTest extends TCKTest {
         if (!Collections.disjoint(namespaceTopicFilter, subscriptions)
                 && !Collections.disjoint(stateTopicFilter, subscriptions)) {
             testResults.put("message-flow-phid-sparkplug-subscription", PASS);
+            testResults.put("message-state-subscribe", PASS);
             state = HostState.SUBSCRIBED;
         } else if (shouldBeSubscribed) {
             final String missingSubscribe;
@@ -322,15 +355,20 @@ public class SessionEstablishmentTest extends TCKTest {
                 missingSubscribe = FAIL + " (STATE topic filter is missing. Possibilities: " + stateTopicFilter + ")";
             }
             testResults.put("message-flow-phid-sparkplug-subscription", missingSubscribe);
+            testResults.put("payloads-state-subscribe", missingSubscribe);
             theTCK.endTest();
         }
     }
 
+    @SpecAssertion(section = Sections.BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-payload")
     @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-topic")
     @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-payload")
     @SpecAssertion(section = Sections.PAYLOADS_DESC_STATE, id = "host-topic-phid-birth-payload-on-off")
     @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-qos")
     @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-retain")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_B_STATE, 
+    		id = "payloads-state-birth")
     private boolean checkBirthMessage(final @NotNull PublishPacket packet) {
         boolean overallResult = true;
 
@@ -353,6 +391,7 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-birth-payload", payloadExists);
+        testResults.put("birth_message_state host-topic-phid-birth-payload", payloadExists);
 
         //Payload message exists
         if (packet.getPayload().isPresent()) {
@@ -386,6 +425,8 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-birth-retain", isRetain);
+        
+        testResults.put("payloads-state-birth", overallResult ? "TRUE" : "FAIL");
         return overallResult;
     }
 
