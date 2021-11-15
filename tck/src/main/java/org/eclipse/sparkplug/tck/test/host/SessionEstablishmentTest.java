@@ -71,6 +71,15 @@ public class SessionEstablishmentTest extends TCKTest {
             "host-topic-phid-death-payload-off",
             "message-flow-phid-sparkplug-subscription",
             "message-flow-phid-sparkplug-state-publish",
+            "operational-behavior-host-application-connect-will",
+            "operational-behavior-host-application-connect-will-payload",
+            "operational-behavior-host-application-connect-will-qos",
+            "operational-behavior-host-application-connect-will-retained",
+            "operational-behavior-host-application-connect-birth",
+            "operational-behavior-host-application-connect-birth-topic",
+            "operational-behavior-host-application-connect-birth-payload",
+            "operational-behavior-host-application-connect-birth-qos",
+            "operational-behavior-host-application-connect-birth-retained",
             "components-ph-state",
             "birth_message_state host-topic-phid-birth-payload",
             "payloads-state-will-message",
@@ -171,6 +180,11 @@ public class SessionEstablishmentTest extends TCKTest {
     @Override
     @SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
             id = "message-flow-phid-sparkplug-state-publish")
+    
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-birth")
+    
     @SpecAssertion(section = Sections.COMPONENTS_PRIMARY_HOST_APPLICATION,
             id = "components-ph-state")
     public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
@@ -197,7 +211,9 @@ public class SessionEstablishmentTest extends TCKTest {
             if (overallPass) {
                 state = HostState.PUBLISHED;
                 testResults.put("message-flow-phid-sparkplug-state-publish", PASS);
+                testResults.put("operational-behavior-host-application-connect-birth", PASS);
             } else {
+            	testResults.put("operational-behavior-host-application-connect-birth", FAIL);
                 logger.error("Test failed on published.");
                 theTCK.endTest();
             }
@@ -219,6 +235,9 @@ public class SessionEstablishmentTest extends TCKTest {
     @SpecAssertion(
     		section = Sections.TOPICS_DEATH_MESSAGE_STATE, 
     		id = "host-topic-phid-required")
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-will") 
     @SpecAssertion(
     		section = Sections.PAYLOADS_B_STATE, 
     		id = "payloads-state-will-message")
@@ -245,16 +264,37 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-required", willExists);
+        testResults.put("operational-behavior-host-application-connect-will", willExists);
         testResults.put("payloads-state-will-message", willExists);
         return overallResult;
     }
 
-    @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-death-topic")
-    @SpecAssertion(section = Sections.TOPICS_DEATH_MESSAGE_STATE, id = "host-topic-phid-death-payload")
-    @SpecAssertion(section = Sections.PAYLOADS_DESC_STATE_DEATH, id = "host-topic-phid-death-payload-off")
+    @SpecAssertion(
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE, 
+    		id = "host-topic-phid-death-topic")
+    @SpecAssertion(
+    		section = Sections.TOPICS_DEATH_MESSAGE_STATE, 
+    		id = "host-topic-phid-death-payload")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_DESC_STATE_DEATH,
+    		id = "host-topic-phid-death-payload-off")
     @SpecAssertion(
     		section = Sections.TOPICS_DEATH_MESSAGE_STATE, 
     		id = "host-topic-phid-death-qos")
+    
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-will-topic") 
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-will-payload") 
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-will-qos")   
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-will-retained")      
+    
     @SpecAssertion(
     		section = Sections.TOPICS_DEATH_MESSAGE_STATE,
     		id = "host-topic-phid-death-retain")
@@ -267,6 +307,7 @@ public class SessionEstablishmentTest extends TCKTest {
     @SpecAssertion(
     		section = Sections.PAYLOADS_B_STATE, 
     		id = "payloads-state-will-message-payload")
+    
     private boolean checkDeathMessage(final @NotNull ConnectPacket packet) {
         boolean overallResult = true;
 
@@ -282,6 +323,7 @@ public class SessionEstablishmentTest extends TCKTest {
                 wrongTopic = FAIL + " (Birth topic should be STATE/{host_application_id})";
                 overallResult = false;
             }
+            testResults.put("operational-behavior-host-application-connect-will-topic", wrongTopic);
             testResults.put("host-topic-phid-death-topic", wrongTopic);
 
             //Payload exists
@@ -305,6 +347,7 @@ public class SessionEstablishmentTest extends TCKTest {
                     overallResult = false;
                 }
                 testResults.put("host-topic-phid-death-payload-off", payloadIsOffline);
+                testResults.put("operational-behavior-host-application-connect-will-payload", payloadIsOffline);
                 testResults.put("payloads-state-will-message-payload", payloadIsOffline);
             }
 
@@ -317,6 +360,7 @@ public class SessionEstablishmentTest extends TCKTest {
                 overallResult = false;
             }
             testResults.put("host-topic-phid-death-qos", isQos1);
+            testResults.put("operational-behavior-host-application-connect-will-qos", isQos1);
             testResults.put("payloads-state-will-message-qos", isQos1);
 
             //Retain flag is set
@@ -328,6 +372,7 @@ public class SessionEstablishmentTest extends TCKTest {
                 overallResult = false;
             }
             testResults.put("host-topic-phid-death-retain", isRetain);
+            testResults.put("operational-behavior-host-application-connect-will-retained", isRetain);
             testResults.put("payloads-state-will-message-retain", isRetain);
         } else {
             overallResult = false;
@@ -360,15 +405,41 @@ public class SessionEstablishmentTest extends TCKTest {
         }
     }
 
-    @SpecAssertion(section = Sections.BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-payload")
-    @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-topic")
-    @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-payload")
-    @SpecAssertion(section = Sections.PAYLOADS_DESC_STATE, id = "host-topic-phid-birth-payload-on-off")
-    @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-qos")
-    @SpecAssertion(section = Sections.TOPICS_BIRTH_MESSAGE_STATE, id = "host-topic-phid-birth-retain")
+    @SpecAssertion(
+    		section = Sections.BIRTH_MESSAGE_STATE,
+    		id = "host-topic-phid-birth-payload")
+    @SpecAssertion(
+    		section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
+    		id = "host-topic-phid-birth-topic")
+    @SpecAssertion(
+    		section = Sections.TOPICS_BIRTH_MESSAGE_STATE, 
+    		id = "host-topic-phid-birth-payload")
+    @SpecAssertion(
+    		section = Sections.TOPICS_BIRTH_MESSAGE_STATE, 
+    		id = "host-topic-phid-birth-qos")
+    @SpecAssertion(
+    		section = Sections.TOPICS_BIRTH_MESSAGE_STATE, 
+    		id = "host-topic-phid-birth-retain")
+    
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-birth-topic")
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-birth-payload")    
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-birth-qos")    
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "operational-behavior-host-application-connect-birth-retained")
+    
     @SpecAssertion(
     		section = Sections.PAYLOADS_B_STATE, 
     		id = "payloads-state-birth")
+    @SpecAssertion(
+    		section = Sections.PAYLOADS_DESC_STATE, 
+    		id = "host-topic-phid-birth-payload-on-off")
     private boolean checkBirthMessage(final @NotNull PublishPacket packet) {
         boolean overallResult = true;
 
@@ -381,7 +452,8 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-birth-topic", wrongTopic);
-
+        testResults.put("operational-behavior-host-application-connect-birth-topic", wrongTopic);
+        
         //Payload exists
         final String payloadExists;
         if (packet.getPayload().isPresent()) {
@@ -393,17 +465,18 @@ public class SessionEstablishmentTest extends TCKTest {
         testResults.put("host-topic-phid-birth-payload", payloadExists);
         testResults.put("birth_message_state host-topic-phid-birth-payload", payloadExists);
 
-        //Payload message exists
+        //Payload message is ONLINE
         if (packet.getPayload().isPresent()) {
-            final String payloadIsOffline;
+            final String payloadIsOnline;
             final ByteBuffer payload = packet.getPayload().get();
             if ("ONLINE".equals(StandardCharsets.UTF_8.decode(payload).toString())) {
-                payloadIsOffline = PASS;
+                payloadIsOnline = PASS;
             } else {
-                payloadIsOffline = FAIL + " (Payload of birth message needs to be a UTF-8 encoded string \"ONLINE\".)";
+                payloadIsOnline = FAIL + " (Payload of birth message needs to be a UTF-8 encoded string \"ONLINE\".)";
                 overallResult = false;
             }
-            testResults.put("host-topic-phid-birth-payload-on-off", payloadIsOffline);
+            testResults.put("host-topic-phid-birth-payload-on-off", payloadIsOnline);
+            testResults.put("operational-behavior-host-application-connect-birth-payload", payloadIsOnline);
         }
 
         //Will publish is QoS 1
@@ -415,6 +488,7 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-birth-qos", isQos1);
+        testResults.put("operational-behavior-host-application-connect-birth-qos", isQos1);
 
         //Retain flag is set
         final String isRetain;
@@ -425,6 +499,7 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-birth-retain", isRetain);
+        testResults.put("operational-behavior-host-application-connect-birth-retained", isRetain);
         
         testResults.put("payloads-state-birth", overallResult ? "TRUE" : "FAIL");
         return overallResult;
