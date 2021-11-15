@@ -257,45 +257,33 @@ Depending on the nature of the Host Application it may consume Edge Node data an
 dashboard, it may historize the data in a database, or it may analyze the data in some way.
 SCADA/IIoT Hosts, MES, Historians, and Analytics applications are all examples of potential
 Sparkplug Host Applications. A Host Application may perform many different functions in handling the
-data. In addition, it may also send Sparkplug NCMD or DCMD messages to Edge Nodes.
+data. In addition, Host Applications may also send Sparkplug NCMD or DCMD messages to Edge Nodes.
 
-There are two different types of Host Applications in Sparkplug. These are 'Primary' and 'Secondary'
-Host Applications. In typical SCADA/IIoT infrastructure implementations, there will be only one
-Primary Host Application responsible for the monitoring and control of a given group of Sparkplug
-Edge Nodes. Within a Sparkplug system there can only be one Primary Host Application. Sparkplug does
+A Sparkplug Edge Node may specify one Host Application as its 'Primary Host Application'. This is
+handled by the Edge Node waiting to publish its NBIRTH and DBIRTH messages until the Host
+Application that it has designated as its Primary Host application has come online. Sparkplug does
 not support the notion of multiple Primary Host Applications. This does not preclude any number of
-Secondary Host Applications participating in the infrastructure that are in either a pure monitoring
-mode, or in the role of a hot standby should the Primary Host Application go offline or become
-unavailable within the infrastructure.
+additional Host Applications participating in the infrastructure that are in either a pure
+monitoring mode, or in the role of a hot standby should the Edge Node's Primary Host Application go
+offline or become unavailable within the infrastructure.
+
+[tck-testable tck-id-intro-sparkplug-host-state]#[yellow-background]*Sparkplug Host Applications
+MUST publish STATE messages denoting their online and offline status.*#
 
 [[introduction_primary_host_application]]
 ===== Primary Host Application
 
-Primary Host Applications differ from Secondary Host Applications in that they publish a 'STATE'
-message which tells Edge Nodes within the infrastructure the session state of the Primary Host. This
-allows Edge Nodes to make decisions based on whether or not the Primary Host Application is online
-or not. For example, an Edge Node may store data at the edge until a Primary Host Application comes
-back online. When the Primary Host Application publishes a new STATE message denoting it is online,
-the Edge Node can resume publishing data and also flush any historical data that it may have stored
-while offline.
+A Primary Host Applications may be defined by an Edge Node. The Edge Node's behavior may change
+based on the status of its configured Primary Host. It is not required that an Edge Node must have
+a Primary Host configured but it may be useful in certain applications. This allows Edge Nodes to
+make decisions based on whether or not the Primary Host Application is online or not. For example,
+an Edge Node may store data at the edge until a Primary Host Application comes back online. When the
+Primary Host Application publishes a new STATE message denoting it is online, the Edge Node can
+resume publishing data and also flush any historical data that it may have stored while offline.
 
 In a traditional SCADA system the SCADA Host would be the Primary Host Application. It is the most
 important consumer of data to keep operations running. With this same concept in mind, there can
-only be one Primary Host Application as a result.
-
-[[introduction_secondary_host_application]]
-===== Secondary Host Application
-
-A Secondary Host Application may be very similar to any Primary Host Application. Functionally,
-there is only one difference between Primary and Secondary Host Applications.
-[tck-testable tck-id-intro-secondary-host-state]#[yellow-background]*Secondary Host Applications
-MUST NOT publish STATE messages denoting their online and offline status.*#
-However, they can exist in a monitoring mode to consume the data in the same way that any Primary
-Host Application would.
-
-In addition if allowed by the Sparkplug Application and use-case, Secondary Host Applications MAY
-publish NCMD and DCMD messages. Whether or not this is permitted is defined by the designers of the
-overall Sparkplug enabled system.
+only be one Primary Host Application configured in an Edge Node as a result.
 
 [[introduction_sparkplug_ids]]
 ===== Sparkplug Identifiers

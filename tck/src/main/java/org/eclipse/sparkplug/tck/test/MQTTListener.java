@@ -142,7 +142,6 @@ public class MQTTListener implements MqttCallbackExtended {
 		try {
 			if (topic.startsWith("STATE/") ) {
 				System.out.println("Sparkplug message: "+ topic + " " + new String(message.getPayload()));
-				checkState(topic, message);
 			} else if (topic.equals(log_topic_name)) {
 				System.out.println("TCK log: "+ new String(message.getPayload()));
 			} else {
