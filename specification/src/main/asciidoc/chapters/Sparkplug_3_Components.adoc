@@ -60,14 +60,17 @@ Sparkplug Specification. Note that it will be represented as an Edge Node in the
 
 A Primary Host Application is an MQTT client application that subscribes to MQTT Sparkplug Edge Node
 originated messages. It is deemed 'primary' by the Edge Node. An Edge Node may be configured to
-modify its behavior based on one specific Sparklug Host Application being online or offline.
+modify its behavior based on one specific Sparklug Host Application being online or offline. This
+specific Host Application is referred to as the Edge Node's 'Primary Host Application'.
 
 The Primary Host Application is often also referred to as the SCADA Host or IIoT Host. In typical
 SCADA/IIoT infrastructure implementations, there will be only one Primary Host Application
 responsible for the monitoring and control of a given MQTT Edge Node. Sparkplug does support the
-notion of multiple Primary Host Applications for any Edge Node. This does not preclude any number of
-additional Sparkplug Host Applications from participating in the infrastructure that are in either a
-pure monitoring mode, or in the role of a hot standby should the Primary Host Application go offline.
+notion of multiple Primary Host Applications for any one Edge Node. This does not preclude any
+number of additional Sparkplug Host Applications from participating in the infrastructure that are
+in either a pure monitoring mode, or in the role of a hot standby should the Primary Host
+Application go offline. In addition, there could be multiple Host Applications which are each the
+Primary Host Application for some subset of Edge Nodes connected to the MQTT infrastructure.
 
 [[components_sparkplug_host_application]]
 === Sparkplug Host Application

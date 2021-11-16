@@ -17,7 +17,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 === Rationale and Use Case
 
 Eclipse Sparkplug™ provides an open and freely available specification for how Edge of Network
-Gateways (Sparkplug Edge Nodes) or native MQTT enabled end devices and MQTT Host Applications
+Gateways (Sparkplug Edge Nodes) or native MQTT enabled end devices and Sparkplug Host Applications
 communicate bi-directionally within an MQTT Infrastructure. This document details the structure and
 implementation requirements for Sparkplug compliant MQTT Client implementations on both Edge Nodes
 and Host Applications.
@@ -110,7 +110,7 @@ to Line of Business and MES solution requirements as well.
 The purpose of the Sparkplug Specification is to remain true to the original notion of keeping the
 Topic Namespace and message sizes to a minimum while still making the overall message transactions
 and session state management between MQTT enabled devices and MQTT SCADA/IIoT applications simple,
-efficient and easy to understand and implement.
+efficient, easy to understand, and implement.
 
 [[introduction_intellectual_property_rights]]
 === Intellectual Property Rights
@@ -261,11 +261,11 @@ data. In addition, Host Applications may also send Sparkplug NCMD or DCMD messag
 
 A Sparkplug Edge Node may specify one Host Application as its 'Primary Host Application'. This is
 handled by the Edge Node waiting to publish its NBIRTH and DBIRTH messages until the Host
-Application that it has designated as its Primary Host application has come online. Sparkplug does
-not support the notion of multiple Primary Host Applications. This does not preclude any number of
-additional Host Applications participating in the infrastructure that are in either a pure
-monitoring mode, or in the role of a hot standby should the Edge Node's Primary Host Application go
-offline or become unavailable within the infrastructure.
+Application that the Edge Node has designated as its Primary Host application has come online.
+Sparkplug does not support the notion of multiple Primary Host Applications. This does not preclude
+any number of additional Host Applications participating in the infrastructure that are in either a
+pure monitoring mode, or in the role of a hot standby should the Edge Node's Primary Host
+Application go offline or become unavailable within the infrastructure.
 
 [tck-testable tck-id-intro-sparkplug-host-state]#[yellow-background]*Sparkplug Host Applications
 MUST publish STATE messages denoting their online and offline status.*#
@@ -325,6 +325,16 @@ words, no two Edge Nodes within a Sparkplug environment can have the same Group 
 Node ID.
 ** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
+
+[[introduction_sparkplug_ids]]
+===== Sparkplug Metric
+
+A Sparkplug Metric is the term used for a single 'tag change event' in the Sparkplug Payload. It
+represents an event that occurred at the Edge Node or Device such as a value or quality of a data
+point changing. For example, it could represent the value of an analog or boolean changing at a
+Sparkplug Device. A Sparkplug Metric typically includes a name, value, and timestamp. Sparkplug
+Metrics are also used in NCMD and DCMD messages to send messages to Edge Nodes and Devices to
+change values at the Edge.
 
 [[introduction_normative_references]]
 === Normative References

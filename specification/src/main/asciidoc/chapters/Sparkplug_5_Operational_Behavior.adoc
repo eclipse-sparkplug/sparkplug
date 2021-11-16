@@ -26,26 +26,29 @@ Application and all connected Eclipse Sparkplug™ Edge Nodes to have the MQTT S
 information for each other. In order to accomplish this the Sparkplug Topic Namespace definitions
 for Birth/Death Certificates along with the defined payloads provide both state and context between
 the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios
-there are two primary reasons for this "designation" of a Primary Host Application:
+there are two main reasons for this "designation" of a Primary Host Application:
 
 [arabic]
 . Only the Primary Host Application should have the permission to issue commands to Edge Nodes.
 . In high availability and redundancy use cases where multiple MQTT Servers are used, Sparkplug Edge
 Nodes need to be aware of whether the Primary Host Application has network connectivity to each
 MQTT Server in the infrastructure. If the Primary Host Application STATE shows that an Edge Node
-is connected to an MQTT Server that the Primary Host Application is *NOT* connected to, then the Edge
-Node should connect to the next available MQTT Server where STATE for the Primary Host Application
-is ‘ONLINE’.
+is connected to an MQTT Server that the Primary Host Application is *NOT* connected to, then the
+Edge Node should connect to the next available MQTT Server where STATE for the Primary Host
+Application is ‘ONLINE’.
 
 [[operational_behavior_primary_host_application_session_establishment]]
-=== Primary Host Application Session Establishment
+=== Host Application Session Establishment
 
-The Primary Host Application upon startup or reconnect will immediately try to create a Host MQTT
+The Sparkplug Host Application upon startup or reconnect will immediately try to create a Host MQTT
 Session with the configured MQTT Server infrastructure. Note that the establishment of an Host
 Application MQTT session is asynchronous of any other MQTT Client session. If Edge Nodes are already
-connected to the MQTT Server infrastructure, the Primary Host Application will synchronize using
-the STATE MQTT topic. If associated Edge Nodes are not connected, Primary Host Application will
-register them when they publish their Sparkplug Edge Node Birth Certificate.
+connected to the MQTT Server infrastructure, the Sparkplug Host Application will synchronize using
+the STATE MQTT topic. If associated Edge Nodes are not connected, the Sparkplug Host Application
+will synchronize with the Edge Nodes and their data streams when the Edge Nodes publish their Birth
+Certificates. Any Edge Node that has specified this Sparkplug Host Application as its Primary Host
+Application will will wait to publish their Birth Certificates until after they receive the STATE
+message denoting that the Primary Host application is online.
 
 // suppress inspection "AsciiDocLinkResolve"
 plantuml::assets/plantuml/host-session-establishment.puml[format=png, alt="Host Session Establishment"]
@@ -56,34 +59,38 @@ The session diagram in Figure 3 - Host Session Establishment shows a very simple
 single MQTT Server. The steps outlined in the session diagram are defined as follows:
 
 [arabic]
-. Primary Host Application will try to create an MQTT Session using the MQTT CONNECT Control
+. Sparkplug Host Applications will try to create an MQTT Session using the MQTT CONNECT Control
 Packet. A Death Certificate is constructed into the MQTT Will Topic and Will Payload of the of the
-CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true. The MQTT CONNECT
-control packet is acknowledged as successful with a valid MQTT CONNACK Control Packet. From this
-point forward in time, the MQTT Server is ready to deliver a Host Death Certificate any time the
-Primary Host Application MQTT Client loses connectivity to the MQTT Server.
+CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true.
+[tck-testable tck-id-message-flow-phid-sparkplug-clean-session]#[yellow-background]*The CONNECT
+Control Packet for all Sparkplug Host Applications MUST set the MQTT 'Clean Session' flag to
+true.*#
+The MQTT CONNECT Control Packet is acknowledged as successful with a valid MQTT CONNACK Control
+Packet from the MQTT Server. From this point forward in time, the MQTT Server is ready to deliver a
+Host Death Certificate any time the Sparkplug Host Application MQTT Client loses connectivity to the
+MQTT Server.
 
-. With the MQTT Session established, Primary Host Application MUST issue an MQTT subscription for
+. With the MQTT Session established, Sparkplug Host Application MUST issue an MQTT subscription for
 the defined Sparkplug Topic Namespace.
 [tck-testable tck-id-message-flow-phid-sparkplug-subscription]#[yellow-background]*The subscription
 on the Sparkplug Topic Namespace and the STATE topic MUST be done immediately after successfully
 establishing the MQTT session and before publishing its own STATE message.*#
 
 . [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#[yellow-background]*Once an MQTT
-Session and the Primary Host Application subscriptions on the Sparkplug Topic Namespace and STATE
-topics have been established, the Primary Host Application MUST publish a new STATE message with a
-Payload of a UTF-8 string of 'ONLINE'.*#
-The Primary Host Application is now ready to start receiving MQTT messages from any connected Edge
-Node within the infrastructure. At this point, the Primary Host Application can update the MQTT
-Client metrics in the Primary Host Application with a current state of ONLINE once each Edge Node
-publishes it's Sparkplug NBIRTH and DBIRTH messages. Since the Primary Host Application is also
-relying on the MQTT Session to the MQTT Server(s), the availability of MQTT Servers to the Primary
-Host Application is also being monitored and reflected in the MQTT Client metrics in the Primary
-Host Application.
+Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic
+Namespace have been established, and the STATE topic subscription has been been established, the
+Sparkplug Host Application MUST publish a new STATE message with a Payload of a UTF-8 string of
+'ONLINE'.*#
+The Host Application is now ready to start receiving MQTT messages from any connected Edge Node
+within the infrastructure. At this point, the Host Application can update the MQTT Client metrics in
+the Host Application with a current state of ONLINE once each Edge Node publishes its Sparkplug
+NBIRTH and DBIRTH messages. Since the Sparkplug Host Application is also relying on the MQTT Session
+to the MQTT Server(s), the availability of MQTT Servers to the Host Application is also being
+monitored and reflected in the MQTT Client metrics in the Host Application.
 
-. If at any point in time Primary Host Application loses connectivity with the defined MQTT
-Server(s), the ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the
-Primary Host Application.
+. If at any point in time Host Application loses connectivity with the defined MQTT Server(s), the
+ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the Host
+Application.
 [tck-not-testable]#[yellow-background]*All metric data associated with any Sparkplug Edge Node that
 was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data
 quality if the Host Application loses connection to the MQTT Server.*#
@@ -95,15 +102,18 @@ quality if the Host Application loses connection to the MQTT Server.*#
 Node in the MQTT infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH
 messages.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#[yellow-background]*Any Edge
-Node in the MQTT infrastructure MUST also verify the Primary Host Application is ONLINE via the
-STATE topic if a primary host is configured for the Edge Node before publishing NBIRTH and DBIRTH
-messages.*#
+Node in the MQTT infrastructure MUST verify the Primary Host Application is ONLINE via the
+STATE topic if a Primary Host Application is configured for the Edge Node before publishing NBIRTH
+and DBIRTH messages.*#
 Most implementations of a Sparkplug Edge Node for real time SCADA systems will try to maintain a
 persistent MQTT Session with the MQTT Server Infrastructure. But there are use cases where the
 MQTT Session does not need to be persistent. In either case, an Edge Node can try to establish an
 MQTT Session at any time and is completely asynchronous from any other MQTT Client in the
 infrastructure. The only exception to this rule is the use case where there are multiple MQTT
-Servers and a Primary Host Application.
+Servers and a Primary Host Application. Note this does not refer to the use of the MQTT 'Clean
+Session' flag. All types of MQTT clients (both Host and Edge Nodes) in a Sparkplug system MUST
+always set the 'Clean Session' flag in the MQTT CONNECT packet to true.
+
 
 // suppress inspection "AsciiDocLinkResolve"
 plantuml::assets/plantuml/edge-node-mqtt-session-establishment.puml[format=png, alt="Edge Node MQTT Session Establishment"]
@@ -158,12 +168,12 @@ associated Devices are also offline.
 
 The Sparkplug Specification is provided to get real time process variable information from existing
 and new end devices measuring, monitoring, and controlling a physical process into an MQTT
-infrastructure and the Primary Host Application Industrial Internet of Things application platform.
-In the context of this document an MQTT Device can represent anything from existing legacy
-poll/response driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and
-instrumentation devices that can implement a conformant MQTT client natively.
+infrastructure and the Host Application Industrial Internet of Things application platform. In the
+context of this document an MQTT Device can represent anything from existing legacy poll/response
+driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and instrumentation
+devices that can implement a conformant MQTT client natively.
 
-The preceding sections in this document detail how the Primary Host Application interacts with the
+The preceding sections in this document detail how the Sparkplug Host Application interacts with the
 MQTT Server infrastructure and how that infrastructure interacts with the notion of a Sparkplug
 Edge Node. But to a large extent the technical requirements of those pieces of the infrastructure
 have already been provided. For most use cases in this market sector the primary focus will be on
@@ -178,9 +188,8 @@ plantuml::assets/plantuml/mqtt-device-session-establishment.puml[format=png, alt
 Figure 5 - MQTT Device Session Establishment
 
 The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with
-all the Sparkplug elements in place i.e. Primary Host Application, MQTT Server(s), Sparkplug Edge
-Node and this element, the device element. The steps outlined in the session diagram are defined as
-follows:
+all the Sparkplug elements in place i.e. Host Application, MQTT Server(s), Sparkplug Edge Node and
+this element, the device element. The steps outlined in the session diagram are defined as follows:
 
 This flow diagram assumes that at least one MQTT Server is available and operational within the
 infrastructure. Without at least a single MQTT Server the remainder of the infrastructure is
