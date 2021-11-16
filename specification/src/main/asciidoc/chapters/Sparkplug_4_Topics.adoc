@@ -78,11 +78,11 @@ The following message_type elements are defined for the Sparkplug topic namespac
 * *NDEATH* – Death certificate for Sparkplug Edge Nodes
 * *DBIRTH* – Birth certificate for Devices
 * *DDEATH* – Death certificate for Devices
-* *NDATA* – Node data message
+* *NDATA* – Edge Node data message
 * *DDATA* – Device data message
-* *NCMD* – Node command message
+* *NCMD* – Edge Node command message
 * *DCMD* – Device command message
-* *STATE* – Primary Host Application state message
+* *STATE* – Sparkplug Host Application state message
 
 The specification for each of these _message_type_ elements are detailed later in this document.
 
@@ -137,7 +137,7 @@ are:
 * *DDATA* – Device data message
 * *NCMD* – Node command message
 * *DCMD* – Device command message
-* *STATE* – Primary Host application state message
+* *STATE* – Sparkplug Host Application state message
 
 Using these defined messages Host Applications can:
 
@@ -484,29 +484,29 @@ denoting the Date/Time the message was sent from the Host Application’s MQTT c
 * [tck-testable tck-id-topics-dcmd-payload]#[yellow-background]*The DCMD MUST include the metrics
 that need to be written to on the Device.*#
 
-[[topics_primary_host]]
+[[topics_sparkplug_host_application]]
 [upperalpha, start=1]
-==== Primary Host Application
+==== Sparkplug Host Application
 
 [[birth_message_state]]
-===== Birth Message (STATE)
+===== Birth Certificate Message (STATE)
 
-[tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The first message a Primary
+[tck-testable tck-id-host-topic-phid-birth-message]#[yellow-background]*The first MQTT message a
 Host Application MUST publish is a Birth Certificate.*#
-The Primary Host Application Death Certificate is registered above within the actual establishment
-of the MQTT session and is published as a part of the native MQTT transport if the MQTT session
-terminates for any reason.
+The Host Application Death Certificate is registered within the establishment of the MQTT session
+and is published as a part of the native MQTT transport if the MQTT session terminates for any
+reason.
 
-The Birth Certificate that is defined here is an application level message published by the Primary
-Host Application MQTT Client applications.
+The Birth Certificate that is defined here is an MQTT application level message published by the
+Sparkplug Host Application MQTT Client applications.
 
 [[topics_birth_message_state]]
-====== Topic (STATE)
+====== Birth Certificate Topic (STATE)
 
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
 Certificate:
 [subs="quotes"]
-  [tck-testable tck-id-host-topic-phid-birth-topic]#*STATE*/primary_host_application_id#
+  [tck-testable tck-id-host-topic-phid-birth-topic]#*STATE*/sparkplug_host_application_id#
 
 * [tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
 Payload MUST be the UTF-8 string “ONLINE”*#
@@ -515,36 +515,34 @@ Payload MUST be the UTF-8 string “ONLINE”*#
 * [tck-testable tck-id-host-topic-phid-birth-retain]#[yellow-background]*The MQTT retain flag for
 the Birth Certificate MUST be set to TRUE*#
 
-[[payloads_desc_state]]
-====== Payload (STATE)
+[[payloads_desc_state_birth]]
+====== Birth Certificate Payload (STATE)
 
-* [tck-testable tck-id-host-topic-phid-birth-payload-on-off]#[yellow-background]*The STATE messages
-from the primary host application MUST include a payload that is a UTF-8 string that is one of the
-following:*#
+* [tck-testable tck-id-host-topic-phid-birth-payload-on-off]#[yellow-background]*The STATE message
+from the Sparkplug Host Application Birth Certificate message MUST include a payload that is a UTF-8
+string that is the following*#
+----
+ONLINE
+----
 
-* OFFLINE
-** If the application is not connected
-* ONLINE
-** If the application is connected
-
-Sparkplug B payloads are not used for encoding in this payload. This allows primary host and host 
-application(s) to work across Sparkplug payload types.
+Sparkplug B payloads are not used for encoding in this payload. This allows Host Applications to
+work across Sparkplug payload types.
 
 [[death_message_state]]
-===== Death Message (STATE)
+===== Death Certificate Message (STATE)
 
-When the Primary Host Application MQTT client establishes an MQTT session to the MQTT Server(s), the
-Death Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
+When the Sparkplug Host Application MQTT client establishes an MQTT session to the MQTT Server(s),
+the Death Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
 packet.
 
 [[topics_death_message_state]]
-====== Topic (STATE)
+====== Death Certificate Topic (STATE)
 
 The *Will Topic* as defined above will be:
 [subs="quotes"]
-  [tck-testable tck-id-host-topic-phid-death-topic]#*STATE*/primary_host_application_id#
+  [tck-testable tck-id-host-topic-phid-death-topic]#*STATE*/sparkplug_host_application_id#
 
-* [tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Primary Host Application
+* [tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Sparkplug Host Application
 MUST provide a Will message in the MQTT CONNECT packet*#
 * [tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*The MQTT Will Payload MUST
 be the UTF-8 string “OFFLINE”*#
@@ -554,9 +552,14 @@ to 1*#
 MUST be set to TRUE*#
 
 [[payloads_desc_state_death]]
-====== Payload (STATE)
+====== Death Certificate Payload (STATE)
 
 * [tck-testable tck-id-host-topic-phid-death-payload-off]#[yellow-background]*The STATE messages
-from the primary host application MUST include a payload that is a UTF-8 string that is the
-following:*#
-** OFFLINE
+from the Sparkplug Host Application Death Certificate message MUST include a payload that is a UTF-8
+string that is the following:*#
+----
+OFFLINE
+----
+
+Sparkplug B payloads are not used for encoding in this payload. This allows Host Applications to
+work across Sparkplug payload types.

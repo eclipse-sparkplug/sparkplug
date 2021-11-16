@@ -1009,11 +1009,11 @@ These are used like addresses and need to be unique as a result.
 sequence number and it MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-nbirth-bdseq]#[yellow-background]*Every NBIRTH message MUST include
 a bdSeq number metric.*#
-* [tck-testable tck-id-payloads-nbirth-bdseq-inc]#[yellow-background]*Every NBIRTH message SHOULD
-include a bdSeq number value that is one greater than the previous NBIRTH's bdSeq number. This value
-MUST never exceed 255. If in the previous NBIRTH a value of 255 was sent, the next NBIRTH MUST have
-a value of 0.*#
-* [tck-testable tck-id-payloads-nbirth-bdseq-inc]#[yellow-background]*Every NBIRTH MUST include a
+* [tck-testable tck-id-payloads-nbirth-bdseq-inc]#[yellow-background]*Every NBIRTH message in a new
+Sparkplug MQTT session SHOULD include a bdSeq number value that is one greater than the previous
+NBIRTH's bdSeq number. This value MUST never exceed 255. If in the previous NBIRTH a value of 255
+was sent, the next NBIRTH MUST have a value of 0.*#
+* [tck-testable tck-id-payloads-nbirth-rebirth-req]#[yellow-background]*Every NBIRTH MUST include a
 metric with the name 'Node Control/Rebirth' and have a boolean value of false.*#
 This is used by Host Applications to force an Edge Node to send a new birth sequence (NBIRTH and
 DBIRTH messages) if errors are detected by the Host Application in the data stream.
@@ -1523,25 +1523,28 @@ the state of the data.*#
 [[payloads_b_state]]
 ==== STATE
 
-As noted previously, the STATE messages published by Primary Host Applications do not use Sparkplug
-B payloads. State messages are used by Primary Host Applications to denote to Edge Nodes whether or
-not the Primary Host Application is online and operational or not.
+As noted previously, the STATE messages published by Sparkplug Host Applications do not use
+Sparkplug B payloads. State messages are used by Sparkplug Host Applications to denote to Edge Nodes
+whether or not the Sparkplug Host Application is online and operational or not.
 
-* [tck-testable tck-id-payloads-state-will-message]#[yellow-background]*Primary Host Applications
-MUST register a Will Message in the MQTT CONNECT packet on the topic 'STATE/[phid]'.*# The [phid]
-should be replaced with the Primary Host Application's ID. This can be any UTF-8 string.
-* [tck-testable tck-id-payloads-state-will-message-qos]#[yellow-background]*The Primary Host
+* [tck-testable tck-id-payloads-state-will-message]#[yellow-background]*Sparkplug Host Applications
+MUST register a Will Message in the MQTT CONNECT packet on the topic 'STATE/[sparkplug_host_id]'.*#
+The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
+UTF-8 string.
+* [tck-testable tck-id-payloads-state-will-message-qos]#[yellow-background]*The Sparkplug Host
 Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*The Primary Host
+* [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*The Sparkplug Host
 Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-will-message-paylaod]#[yellow-background]*The Primary Host
+* [tck-testable tck-id-payloads-state-will-message-paylaod]#[yellow-background]*The Sparkplug Host
 Application MUST set the Will Payload to the UTF-8 string of 'OFFLINE' in the MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*After establishing an MQTT
-connection, the Primary Host Application MUST subscribe on it's own 'STATE/[phid]' topic.*#
-** Non-normative comment: This allows the Primary Host Application handle timing issues around STATE
-'OFFLINE' messages being published on it's behalf by the MQTT Server when it is in fact online.
+connection, the Sparkplug Host Application MUST subscribe on it's own 'STATE/[sparkplug_host_id]'
+topic.*#
+** Non-normative comment: This allows the Sparkplug Host Application handle timing issues around
+STATE 'OFFLINE' messages being published on it's behalf by the MQTT Server when it is in fact
+online.
 * [tck-testable tck-id-payloads-state-birth]#[yellow-background]*After subscribing on it's own
-STATE/[phid] topic, the Primary Host Application MUST publish an MQTT message on the topic
-'STATE/[phid]' with a payload of the UTF-8 string of 'ONLINE', a QoS of 1, and the retain flag set
-to true.*# The [phid] should be replaced with the Primary Host Application's ID. This can be any
-UTF-8 string.
+STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message on the
+topic 'STATE/[sparkplug_host_id]' with a payload of the UTF-8 string of 'ONLINE', a QoS of 1, and
+the retain flag set to true.*# The [sparkplug_host_id] should be replaced with the Sparkplug Host
+Application's ID. This can be any UTF-8 string.
