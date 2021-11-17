@@ -438,7 +438,7 @@ public class SessionEstablishmentTest extends TCKTest {
     		section = Sections.PAYLOADS_B_STATE, 
     		id = "payloads-state-birth")
     @SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_STATE, 
+    		section = Sections.PAYLOADS_DESC_STATE_BIRTH, 
     		id = "host-topic-phid-birth-payload-on-off")
     private boolean checkBirthMessage(final @NotNull PublishPacket packet) {
         boolean overallResult = true;
