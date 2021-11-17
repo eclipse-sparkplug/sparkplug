@@ -326,7 +326,7 @@ Node ID.
 ** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
 
-[[introduction_sparkplug_ids]]
+[[introduction_sparkplug_metrics]]
 ===== Sparkplug Metric
 
 A Sparkplug Metric is the term used for a single 'tag change event' in the Sparkplug Payload. It

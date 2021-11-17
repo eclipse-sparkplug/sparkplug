@@ -182,7 +182,7 @@ public class MQTTListener implements MqttCallbackExtended {
 		}
 	}
 	
-	@SpecAssertion(
+	/*@SpecAssertion(
     		section = Sections.INTRODUCTION_SECONDARY_HOST_APPLICATION,
     		id = "intro-secondary-host-state")
 	public void checkState(String topic, MqttMessage message) {
@@ -195,7 +195,7 @@ public class MQTTListener implements MqttCallbackExtended {
 		} else {
 			log("Error: STATE message with wrong topic "+topic);
 		}
-	}
+	}*/
 	
     @SpecAssertion(
     		section = Sections.TOPICS_SPARKPLUG_TOPIC_NAMESPACE_ELEMENTS,
