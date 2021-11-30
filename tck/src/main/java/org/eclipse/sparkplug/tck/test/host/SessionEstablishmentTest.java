@@ -37,6 +37,14 @@ import java.util.stream.Collectors;
 
 /**
  * This is the primary host Sparkplug session establishment, and re-establishment test.
+ * 
+ * We do know the host application id, but there is no requirement on the MQTT client id,
+ * which means the first that we know we are dealing with the host application is the receipt
+ * of the STATE message.  
+ * 
+ * Currently this test works if the first MQTT client to connect is the host application.  
+ * To make it completely robust means following all connect/subscribe/publish combinations and
+ * ruling out the ones that don't match.  There could be many in parallel.
  *
  * @author Ian Craggs
  * @author Lukas Brand
@@ -58,6 +66,8 @@ public class SessionEstablishmentTest extends TCKTest {
 
     private final @NotNull Map<String, String> testResults = new HashMap<>();
     private final @NotNull List<String> testIds = List.of(
+    		"intro-sparkplug-host-state",
+    		"principles-birth-certificates-order",
             "host-topic-phid-required",
             "host-topic-phid-birth-topic",
             "host-topic-phid-birth-payload",
@@ -71,6 +81,7 @@ public class SessionEstablishmentTest extends TCKTest {
             "host-topic-phid-death-payload-off",
             "message-flow-phid-sparkplug-subscription",
             "message-flow-phid-sparkplug-state-publish",
+            "message-flow-phid-sparkplug-clean-session",
             "operational-behavior-host-application-connect-will",
             "operational-behavior-host-application-connect-will-payload",
             "operational-behavior-host-application-connect-will-qos",
@@ -81,7 +92,7 @@ public class SessionEstablishmentTest extends TCKTest {
             "operational-behavior-host-application-connect-birth-qos",
             "operational-behavior-host-application-connect-birth-retained",
             "components-ph-state",
-            "birth_message_state host-topic-phid-birth-payload",
+            "host-topic-phid-birth-message",
             "payloads-state-will-message",
             "payloads-state-will-message-qos",
             "payloads-state-subscribe",
@@ -156,8 +167,10 @@ public class SessionEstablishmentTest extends TCKTest {
     public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
         logger.info("Primary host session establishment test - subscribe");
 
-        //ignore theoretical messages prior of connect
-        if (hostClientId == null) return;
+        //ignore messages before connect
+        if (hostClientId == null) {
+        	return;
+        }
 
         if (hostClientId.equals(clientId)) {
             //Subscribe is after connect (and allow additional subscriptions)
@@ -178,20 +191,31 @@ public class SessionEstablishmentTest extends TCKTest {
     }
 
     @Override
-    @SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+    @SpecAssertion(
+    		section = Sections.PRINCIPLES_BIRTH_AND_DEATH_CERTIFICATES,
+    		id = "principles-birth-certificates-order")    
+    
+    @SpecAssertion(
+    		section = Sections.INTRODUCTION_HOST_APPLICATIONS,
+    		id = "intro-sparkplug-host-state")
+    
+    @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
             id = "message-flow-phid-sparkplug-state-publish")
     
     @SpecAssertion(
     		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
     		id = "operational-behavior-host-application-connect-birth")
     
-    @SpecAssertion(section = Sections.COMPONENTS_PRIMARY_HOST_APPLICATION,
+    @SpecAssertion(section = Sections.COMPONENTS_SPARKPLUG_HOST_APPLICATION,
             id = "components-ph-state")
     public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
         logger.info("Primary host session establishment test - publish");
 
-        //ignore messages prior of connect
-        if (hostClientId == null) return;
+        //ignore messages before connect
+        if (hostClientId == null) {
+        	return;
+        }
 
         if (hostClientId.equals(clientId)) {
             //Check if subscribe completed
@@ -210,9 +234,11 @@ public class SessionEstablishmentTest extends TCKTest {
 
             if (overallPass) {
                 state = HostState.PUBLISHED;
+                testResults.put("principles-birth-certificates-order", PASS);
                 testResults.put("message-flow-phid-sparkplug-state-publish", PASS);
                 testResults.put("operational-behavior-host-application-connect-birth", PASS);
             } else {
+            	testResults.put("principles-birth-certificates-order", FAIL);
             	testResults.put("operational-behavior-host-application-connect-birth", FAIL);
                 logger.error("Test failed on published.");
                 theTCK.endTest();
@@ -220,6 +246,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
             //TODO: test reconnect
             testResults.put("components-ph-state", PASS);
+            testResults.put("intro-sparkplug-host-state", PASS);
         }
 
         // TODO: now we can disconnect the client and allow it to reconnect and go throught the
@@ -239,6 +266,9 @@ public class SessionEstablishmentTest extends TCKTest {
     		section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
     		id = "operational-behavior-host-application-connect-will") 
     @SpecAssertion(
+    		section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT, 
+    		id = "message-flow-phid-sparkplug-clean-session")
+    @SpecAssertion(
     		section = Sections.PAYLOADS_B_STATE, 
     		id = "payloads-state-will-message")
     private boolean checkConnectMessage(final @NotNull ConnectPacket packet) {
@@ -252,8 +282,7 @@ public class SessionEstablishmentTest extends TCKTest {
             isCleanSession = FAIL + " (Clean session should be set to true.)";
             overallResult = false;
         }
-        //TODO: Add host-topic-cleanstart-required
-        //testResults.put("host-topic-cleanstart-required", isCleanSession);
+        testResults.put("message-flow-phid-sparkplug-clean-session", isCleanSession);
 
         //Will exists
         final String willExists;
@@ -407,7 +436,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
     @SpecAssertion(
     		section = Sections.BIRTH_MESSAGE_STATE,
-    		id = "host-topic-phid-birth-payload")
+    		id = "host-topic-phid-birth-message")
     @SpecAssertion(
     		section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
     		id = "host-topic-phid-birth-topic")
@@ -463,6 +492,7 @@ public class SessionEstablishmentTest extends TCKTest {
             overallResult = false;
         }
         testResults.put("host-topic-phid-birth-payload", payloadExists);
+        testResults.put("host-topic-phid-birth-message", payloadExists);
         testResults.put("birth_message_state host-topic-phid-birth-payload", payloadExists);
 
         //Payload message is ONLINE
