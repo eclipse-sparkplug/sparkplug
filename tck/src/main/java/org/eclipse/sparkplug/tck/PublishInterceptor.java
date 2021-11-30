@@ -66,7 +66,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
                     if (payload.toUpperCase().startsWith(cmd)) {
                         //find all tokens which are either plain tokens or
                         //containing whitespaces and therefore surrounded with double quotes
-                        final Pattern tokenPattern = Pattern.compile("(\"(\\w|\\s)+\")|\\w+");
+                        final Pattern tokenPattern = Pattern.compile("(\"[*]+\")|\\S+");
                         final Matcher matcher = tokenPattern.matcher(payload.trim());
                         final List<String> tokens = new ArrayList<>();
                         while (matcher.find()) {
@@ -85,6 +85,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
                         if (strings.length < 3) {
                             throw new RuntimeException("New test syntax is: NEW_TEST profile testname <parameters>");
                         }
+                        
                         final int no_parms = strings.length - 3;
                         final String[] parms = new String[no_parms];
                         if (no_parms > 0) {
