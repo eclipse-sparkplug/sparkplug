@@ -250,6 +250,49 @@ The only fundamental difference between a Primary Host Application MQTT Client a
 Host Application MQTT Clients is that the Edge Nodes in the infrastructure know to make sure the
 Primary Host Application is online before publishing data.
 
+[[operational_behavior_host_application_message_ordering]]
+=== Sparkplug Host Application Message Ordering
+
+Sparkplug Host Applications are required to validate the order of messages arriving from Edge Nodes.
+This is done using the sequence number which is sent in every NBIRTH, DBIRTH, NDATA, and DDATA
+message that comes from an Edge Node. Because these MQTT messages are sent on different topics, it
+is possible based on MQTT Server implementations that these messages may arrive at the Sparkplug
+Host Application in a different order than they were sent from the Edge Node. This can be especially
+common when using clustered MQTT Servers. It is the responsibility of the Sparkplug Host Application
+to ensure that all messages arrive within a 'Reorder Timeout'. In typical environments this timeout
+can be as little as a couple of seconds. In deployments with very slow networks or clustered MQTT
+servers it may need to be longer. In some environments, the MQTT Server may ensure in-order delivery
+of QoS0 MQTT messages even across topics. In these cases this timeout could be zero.
+
+If a Sparkplug Host Applications receives messages from Edge Node with sequence numbers 1, 2, and 4.
+At the time the message with a sequence number of 4 arrives, a timer SHOULD be started within the
+Host Application. This is the start of the Reordering Timeout timer. A messages with sequence number
+3 MUST arrive before the Reordering Timeout elapses. If a message with sequence number 3 does not
+arrive before the timeout, a Rebirth Request SHOULD be sent to the Edge Node. The ensures the
+session state is properly reestablished. If a message with a sequence number of 3 arrives before the
+Reorder Timeout occurs, the timer can be shutdown and normal operation of the Host Application can
+continue.
+
+It is also important to note that depending on the Sparkplug Host Application's purpose, it may make
+sense to never process messages out of order. It also may make sense to not process a message that
+arrived out of sequence if its preceding messages didn't arrive before the Reorder Timeout. These
+choices are left to the Sparkplug Host Application developer.
+
+* [tck-testable tck-id-operational-behavior-host-reordering-param]#[yellow-background]*Sparkplug
+Host Applications SHOULD provide a configurable 'Reorder Timeout' parameter*#
+* [tck-testable tck-id-operational-behavior-host-reordering-start]#[yellow-background]*If a message
+arrives with a out of order sequence number, the Host Application SHOULD start a timer denoting the
+start of the Reorder Timeout window*#
+* [tck-testable tck-id-operational-behavior-host-reordering-rebirth]#[yellow-background]*If the
+Reorder Timeout elapses and the missing message(s) have not been received, the Sparkplug Host
+Application SHOULD send an NCMD to the Edge Node with a 'Node Control/Rebirth' request*#
+** Non-normative comment: In most cases a 'Primary Host Application' would send a Rebirth Request
+but a Non-Primary Host may not
+* [tck-testable tck-id-operational-behavior-host-reordering-success]#[yellow-background]*If the
+missing messages that triggered the start of the Reorder Timeout timer arrive before the reordering
+timer elapses, the timer can be terminated and normal operation in the Host Application can
+continue*#
+
 [[operational_behavior_primary_application_state_in_multiple_mqtt_server_topologies]]
 === Primary Host Application STATE in Multiple MQTT Server Topologies
 

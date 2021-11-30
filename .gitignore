@@ -9,3 +9,4 @@ tck/src/license/THIRD-PARTY.properties
 build/
 target/
 specification/src/main/asciidoc/docinfo-header.html
+.settings

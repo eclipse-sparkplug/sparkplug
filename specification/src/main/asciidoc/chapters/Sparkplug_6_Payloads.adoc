@@ -445,26 +445,38 @@ string. The slashes in the string represent folders of the metric to represent h
 structures. For example, ‘outputs/A’ would be a metric with a unique identifier of ‘A’ in the
 ‘outputs’ folder. There is no limit to the number of folders. However, across the infrastructure of
 MQTT publishers a defined folder should always remain a folder.
+** [tck-testable tck-id-payloads-name-requirement]#[yellow-background]*The name MUST be
+included with every metric unless aliases are being used.*#
 * *alias*
 ** This is an unsigned 64-bit integer representing an optional alias for a Sparkplug B payload.
-[tck-testable tck-id-payloads-alias-uniqueness]#[yellow-background]*If supplied in an NBIRTH or
+Aliases are optional and not required. *If aliases are used, the following rules apply.*
+*** [tck-testable tck-id-payloads-alias-uniqueness]#[yellow-background]*If supplied in an NBIRTH or
 DBIRTH it MUST be a unique number across this Edge Node's entire set of metrics.*#
-In other words, no two metrics for the same Edge Node can have the same alias. Upon being defined in
-the NBIRTH or DBIRTH, subsequent messages can supply only the alias instead of the metric friendly
-name to reduce overall message size.
+**** Non-normative comment: no two metrics for the same Edge Node can have the same alias. Upon being
+defined in the NBIRTH or DBIRTH, subsequent messages can supply only the alias instead of the metric
+friendly name to reduce overall message size.
+*** [tck-testable tck-id-payloads-alias-birth-requirement]#[yellow-background]*NBIRTH and DBIRTH
+messages MUST include both a metric name and alias.*#
+*** [tck-testable tck-id-payloads-alias-data-cmd-requirement]#[yellow-background]*NDATA, DDATA,
+NCMD, and DCMD messages MUST only include an alias and the metric name MUST be excluded.*#
 * *timestamp*
 ** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
 milliseconds since epoch (Jan 1, 1970).
-[tck-not-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*This timestamp MUST
-be in UTC.*# This timestamp is meant to represent the time at which the value of a metric was
+** [tck-testable tck-id-payloads-name-birth-data-requirement]#[yellow-background]*The timestamp MUST
+be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.*#
+** [tck-testable tck-id-payloads-name-cmd-requirement]#[yellow-background]*The timestamp MAY be
+included with metrics in NCMD and DCMD messages.*#
+** [tck-not-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*This timestamp
+MUST be in UTC.*#
+*** Non-normative comment: This timestamp represents the time at which the value of a metric was
 captured.
 * *datatype*
 ** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*This MUST be an
 unsigned 32-bit integer representing the datatype.*#
-[tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*This value MUST be one of
-the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
-[tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*This MUST be included in
-Metric Definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*This value MUST be one
+of the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
+** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*This MUST be included with
+each metric definitions in NBIRTH and DBIRTH messages.*#
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some
 cases, it may be desirable to send metrics after they were acquired from a device or Edge Node. This
