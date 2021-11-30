@@ -18,12 +18,13 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[conformance_profiles]]
 === Conformance Profiles
 
-There are three Sparkplug target applications. A Sparkplug infrastructure typically consists of one
+There are four Sparkplug target applications. A Sparkplug infrastructure typically consists of one
 or more of the following application types
 
 * Sparkplug Edge Node
 * Sparkplug Host Application
 * MQTT Server
+* Sparkplug Aware MQTT Server
 
 Each application type has specific conformance requirements that must be met. Typically a Sparkplug
 application would only implement one of these profiles. For example an MQTT client wouldn't
@@ -46,8 +47,8 @@ Nodes when required.
 [tck-testable tck-id-conformance-primary-host]#[yellow-background]*Sparkplug Host Applications MUST
 publish 'STATE' messages that represent its Birth and Death Certificates.*#
 
-[[conformance_sparkplug_mqtt_server]]
-==== Sparkplug MQTT Server
+[[conformance_mqtt_server]]
+==== MQTT Server
 
 Sparkplug infrastructures have a specific subset of requirements on MQTT Servers. Any fully MQTT
 v3.1.1 or v5.0 MQTT Server will meet the requirements of Sparkplug infrastructures. However, not all
@@ -63,7 +64,8 @@ MQTT Server MUST support all aspects of Will Messages including use of the 'reta
 * [tck-testable tck-id-conformance-mqtt-retained]#[yellow-background]*A Sparkplug conformant MQTT
 Server MUST support all aspects of the 'retain flag'*#
 
-
+[[conformance_sparkplug_aware_mqtt_server]]
+==== Sparkplug Aware MQTT Server
 
 
 
