@@ -1535,7 +1535,7 @@ UTF-8 string.
 Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*The Sparkplug Host
 Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-will-message-paylaod]#[yellow-background]*The Sparkplug Host
+* [tck-testable tck-id-payloads-state-will-message-payload]#[yellow-background]*The Sparkplug Host
 Application MUST set the Will Payload to the UTF-8 string of 'OFFLINE' in the MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*After establishing an MQTT
 connection, the Sparkplug Host Application MUST subscribe on it's own 'STATE/[sparkplug_host_id]'

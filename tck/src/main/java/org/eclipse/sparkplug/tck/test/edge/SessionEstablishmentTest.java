@@ -48,7 +48,7 @@ import java.nio.ByteBuffer;
  * @author Mitchell McPartland
  */
 @SpecVersion(spec = "sparkplug", version = "3.0.0-SNAPSHOT")
-public class SessionEstablishment extends TCKTest {
+public class SessionEstablishmentTest extends TCKTest {
 	
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	
@@ -57,6 +57,8 @@ public class SessionEstablishment extends TCKTest {
 	
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
 	private final @NotNull List<String> testIds = List.of(
+		"principles-birth-certificates-order",
+		"principles-persistence-clean-session",
 		"payloads-ndeath-will-message-qos", 
 		"payloads-ndeath-seq",
 		"topics-ndeath-seq",
@@ -69,7 +71,7 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-sequence-num-zero-nbirth",
 		"payloads-nbirth-bdseq",
 		"payloads-nbirth-timestamp", 
-		"payloads-nbirth-rebirth", 
+		"payloads-nbirth-rebirth-req", 
 		"payloads-ndeath-bdseq", 
 		"edge-subscribe-ncmd", 
 		"edge-subscribe-dcmd",
@@ -88,7 +90,10 @@ public class SessionEstablishment extends TCKTest {
 		"payloads-dbirth-seq",
 		"topics-dbirth-seq",
 		"payloads-dbirth-seq-inc",
-		"payloads-dbirth-order"
+		"payloads-dbirth-order",
+		"operational-behavior-data-commands-rebirth-name",
+		"operational-behavior-data-commands-rebirth-datatype",
+		"operational-behavior-data-commands-rebirth-value"
 	);
 	
 	private final @NotNull TCK theTCK;
@@ -106,7 +111,7 @@ public class SessionEstablishment extends TCKTest {
 	private @NotNull long deathBdSeq = -1;
 	private @NotNull long birthBdSeq = -1;
 
-	public SessionEstablishment(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
 		logger.info("Edge Node session establishment test. Parameters: host_application_id group_id edge_node_id [device_ids]");
 		theTCK = aTCK;
 
@@ -160,9 +165,22 @@ public class SessionEstablishment extends TCKTest {
 		return testResults;
 	}
 	
-	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-will-message")
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_PERSISTENT_VS_NON_PERSISTENT_CONNECTIONS, 
+			id = "principles-persistence-clean-session")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH, 
+			id = "payloads-ndeath-will-message")
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
 		logger.info("Edge session establishment test - connect");
+		
+        final String isCleanSession;
+        if (packet.getCleanStart()) {
+            isCleanSession = PASS;
+        } else {
+            isCleanSession = FAIL + " (Clean session should be set to true.)";
+        }
+        testResults.put("principles-persistence-clean-session", isCleanSession);
 
 		String willPresent = FAIL + " (NDEATH not registered as Will in connect packet)";
 		Optional<WillPublishPacket> willPublishPacketOptional = null;
@@ -176,6 +194,7 @@ public class SessionEstablishment extends TCKTest {
 			logger.info("Exception", e);
 		}
 	}
+	
 	
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
@@ -201,12 +220,22 @@ public class SessionEstablishment extends TCKTest {
 		}
 	}
 	
+	
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_BIRTH_AND_DEATH_CERTIFICATES, 
+			id = "principles-birth-certificates-order")
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		logger.info("Edge session establishment test - publish");
 		
 		String topic = packet.getTopic();
 		if(topic.equals("spBv1.0/" + groupId + "/NBIRTH/" + edgeNodeId)) {
 			checkNBirth(packet);
+			if (ndataFound || ddataFound) {
+				testResults.put("principles-birth-certificates-order", FAIL + " Birth certificates must be first");
+			}
+			else { 
+				testResults.put("principles-birth-certificates-order", PASS);
+			}
 		} else if (topic.startsWith("spBv1.0/" + groupId + "/DBIRTH/")) {
 			String[] topicParts = topic.split("/");
 			String device = topicParts[topicParts.length-1];
@@ -225,11 +254,21 @@ public class SessionEstablishment extends TCKTest {
 		}
 	}
 
-	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-will-message-qos")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-seq")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NDEATH, id = "topics-ndeath-seq")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-will-message-retain")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NDEATH, id = "topics-ndeath-payload")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH, 
+			id = "payloads-ndeath-will-message-qos")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH, 
+			id = "payloads-ndeath-seq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NDEATH, 
+			id = "topics-ndeath-seq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH, 
+			id = "payloads-ndeath-will-message-retain")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NDEATH, 
+			id = "topics-ndeath-payload")
 	public Optional<WillPublishPacket> checkWillMessage(final @NotNull ConnectPacket packet) {
 		final Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
 		if (willPublishPacketOptional.isPresent()) {
@@ -282,21 +321,62 @@ public class SessionEstablishment extends TCKTest {
 		return willPublishPacketOptional;
 	}
 	
-	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-bdseq")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-qos")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-mqtt")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-seq-num")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-timestamp")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-bdseq-included")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-bdseq-matching")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_NBIRTH, id = "topics-nbirth-rebirth-metric")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-retain")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-seq")
-	@SpecAssertion(section = Sections.PAYLOADS_B_PAYLOAD, id = "payloads-sequence-num-zero-nbirth")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-timestamp")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NBIRTH, id = "payloads-nbirth-rebirth")
-	@SpecAssertion(section = Sections.PAYLOADS_B_NDEATH, id = "payloads-ndeath-bdseq")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "message-flow-edge-node-birth-publish-subscribe")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH, 
+			id = "topics-nbirth-mqtt")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH, 
+			id = "topics-nbirth-seq-num")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH, 
+			id = "topics-nbirth-timestamp")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH, 
+			id = "topics-nbirth-bdseq-included")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH, 
+			id = "topics-nbirth-bdseq-matching")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH, 
+			id = "topics-nbirth-rebirth-metric")
+	
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS, 
+			id = "operational-behavior-data-commands-rebirth-name")
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS, 
+			id = "operational-behavior-data-commands-rebirth-datatype")	
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS, 
+			id = "operational-behavior-data-commands-rebirth-value")
+	
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH, 
+			id = "payloads-nbirth-bdseq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH, 
+			id = "payloads-nbirth-qos")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH, 
+			id = "payloads-nbirth-retain")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH, 
+			id = "payloads-nbirth-seq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_PAYLOAD, 
+			id = "payloads-sequence-num-zero-nbirth")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH, 
+			id = "payloads-nbirth-timestamp")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH, 
+			id = "payloads-nbirth-rebirth-req")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH, 
+			id = "payloads-ndeath-bdseq")
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, 
+			id = "message-flow-edge-node-birth-publish-subscribe")
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -391,22 +471,55 @@ public class SessionEstablishment extends TCKTest {
 
 		// nbirth message must include 'node control/rebirth' metric
 		String rebirthIncluded = FAIL + " (NBIRTH must include a 'node control/rebirth' metric)";
+		if (rebirthFound == true) {
+			rebirthIncluded = PASS;
+		}
+		testResults.put("payloads-nbirth-rebirth-req", rebirthIncluded);
+		testResults.put("topics-nbirth-rebirth-metric", rebirthIncluded);
+		testResults.put("operational-behavior-data-commands-rebirth-name", rebirthIncluded);
+		
+		String rebirthBoolean = FAIL + " (NBIRTH 'node control/rebirth' metric must be boolean)";
+		if (rebirthFound == true && datatype == MetricDataType.Boolean) {
+			rebirthIncluded = PASS;
+		}
+		testResults.put("operational-behavior-data-commands-rebirth-datatype", rebirthBoolean);
+		
+		String rebirthValue = FAIL + " (NBIRTH 'node control/rebirth' metric must == false)";
 		if (rebirthFound == true && datatype == MetricDataType.Boolean && rebirthVal == false) {
 			rebirthIncluded = PASS;
 		}
-		testResults.put("payloads-nbirth-rebirth", rebirthIncluded);
-		testResults.put("topics-nbirth-rebirth-metric", rebirthIncluded);
+		testResults.put("operational-behavior-data-commands-rebirth-value", rebirthValue);
+		
+		
 	}
 	
-	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-qos")
-	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-retain")
-	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-timestamp")
-	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-seq")
-	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-seq-inc")
-	@SpecAssertion(section = Sections.PAYLOADS_B_DBIRTH, id = "payloads-dbirth-order")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_DBIRTH, id = "topics-dbirth-mqtt")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_DBIRTH, id = "topics-dbirth-timestamp")
-	@SpecAssertion(section = Sections.PAYLOADS_DESC_DBIRTH, id = "topics-dbirth-seq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DBIRTH, 
+			id = "payloads-dbirth-qos")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DBIRTH, 
+			id = "payloads-dbirth-retain")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DBIRTH, 
+			id = "payloads-dbirth-timestamp")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DBIRTH, 
+			id = "payloads-dbirth-seq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DBIRTH, 
+			id = "payloads-dbirth-seq-inc")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DBIRTH, 
+			id = "payloads-dbirth-order")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DBIRTH, 
+			id = "topics-dbirth-mqtt")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DBIRTH, 
+			id = "topics-dbirth-timestamp")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DBIRTH, 
+			id = "topics-dbirth-seq")
 	public void checkDBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -537,8 +650,8 @@ public class SessionEstablishment extends TCKTest {
 		return sparkplugPayload;
 	}
 
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-ncmd")
-	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-dcmd")
+	/*@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-ncmd")
+	@SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT, id = "edge-subscribe-dcmd")*/
 	public void checkSubscribeTopics() {
 		
 		// making sure edge node subscribes to ncmd and dcmd
