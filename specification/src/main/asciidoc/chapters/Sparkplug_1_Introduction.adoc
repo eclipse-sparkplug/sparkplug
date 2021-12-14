@@ -344,7 +344,16 @@ link:#appendix_b[Appendix B].
 
 [[introduction_security]]
 === Security
-// TODO: Github #73
+
+Security is not directly addressed in the Sparkplug Specification with normative statements.
+However, security should be addressed appropriately in every Sparkplug system. MQTT clients,
+servers, authentication, authorization, network access, physical access, and all other aspects of
+security should be addressed based on how the system will be deployed and used. Because Sparkplug
+utilizes MQTT and TCP/IP, the security features and best practices of those protocols also applies
+to Sparkplug. The security practices related to TCP/IP and MQTT have changed throughout the years
+and likely will continue to do so. As a result, the Sparkplug Specification will defer to the
+underlying protocols and industry standards for best practices. However, some non-normative
+statements are included with regard to security in the Sparkplug Specification.
 
 [[introduction_authentication]]
 ==== Authentication
