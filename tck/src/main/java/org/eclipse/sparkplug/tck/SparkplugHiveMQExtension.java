@@ -27,42 +27,46 @@ import org.slf4j.LoggerFactory;
  */
 public class SparkplugHiveMQExtension implements ExtensionMain {
 
-    private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-    @Override
-    public void extensionStart(final @NotNull ExtensionStartInput extensionStartInput,
-                               final @NotNull ExtensionStartOutput extensionStartOutput) {
+	@Override
+	public void extensionStart(final @NotNull ExtensionStartInput extensionStartInput,
+			final @NotNull ExtensionStartOutput extensionStartOutput) {
 
-        try {
-            logger.info("Starting Sparkplug Extension");
+		try {
+			logger.info("Starting Sparkplug Extension");
 
-            final TCK aTCK = new TCK();
+			final TCK aTCK = new TCK();
 
-            final ConnectInterceptor connectInterceptor = new ConnectInterceptor(aTCK);
-            Services.interceptorRegistry().setConnectInboundInterceptorProvider(input -> connectInterceptor);
+			final ConnectInterceptor connectInterceptor = new ConnectInterceptor(aTCK);
+			Services.interceptorRegistry().setConnectInboundInterceptorProvider(input -> connectInterceptor);
 
-            final SubscribeInterceptor subscribeInterceptor = new SubscribeInterceptor(aTCK);
-            final PublishInterceptor publishInterceptor = new PublishInterceptor(aTCK);
-            final DisconnectInterceptor disconnectInterceptor = new DisconnectInterceptor(aTCK);
-            // create a new client initializer
-            final ClientInitializer clientInitializer = (initializerInput, clientContext) -> {
-                // add the interceptors to the context of the connecting client
-                clientContext.addSubscribeInboundInterceptor(subscribeInterceptor);
-                clientContext.addPublishInboundInterceptor(publishInterceptor);
-                clientContext.addDisconnectInboundInterceptor(disconnectInterceptor);
-            };
+			final SubscribeInterceptor subscribeInterceptor = new SubscribeInterceptor(aTCK);
+			final PublishInterceptor publishInterceptor = new PublishInterceptor(aTCK);
+			final DisconnectInterceptor disconnectInterceptor = new DisconnectInterceptor(aTCK);
 
-            // register the client initializer
-            Services.initializerRegistry().setClientInitializer(clientInitializer);
+			// create a new client initializer
+			final ClientInitializer clientInitializer = (initializerInput, clientContext) -> {
+				// add the interceptors to the context of the connecting client
+				clientContext.addSubscribeInboundInterceptor(subscribeInterceptor);
+				clientContext.addPublishInboundInterceptor(publishInterceptor);
+				clientContext.addDisconnectInboundInterceptor(disconnectInterceptor);
+			};
 
-        } catch (final Exception e) {
-            logger.error("Exception thrown at extension start: ", e);
-        }
-    }
+			// register the client initializer
+			Services.initializerRegistry().setClientInitializer(clientInitializer);
 
-    @Override
-    public void extensionStop(final @NotNull ExtensionStopInput extensionStopInput,
-                              final @NotNull ExtensionStopOutput extensionStopOutput) {
-        logger.info("Stopping Sparkplug Extension");
-    }
+			Services.eventRegistry()
+					.setClientLifecycleEventListener(new SparkplugClientLifecycleEventListenerProvider(aTCK));
+
+		} catch (final Exception e) {
+			logger.error("Exception thrown at extension start: ", e);
+		}
+	}
+
+	@Override
+	public void extensionStop(final @NotNull ExtensionStopInput extensionStopInput,
+			final @NotNull ExtensionStopOutput extensionStopOutput) {
+		logger.info("Stopping Sparkplug Extension");
+	}
 }
