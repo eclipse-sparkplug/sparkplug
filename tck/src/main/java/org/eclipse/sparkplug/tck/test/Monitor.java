@@ -87,13 +87,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private static final @NotNull String FAIL = "FAIL";
 	private static final @NotNull String NAMESPACE = "spBv1.0";
 	private HashMap testResults;
-	String[] testIds = {
-		"topic-structure-namespace-unique-edge-node-descriptor"
-	};
+	String[] testIds = { "topic-structure-namespace-unique-edge-node-descriptor" };
 
 	// edge_node_id to clientid
 	private HashMap edge_nodes = new HashMap<String, String>();
-	
+
 	// clientid to edge_node_id
 	private HashMap clientids = new HashMap<String, String>();
 
@@ -126,33 +124,34 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	public HashMap<String, String> getResults() {
 		return testResults;
 	}
-	
-    @Override
-    public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
-        logger.info("Monitor: Client {} connects.", connectionStartInput.getConnectPacket().getClientId());
-    }
 
-    @Override
-    public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
-        logger.info("Monitor: Client {} authenticated successfully.", authenticationSuccessfulInput.getClientInformation().getClientId());
-    }
+	@Override
+	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+		logger.info("Monitor: Client {} connects.", connectionStartInput.getConnectPacket().getClientId());
+	}
 
-    @Override
-    public void onDisconnect(DisconnectEventInput disconnectEventInput) {
-    	String clientid = disconnectEventInput.getClientInformation().getClientId();
-        logger.info("Monitor: Client {} disconnected.", clientid);
-    	
-    	String edge_node_id = (String)clientids.get(clientid);
-    	if (edge_node_id != null) {
-    		logger.info("Monitor: removing edge node {} for client id {} on disconnect", edge_node_id, clientid); 
-    		if (clientids.remove(clientid) == null) {
-    			logger.info("Monitor: Error removing clientid {} on disconnect", clientid); 
-    		}
-    		if (edge_nodes.remove(edge_node_id) == null) {
-    			logger.info("Monitor: Error removing edge_node_id {} on disconnect", edge_node_id); 
-    		}
-    	}
-    }
+	@Override
+	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+		logger.info("Monitor: Client {} authenticated successfully.",
+				authenticationSuccessfulInput.getClientInformation().getClientId());
+	}
+
+	@Override
+	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
+		String clientid = disconnectEventInput.getClientInformation().getClientId();
+		logger.info("Monitor: Client {} disconnected.", clientid);
+
+		String edge_node_id = (String) clientids.get(clientid);
+		if (edge_node_id != null) {
+			logger.info("Monitor: removing edge node {} for client id {} on disconnect", edge_node_id, clientid);
+			if (clientids.remove(clientid) == null) {
+				logger.info("Monitor: Error removing clientid {} on disconnect", clientid);
+			}
+			if (edge_nodes.remove(edge_node_id) == null) {
+				logger.info("Monitor: Error removing edge_node_id {} on disconnect", edge_node_id);
+			}
+		}
+	}
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
@@ -169,13 +168,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	}
 
-	
 	@SpecAssertion(
-			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT, 
+			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
 			id = "topic-structure-namespace-unique-edge-node-descriptor")
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
-		
+
 		String topic = packet.getTopic();
 		if (topic.startsWith(NAMESPACE)) {
 			String[] topicParts = topic.split("/");
@@ -189,37 +187,39 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String message_type = topicParts[2];
 			String edge_node_id = topicParts[3];
 			if (topicParts.length == 5) {
-				device_id = topicParts[topicParts.length-1];
+				device_id = topicParts[topicParts.length - 1];
 			}
 
 			// if we have more than one MQTT client id with the same edge node id then it's an error
 			if (message_type.equals("NBIRTH")) {
 				logger.info("Monitor: *** NBIRTH *** {} {}", edge_node_id, clientId);
-				String client_id = (String)edge_nodes.get(edge_node_id);
+				String client_id = (String) edge_nodes.get(edge_node_id);
 				if (client_id != null && !client_id.equals(clientId)) {
-		    		logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", client_id, clientId, edge_node_id);
+					logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", client_id, clientId,
+							edge_node_id);
 					testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
 				} else {
-					logger.info("Monitor: adding edge node {} for client id {} on NBIRTH", edge_node_id, clientId); 
+					logger.info("Monitor: adding edge node {} for client id {} on NBIRTH", edge_node_id, clientId);
 					edge_nodes.put(edge_node_id, clientId);
 					clientids.put(clientId, edge_node_id);
 				}
 			} else if (message_type.equals("NDEATH")) {
 				logger.info("Monitor: *** NDEATH *** {} {}", edge_node_id, clientId);
-		    	String found_client_id = (String)edge_nodes.get(edge_node_id);
-		    	
-		    	if (found_client_id != null && !found_client_id.equals(clientId)) {
-		    		logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", found_client_id, clientId, edge_node_id);
-		    		testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
-		    	} else {
-		    		logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId); 
-		    		if (clientids.remove(clientId) == null) {
-		    			logger.info("Monitor: Error removing clientid {} on NDEATH", clientId); 
-		    		}
-		    		if (edge_nodes.remove(edge_node_id) == null) {
-		    			logger.info("Monitor: Error removing edge_node_id {} on NDEATH", edge_node_id); 
-		    		}
-		    	}
+				String found_client_id = (String) edge_nodes.get(edge_node_id);
+
+				if (found_client_id != null && !found_client_id.equals(clientId)) {
+					logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", found_client_id,
+							clientId, edge_node_id);
+					testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
+				} else {
+					logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId);
+					if (clientids.remove(clientId) == null) {
+						logger.info("Monitor: Error removing clientid {} on NDEATH", clientId);
+					}
+					if (edge_nodes.remove(edge_node_id) == null) {
+						logger.info("Monitor: Error removing edge_node_id {} on NDEATH", edge_node_id);
+					}
+				}
 			}
 		}
 	}
