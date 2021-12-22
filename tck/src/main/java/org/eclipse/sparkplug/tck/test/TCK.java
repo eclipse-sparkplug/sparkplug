@@ -85,23 +85,27 @@ public class TCK {
 		if (current != null) {
 			current.connect(clientId, packet);
 		}
+		monitor.connect(clientId, packet);
 	}
 
 	public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
 		if (current != null) {
 			current.disconnect(clientId, packet);
 		}
+		monitor.disconnect(clientId, packet);
 	}
 
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 		if (current != null) {
 			current.subscribe(clientId, packet);
 		}
+		monitor.subscribe(clientId, packet);
 	}
 
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		if (current != null) {
 			current.publish(clientId, packet);
 		}
+		monitor.publish(clientId, packet);
 	}
 }
