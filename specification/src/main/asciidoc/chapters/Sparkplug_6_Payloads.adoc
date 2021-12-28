@@ -1464,6 +1464,11 @@ message.
 SHOULD be published by the Edge Node before it intentionally disconnects from the MQTT Server.*#
 This allows host applications advanced notice that an Edge Node has disconnected rather than waiting
 for the NDEATH to be delivered by the MQTT Server based on an MQTT keep alive timeout.
+* An NDEATH message MAY include a timestamp.
+** It should be noted that this timestamp is typically set at the time of the MQTT CONNECT message
+and as a result may not be useful to Host Applications. If the timestamp is set, Host Applications
+SHOULD NOT use it to determine corresponding NBIRTH messages. Instead, the bdSeq number used in the
+NBIRTH and NDEATH messages MUST be used to determine that an NDEATH matches a prior NBIRTH.
 
 The following is a representation of a NDEATH message on the topic:
 

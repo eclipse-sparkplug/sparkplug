@@ -275,9 +275,10 @@ The Death Certificate topic and payload described here are not “published” a
 client, but provided as parameters within the MQTT CONNECT control packet when this Sparkplug Edge
 Node first establishes the MQTT Client session.
 
-Immediately upon reception of an Edge Node Death Certificate (NDEATH message), any Host Application
-subscribed to this Edge Node should set the data quality of all metrics to STALE and should note the
-timestamp when the NDEATH message was received.
+Immediately upon reception of an Edge Node Death Certificate (NDEATH message) with a bdSeq number
+that matches the preceding bdSeq number in the NBIRTH, any Host Application subscribed to this Edge
+Node should set the data quality of all metrics to STALE and should note the timestamp when the
+NDEATH message was received.
 
 [[topics_death_message_ndeath]]
 ====== Topic (NDEATH)
