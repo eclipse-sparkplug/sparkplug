@@ -104,3 +104,6 @@ $sparkplug/certificates/spBv1.0/G1/DBIRTH/E1/D1
 Aware MQTT Server MUST make DBIRTH messages available on the topic:
 $sparkplug/certificates/namespace/group_id/DBIRTH/edge_node_id/device_id with the MQTT retain flag
 set to true*#
+* [tck-testable tck-id-conformance-mqtt-aware-ndeath-timestamp]#[yellow-background]*A Sparkplug
+Aware MQTT Server MAY replace the timestmap of NDEATH messages. If it does, it MUST set the
+timestamp to the UTC time at which it attempts to deliver the NDEATH to subscribed clients*#
