@@ -481,6 +481,8 @@ unsigned 32-bit integer representing the datatype.*#
 of the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
 ** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*This MUST be included with
 each metric definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*This SHOULD NOT be
+included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some
 cases, it may be desirable to send metrics after they were acquired from a device or Edge Node. This
@@ -717,14 +719,14 @@ referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 [tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
 Definition MUST have is_definitiion set to true.*#
 [tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
-MUST have template_ref set to NULL.*#
+MUST omit the template_ref field.*#
 * *Template Instance*
 ** This is an instance of a Sparkplug Template.
 [tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*A Template
 Instance MUST have is_definitiion set to false.*#
 [tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*A Template Instance MUST
 have template_ref set to the type of template definition it is.*#
-In other words, it must be set the name of the metric that represents the template definition.
+In other words, it must be set to the name of the metric that represents the template definition.
 
 A Sparkplug Template includes the following components.
 
@@ -739,10 +741,10 @@ datatypes or other Templates as required.
 ** This is an option field and is an array of Parameter objects representing parameters associated
 with the Template.
 * *template_ref*
-** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*This MUST be set to
-NULL if this is a Template Definition.*#
+** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*This MUST be omitted
+if this is a Template Definition.*#
 [tck-testable tck-id-payloads-template-ref-instance]#[yellow-background]*This MUST be a UTF-8 string
-representing a reference to a Template name if this is a Template Instance.*#
+representing a reference to a Template Definition name if this is a Template Instance.*#
 * *is_definition*
 ** This is a Boolean representing whether this is a Template definition or a Template instance.
 [tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*This MUST be included in
