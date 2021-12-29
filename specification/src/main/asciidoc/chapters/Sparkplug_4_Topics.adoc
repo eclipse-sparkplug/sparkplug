@@ -403,7 +403,7 @@ is in a mode of quiescent Report by Exception (RBE) reporting of any metric that
 advantage of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
 devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT
 session connection. Again, time based reporting can be used instead of RBE but is discouraged and
-unnecessary.
+typically unnecessary.
 
 [[topics_data_message_ddata]]
 ====== Topic (DDATA)
