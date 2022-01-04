@@ -440,13 +440,17 @@ timestamp, and datatype along with metadata used to describe the information it 
 represent 'tags' in classic SCADA systems. It includes the following components.
 
 * *name*
-** This is the friendly name of a metric. It should be represented as a slash delimited UTF-8
-string. The slashes in the string represent folders of the metric to represent hierarchical data
-structures. For example, ‘outputs/A’ would be a metric with a unique identifier of ‘A’ in the
+** This is the friendly name of a metric. It should be represented as a forward-slash delimited
+UTF-8 string. The slashes in the string represent folders of the metric to represent hierarchical
+data structures. For example, ‘outputs/A’ would be a metric with a unique identifier of ‘A’ in the
 ‘outputs’ folder. There is no limit to the number of folders. However, across the infrastructure of
 MQTT publishers a defined folder should always remain a folder.
 ** [tck-testable tck-id-payloads-name-requirement]#[yellow-background]*The name MUST be
 included with every metric unless aliases are being used.*#
+** All UTF-8 characters are allowed in the metric name. However, special characters including but
+not limited to the following are discouraged: . , \ @ # $ % ^ & * ( ) [ ] { } | ! ` ~ : ; ' " < > ?.
+This is because many Sparkplug Host Applications may have issues handling them.
+
 * *alias*
 ** This is an unsigned 64-bit integer representing an optional alias for a Sparkplug B payload.
 Aliases are optional and not required. *If aliases are used, the following rules apply.*
@@ -477,6 +481,8 @@ unsigned 32-bit integer representing the datatype.*#
 of the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
 ** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*This MUST be included with
 each metric definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*This SHOULD NOT be
+included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some
 cases, it may be desirable to send metrics after they were acquired from a device or Edge Node. This
@@ -713,14 +719,14 @@ referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 [tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
 Definition MUST have is_definitiion set to true.*#
 [tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
-MUST have template_ref set to NULL.*#
+MUST omit the template_ref field.*#
 * *Template Instance*
 ** This is an instance of a Sparkplug Template.
 [tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*A Template
 Instance MUST have is_definitiion set to false.*#
 [tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*A Template Instance MUST
 have template_ref set to the type of template definition it is.*#
-In other words, it must be set the name of the metric that represents the template definition.
+In other words, it must be set to the name of the metric that represents the template definition.
 
 A Sparkplug Template includes the following components.
 
@@ -735,10 +741,10 @@ datatypes or other Templates as required.
 ** This is an option field and is an array of Parameter objects representing parameters associated
 with the Template.
 * *template_ref*
-** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*This MUST be set to
-NULL if this is a Template Definition.*#
+** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*This MUST be omitted
+if this is a Template Definition.*#
 [tck-testable tck-id-payloads-template-ref-instance]#[yellow-background]*This MUST be a UTF-8 string
-representing a reference to a Template name if this is a Template Instance.*#
+representing a reference to a Template Definition name if this is a Template Instance.*#
 * *is_definition*
 ** This is a Boolean representing whether this is a Template definition or a Template instance.
 [tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*This MUST be included in
@@ -1464,6 +1470,11 @@ message.
 SHOULD be published by the Edge Node before it intentionally disconnects from the MQTT Server.*#
 This allows host applications advanced notice that an Edge Node has disconnected rather than waiting
 for the NDEATH to be delivered by the MQTT Server based on an MQTT keep alive timeout.
+* An NDEATH message MAY include a timestamp.
+** It should be noted that this timestamp is typically set at the time of the MQTT CONNECT message
+and as a result may not be useful to Host Applications. If the timestamp is set, Host Applications
+SHOULD NOT use it to determine corresponding NBIRTH messages. Instead, the bdSeq number used in the
+NBIRTH and NDEATH messages MUST be used to determine that an NDEATH matches a prior NBIRTH.
 
 The following is a representation of a NDEATH message on the topic:
 

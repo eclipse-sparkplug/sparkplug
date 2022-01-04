@@ -144,9 +144,19 @@ show the Edge Node in an "ONLINE" state once it publishes its NBIRTH and DBIRTH 
 
 . If at any point in time the Edge Node MQTT Client loses connectivity to the defined MQTT
 Server(s), a Death Certificate (NDEATH) is issued by the MQTT Server on behalf of the Edge Node.
-Upon receipt of the Death Certificate, the Primary Host Application should set the state of the Edge
-Node to ‘OFFLINE’ and update all metric timestamps related to this Edge Node. Any defined metrics
-will be set to a STALE data quality.
+Upon receipt of the Death Certificate with a bdSeq number metric that matches the preceding bdSeq
+number in the NBIRTH messages, the Primary Host Application should set the state of the Edge Node
+to ‘OFFLINE’ and update all metric timestamps related to this Edge Node. Any defined metrics will be
+set to a STALE data quality.
+
+.. The bdSeq number is used to correlate an NBIRTH with a NDEATH. Because the NDEATH is included in
+the MQTT CONNECT packet, its timestamp (if included) is not useful to Sparkplug Host Applications.
+Instead, a bdSeq number must be included as a metric in the payload of the NDEATH. The same bdSeq
+number metric value must also be included in the NBIRTH message published immediately after the MQTT
+CONNECT. This allows Host Applications to know that a NDEATH matches a specific NBIRTH message. This
+is required because timing with Will Messages may result in NDEATH messages arriving after a
+new/next NBIRTH message. The bdSeq number allows Host Applications to know when it must consider the
+Edge Node offline.
 
 [[operational_behavior_edge_node_session_termination]]
 === Edge Node Session Termination

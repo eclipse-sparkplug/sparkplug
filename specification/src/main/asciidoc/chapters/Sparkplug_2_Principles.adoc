@@ -33,15 +33,19 @@ Figure 2 - Simple MQTT Infrastructure
 [[principles_report_by_exception]]
 === Report by Exception
 
-The Sparkplug Specification uses the concept of Report by Exception. Because Sparkplug utilize the
-built in functions of MQTT to maintain session awareness, messages only need to be sent by an Edge
-Node when values at the edge change. In the initial BIRTH messages, all of the current metric values
-are published in the payload. Because the MQTT session is stateful, after the initial BIRTH messages
-are sent, new metric values only need to be published when the values change.
+The Sparkplug Specification uses the concept of Report by Exception (RBE). Because Sparkplug
+utilizes the built in functions of MQTT to maintain session awareness, messages only need to be sent
+by an Edge Node when values at the edge change. In the initial BIRTH messages, all of the current
+metric values are published in the payload. Because the MQTT session is stateful, after the initial
+BIRTH messages are sent, new metric values only need to be published when the values change.
 
-[tck-testable tck-id-principles-rbe-required]#[yellow-background]*Because of the stateful nature of
-Sparkplug sessions, data MUST NOT be published from Edge Nodes on a periodic basis and instead MUST
-be published using a RBE based approach.*#
+Sparkplug does not require that RBE be used in all cases. This is to account for special
+circumstances that may require periodic reporting. However, as a general rule periodic publishing
+should not be used.
+
+[tck-testable tck-id-principles-rbe-recommended]#[yellow-background]*Because of the stateful nature
+of Sparkplug sessions, data SHOULD NOT be published from Edge Nodes on a periodic basis and instead
+SHOULD be published using a RBE based approach.*#
 
 [[principles_continuous_session_awareness]]
 === Continuous Session Awareness
