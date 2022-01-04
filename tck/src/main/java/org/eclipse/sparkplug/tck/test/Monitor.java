@@ -146,11 +146,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			if (edge_nodes.remove(edge_node_id) == null) {
 				logger.error("Monitor: Error removing edge_node_id {} on disconnect", edge_node_id);
 			}
-			
-			HashSet devices = (HashSet)edge_to_devices.get(edge_node_id);
+
+			HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
 			logger.info("Monitor: devices for edge_node_id {} were {}", edge_node_id, devices);
 			if (edge_to_devices.remove(edge_node_id) == null) {
-				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect", edge_node_id);
+				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect",
+						edge_node_id);
 			}
 		}
 	}
@@ -194,6 +195,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			if (topicParts.length == 5) {
 				device_id = topicParts[topicParts.length - 1];
 			}
+
+			// Uniqueness for edge node ids is within group id, so
+			// we add the group_id to the edge node id as a shortcut to make it so.
+			edge_node_id = group_id + ":" + edge_node_id;
 
 			// if we have more than one MQTT client id with the same edge node id then it's an error
 			if (message_type.equals("NBIRTH")) {
@@ -271,11 +276,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			if (edge_nodes.remove(edge_node_id) == null) {
 				logger.info("Monitor: Error removing edge_node_id {} on NDEATH", edge_node_id);
 			}
-			
-			HashSet devices = (HashSet)edge_to_devices.get(edge_node_id);
+
+			HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
 			logger.info("Monitor: devices for edge_node_id {} were {}", edge_node_id, devices);
 			if (edge_to_devices.remove(edge_node_id) == null) {
-				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect", edge_node_id);
+				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect",
+						edge_node_id);
 			}
 		}
 	}
