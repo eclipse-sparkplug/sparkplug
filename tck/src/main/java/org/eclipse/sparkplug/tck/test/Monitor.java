@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -14,18 +14,9 @@
 package org.eclipse.sparkplug.tck.test;
 
 /*
- * This is the primary host Sparkplug send command test: 
- * 
- * to check that a command from a primary host under test is correct to both an
- * edge node (NCMD) and a device (DCMD).
- * 
- * There will be a prompt to the person executing the test to send a command to 
- * a device and edge node we will connect.
- * 
- * The host application under test must be connected and online prior to starting this test.
- * The id of the host application must be passed as the firt parameter to this test.
- * The second parameter is the id of the edge node to be used.
- * The third parameter is the id of the device to be used.
+ * A utility to check MQTT Sparkplug messages at any time for conformance to
+ * the spec. It runs in parallel to any Sparkplug SDK test, providing checks
+ * for additional assertions which apply at all times.
  * 
  */
 
@@ -69,6 +60,7 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -87,13 +79,17 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private static final @NotNull String FAIL = "FAIL";
 	private static final @NotNull String NAMESPACE = "spBv1.0";
 	private HashMap testResults;
-	String[] testIds = { "topic-structure-namespace-unique-edge-node-descriptor" };
+	String[] testIds = { "topic-structure-namespace-unique-edge-node-descriptor",
+			"topic-structure-namespace-unique-edge-node-descriptor", "topic-structure-namespace-unique-device-id" };
 
 	// edge_node_id to clientid
 	private HashMap edge_nodes = new HashMap<String, String>();
 
 	// clientid to edge_node_id
 	private HashMap clientids = new HashMap<String, String>();
+
+	// edge_node_id to device_id
+	private HashMap edge_to_devices = new HashMap<String, HashSet<String>>();
 
 	public Monitor() {
 		logger.info("Sparkplug message monitor 1.0");
@@ -145,10 +141,16 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		if (edge_node_id != null) {
 			logger.info("Monitor: removing edge node {} for client id {} on disconnect", edge_node_id, clientid);
 			if (clientids.remove(clientid) == null) {
-				logger.info("Monitor: Error removing clientid {} on disconnect", clientid);
+				logger.error("Monitor: Error removing clientid {} on disconnect", clientid);
 			}
 			if (edge_nodes.remove(edge_node_id) == null) {
-				logger.info("Monitor: Error removing edge_node_id {} on disconnect", edge_node_id);
+				logger.error("Monitor: Error removing edge_node_id {} on disconnect", edge_node_id);
+			}
+			
+			HashSet devices = (HashSet)edge_to_devices.get(edge_node_id);
+			logger.info("Monitor: devices for edge_node_id {} were {}", edge_node_id, devices);
+			if (edge_to_devices.remove(edge_node_id) == null) {
+				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect", edge_node_id);
 			}
 		}
 	}
@@ -169,8 +171,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	@SpecAssertion(
-			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
-			id = "topic-structure-namespace-unique-edge-node-descriptor")
+			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
+			id = "topic-structure-namespace-duplicate-device-id-across-edge-node")
+	@SpecAssertion(
+			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
+			id = "topic-structure-namespace-unique-device-id")
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
 
@@ -192,34 +197,85 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 			// if we have more than one MQTT client id with the same edge node id then it's an error
 			if (message_type.equals("NBIRTH")) {
-				logger.info("Monitor: *** NBIRTH *** {} {}", edge_node_id, clientId);
-				String client_id = (String) edge_nodes.get(edge_node_id);
-				if (client_id != null && !client_id.equals(clientId)) {
-					logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", client_id, clientId,
-							edge_node_id);
-					testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
-				} else {
-					logger.info("Monitor: adding edge node {} for client id {} on NBIRTH", edge_node_id, clientId);
-					edge_nodes.put(edge_node_id, clientId);
-					clientids.put(clientId, edge_node_id);
-				}
+				handleNBIRTH(edge_node_id, clientId);
 			} else if (message_type.equals("NDEATH")) {
-				logger.info("Monitor: *** NDEATH *** {} {}", edge_node_id, clientId);
-				String found_client_id = (String) edge_nodes.get(edge_node_id);
-
-				if (found_client_id != null && !found_client_id.equals(clientId)) {
-					logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", found_client_id,
-							clientId, edge_node_id);
-					testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
+				handleNDEATH(edge_node_id, clientId);
+			} else if (message_type.equals("DBIRTH")) {
+				logger.info("Monitor: *** DBIRTH *** {} {}", device_id, edge_node_id);
+				if (!edge_to_devices.keySet().contains(edge_node_id)) {
+					logger.error("Monitor: DBIRTH before NBIRTH");
 				} else {
-					logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId);
-					if (clientids.remove(clientId) == null) {
-						logger.info("Monitor: Error removing clientid {} on NDEATH", clientId);
-					}
-					if (edge_nodes.remove(edge_node_id) == null) {
-						logger.info("Monitor: Error removing edge_node_id {} on NDEATH", edge_node_id);
+					HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
+					if (devices.contains(device_id)) {
+						logger.error("Monitor: edge_node {} using device_id {} twice", edge_node_id, device_id);
+						testResults.put("topic-structure-namespace-unique-device-id", FAIL);
+					} else {
+						logger.info("Monitor: adding device id {} for edge node id {} on DBIRTH", device_id,
+								edge_node_id);
+						devices.add(device_id);
 					}
 				}
+			} else if (message_type.equals("DDEATH")) {
+				logger.info("Monitor: *** DDEATH *** {} {}", device_id, edge_node_id);
+
+				if (!edge_to_devices.keySet().contains(edge_node_id)) {
+					logger.error("Monitor: DDEATH received but no edge_node_id recorded");
+				} else {
+					HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
+					if (!devices.contains(device_id)) {
+						logger.error("Monitor: DDEATH before DBIRTH for device {} on edge {}", device_id, edge_node_id);
+					} else {
+						logger.info("Monitor: removing device id {} for edge node id {} on DDEATH", device_id,
+								edge_node_id);
+						devices.remove(device_id);
+					}
+				}
+			}
+		}
+	}
+
+	@SpecAssertion(
+			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
+			id = "topic-structure-namespace-unique-edge-node-descriptor")
+	private void handleNBIRTH(String edge_node_id, String clientId) {
+		logger.info("Monitor: *** NBIRTH *** {} {}", edge_node_id, clientId);
+		String client_id = (String) edge_nodes.get(edge_node_id);
+		if (client_id != null && !client_id.equals(clientId)) {
+			logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", client_id, clientId,
+					edge_node_id);
+			testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
+		} else {
+			logger.info("Monitor: adding edge node {} for client id {} on NBIRTH", edge_node_id, clientId);
+			edge_nodes.put(edge_node_id, clientId);
+			clientids.put(clientId, edge_node_id);
+			edge_to_devices.put(edge_node_id, new HashSet<String>());
+		}
+	}
+
+	@SpecAssertion(
+			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
+			id = "topic-structure-namespace-unique-edge-node-descriptor")
+	private void handleNDEATH(String edge_node_id, String clientId) {
+		logger.info("Monitor: *** NDEATH *** {} {}", edge_node_id, clientId);
+		String found_client_id = (String) edge_nodes.get(edge_node_id);
+
+		if (found_client_id != null && !found_client_id.equals(clientId)) {
+			logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", found_client_id, clientId,
+					edge_node_id);
+			testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
+		} else {
+			logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId);
+			if (clientids.remove(clientId) == null) {
+				logger.info("Monitor: Error removing clientid {} on NDEATH", clientId);
+			}
+			if (edge_nodes.remove(edge_node_id) == null) {
+				logger.info("Monitor: Error removing edge_node_id {} on NDEATH", edge_node_id);
+			}
+			
+			HashSet devices = (HashSet)edge_to_devices.get(edge_node_id);
+			logger.info("Monitor: devices for edge_node_id {} were {}", edge_node_id, devices);
+			if (edge_to_devices.remove(edge_node_id) == null) {
+				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect", edge_node_id);
 			}
 		}
 	}
