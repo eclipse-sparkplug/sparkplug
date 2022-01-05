@@ -78,7 +78,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private static final @NotNull String PASS = "PASS";
 	private static final @NotNull String FAIL = "FAIL";
 	private static final @NotNull String NAMESPACE = "spBv1.0";
-	private HashMap testResults;
+	private HashMap testResults = new HashMap<String, String>();
 	String[] testIds = { "topic-structure-namespace-unique-edge-node-descriptor",
 			"topic-structure-namespace-unique-edge-node-descriptor", "topic-structure-namespace-unique-device-id" };
 
@@ -93,9 +93,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public Monitor() {
 		logger.info("Sparkplug message monitor 1.0");
-
-		testResults = new HashMap<String, String>();
-		edge_nodes = new HashMap<String, String>();
 
 		for (int i = 0; i < testIds.length; ++i) {
 			testResults.put(testIds[i], "");
@@ -132,6 +129,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				authenticationSuccessfulInput.getClientInformation().getClientId());
 	}
 
+	// onDisconnect is called whenever an MQTT client disconnects from the server,
+	// whether that be through an MQTT disconnect or a simple TCP connection break, so
+	// under all circumstances.
 	@Override
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
 		String clientid = disconnectEventInput.getClientInformation().getClientId();
@@ -161,6 +161,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	}
 
+	// disconnect is only called for the receipt of an MQTT disconnect packet
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
 
@@ -174,9 +175,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
 			id = "topic-structure-namespace-duplicate-device-id-across-edge-node")
-	@SpecAssertion(
-			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
-			id = "topic-structure-namespace-unique-device-id")
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
 
@@ -206,35 +204,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			} else if (message_type.equals("NDEATH")) {
 				handleNDEATH(edge_node_id, clientId);
 			} else if (message_type.equals("DBIRTH")) {
-				logger.info("Monitor: *** DBIRTH *** {} {}", device_id, edge_node_id);
-				if (!edge_to_devices.keySet().contains(edge_node_id)) {
-					logger.error("Monitor: DBIRTH before NBIRTH");
-				} else {
-					HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
-					if (devices.contains(device_id)) {
-						logger.error("Monitor: edge_node {} using device_id {} twice", edge_node_id, device_id);
-						testResults.put("topic-structure-namespace-unique-device-id", FAIL);
-					} else {
-						logger.info("Monitor: adding device id {} for edge node id {} on DBIRTH", device_id,
-								edge_node_id);
-						devices.add(device_id);
-					}
-				}
+				handleDBIRTH(device_id, edge_node_id);
 			} else if (message_type.equals("DDEATH")) {
-				logger.info("Monitor: *** DDEATH *** {} {}", device_id, edge_node_id);
-
-				if (!edge_to_devices.keySet().contains(edge_node_id)) {
-					logger.error("Monitor: DDEATH received but no edge_node_id recorded");
-				} else {
-					HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
-					if (!devices.contains(device_id)) {
-						logger.error("Monitor: DDEATH before DBIRTH for device {} on edge {}", device_id, edge_node_id);
-					} else {
-						logger.info("Monitor: removing device id {} for edge node id {} on DDEATH", device_id,
-								edge_node_id);
-						devices.remove(device_id);
-					}
-				}
+				handleDDEATH(device_id, edge_node_id);
 			}
 		}
 	}
@@ -246,7 +218,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		logger.info("Monitor: *** NBIRTH *** {} {}", edge_node_id, clientId);
 		String client_id = (String) edge_nodes.get(edge_node_id);
 		if (client_id != null && !client_id.equals(clientId)) {
-			logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", client_id, clientId,
+			logger.error("Monitor: two clientids {} {} using the same group_id/edge_node_id {}", client_id, clientId,
 					edge_node_id);
 			testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
 		} else {
@@ -265,8 +237,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		String found_client_id = (String) edge_nodes.get(edge_node_id);
 
 		if (found_client_id != null && !found_client_id.equals(clientId)) {
-			logger.error("Monitor: two clientids {} {} using the same edge_node_id {}", found_client_id, clientId,
-					edge_node_id);
+			logger.error("Monitor: two clientids {} {} using the same groups_id/edge_node_id {}", found_client_id,
+					clientId, edge_node_id);
 			testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
 		} else {
 			logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId);
@@ -286,4 +258,37 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		}
 	}
 
+	@SpecAssertion(
+			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
+			id = "topic-structure-namespace-unique-device-id")
+	private void handleDBIRTH(String device_id, String edge_node_id) {
+		logger.info("Monitor: *** DBIRTH *** {} {}", device_id, edge_node_id);
+		if (!edge_to_devices.keySet().contains(edge_node_id)) {
+			logger.error("Monitor: DBIRTH before NBIRTH");
+		} else {
+			HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
+			if (devices.contains(device_id)) {
+				logger.error("Monitor: edge_node {} using device_id {} twice", edge_node_id, device_id);
+				testResults.put("topic-structure-namespace-unique-device-id", FAIL);
+			} else {
+				logger.info("Monitor: adding device id {} for edge node id {} on DBIRTH", device_id, edge_node_id);
+				devices.add(device_id);
+			}
+		}
+	}
+
+	private void handleDDEATH(String device_id, String edge_node_id) {
+		logger.info("Monitor: *** DDEATH *** {} {}", device_id, edge_node_id);
+		if (!edge_to_devices.keySet().contains(edge_node_id)) {
+			logger.error("Monitor: DDEATH received but no edge_node_id recorded");
+		} else {
+			HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
+			if (!devices.contains(device_id)) {
+				logger.error("Monitor: DDEATH before DBIRTH for device {} on edge {}", device_id, edge_node_id);
+			} else {
+				logger.info("Monitor: removing device id {} for edge node id {} on DDEATH", device_id, edge_node_id);
+				devices.remove(device_id);
+			}
+		}
+	}
 }
