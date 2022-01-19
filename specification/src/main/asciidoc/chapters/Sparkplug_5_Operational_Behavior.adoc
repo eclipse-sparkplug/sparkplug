@@ -60,7 +60,7 @@ single MQTT Server. The steps outlined in the session diagram are defined as fol
 
 [arabic]
 . Sparkplug Host Applications will try to create an MQTT Session using the MQTT CONNECT Control
-Packet. A Death Certificate is constructed into the MQTT Will Topic and Will Payload of the of the
+Packet. A Death Certificate is constructed into the MQTT Will Topic and Will Payload of the
 CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true.
 [tck-testable tck-id-message-flow-phid-sparkplug-clean-session]#[yellow-background]*The CONNECT
 Control Packet for all Sparkplug Host Applications MUST set the MQTT 'Clean Session' flag to
@@ -291,7 +291,7 @@ choices are left to the Sparkplug Host Application developer.
 * [tck-testable tck-id-operational-behavior-host-reordering-param]#[yellow-background]*Sparkplug
 Host Applications SHOULD provide a configurable 'Reorder Timeout' parameter*#
 * [tck-testable tck-id-operational-behavior-host-reordering-start]#[yellow-background]*If a message
-arrives with a out of order sequence number, the Host Application SHOULD start a timer denoting the
+arrives with an out of order sequence number, the Host Application SHOULD start a timer denoting the
 start of the Reorder Timeout window*#
 * [tck-testable tck-id-operational-behavior-host-reordering-rebirth]#[yellow-background]*If the
 Reorder Timeout elapses and the missing message(s) have not been received, the Sparkplug Host
@@ -371,7 +371,7 @@ this server if its MQTT Session stays intact and it does not receive the Primary
 DEATH Certificate.
 
 . Having a subscription registered to the MQTT Server on the STATE topic will result in any change
-to the current the Primary Host Application STATE being received immediately. In this case, a
+to the current Primary Host Application STATE being received immediately. In this case, a
 network disruption causes the Primary Host Application MQTT Session to server #2 to be terminated.
 This will cause the MQTT Server, on behalf of the now terminated the Primary Host Application MQTT
 Client to publish the Death Certificate to anyone that is currently subscribed to it. Upon receipt
@@ -479,7 +479,7 @@ a Sparkplug Host Application sends its MQTT CONNECT packet, it MUST include a Wi
 MQTT Will Message's topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
 of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-payload]#[yellow-background]*The
-MQTT Will Message's payload MUST be the ASCII String of 'OFFLINE'.*#
+MQTT Will Message's payload MUST be the UTF-8 String of 'OFFLINE'.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-qos]#[yellow-background]*The
 MQTT Will Message's MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-retained]#[yellow-background]*The
@@ -495,7 +495,7 @@ after successfully connecting to the MQTT Server.*#
 Host Application's Birth topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
 of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-payload]#[yellow-background]*The
-Host Application's Birth payload MUST be the ASCII String of 'ONLINE'.*#
+Host Application's Birth payload MUST be the UTF-8 String of 'ONLINE'.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-qos]#[yellow-background]*The
 Host Application's Birth MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-retained]#[yellow-background]*The
@@ -512,7 +512,7 @@ following characteristics.
 Sparkplug Host Application's Death topic MUST be of the form 'STATE/host_id' where host_id is the
 unique identifier of the Sparkplug Host Application.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-payload]#[yellow-background]*The
-Sparkplug Host Application's Death payload MUST be the ASCII String of 'OFFLINE'.*#
+Sparkplug Host Application's Death payload MUST be the UTF-8 String of 'OFFLINE'.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-qos]#[yellow-background]*The
 Sparkplug Host Application's Death MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-death-retained]#[yellow-background]*The
@@ -565,7 +565,7 @@ messages MUST include current values for all metrics.*#
 messages MUST only be published when Device level metrics change.*#
 ** In other words, metric values that have not changed within the same Sparkplug Session MUST not be
 resent until a new Sparkplug session is established.
-* NDATA messages SHOULD be aggregated to include multiple metrics.
+* DDATA messages SHOULD be aggregated to include multiple metrics.
 ** This is up to the application developer in terms of how many metrics should be aggregated in a
 single message, but it typically doesn't make sense to publish an MQTT message for every single
 metric change.

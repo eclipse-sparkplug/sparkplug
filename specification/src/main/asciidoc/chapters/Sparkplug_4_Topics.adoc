@@ -39,7 +39,7 @@ specification MUST use the following topic namespace structure:*#
 The namespace element of the topic namespace is the root element that will define both the
 structure of the remaining namespace elements as well as the encoding used for the associated
 payload data. The Sparkplug specification defines two (2) namespaces. One is for Sparkplug payload
-definition A (now deprecated), and another one of for the Sparkplug payload definition B.
+definition A (now deprecated), and the second is for the Sparkplug payload definition B.
 
 [tck-testable tck-id-topic-structure-namespace-a]#[yellow-background]*For the Sparkplug B version of
 the payload definition, the UTF-8 string constant for the namespace element MUST be:*#
@@ -116,7 +116,7 @@ MUST be unique from other devices being reported on by the same Edge Node.*#
 device_id MAY be duplicated from Edge Node to other Edge Nodes.*#
 The device_id element travels with every message published and should be as short as possible.
 [tck-testable tck-id-topic-structure-namespace-device-id-associated-message-types]#[yellow-background]*The
-device_id MUST be included with message_type elements DBIRTH, DDEATH, DDATA, and DCMD based topics*#
+device_id MUST be included with message_type elements DBIRTH, DDEATH, DDATA, and DCMD based topics.*#
 [tck-testable tck-id-topic-structure-namespace-device-id-non-associated-message-types]#[yellow-background]*The
 device_id MUST NOT be included with message_type elements NBIRTH, NDEATH, NDATA, NCMD, and STATE
 based topics*#
@@ -147,7 +147,7 @@ infrastructure.
 values.
 * Issue write/command messages to any Edge Node or Device metric.
 
-This section defines the payload contents and how each of the associated messages types can be used.
+This section defines the payload contents and how each of the associated message types can be used.
 
 [[topics_edge_node]]
 ==== Edge Node
