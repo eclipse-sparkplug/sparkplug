@@ -470,18 +470,18 @@ milliseconds since epoch (Jan 1, 1970).
 be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.*#
 ** [tck-testable tck-id-payloads-name-cmd-requirement]#[yellow-background]*The timestamp MAY be
 included with metrics in NCMD and DCMD messages.*#
-** [tck-not-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*This timestamp
+** [tck-not-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*The timestamp
 MUST be in UTC.*#
 *** Non-normative comment: This timestamp represents the time at which the value of a metric was
 captured.
 * *datatype*
-** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*This MUST be an
+** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*The datatype MUST be an
 unsigned 32-bit integer representing the datatype.*#
-** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*This value MUST be one
+** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*The datatype MUST be one
 of the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
-** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*This MUST be included with
-each metric definitions in NBIRTH and DBIRTH messages.*#
-** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*This SHOULD NOT be
+** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*The datatype MUST be included with
+each metric definition in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*The datatype SHOULD NOT be
 included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some
@@ -644,7 +644,7 @@ A Sparkplug B PropertySetList object is an array of PropertySet objects. It incl
 components.
 
 * *propertyset*
-** This is an array of link:#payloads_b_propertyset[PropetrySet objects].
+** This is an array of link:#payloads_b_propertyset[PropertySet objects].
 
 [[payloads_b_dataset]]
 ==== DataSet
@@ -717,13 +717,13 @@ referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 * *Template Definition*
 ** This is the definition of a Sparkplug Template.
 [tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
-Definition MUST have is_definitiion set to true.*#
+Definition MUST have is_definition set to true.*#
 [tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
 MUST omit the template_ref field.*#
 * *Template Instance*
 ** This is an instance of a Sparkplug Template.
 [tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*A Template
-Instance MUST have is_definitiion set to false.*#
+Instance MUST have is_definition set to false.*#
 [tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*A Template Instance MUST
 have template_ref set to the type of template definition it is.*#
 In other words, it must be set to the name of the metric that represents the template definition.
@@ -1133,7 +1133,7 @@ sequence number.*#
 include a sequence number value that is one greater than the previous sequence number sent by the
 Edge Node. This value MUST never exceed 255. If in the previous sequence number sent by the Edge
 Node was 255, the next sequence number sent MUST have a value of 0.*#
-* [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*All DBIRTH messages sent by and
+* [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*All DBIRTH messages sent by an
 Edge Node MUST be sent immediately after the NBIRTH and before any NDATA or DDATA messages are
 published by the Edge Node.*#
 * [tck-testable tck-id-payloads-dbirth-qos]#[yellow-background]*DBIRTH messages MUST be published
@@ -1152,7 +1152,7 @@ In the topic above the following information is known based on the Sparkplug top
 * The ‘Group ID’ is: Sparkplug B Devices
 * The ‘Edge Node ID’ is: Raspberry Pi
 * The ‘Device ID’ is: Pibrella
-* This is an DBIRTH message based on the 'DBIRTH' Sparkplug Verb
+* This is a DBIRTH message based on the 'DBIRTH' Sparkplug Verb
 
 Consider the following Sparkplug B payload in the DBIRTH message shown above:
 
@@ -1252,14 +1252,14 @@ an ordered List of metrics, multiple different change events for multiple differ
 be included in a single NDATA message.
 
 * [tck-testable tck-id-payloads-ndata-timestamp]#[yellow-background]*NDATA messages MUST include a
-payload timestmp that denotes the time at which the message was published.*#
+payload timestamp that denotes the time at which the message was published.*#
 * [tck-testable tck-id-payloads-ndata-seq]#[yellow-background]*Every NDATA message MUST include a
 sequence number.*#
 * [tck-testable tck-id-payloads-ndata-seq-inc]#[yellow-background]*Every NDATA message MUST include
 a sequence number value that is one greater than the previous sequence number sent by the Edge Node.
 This value MUST never exceed 255. If in the previous sequence number sent by the Edge Node was 255,
 the next sequence number sent MUST have a value of 0.*#
-* [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*All NDATA messages sent by and Edge
+* [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*All NDATA messages sent by an Edge
 Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages have been published by the Edge
 Node.*#
 * [tck-testable tck-id-payloads-ndata-qos]#[yellow-background]*NDATA messages MUST be published with
@@ -1315,7 +1315,7 @@ sequence number.*#
 a sequence number value that is one greater than the previous sequence number sent by the Edge Node.
 This value MUST never exceed 255. If in the previous sequence number sent by the Edge Node was 255,
 the next sequence number sent MUST have a value of 0.*#
-* [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*All DDATA messages sent by and Edge
+* [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*All DDATA messages sent by an Edge
 Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages have been published by the Edge
 Node.*#
 * [tck-testable tck-id-payloads-ddata-qos]#[yellow-background]*DDATA messages MUST be published with
@@ -1512,9 +1512,9 @@ the Edge Node should publish a DDEATH to denote that device connectivity has bee
 
 * [tck-testable tck-id-payloads-ddeath-timestamp]#[yellow-background]*DDEATH messages MUST include a
 payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-ddeath-seq]#[yellow-background]*Every NDATA message MUST include a
+* [tck-testable tck-id-payloads-ddeath-seq]#[yellow-background]*Every DDEATH message MUST include a
 sequence number.*#
-* [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*Every NDATA message MUST include
+* [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*Every DDEATH message MUST include
 a sequence number value that is one greater than the previous sequence number sent by the Edge Node.
 This value MUST never exceed 255. If in the previous sequence number sent by the Edge Node was 255,
 the next sequence number sent MUST have a value of 0.*#
@@ -1528,7 +1528,7 @@ spBv1.0/Sparkplug B Devices/DDEATH/Raspberry Pi/Pibrella
 * The ‘Group ID’ is: Sparkplug B Devices
 * The ‘Edge Node ID’ is: Raspberry Pi
 * The ‘Device ID’ is: Pibrella
-* This is an DDEATH message based on the 'DDEATH' Sparkplug Verb
+* This is a DDEATH message based on the 'DDEATH' Sparkplug Verb
 
 Consider the following Sparkplug B payload in the DDEATH message shown above:
 

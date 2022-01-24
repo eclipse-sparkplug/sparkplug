@@ -8,7 +8,7 @@
 	* STATE/[Primary Host ID]
 
 ## Sparkplug Topic Tokens
-* Primary Host ID: The ASCII identifier for the primary host client.
+* Primary Host ID: The UTF-8 identifier for the primary host client.
 * Namespace Token: The first MQTT topic token MUST always be spAv1.0 or spBv1.0 with the exception of STATE messages. This denotes the payload encoding.
 * Group ID: This MUST be included as the second topic token for every non-STATE topic
 * Edge Node ID: This MUST be included as the fourth topic token for every non-STATE topic
@@ -23,8 +23,8 @@
 
 ## Sparkplug Primary Host Client
 * There MUST not be more than one Sparkplug Primary Host Client connected to any MQTT Server
-* An MQTT 'Will Message' must be registered with the STATE topic. It MUST have a payload with the ASCII string 'OFFLINE', use QoS1, and MUST set the MQTT retain flag to true
-* The STATE message MUST be published after the MQTT CONNACK packet is received with a 'Connection Accepted' response. The payload MUST be an ASCII string with the value of 'ONLINE', it MUST use QoS1, and MUST set the MQTT retain flag to true.
+* An MQTT 'Will Message' must be registered with the STATE topic. It MUST have a payload with the UTF-8 string 'OFFLINE', use QoS1, and MUST set the MQTT retain flag to true
+* The STATE message MUST be published after the MQTT CONNACK packet is received with a 'Connection Accepted' response. The payload MUST be an UTF-8 string with the value of 'ONLINE', it MUST use QoS1, and MUST set the MQTT retain flag to true.
 
 ## Sparkplug Edge Client
 * MUST publish an NBIRTH message after connecting to the MQTT Server and before publishing any other messages
@@ -51,7 +51,7 @@ pending bdSeq number metric that will be published in pending NBIRTH message
 * All non-STATE messages MUST be published with the MQTT 'retain flag' set to false
 
 ## MQTT Will Messages
-* Sparkplug Primary Host Clients MUST register an MQTT Will message with the topic 'STATE/[Primary Host ID]', a payload of an ASCII string 'OFFLINE', MQTT retain=true, and QoS=1
+* Sparkplug Primary Host Clients MUST register an MQTT Will message with the topic 'STATE/[Primary Host ID]', a payload of an UTF-8 string 'OFFLINE', MQTT retain=true, and QoS=1
 * Sparkplug Host Clients that are not the Sparkplug Primary Host Clients MUST NOT register an MQTT Will message
 * Sparkplug Edge Clients MUST register an MQTT Will message with the topic: '[Namespace Token]/[Group ID]/[Sparkplug Verb]/[Edge Node ID]'
 	* MORE TO ADD HERE

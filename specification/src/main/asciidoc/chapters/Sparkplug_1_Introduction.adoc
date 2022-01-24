@@ -29,7 +29,7 @@ to accomplish the three following goals.
 [[introduction_define_an_mqtt_topic_namespace]]
 ==== Define an MQTT Topic Namespace
 
-As noted many times in this document one of the many attractive features of MQTT is that is does not
+As noted many times in this document one of the many attractive features of MQTT is that it does not
 specify any required MQTT Topic Namespace within its implementation. This fact has meant that MQTT
 has taken a dominant position across a wide spectrum of IoT solutions. The intent of the Sparkplug
 Specification is to identify and document a Topic Namespace that is well thought out and optimized
@@ -245,7 +245,7 @@ within the context of that application.
 This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using
 a compliant MQTT v3.1.1 or v5.0 connection with the payload and topic notation as outlined in this
 Sparkplug Specification. With MQTT/Sparkplug enabled directly in the device this could bypass the
-use of a Sparkplug Device in the infrastructure. In this case, the physical device or sensor is
+use of a Sparkplug Edge Node in the infrastructure. In this case, the physical device or sensor is
 the Edge Node. It is up to the developer of the application to decide if the concept of a 'Sparkplug
 Device' is to be used within their application.
 
@@ -273,7 +273,7 @@ MUST publish STATE messages denoting their online and offline status.*#
 [[introduction_primary_host_application]]
 ===== Primary Host Application
 
-A Primary Host Applications may be defined by an Edge Node. The Edge Node's behavior may change
+A Primary Host Application may be defined by an Edge Node. The Edge Node's behavior may change
 based on the status of its configured Primary Host. It is not required that an Edge Node must have
 a Primary Host configured but it may be useful in certain applications. This allows Edge Nodes to
 make decisions based on whether or not the Primary Host Application is online or not. For example,
@@ -293,7 +293,7 @@ infrastructure. There are three primary IDs and one that is a composite ID. Thes
 the following.
 
 * Group ID
-** [tck-testable tck-id-intro-group-id-string]#[yellow-background]*The Group ID MUST be UTF-8 string
+** [tck-testable tck-id-intro-group-id-string]#[yellow-background]*The Group ID MUST be a UTF-8 string
 and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
 ** [tck-testable tck-id-intro-group-id-chars]#[yellow-background]*Because the Group ID is used in
 MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
@@ -301,19 +301,19 @@ Specification.*#
 ** Non-normative comment: The Group ID represents a general grouping of Edge Nodes that makes sense
 within the context of the Sparkplug application and use-case.
 * Edge Node ID
-** [tck-testable tck-id-intro-edge-node-id-string]#[yellow-background]*The Edge Node ID MUST be
+** [tck-testable tck-id-intro-edge-node-id-string]#[yellow-background]*The Edge Node ID MUST be a 
 UTF-8 string and used as part of the Sparkplug topics as defined in the
 link:#topics[Topics Section].*#
 ** [tck-testable tck-id-intro-edge-node-id-chars]#[yellow-background]*Because the Edge Node ID is
-used in MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the
+used in MQTT topic strings the Edge Node ID MUST only contain characters allowed for MQTT topics per the
 MQTT Specification.*#
 ** Non-normative comment: The Edge Node ID represents a unique identifier for an Edge Node within
 the context of the Group ID under which it exists.
 * Device ID
-** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Device ID MUST be UTF-8
+** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Device ID MUST be a UTF-8
 string and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
 ** [tck-testable tck-id-intro-device-id-chars]#[yellow-background]*Because the Device ID is used in
-MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
+MQTT topic strings the Device ID MUST only contain characters allowed for MQTT topics per the MQTT
 Specification.*#
 ** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
