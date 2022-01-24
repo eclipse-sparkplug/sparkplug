@@ -107,11 +107,11 @@ But in some use cases, such as sending GPS coordinates for asset tracking or oth
 with periodic data from sensors, MQTT enabled devices do not need to remain connected to the MQTT
 infrastructure. In these use cases, all the Device needs to do is to issue an MQTT DISCONNECT
 control packet prior to going offline to leave the MQTT infrastructure “gracefully”. In this case an
-MQTT device or associated DEATH certificate will most normally not be seen. System designers just
-need to be aware that the metric in the Host Application will represent “Last Known Good” values
-with a timestamp of this data where the current state of the of the MQTT Device is not a real-time
-indication. The Host Application metric timestamp values can be used to determine when the values
-from this node were last updated.
+MQTT device or associated DEATH certificate will not be sent to Sparkplug Host Applications. System
+designers just need to be aware that the metric in the Host Application will represent “Last Known
+Good” values with a timestamp of this data where the current state of the of the MQTT Device is not
+a real-time indication. The Host Application metric timestamp values can be used to determine when
+the values from this Edge Node were last updated.
 
 Non-persistent MQTT Enabled Devices should still register a proper DEATH Certificate upon the
 establishment of an MQTT session. In this manner, the Host Application can still have a good
@@ -120,4 +120,4 @@ terminated prior to the Edge Node being able to complete its transaction.
 
 Regardless of a persistent or non-persistent connection,
 [tck-testable tck-id-principles-persistence-clean-session]#[yellow-background]*Edge Node MQTT
-CONNECT packets MUST set the 'Clean Session' flag to false.*#
+CONNECT packets MUST set the 'Clean Session' flag to true.*#
