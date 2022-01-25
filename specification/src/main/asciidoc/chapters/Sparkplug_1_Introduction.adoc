@@ -33,7 +33,7 @@ As noted many times in this document one of the many attractive features of MQTT
 specify any required MQTT Topic Namespace within its implementation. This fact has meant that MQTT
 has taken a dominant position across a wide spectrum of IoT solutions. The intent of the Sparkplug
 Specification is to identify and document a Topic Namespace that is well thought out and optimized
-for the SCADA/IIoT solution sector. In addition, Sparkplug defines a Topic Namespace in such away
+for the SCADA/IIoT solution sector. In addition, Sparkplug defines a Topic Namespace in such a way
 that it provides semantics which allow for automatic discovery and bi-directional communication
 between MQTT clients in a system.
 
