@@ -191,12 +191,12 @@ include the following:*#
 * [tck-testable tck-id-topics-nbirth-templates]#[yellow-background]*If Template instances will be
 published by this Edge Node or any devices, all Template definitions MUST be published in the
 NBIRTH.*#
-* [tck-testable tck-id-topics-nbirth-bdseq-included]#[yellow-background]*A bdseq number as a metric
+* [tck-testable tck-id-topics-nbirth-bdseq-included]#[yellow-background]*A bdSeq number as a metric
 MUST be included in the payload.*#
-* [tck-testable tck-id-topics-nbirth-bdseq-matching]#[yellow-background]*This MUST match the bdseq
+* [tck-testable tck-id-topics-nbirth-bdseq-matching]#[yellow-background]*This MUST match the bdSeq
 number provided in the MQTT CONNECT packet’s Will Message payload.*#
 This allows Host Applications to correlate NBIRTHs to NDEATHs.
-* [tck-testable tck-id-topics-nbirth-bdseq-increment]#[yellow-background]*The bdseq number MUST
+* [tck-testable tck-id-topics-nbirth-bdseq-increment]#[yellow-background]*The bdSeq number MUST
 start at zero and increment by one on every new MQTT CONNECT packet.*#
 
 [tck-testable tck-id-topics-nbirth-rebirth-metric]#[yellow-background]*The NBIRTH message MUST
@@ -291,7 +291,7 @@ The Death Certificate topic for an Sparkplug Edge Node is:
 ====== Payload (NDEATH)
 
 * [tck-testable tck-id-topics-ndeath-payload]#[yellow-background]*The NDEATH message contains a very
-simple payload that MUST only include a single metric, the bdseq number, so that the NDEATH event
+simple payload that MUST only include a single metric, the bdSeq number, so that the NDEATH event
 can be associated with the NBIRTH.*#
 Since this is typically published by the MQTT Server on behalf of the Edge Node, information about
 the current state of the Edge Node and its devices is not and cannot be known. As a result,
