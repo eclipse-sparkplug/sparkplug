@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+ * Copyright © 2021, 2022 Ian Craggs and others
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -31,78 +31,76 @@ import java.util.regex.Pattern;
  */
 public class PublishInterceptor implements PublishInboundInterceptor {
 
-    private final static @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	private final static @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-    private final TCK theTCK;
+	private final TCK theTCK;
 
-    public PublishInterceptor(final @NotNull TCK theTCK) {
-        this.theTCK = theTCK;
-    }
+	public PublishInterceptor(final @NotNull TCK theTCK) {
+		this.theTCK = theTCK;
+	}
 
-    @Override
-    public void onInboundPublish(final @NotNull PublishInboundInput publishInboundInput,
-                                 final @NotNull PublishInboundOutput publishInboundOutput) {
-        try {
-            final String clientId = publishInboundInput.getClientInformation().getClientId();
-            logger.info("Inbound publish from '{}'", clientId);
+	@Override
+	public void onInboundPublish(final @NotNull PublishInboundInput publishInboundInput,
+			final @NotNull PublishInboundOutput publishInboundOutput) {
+		try {
+			final String clientId = publishInboundInput.getClientInformation().getClientId();
+			logger.info("Inbound publish from '{}'", clientId);
 
-            final PublishPacket packet = publishInboundInput.getPublishPacket();
+			final PublishPacket packet = publishInboundInput.getPublishPacket();
 
-            final String topic = packet.getTopic();
-            logger.info("\tTopic {}", topic);
+			final String topic = packet.getTopic();
+			logger.info("\tTopic {}", topic);
 
-            if (packet.getPayload().isPresent()) {
-                final ByteBuffer payloadByteBuffer = packet.getPayload().get();
-                final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
+			if (packet.getPayload().isPresent()) {
+				final ByteBuffer payloadByteBuffer = packet.getPayload().get();
+				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
 
-                logger.info("\tPayload {}", payload);
+				logger.info("\tPayload {}", payload);
 
-                if (topic.equals("SPARKPLUG_TCK/LOG")) {
-                    logger.info(clientId + ": " + payload);  // display log message
-                }
+				if (topic.equals("SPARKPLUG_TCK/LOG")) {
+					logger.info(clientId + ": " + payload); // display log message
+				}
 
-                if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
-                    String cmd = "NEW_TEST";
-                    if (payload.toUpperCase().startsWith(cmd)) {
-                        //find all tokens which are either plain tokens or
-                        //containing whitespaces and therefore surrounded with double quotes
-                        final Pattern tokenPattern = Pattern.compile("(\"[*]+\")|\\S+");
-                        final Matcher matcher = tokenPattern.matcher(payload.trim());
-                        final List<String> tokens = new ArrayList<>();
-                        while (matcher.find()) {
-                            tokens.add(matcher.group());
-                        }
-                        final String[] strings = tokens.stream()
-                                .map(token -> {
-                                    if (token.startsWith("\"") && token.endsWith("\"")) {
-                                        return token.substring(1, token.length() - 1);
-                                    } else {
-                                        return token;
-                                    }
-                                })
-                                .toArray(String[]::new);
+				if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
+					String cmd = "NEW_TEST";
+					if (payload.toUpperCase().startsWith(cmd)) {
+						// find all tokens which are either plain tokens or
+						// containing whitespaces and therefore surrounded with double quotes
+						final Pattern tokenPattern = Pattern.compile("(\"[^\"]+\")|\\S+");
+						final Matcher matcher = tokenPattern.matcher(payload.trim());
+						final List<String> tokens = new ArrayList<>();
+						while (matcher.find()) {
+							tokens.add(matcher.group());
+						}
+						final String[] strings = tokens.stream().map(token -> {
+							if (token.startsWith("\"") && token.endsWith("\"")) {
+								return token.substring(1, token.length() - 1);
+							} else {
+								return token;
+							}
+						}).toArray(String[]::new);
 
-                        if (strings.length < 3) {
-                            throw new RuntimeException("New test syntax is: NEW_TEST profile testname <parameters>");
-                        }
-                        
-                        final int no_parms = strings.length - 3;
-                        final String[] parms = new String[no_parms];
-                        if (no_parms > 0) {
-                            System.arraycopy(strings, 3, parms, 0, no_parms);
-                        }
-                        theTCK.newTest(strings[1], strings[2], parms);
-                    } else {
-                        cmd = "END_TEST";
-                        if (payload.toUpperCase().trim().equals(cmd)) {
-                            theTCK.endTest();
-                        }
-                    }
-                } else
-                    theTCK.publish(clientId, packet);
-            }
-        } catch (final Exception e) {
-            logger.error("Publish Exception", e);
-        }
-    }
+						if (strings.length < 3) {
+							throw new RuntimeException("New test syntax is: NEW_TEST profile testname <parameters>");
+						}
+
+						final int no_parms = strings.length - 3;
+						final String[] parms = new String[no_parms];
+						if (no_parms > 0) {
+							System.arraycopy(strings, 3, parms, 0, no_parms);
+						}
+						theTCK.newTest(strings[1], strings[2], parms);
+					} else {
+						cmd = "END_TEST";
+						if (payload.toUpperCase().trim().equals(cmd)) {
+							theTCK.endTest();
+						}
+					}
+				} else
+					theTCK.publish(clientId, packet);
+			}
+		} catch (final Exception e) {
+			logger.error("Publish Exception", e);
+		}
+	}
 }
