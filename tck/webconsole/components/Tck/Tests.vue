@@ -1,4 +1,15 @@
-<!-- @author Lukas Brand -->
+<!--****************************************************************************
+ * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Lukas Brand - initial implementation and documentation
+ ****************************************************************************-->
 
 <template>
   <div>
@@ -124,6 +135,11 @@ export default {
         for (const [_, testValue] of Object.entries(this.eonTests)) {
           if (testValue.testValues.name === this.currentTest) {
             testValue.testValues.logging.push(newValue);
+            if (newValue.logValue.includes("OVERALL: PASS")) {
+              testValue.testValues.result = true;
+            } else if (newValue.logValue.includes("OVERALL: FAIL")) {
+              testValue.testValues.result = false;
+            }
           }
         }
       }
@@ -167,7 +183,23 @@ export default {
             readableName: "Session Establishment Test",
             description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
             requirements: ["The Host Application under test needs to be connected after starting the test."],
-            //code: "This is code you can copy \n Multiline text \n Test Senario",
+            result: null,
+            logging: [],
+          },
+        },
+        sessionTerminationTest: {
+          testValues: {
+            name: "SessionTerminationTest",
+            readableName: "Session Termination Test",
+            description: "This is the Host Application Sparkplug session termination test.",
+            requirements: ["The Host Application under test needs to be connected before starting the test."],
+            parameters: {
+              client_id: {
+                parameterReadableName: "Client Id",
+                parameterValue: "",
+                parameterDescription: "The MQTT Client Id of the already connected Host Application",
+              },
+            },
             result: null,
             logging: [],
           },
@@ -201,6 +233,35 @@ export default {
             logging: [],
           },
         },
+        receiveDataTest: {
+          testValues: {
+            name: "ReceiveDataTest",
+            readableName: "Receive Data Test",
+            description:
+              "To check that a data from an edge node (NDATA) and a device (DDATA) can be received and procesed by the Host Application.",
+            requirements: ["The Host Application under test must be connected and online prior to starting this test."],
+            parameters: {
+              group_id: {
+                parameterReadableName: "Group Id",
+                parameterValue: "",
+                parameterDescription: "The Group Id of the Edge Node",
+              },
+              edge_node_id: {
+                parameterReadableName: "Edge Node Id",
+                parameterValue: "",
+                parameterDescription: "The Edge Node Id the Host Application will receive data from.",
+              },
+              device_id: {
+                parameterReadableName: "Device Id",
+                parameterValue: "",
+                parameterDescription: "The Device Id the Host Application will receive data from.",
+              },
+            },
+            code: "",
+            result: null,
+            logging: [],
+          },
+        },
       },
 
       /**
@@ -224,7 +285,59 @@ export default {
        * @type {String} eonTests.{testName}.testValues.logging.logMessage.logLevel
        * @type {String} eonTests.{testName}.testValues.logging.logMessage.logValue
        */
-      eonTests: {},
+      eonTests: {
+        sessionEstablishmentTest: {
+          testValues: {
+            name: "SessionEstablishmentTest",
+            readableName: "Session Establishment Test",
+            description: "This is the Edge Node Sparkplug session establishment test.",
+            requirements: ["The Edge Node and Devices should be connected after starting the test."],
+            parameters: {
+              device_ids: {
+                parameterReadableName: "Device Ids",
+                parameterValue: "",
+                parameterDescription: "The Ids of devices connected to the edge node",
+              },
+            },
+            result: null,
+            logging: [],
+          },
+        },
+        sendDataTest: {
+          testValues: {
+            name: "SendDataTest",
+            readableName: "Send Data Test",
+            description: "This is the Edge Node Sparkplug send data test.",
+            requirements: ["The Edge Node and Devices should send some data messages after starting the test."],
+            parameters: {
+              device_id: {
+                parameterReadableName: "Device Id",
+                parameterValue: "",
+                parameterDescription: "The Id of a device connected to the edge node",
+              },
+            },
+            result: null,
+            logging: [],
+          },
+        },
+        receiveCommandTest: {
+          testValues: {
+            name: "ReceiveCommandTest",
+            readableName: "Receive Command Test",
+            description: "This is the Edge Node Sparkplug receive command test.",
+            requirements: ["The Edge Node and Devices should be ready to receive a rebirth command."],
+            parameters: {
+              device_id: {
+                parameterReadableName: "Device Id",
+                parameterValue: "",
+                parameterDescription: "The Id of a device connected to the edge node",
+              },
+            },
+            result: null,
+            logging: [],
+          },
+        },
+      },
     };
   },
 

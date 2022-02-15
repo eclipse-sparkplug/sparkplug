@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -62,101 +62,86 @@ import java.util.Optional;
 import java.nio.ByteBuffer;
 
 @SpecVersion(
-        spec = "sparkplug",
-        version = "3.0.0-SNAPSHOT")
+		spec = "sparkplug",
+		version = "3.0.0-SNAPSHOT")
 public class SendDataTest extends TCKTest {
 
-    private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-    private HashMap testResults = new HashMap<String, String>();
-    String[] testIds = {
-        	"topics-ndata-mqtt",
-        	"topics-ndata-seq-num",
-        	"topics-ndata-timestamp",
-        	"topics-ndata-payload",
-        	"topics-ddata-mqtt",
-        	"topics-ddata-seq-num",
-        	"topics-ddata-timestamp",
-        	"topics-ddata-payload",
-           	"payloads-ndata-timestamp",
-           	"payloads-ndata-seq", 
-           	"payloads-ndata-qos", 
-           	"payloads-ndata-retain",
-           	"payloads-ddata-timestamp",
-           	"payloads-ddata-seq", 
-           	"payloads-ddata-qos", 
-           	"payloads-ddata-retain"
-        };
-    private String myClientId = null;
-    private String state = null;
-    private TCK theTCK = null;
-    private String host_application_id = null;
-    private String edge_node_id = null;
-    private String device_id = null;
-    private boolean edge_node_checked = false,
-    		device_checked = false;
-    
-    public SendDataTest(TCK aTCK, String[] parms) {
-        logger.info(getName());
-        theTCK = aTCK;
-         
-        testResults = new HashMap<String, String>();
-        
-        for (int i = 0; i < testIds.length; ++i) {
-            testResults.put(testIds[i], "");
-        }
-        
-        if (parms.length < 3) {
-        	logger.info("Parameters to edge send data test must be: host_application_id edge_node_id device_id");
-        	return;
-        }
-        
-        host_application_id = parms[0];
-        logger.info("Host application id is "+host_application_id);
-        
-        edge_node_id = parms[1];
-        logger.info("Edge node id is "+edge_node_id);
-        
-        device_id = parms[2];
-        logger.info("Device id is "+device_id);
-    }
-    
-    public void endTest() {
-    	state = null;
-    	myClientId = null;
-    	reportResults(testResults);
-        for (int i = 0; i < testIds.length; ++i) {
-            testResults.put(testIds[i], "");
-        }
-    }
-    
-    public String getName() {
-    	return "Sparkplug Edge Node Send Data Test";
-    }
-    
-    public String[] getTestIds() {
-    	return testIds;
-    }
-    
-    public HashMap<String, String> getResults() {
-    	return testResults;
-    }
+	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
+	private HashMap testResults = new HashMap<String, String>();
+	String[] testIds = { "topics-ndata-mqtt", "topics-ndata-seq-num", "topics-ndata-timestamp", "topics-ndata-payload",
+			"topics-ddata-mqtt", "topics-ddata-seq-num", "topics-ddata-timestamp", "topics-ddata-payload",
+			"payloads-ndata-timestamp", "payloads-ndata-seq", "payloads-ndata-qos", "payloads-ndata-retain",
+			"payloads-ddata-timestamp", "payloads-ddata-seq", "payloads-ddata-qos", "payloads-ddata-retain" };
+	private String myClientId = null;
+	private String state = null;
+	private TCK theTCK = null;
+	private String host_application_id = null;
+	private String edge_node_id = null;
+	private String device_id = null;
+	private boolean edge_node_checked = false, device_checked = false;
+
+	public SendDataTest(TCK aTCK, String[] parms) {
+		logger.info(getName());
+		theTCK = aTCK;
+
+		testResults = new HashMap<String, String>();
+
+		for (int i = 0; i < testIds.length; ++i) {
+			testResults.put(testIds[i], "");
+		}
+
+		if (parms.length < 3) {
+			logger.info("Parameters to edge send data test must be: host_application_id edge_node_id device_id");
+			return;
+		}
+
+		host_application_id = parms[0];
+		logger.info("Host application id is " + host_application_id);
+
+		edge_node_id = parms[1];
+		logger.info("Edge node id is " + edge_node_id);
+
+		device_id = parms[2];
+		logger.info("Device id is " + device_id);
+	}
+
+	public void endTest() {
+		state = null;
+		myClientId = null;
+		reportResults(testResults);
+		for (int i = 0; i < testIds.length; ++i) {
+			testResults.put(testIds[i], "");
+		}
+	}
+
+	public String getName() {
+		return "Sparkplug Edge Node Send Data Test";
+	}
+
+	public String[] getTestIds() {
+		return testIds;
+	}
+
+	public HashMap<String, String> getResults() {
+		return testResults;
+	}
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void subscribe(String clientId, SubscribePacket packet) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -166,9 +151,9 @@ public class SendDataTest extends TCKTest {
 		String[] levels = packet.getTopic().split("/");
 		if (levels.length >= 3) {
 			cmd = levels[2];
-			
+
 		}
-		
+
 		if (cmd.equals("NDATA")) {
 			// namespace/group_id/NDATA/edge_node_id
 			checkNodeData(clientId, packet);
@@ -181,55 +166,53 @@ public class SendDataTest extends TCKTest {
 			theTCK.endTest();
 		}
 	}
-	
-	
+
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_NDATA,
-    		id = "payloads-ndata-timestamp")
+			section = Sections.PAYLOADS_B_NDATA,
+			id = "payloads-ndata-timestamp")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_NDATA,
-    		id = "payloads-ndata-seq") 
+			section = Sections.PAYLOADS_B_NDATA,
+			id = "payloads-ndata-seq")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_NDATA,
-    		id = "payloads-ndata-qos") 
+			section = Sections.PAYLOADS_B_NDATA,
+			id = "payloads-ndata-qos")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_NDATA,
-    		id = "payloads-ndata-retain")
+			section = Sections.PAYLOADS_B_NDATA,
+			id = "payloads-ndata-retain")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_NDATA,
-    		id = "topics-ndata-mqtt") 
+			section = Sections.PAYLOADS_DESC_NDATA,
+			id = "topics-ndata-mqtt")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_NDATA,
-    		id = "topics-ndata-seq-num") 
+			section = Sections.PAYLOADS_DESC_NDATA,
+			id = "topics-ndata-seq-num")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_NDATA,
-    		id = "topics-ndata-timestamp")
+			section = Sections.PAYLOADS_DESC_NDATA,
+			id = "topics-ndata-timestamp")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_NDATA,
-    		id = "topics-ndata-payload")
+			section = Sections.PAYLOADS_DESC_NDATA,
+			id = "topics-ndata-payload")
 	public void checkNodeData(String clientId, PublishPacket packet) {
 		String result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE && 
-				packet.getRetain() == false) {
+		if (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false) {
 			result = "PASS";
 		}
 		testResults.put("topics-ndata-mqtt", result);
-		
+
 		result = "FAIL";
 		if (packet.getQos() == Qos.AT_MOST_ONCE) {
 			result = "PASS";
 		}
 		testResults.put("payloads-ndata-qos", result);
-		
+
 		result = "FAIL";
 		if (packet.getRetain() == false) {
 			result = "PASS";
 		}
 		testResults.put("payloads-ndata-retain", result);
-		
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();				
+
+		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
-		
+
 		SparkplugBPayload inboundPayload = null;
 		if (bpayload != null) {
 			try {
@@ -240,28 +223,28 @@ public class SendDataTest extends TCKTest {
 				e.printStackTrace();
 			}
 		}
-		logger.info("Send data test inboundpayload "+inboundPayload);
-		
+		logger.info("Send data test inboundpayload " + inboundPayload);
+
 		result = "FAIL";
 		if (inboundPayload != null) {
 			long seqno = inboundPayload.getSeq();
 			if (seqno >= 0) {
 				result = "PASS";
-			}	
+			}
 		}
 		testResults.put("topics-ndata-seq-num", result);
 		testResults.put("payloads-ndata-seq", result);
-		
+
 		result = "FAIL";
 		if (inboundPayload != null) {
 			Date ts = inboundPayload.getTimestamp();
 			if (ts != null) {
 				result = "PASS";
-			}	
+			}
 		}
 		testResults.put("topics-ndata-timestamp", result);
 		testResults.put("payloads-ndata-timestamp", result);
-		
+
 		result = "FAIL";
 		if (inboundPayload != null) {
 			List<Metric> metrics = inboundPayload.getMetrics();
@@ -269,63 +252,62 @@ public class SendDataTest extends TCKTest {
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
 				// TODO: Must include metrics that have changed
-				//if (current.getName().equals(edge_metric)) {
-					result = "PASS"; 
-				//}
+				// if (current.getName().equals(edge_metric)) {
+				result = "PASS";
+				// }
 			}
 		}
 		testResults.put("topics-ndata-payload", result);
-		logger.info("Send data test payload "+result);
+		logger.info("Send data test payload " + result);
 		edge_node_checked = true;
 	}
-	
+
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_DDATA,
-    		id = "payloads-ddata-timestamp")
+			section = Sections.PAYLOADS_B_DDATA,
+			id = "payloads-ddata-timestamp")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_DDATA,
-    		id = "payloads-ddata-seq") 
+			section = Sections.PAYLOADS_B_DDATA,
+			id = "payloads-ddata-seq")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_DDATA,
-    		id = "payloads-ddata-qos") 
+			section = Sections.PAYLOADS_B_DDATA,
+			id = "payloads-ddata-qos")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_B_DDATA,
-    		id = "payloads-ddata-retain")
+			section = Sections.PAYLOADS_B_DDATA,
+			id = "payloads-ddata-retain")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_DDATA,
-    		id = "topics-ddata-mqtt") 
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = "topics-ddata-mqtt")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_DDATA,
-    		id = "topics-ddata-seq-num")
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = "topics-ddata-seq-num")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_DDATA,
-    		id = "topics-ddata-timestamp")
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = "topics-ddata-timestamp")
 	@SpecAssertion(
-    		section = Sections.PAYLOADS_DESC_DDATA,
-    		id = "topics-ddata-payload")
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = "topics-ddata-payload")
 	public void checkDeviceData(String clientId, PublishPacket packet) {
 		String result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE && 
-				packet.getRetain() == false) {
+		if (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false) {
 			result = "PASS";
 		}
 		testResults.put("topics-ddata-mqtt", result);
-		
+
 		result = "FAIL";
 		if (packet.getQos() == Qos.AT_MOST_ONCE) {
 			result = "PASS";
 		}
 		testResults.put("payloads-ddata-qos", result);
-		
+
 		result = "FAIL";
 		if (packet.getRetain() == false) {
 			result = "PASS";
 		}
 		testResults.put("payloads-ddata-retain", result);
-		
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();				
+
+		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
-		
+
 		SparkplugBPayload inboundPayload = null;
 		if (bpayload != null) {
 			try {
@@ -336,42 +318,42 @@ public class SendDataTest extends TCKTest {
 				e.printStackTrace();
 			}
 		}
-		logger.info("Send data test inboundpayload "+inboundPayload);
-		
+		logger.info("Send data test inboundpayload " + inboundPayload);
+
 		result = "FAIL";
 		if (inboundPayload != null) {
 			long seqno = inboundPayload.getSeq();
 			if (seqno >= 0) {
 				result = "PASS";
-			}	
+			}
 		}
 		testResults.put("topics-ddata-seq-num", result);
 		testResults.put("payloads-ddata-seq", result);
-		
+
 		result = "FAIL";
 		if (inboundPayload != null) {
 			Date ts = inboundPayload.getTimestamp();
 			if (ts != null) {
 				result = "PASS";
-			}	
+			}
 		}
 		testResults.put("topics-ddata-timestamp", result);
 		testResults.put("payloads-ddata-timestamp", result);
-		
+
 		result = "FAIL";
 		if (inboundPayload != null) {
 			List<Metric> metrics = inboundPayload.getMetrics();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
-				// TODO: Must include metrics that have changed - how do we check that? 
+				// TODO: Must include metrics that have changed - how do we check that?
 				Metric current = metricIterator.next();
-				//if (current.getName().equals(device_metric)) {
-					result = "PASS"; 
-				//}
+				// if (current.getName().equals(device_metric)) {
+				result = "PASS";
+				// }
 			}
 		}
 		testResults.put("topics-ddata-payload", result);
-		logger.info("Send data test payload "+result);
+		logger.info("Send data test payload " + result);
 		device_checked = true;
 	}
 

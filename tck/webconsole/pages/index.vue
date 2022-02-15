@@ -1,4 +1,15 @@
-<!-- @author Lukas Brand -->
+<!--****************************************************************************
+ * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Lukas Brand - initial implementation and documentation
+ ****************************************************************************-->
 
 <template>
   <div>
@@ -222,7 +233,21 @@ export default {
         if (testType === "SessionEstablishmentTest") {
           const testParameters = this.sparkplugClient.hostApplication.hostId;
           this.createTestRequest(profile, testType, testParameters);
+        } else if (testType === "SessionTerminationTest") {
+          const testParameters =
+            this.sparkplugClient.hostApplication.hostId +
+            " " +
+            testParameter.parameters["client_id"].parameterValue;
+          this.createTestRequest(profile, testType, testParameters);
         } else if (testType === "SendCommandTest") {
+          const testParameters =
+            this.sparkplugClient.hostApplication.hostId +
+            " " +
+            testParameter.parameters["edge_node_id"].parameterValue +
+            " " +
+            testParameter.parameters["device_id"].parameterValue;
+          this.createTestRequest(profile, testType, testParameters);
+        }  else if (testType === "ReceiveDataTest") {
           const testParameters =
             this.sparkplugClient.hostApplication.hostId +
             " " +
@@ -234,6 +259,39 @@ export default {
           alert("Test does not exist");
         }
       } else if (this.sparkplugClient.clientType === "EONNODE") {
+        const profile = "edge";
+        const testType = testParameter.name;
+        if (testType === "SessionEstablishmentTest") {
+          const testParameters =
+            this.sparkplugClient.hostApplication.hostId +
+            " " +
+            this.sparkplugClient.eonNode.groupId +
+            " " +
+            this.sparkplugClient.eonNode.edgeNodeId +
+            " " +
+            testParameter.parameters["device_ids"].parameterValue;
+          this.createTestRequest(profile, testType, testParameters);
+        } else if (testType === "SendDataTest") {
+          const testParameters =
+            this.sparkplugClient.hostApplication.hostId +
+            " " +
+            this.sparkplugClient.eonNode.groupId +
+            " " +
+            this.sparkplugClient.eonNode.edgeNodeId +
+            " " +
+            testParameter.parameters["device_id"].parameterValue;
+          this.createTestRequest(profile, testType, testParameters);
+        }  else if (testType === "ReceiveCommandTest") {
+          const testParameters =
+            this.sparkplugClient.eonNode.groupId +
+            " " +
+            this.sparkplugClient.eonNode.edgeNodeId +
+            " " +
+            testParameter.parameters["device_id"].parameterValue;
+          this.createTestRequest(profile, testType, testParameters);
+        } else{
+          alert("Test does not exist");
+        }
       } else {
         alert("Client type does not exist");
       }

@@ -23,7 +23,7 @@ package org.eclipse.sparkplug.tck.test.host;
  * a device and edge node we will connect.
  * 
  * The host application under test must be connected and online prior to starting this test.
- * The id of the host application must be passed as the firt parameter to this test.
+ * The id of the host application must be passed as the first parameter to this test.
  * The second parameter is the id of the edge node to be used.
  * The third parameter is the id of the device to be used.
  * 
