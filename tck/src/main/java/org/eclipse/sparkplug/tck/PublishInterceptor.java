@@ -55,10 +55,10 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 				final ByteBuffer payloadByteBuffer = packet.getPayload().get();
 				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
 
-				logger.info("\tPayload {}", payload);
+				logger.debug("\tPayload {}", payload);
 
 				if (topic.equals("SPARKPLUG_TCK/LOG")) {
-					logger.info(clientId + ": " + payload); // display log message
+					logger.debug(clientId + ": " + payload); // display log message
 				}
 
 				if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
@@ -73,12 +73,12 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 							tokens.add(matcher.group());
 						}
 						final String[] strings = tokens.stream().map(token -> {
-							if (token.startsWith("\"") && token.endsWith("\"")) {
-								return token.substring(1, token.length() - 1);
-							} else {
-								return token;
-							}
-						}).toArray(String[]::new);
+								if (token.startsWith("\"") && token.endsWith("\"")) {
+									return token.substring(1, token.length() - 1);
+								} else {
+									return token;
+								}
+							}).toArray(String[]::new);
 
 						if (strings.length < 3) {
 							throw new RuntimeException("New test syntax is: NEW_TEST profile testname <parameters>");
