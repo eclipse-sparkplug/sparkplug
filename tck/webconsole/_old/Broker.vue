@@ -22,7 +22,7 @@
             id="input-1"
             v-model="connection.host"
             type="text"
-            placeholder="Enter broker url"
+            placeholder="Enter MQTT broker url"
             required
             >{{ connection.host }}</b-form-input
           >
@@ -33,7 +33,7 @@
             id="input-1"
             v-model="connection.port"
             type="number"
-            placeholder="Enter broker port"
+            placeholder="Enter MQTT broker port"
             required
             >{{ connection.port }}</b-form-input
           >

@@ -4,7 +4,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -13,8 +13,8 @@
 
 <template>
   <div>
-    <h3>Tests</h3>
-    <div>
+      <h3 v-if="clientType === 'HOSTAPPLICATION'">Host Application Tests</h3>
+      <h3 v-else>EoN Node Tests</h3>
       <!--
       <TckAllTests
         @start-all-tests="$emit('start-all-tests=', hostTests, eonTests)"
@@ -50,7 +50,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -182,7 +181,13 @@ export default {
             name: "SessionEstablishmentTest",
             readableName: "Session Establishment Test",
             description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
-            requirements: ["The Host Application under test needs to be connected after starting the test."],
+            requirements: [
+                "Setup an MQTT Connection ",
+                "Set a Host Application Id that is used by an Application",
+                "Start this test.",
+                "Start the Host Application to trigger events of MQTT messages.",
+                "Wait until Tests are finished and check Results."
+            ],
             result: null,
             logging: [],
           },
@@ -192,10 +197,17 @@ export default {
             name: "SessionTerminationTest",
             readableName: "Session Termination Test",
             description: "This is the Host Application Sparkplug session termination test.",
-            requirements: ["The Host Application under test needs to be connected before starting the test."],
+            requirements: [
+                "Setup an MQTT Connection.",
+                "Set a Host Application Id that is used by an Application.",
+                "Start the Host Application, if it is not yet running.",
+                "Start this test.",
+                "Stop the Host Application to trigger events of MQTT messages.",
+                "Wait until Tests are finished and check Results."
+            ],
             parameters: {
               client_id: {
-                parameterReadableName: "Client Id",
+                parameterReadableName: "Host App Id",
                 parameterValue: "",
                 parameterDescription: "The MQTT Client Id of the already connected Host Application",
               },
@@ -210,7 +222,13 @@ export default {
             readableName: "Send Command Test",
             description:
               "To check that a command from a Host Application under test is correct to both an edge node (NCMD) and a device (DCMD).",
-            requirements: ["The Host Application under test must be connected and online prior to starting this test."],
+            requirements: [
+                "Start the Host Application, if it is not yet running.",
+                "Setup an MQTT Connection.",
+                "Set a Host Application Id that is used by an Application.",
+                "Start this test.",
+                "Wait until Tests are finished and check Results."
+            ],
             parameters: {
               group_id: {
                 parameterReadableName: "Group Id",
@@ -239,7 +257,13 @@ export default {
             readableName: "Receive Data Test",
             description:
               "To check that a data from an edge node (NDATA) and a device (DDATA) can be received and procesed by the Host Application.",
-            requirements: ["The Host Application under test must be connected and online prior to starting this test."],
+            requirements: [
+                "Start the Host Application, if it is not yet running.",
+                "Setup an MQTT Connection.",
+                "Set a Host Application Id that is used by an Application.",
+                "Start this test.",
+                "Wait until Tests are finished and check Results."
+            ],
             parameters: {
               group_id: {
                 parameterReadableName: "Group Id",
@@ -291,7 +315,14 @@ export default {
             name: "SessionEstablishmentTest",
             readableName: "Session Establishment Test",
             description: "This is the Edge Node Sparkplug session establishment test.",
-            requirements: ["The Edge Node and Devices should be connected after starting the test."],
+            requirements: [
+                "Setup an MQTT Connection.",
+                "Set a Group and a Device Id that is used by an Application.",
+                "Start this test.",
+                "Start the Host Application to trigger events of MQTT messages.",
+                "Connect Edge Node and Device.",
+                "Wait until Tests are finished and check Results."
+            ],
             parameters: {
               device_ids: {
                 parameterReadableName: "Device Ids",
@@ -308,7 +339,13 @@ export default {
             name: "SendDataTest",
             readableName: "Send Data Test",
             description: "This is the Edge Node Sparkplug send data test.",
-            requirements: ["The Edge Node and Devices should send some data messages after starting the test."],
+            requirements: [
+                "Setup an MQTT Connection.",
+                "Set Device Id that is used by the configured Group and Edge.",
+                "Start this test.",
+                "Send some data by Edge Node and Devices.",
+                "Wait until Tests are finished and check Results."
+            ],
             parameters: {
               device_id: {
                 parameterReadableName: "Device Id",
@@ -324,8 +361,15 @@ export default {
           testValues: {
             name: "ReceiveCommandTest",
             readableName: "Receive Command Test",
-            description: "This is the Edge Node Sparkplug receive command test.",
-            requirements: ["The Edge Node and Devices should be ready to receive a rebirth command."],
+            description: "This is the Edge Node Sparkplug receive command test. (NCMD)",
+            requirements: [
+                "Setup an MQTT Connection.",
+                "Set Device Id that is used by the configured Group and Edge.",
+                "Start this test.",
+                "Disconnect and Connect the Device.",
+                "The Edge Node and Devices should receive a rebirth command.",
+                "Wait until Tests are finished and check Results."
+            ],
             parameters: {
               device_id: {
                 parameterReadableName: "Device Id",

@@ -17,7 +17,9 @@
               <b-form-radio value="EONNODE">Edge of Network Node</b-form-radio>
             </b-form-radio-group>
           </b-form-group>
+
           <div v-if="local.clientType === 'HOSTAPPLICATION'">
+
             <SparkplugHostApplication
               :hostApplication="local.hostApplication"
               @on-updated="update('hostApplication', $event)"
