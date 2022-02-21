@@ -178,6 +178,7 @@ export default {
       hostTests: {
         sessionEstablishmentTest: {
           testValues: {
+            type:"HOSTAPPLICATION",
             name: "SessionEstablishmentTest",
             readableName: "Session Establishment Test",
             description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
@@ -194,7 +195,8 @@ export default {
         },
         sessionTerminationTest: {
           testValues: {
-            name: "SessionTerminationTest",
+              type:"HOSTAPPLICATION",
+              name: "SessionTerminationTest",
             readableName: "Session Termination Test",
             description: "This is the Host Application Sparkplug session termination test.",
             requirements: [
@@ -218,7 +220,8 @@ export default {
         },
         sendCommandTest: {
           testValues: {
-            name: "SendCommandTest",
+              type:"HOSTAPPLICATION",
+              name: "SendCommandTest",
             readableName: "Send Command Test",
             description:
               "To check that a command from a Host Application under test is correct to both an edge node (NCMD) and a device (DCMD).",
@@ -253,7 +256,8 @@ export default {
         },
         receiveDataTest: {
           testValues: {
-            name: "ReceiveDataTest",
+              type:"HOSTAPPLICATION",
+              name: "ReceiveDataTest",
             readableName: "Receive Data Test",
             description:
               "To check that a data from an edge node (NDATA) and a device (DDATA) can be received and procesed by the Host Application.",
@@ -312,6 +316,7 @@ export default {
       eonTests: {
         sessionEstablishmentTest: {
           testValues: {
+              type:"EONNODE",
             name: "SessionEstablishmentTest",
             readableName: "Session Establishment Test",
             description: "This is the Edge Node Sparkplug session establishment test.",
@@ -336,7 +341,8 @@ export default {
         },
         sendDataTest: {
           testValues: {
-            name: "SendDataTest",
+              type:"EONNODE",
+              name: "SendDataTest",
             readableName: "Send Data Test",
             description: "This is the Edge Node Sparkplug send data test.",
             requirements: [
@@ -359,7 +365,8 @@ export default {
         },
         receiveCommandTest: {
           testValues: {
-            name: "ReceiveCommandTest",
+              type:"EONNODE",
+              name: "ReceiveCommandTest",
             readableName: "Receive Command Test",
             description: "This is the Edge Node Sparkplug receive command test. (NCMD)",
             requirements: [

@@ -5,20 +5,21 @@
             <b-container bg-variant="light" fluid="xs" border-bottom-0 small >
                 <b-row>
                     <b-col sm="9" >
-                      <h5 class="text-dark" v-b-toggle="'my-collapse-' + test.name" >{{test.readableName}}</h5>
+                      <h5 class="text-dark" v-b-toggle="'my-collapse-' + test.name + test.type" >{{test.readableName}}</h5>
                     </b-col>
                     <b-col sm="3" align="right">
                         <b-badge
                             variant="warning"
                             size="xs"
-                            v-b-toggle="'my-collapse-' + test.name"
+                            v-b-toggle="'my-collapse-' + test.name + test.type"
                         >
                             Show/Hide </b-badge>
                     </b-col>
                 </b-row>
             </b-container>
+
         <b-collapse
-            :id="'my-collapse-' + test.name"
+            :id="'my-collapse-' +  test.name + test.type"
         ><hr>
         <b-container bg-variant="light"  fluid="xs" >
             <b-row>
@@ -90,25 +91,25 @@
             </b-row>
             <b-row>
                 <b-col sm="12">
-                    <hr>
+                <hr>
+                <div v-show="test.type==='HOSTAPPLICATION'">
                     <b-button-toolbar size="m">
-                            <div v-show="start">
+                            <div v-show="startH">
                                 <b-button class="mr-1" variant="success"
-                                          @click="$emit('start-single-test', test); testState()">Start Test
+                                          @click="$emit('start-single-test', test); testState(test)">Start Test
                                 </b-button>
                                 <span v-if="test.result != null">
                                     <b-button class="mr-5" variant="info"
-                                         @click="$emit('reset-single-test', test); resetState()">Reset Test</b-button>
+                                         @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
                                 </span>
-
                             </div>
-                            <div v-show="stop">
+                            <div v-show="stopH">
                               <span v-if="test.result === null">
                                   <b-button class="ml-1" variant="danger"
-                                            @click="$emit('abort-single-test', test); testState() ">Stop Test</b-button>
+                                            @click="$emit('abort-single-test', test); testState(test) ">Stop Test</b-button>
                               </span>
                                 <b-button class="mr-5" variant="info"
-                                          @click="$emit('reset-single-test', test); resetState()">Reset Test
+                                          @click="$emit('reset-single-test', test); resetState(test)">Reset Test
                                 </b-button>
                                 <span v-if="test.result === null" class="float-right">
                                        <strong>Test is running...</strong>
@@ -117,12 +118,11 @@
                             </div>
 
                             <span v-if="test.result != null">
-                                <span class="my-auto mr-5">Allover Result: </span>
+                                <span class="my-auto mr-5">overall Result: </span>
                                 <b-icon v-if="test.result === true" class="my-auto h3" icon="check-circle-fill" variant="success"/>
                                 <b-icon v-else-if="test.result === false" class="my-auto h3" icon="x-circle-fill" variant="danger"/>
                             </span>
                         </b-button-toolbar>
-
                     <div v-if="loggingSplitInLines.length > 0" class="mt-3">
                         <h6 class="text-primary">Logging:</h6>
                         <div>
@@ -132,6 +132,48 @@
 
                         </div>
                     </div>
+                </div>
+                <div v-show="test.type==='EONNODE'">
+                    <b-button-toolbar size="m">
+                            <div v-show="start">
+                                <b-button class="mr-1" variant="success"
+                                          @click="$emit('start-single-test', test); testState(test)">Start Test
+                                </b-button>
+                                <span v-if="test.result != null">
+                                    <b-button class="mr-5" variant="info"
+                                              @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
+                                </span>
+                            </div>
+                            <div v-show="stop">
+                              <span v-if="test.result === null">
+                                  <b-button class="ml-1" variant="danger"
+                                            @click="$emit('abort-single-test', test); testState(test) ">Stop Test</b-button>
+                              </span>
+                                <b-button class="mr-5" variant="info"
+                                          @click="$emit('reset-single-test', test); resetState(test)">Reset Test
+                                </b-button>
+                                <span v-if="test.result === null" class="float-right">
+                                       <strong>Test is running...</strong>
+                                       <b-spinner class="ml-auto" variant="info"></b-spinner>
+                                </span>
+                            </div>
+
+                            <span v-if="test.result != null">
+                                <span class="my-auto mr-5">overall Result: </span>
+                                <b-icon v-if="test.result === true" class="my-auto h3" icon="check-circle-fill" variant="success"/>
+                                <b-icon v-else-if="test.result === false" class="my-auto h3" icon="x-circle-fill" variant="danger"/>
+                            </span>
+                        </b-button-toolbar>
+                    <div v-if="loggingSplitInLines.length > 0" class="mt-3">
+                        <h6 class="text-primary">Logging:</h6>
+                        <div>
+                            <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
+                                <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
                 </b-col>
             </b-row>
         </b-container>
@@ -147,6 +189,8 @@ export default {
         return {
             start: true,
             stop: false,
+            startH: true,
+            stopH: false,
             isVisible: false
         }
     },
@@ -158,6 +202,16 @@ export default {
 
     props: {
         test: {
+            /**
+             * This is the test type
+             * @type {String}
+             */
+            type: {
+                type: String,
+                required: true,
+                default: "HOSTAPPLICATION",
+            },
+
             /**
              * This is the test name, also used as id. Defined in the backend.
              * @type {String}
@@ -177,6 +231,7 @@ export default {
                 required: true,
                 default: "unknown test",
             },
+
 
             /**
              * Tests description.
@@ -299,13 +354,24 @@ export default {
             this.isVisible = isVisible
         },
 
-        testState() {
-            this.start = !this.start;
-            this.stop = !this.stop;
+        testState(test) {
+
+            if( test.type === "HOSTAPPLICATION") {
+                this.startH = !this.startH;
+                this.stopH = !this.stopH;
+            } else {
+                this.start = !this.start;
+                this.stop = !this.stop;
+            }
         },
-        resetState() {
-            this.start = true;
-            this.stop = false;
+        resetState(test ) {
+            if( test.type === "HOSTAPPLICATION") {
+                this.startH = true;
+                this.stopH = false;
+            } else {
+                this.start = true;
+                this.stop = false;
+            }
             this.test.result = null;
         }
 
