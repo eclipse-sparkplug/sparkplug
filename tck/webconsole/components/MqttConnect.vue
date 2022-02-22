@@ -20,47 +20,78 @@
       @dismissed="failureCountDown = 0"
       >Webconsole disconnected</b-alert
     >
-    <b-collapse v-model="change" id="collapse-1" class="mt-2">
-      <b-card title="Mqtt Server Configuration" @submit="createConnection">
+    <b-collapse v-model="change" id="collapse-1" class="mt-3">
+      <b-card title="Mqtt Server Configuration" @submit="createConnection" border-variant="primary">
         <b-form>
-          <b-form-group label="Broker Url:" label-for="input-1" description="">
-            <b-form-input v-model="connection.host" type="text" placeholder="Enter broker url" required></b-form-input>
-          </b-form-group>
+          <b-container fluid>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Broker Url:</label>
+                  </b-col>
+                  <b-col sm="9">
+                      <b-form-input v-model="connection.host" size="sm"
+                                    placeholder="Enter broker url" required></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Broker Port:</label>
+                  </b-col>
+                  <b-col sm="9">
+                      <b-form-input v-model="connection.port" size="sm"  type="number"
+                                    placeholder="Enter broker port" required></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Broker Endpoint:</label>
+                  </b-col>
+                  <b-col sm="9">
+                      <b-form-input v-model="connection.endpoint" size="sm"
+                                    placeholder="Enter broker endpoint"></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Client Id:</label>
+                  </b-col>
+                  <b-col sm="9">
+                      <b-form-input v-model="connection.clientId" size="sm"
+                                    placeholder="Enter client id"></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Client Username:</label>
+                  </b-col>
+                  <b-col sm="9">
+                      <b-form-input v-model="connection.username" size="sm"
+                                    placeholder="Enter client username"></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Password:</label>
+                  </b-col>
+                  <b-col sm="9">
+                      <b-form-input v-model="connection.password" size="sm"
+                                    placeholder="Enter client password"></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="12">
+                      <b-button type="submit" variant="primary" :disabled="mqttClient.connected" @click="createConnection">
+                        {{ mqttClient.connected ? "Connected" : "Connect" }}
+                      </b-button>
 
-          <b-form-group label="Broker Port:" label-for="input-1" description="">
-            <b-form-input
-              v-model="connection.port"
-              type="number"
-              placeholder="Enter broker port"
-              required
-            ></b-form-input>
-          </b-form-group>
+                      <b-button v-if="mqttClient.connected" variant="danger" class="conn-btn" @click="destroyConnection">
+                        Disconnect
+                      </b-button>
 
-          <b-form-group label="Broker Endpoint:" label-for="input-1" description="">
-            <b-form-input v-model="connection.endpoint" type="text" placeholder="Enter broker endpoint"></b-form-input>
-          </b-form-group>
-
-          <b-form-group label="Client Id:" label-for="input-1" description="">
-            <b-form-input v-model="connection.clientId" type="text" placeholder="Enter client id"></b-form-input>
-          </b-form-group>
-
-          <b-form-group label="Client Username:" label-for="input-1" description="">
-            <b-form-input v-model="connection.username" type="text" placeholder="Enter client username"></b-form-input>
-          </b-form-group>
-
-          <b-form-group label="Client Password:" label-for="input-1" description="">
-            <b-form-input v-model="connection.password" type="text" placeholder="Enter client password"></b-form-input>
-          </b-form-group>
-
-          <b-button type="submit" variant="primary" :disabled="mqttClient.connected" @click="createConnection">
-            {{ mqttClient.connected ? "Connected" : "Connect" }}
-          </b-button>
-
-          <b-button v-if="mqttClient.connected" variant="danger" class="conn-btn" @click="destroyConnection">
-            Disconnect
-          </b-button>
-
-          <b-button type="secondary" @click="defaultConnection"> Default Values </b-button>
+                      <b-button type="secondary" @click="defaultConnection"> Default Values </b-button>
+                  </b-col>
+              </b-row>
+          </b-container>
         </b-form>
       </b-card>
     </b-collapse>

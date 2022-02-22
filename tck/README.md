@@ -10,11 +10,40 @@ Build the TCK with the command
 
 in this directory. This will result in an extension for the HiveMQ MQTT Broker in the tck/build/hivemq-extension directory.
 
-You'll need to have a HiveMQ broker installed. The [HiveMQ Community edition](https://www.hivemq.com/developers/community/) is open source and freely available.
 
-Copy the extension file (tck/build/hivemq-extension/sparkplug-tck-3.0.0-SNAPSHOT.jar) to the HiveMQ extension directory (extensions/sparkplug-tck).
+## Further Gradle build tasks
+Hivemq provides its own gradle task set, with some further useful tasks
 
-Add a websocket listener to the HiveMQ broker. Here is an example config.xml file to go into the conf directory:
+    hivemq extension
+        hivemqExtensionJar 
+        ...
+        hivemqExtensionZip 
+        runHivemqWithExtension
+
+* Using `./gradlew runHivemqWithExtension` allows running (and debug) HiveMQ directly in your IDE. With this the HiveMQ community edition is automatically downloaded and fully configured for the TCK extension by the tasks from the gradle build file.
+
+* Using `./gradlew hivemqExtensionZip` builds a zip file, that contains all necessary files for extension usage and move this into a HiveMQ broker installation.
+
+## Running HiveMQ with Sparkplug-TCK Extension
+
+  * You'll need to have a HiveMQ broker installed. The [HiveMQ Community edition](https://www.hivemq.com/developers/community/) is open source and freely available.
+    * Download complete, including the hivemq-allow-all-extension
+
+  * Copy the extension distribution file (tck/build/hivemq-extension/sparkplug-tck-3.0.0-SNAPSHOT.zip) to the HiveMQ extension directory (extensions).
+
+  * Unzip the sparkplug-tck-3.0.0-SNAPSHOT.zip in the extension folder.
+    
+The target folder should have the following content. 
+
+```
+|-| extensions/
+  |-| sparkplug-tck/
+    |--  hivemq-extension.xml
+    |--  sparkplug-tck-3.0.0-SNAPSHOT.jar
+```
+
+Add a websocket listener to the HiveMQ broker.
+(Example files for configuration config.xml and logging logback.xml can be found in the hivemq-configuration folder)
 
 	<hivemq>
 		<listeners>
@@ -39,10 +68,12 @@ Add a websocket listener to the HiveMQ broker. Here is an example config.xml fil
 		</anonymous-usage-statistics>
 	</hivemq>
 
-Then when starting the HiveMQ broker you should see the messages:
+Finally, when starting the HiveMQ broker you should see the messages:
 
 	INFO  - Starting Sparkplug Extension
 	INFO  - Extension "Sparkplug TCK Tests" version 3.0.0-SNAPSHOT started successfully.
+
+Check that connecting to the broker is allowed. (Per default setup, the hivemq-allow-all extension is enabled.)
 
 # Web console
 
