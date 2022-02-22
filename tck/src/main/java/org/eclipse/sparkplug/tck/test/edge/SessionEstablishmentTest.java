@@ -74,6 +74,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
 
+	private @NotNull String testClientId = null;
 	private @NotNull String hostApplicationId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
@@ -127,6 +128,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	}
 
 	public void endTest() {
+		testClientId = null;
 		reportResults(testResults);
 	}
 
@@ -148,27 +150,39 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDEATH,
 			id = "payloads-ndeath-will-message")
-	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
-		logger.info("Edge session establishment test - connect");
-
-		final String isCleanSession;
-		if (packet.getCleanStart()) {
-			isCleanSession = PASS;
-		} else {
-			isCleanSession = FAIL + " (Clean session should be set to true.)";
-		}
-		testResults.put("principles-persistence-clean-session", isCleanSession);
-
-		String willPresent = FAIL + " (NDEATH not registered as Will in connect packet)";
-		Optional<WillPublishPacket> willPublishPacketOptional = null;
-		try {
-			willPublishPacketOptional = checkWillMessage(packet);
-			if (willPublishPacketOptional.isPresent()) {
-				willPresent = PASS;
+	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {	
+		/* Determine if this the connect packet for the Edge node under test.
+		 * Set the clientid if so. */
+		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String willTopic = willPublishPacket.getTopic();
+			if (willTopic.equals("spBv1.0/" + groupId + "/NDEATH/" + edgeNodeId)) {
+				testClientId = clientId;
+				logger.info("Edge session establishment test - connect - client id is "+clientId);
 			}
-			testResults.put("payloads-ndeath-will-message", willPresent);
-		} catch (Exception e) {
-			logger.info("Exception", e);
+		}
+		
+		if (testClientId != null) {
+			final String isCleanSession;
+			if (packet.getCleanStart()) {
+				isCleanSession = PASS;
+			} else {
+				isCleanSession = FAIL + " (Clean session should be set to true.)";
+			}
+			testResults.put("principles-persistence-clean-session", isCleanSession);
+
+			String willPresent = FAIL + " (NDEATH not registered as Will in connect packet)";
+			// Optional<WillPublishPacket> willPublishPacketOptional = null;
+			try {
+				willPublishPacketOptional = checkWillMessage(packet);
+				if (willPublishPacketOptional.isPresent()) {
+					willPresent = PASS;
+				}
+				testResults.put("payloads-ndeath-will-message", willPresent);
+			} catch (Exception e) {
+				logger.info("Exception", e);
+			}
 		}
 	}
 
@@ -186,12 +200,14 @@ public class SessionEstablishmentTest extends TCKTest {
 		List<Subscription> subscriptions = packet.getSubscriptions();
 		for (Subscription s : subscriptions) {
 			topic = s.getTopicFilter();
-			if (topic.startsWith("spBv1.0/" + groupId + "/NCMD/" + edgeNodeId)) {
-				ncmdFound = true;
-			} else if (topic.startsWith("spBv1.0/" + groupId + "/DCMD/" + edgeNodeId)) {
-				dcmdFound = true;
-			} else if (topic.startsWith("STATE/" + hostApplicationId)) {
+			if (topic.startsWith("STATE/" + hostApplicationId)) {
 				stateFound = true;
+			} else if (testClientId != null && testClientId.equals(clientId)) {
+				if (topic.startsWith("spBv1.0/" + groupId + "/NCMD/" + edgeNodeId)) {
+					ncmdFound = true;
+				} else if (topic.startsWith("spBv1.0/" + groupId + "/DCMD/" + edgeNodeId)) {
+					dcmdFound = true;
+				}
 			}
 		}
 	}
@@ -202,29 +218,31 @@ public class SessionEstablishmentTest extends TCKTest {
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		logger.info("Edge session establishment test - publish");
 
-		String topic = packet.getTopic();
-		if (topic.equals("spBv1.0/" + groupId + "/NBIRTH/" + edgeNodeId)) {
-			checkNBirth(packet);
-			if (ndataFound || ddataFound) {
-				testResults.put("principles-birth-certificates-order", FAIL + " Birth certificates must be first");
-			} else {
-				testResults.put("principles-birth-certificates-order", PASS);
+		if (testClientId != null && testClientId.equals(clientId)) {
+			String topic = packet.getTopic();
+			if (topic.equals("spBv1.0/" + groupId + "/NBIRTH/" + edgeNodeId)) {
+				checkNBirth(packet);
+				if (ndataFound || ddataFound) {
+					testResults.put("principles-birth-certificates-order", FAIL + " Birth certificates must be first");
+				} else {
+					testResults.put("principles-birth-certificates-order", PASS);
+				}
+			} else if (topic.startsWith("spBv1.0/" + groupId + "/DBIRTH/")) {
+				String[] topicParts = topic.split("/");
+				String device = topicParts[topicParts.length - 1];
+				deviceIds.put(device, true);
+				checkDBirth(packet);
+			} else if (topic.startsWith("spBv1.0/" + groupId + "/NDATA")) {
+				ndataFound = true;
+			} else if (topic.startsWith("spBv1.0/" + groupId + "/DDATA")) {
+				ddataFound = true;
 			}
-		} else if (topic.startsWith("spBv1.0/" + groupId + "/DBIRTH/")) {
-			String[] topicParts = topic.split("/");
-			String device = topicParts[topicParts.length - 1];
-			deviceIds.put(device, true);
-			checkDBirth(packet);
-		} else if (topic.startsWith("spBv1.0/" + groupId + "/NDATA")) {
-			ndataFound = true;
-		} else if (topic.startsWith("spBv1.0/" + groupId + "/DDATA")) {
-			ddataFound = true;
-		}
-		logger.info("topic " + packet.getTopic());
+			logger.info("topic " + packet.getTopic());
 
-		if (deviceIds.size() == 0) {
-			checkSubscribeTopics();
-			theTCK.endTest();
+			if (deviceIds.size() == 0) {
+				checkSubscribeTopics();
+				theTCK.endTest();
+			}
 		}
 	}
 
@@ -428,7 +446,6 @@ public class SessionEstablishmentTest extends TCKTest {
 				}
 			}
 		}
-
 		// every nbirth must include a bdSeq
 		String bdSeqIncluded = FAIL + " (NBIRTH must include a bdSeq)";
 		if (birthBdSeq != -1) {
@@ -457,13 +474,14 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		String rebirthBoolean = FAIL + " (NBIRTH 'node control/rebirth' metric must be boolean)";
 		if (rebirthFound == true && datatype == MetricDataType.Boolean) {
-			rebirthIncluded = PASS;
+			rebirthBoolean = PASS;
 		}
 		testResults.put("operational-behavior-data-commands-rebirth-datatype", rebirthBoolean);
 
+		logger.info("4 metric value "+rebirthVal+" type "+datatype + " " +(datatype == MetricDataType.Boolean));
 		String rebirthValue = FAIL + " (NBIRTH 'node control/rebirth' metric must == false)";
 		if (rebirthFound == true && datatype == MetricDataType.Boolean && rebirthVal == false) {
-			rebirthIncluded = PASS;
+			rebirthValue = PASS;
 		}
 		testResults.put("operational-behavior-data-commands-rebirth-value", rebirthValue);
 
