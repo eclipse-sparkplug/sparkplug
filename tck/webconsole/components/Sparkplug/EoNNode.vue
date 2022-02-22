@@ -4,25 +4,30 @@
   <div>
     <client-only>
     <b-form>
-      <b-form-group label="Edge of Network Node ID:" description="The identifiers of the Edge of Network node">
-        <b-input-group class="mb-2">
-          <b-form-input
-            :value="local.groupId"
-            @input="update('groupId', $event)"
-            type="text"
-            placeholder="group_id"
-            required
-          />
-          <b-input-group-text>/</b-input-group-text>
-          <b-form-input
-            :value="local.edgeNodeId"
-            @input="update('edgeNodeId', $event)"
-            type="text"
-            placeholder="edge_node_id"
-            required
-          />
-        </b-input-group>
-      </b-form-group>
+        <b-container fluid="xs">
+            <b-row  >
+                <b-col sm="3">
+                    <label size="sm" description="The identifiers of the Edge of Network node">Edge of Network Node ID:</label>
+                </b-col>
+                <b-col sm="9">
+                    <b-input-group class="mb-2">
+                        <b-form-input
+                            :value="local.groupId"
+                            @input="update('groupId', $event)"
+                            placeholder="group_id"
+                            required
+                        />
+                        <b-input-group-text >/</b-input-group-text>
+                        <b-form-input
+                            :value="local.edgeNodeId"
+                            @input="update('edgeNodeId', $event)"
+                            placeholder="edge_node_id"
+                            required
+                        />
+                    </b-input-group>
+                </b-col>
+            </b-row>
+        </b-container>
     </b-form>
     </client-only>
   </div>

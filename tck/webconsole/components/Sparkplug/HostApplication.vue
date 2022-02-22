@@ -3,16 +3,24 @@
 <template>
   <div>
     <client-only>
+
     <b-form>
-      <b-form-group label="Host Application Host ID:" description="The identifiers of the Host Application">
-        <b-form-input
-          :value="local.hostId"
-          @input="update('hostId', $event)"
-          type="text"
-          placeholder="scada_host_id"
-          required
-        />
-      </b-form-group>
+        <b-container fluid="xs">
+            <b-row  >
+                <b-col sm="3">
+                    <label description="The identifiers of the Host Application">Host Application ID:</label>
+                </b-col>
+                <b-col sm="9">
+                    <b-form-input
+                        :value="local.hostId"
+                        @input="update('hostId', $event)"
+                        type="text"
+                        placeholder="scada_host_id"
+                        required
+                    />
+                </b-col>
+            </b-row>
+        </b-container>
     </b-form>
     </client-only>
   </div>

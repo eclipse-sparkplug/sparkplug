@@ -4,7 +4,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -21,37 +21,40 @@
     <div class="m-3">
       <WebConsoleInformation />
       <div>
-        <b-tabs content-class="mt-1" v-model="activeTab" pills justified>
-          <b-tab
-            @click="changeMqttConnectFun(0)"
-            :title-link-class="mqttClient.connected ? 'bg-success text-white' : 'bg-danger text-white'"
-          >
-            <template #title>
-              <span class="mr-2">MQTT Configuration</span>
-              <span>
-                {{ mqttClient.connected ? "(connected)" : "(disconnected)" }}
-              </span>
-            </template>
-            <MqttConnect :change="tabOpen" @on-connect="mqttConnected" class="mt-3" />
-          </b-tab>
-          <b-tab
-            @click="changeMqttConnectFun(1)"
-            :title-link-class="
-              (sparkplugClient.hostApplication.complete && sparkplugClient.clientType === 'HOSTAPPLICATION') ||
-              (sparkplugClient.eonNode.complete && sparkplugClient.clientType === 'EONNODE')
-                ? 'bg-success text-white'
-                : 'bg-danger text-white'
-            "
-          >
-            <template #title> Sparkplug Client Configuration </template>
-            <SparkplugClientConnect
-              :change="tabOpen"
-              :currentTest="currentTest"
-              v-model="sparkplugClient"
-              class="mt-3"
-            />
-          </b-tab>
-        </b-tabs>
+        <b-card no-body>
+            <b-tabs v-model="activeTab" card>
+              <b-tab
+                @click="changeMqttConnectFun(0)"
+                :title-link-class="mqttClient.connected ? 'bg-success text-white' : 'bg-danger text-white'"
+              >
+                <template #title>
+                  <span class="mr-2">MQTT Configuration</span>
+                  <span>
+                    {{ mqttClient.connected ? "(connected)" : "(disconnected)" }}
+                  </span>
+                </template>
+                <MqttConnect :change="tabOpen" @on-connect="mqttConnected" class="mt-3" />
+              </b-tab>
+              <b-tab
+                @click="changeMqttConnectFun(1)"
+                :title-link-class="
+                  (sparkplugClient.hostApplication.complete && sparkplugClient.clientType === 'HOSTAPPLICATION') ||
+                  (sparkplugClient.eonNode.complete && sparkplugClient.clientType === 'EONNODE')
+                    ? 'bg-success text-white'
+                    : 'bg-danger text-white'
+                "
+              >
+                <template #title> Sparkplug Configuration (Clients) </template>
+                <SparkplugClientConnect
+                  :change="tabOpen"
+                  :currentTest="currentTest"
+                  v-model="sparkplugClient"
+                  class="mt-3"
+                />
+              </b-tab>
+
+            </b-tabs>
+        </b-card>
       </div>
 
       <TckTests
