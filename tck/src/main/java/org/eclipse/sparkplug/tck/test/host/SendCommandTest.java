@@ -91,6 +91,7 @@ public class SendCommandTest extends TCKTest {
 	private String state = null;
 	private TCK theTCK = null;
 	private String host_application_id = null;
+	private String group_id = null;
 	private String edge_node_id = null;
 	private String edge_metric = "TCK_metric/Boolean";
 	private String device_id = null;
@@ -107,8 +108,13 @@ public class SendCommandTest extends TCKTest {
 			testResults.put(testIds[i], "");
 		}
 
-		if (parms.length < 3) {
-			logger.info("Parameters to send command test must be: host_application_id edge_node_id device_id");
+		if (parms.length < 4) {
+			logger.info("Parameters to send command test must be: host_application_id group_id edge_node_id device_id");
+			String msg = "Message was: ";
+			for (int i = 0; i < parms.length; ++i) {
+				msg += parms[i] + " ";
+			}
+			logger.info(msg);
 			return;
 		}
 		host_application_id = parms[0];
@@ -146,19 +152,22 @@ public class SendCommandTest extends TCKTest {
 			return;
 		}
 
-		edge_node_id = parms[1];
+		group_id = parms[1];
+		logger.info("Group id is " + group_id);
+		
+		edge_node_id = parms[2];
 		logger.info("Edge node id is " + edge_node_id);
 
-		device_id = parms[2];
+		device_id = parms[3];
 		logger.info("Device id is " + device_id);
 
 		// First we have to connect an edge node and device.
 		// We do this by sending an MQTT control message to the TCK device utility.
 		state = "ConnectingDevice";
-		String payload = "NEW DEVICE " + host_application_id + " " + edge_node_id + " " + device_id;
+		String payload = "NEW DEVICE " + host_application_id + " " + group_id + " "+ edge_node_id + " " + device_id;
 		Publish message = Builders.publish().topic("SPARKPLUG_TCK/DEVICE_CONTROL").qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting new device creation.  Edge node id: " + edge_node_id + " device id: " + device_id);
+		logger.info("Requesting new device creation.  Group id: "+group_id+" edge node id: " + edge_node_id + " device id: " + device_id);
 		publishService.publish(message);
 
 	}

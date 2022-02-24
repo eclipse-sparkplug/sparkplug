@@ -69,7 +69,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			"topics-nbirth-rebirth-metric", "payloads-dbirth-qos", "payloads-dbirth-retain", "topics-dbirth-mqtt",
 			"topics-dbirth-timestamp", "payloads-dbirth-timestamp", "payloads-dbirth-seq", "topics-dbirth-seq",
 			"payloads-dbirth-seq-inc", "payloads-dbirth-order", "operational-behavior-data-commands-rebirth-name",
-			"operational-behavior-data-commands-rebirth-datatype", "operational-behavior-data-commands-rebirth-value");
+			"operational-behavior-data-commands-rebirth-datatype", "operational-behavior-data-commands-rebirth-value",
+			"operational-behavior-data-publish-nbirth-values", "operational-behavior-data-publish-dbirth-values");
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -331,6 +332,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NBIRTH,
 			id = "topics-nbirth-rebirth-metric")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH,
+			id = "topics-nbirth-metrics")
 
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
@@ -369,6 +373,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = "message-flow-edge-node-birth-publish-subscribe")
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = "operational-behavior-data-publish-nbirth-values")
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -439,11 +446,24 @@ public class SessionEstablishmentTest extends TCKTest {
 					rebirthFound = true;
 					datatype = m.getDataType();
 					rebirthVal = (boolean) m.getValue();
-				} else if (bdSeqFound == true && rebirthFound == true) {
+				}
+				if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
+					testResults.put("topics-nbirth-metrics", FAIL);
+				} else if (testResults.get("topics-nbirth-metrics").equals("")) {
+					testResults.put("topics-nbirth-metrics", PASS);
+				}
+				if (m.getValue() == null) {
+					testResults.put("operational-behavior-data-publish-nbirth-values", FAIL);
+				} else {
+					if (testResults.get("operational-behavior-data-publish-nbirth-values").equals("")) {
+						testResults.put("operational-behavior-data-publish-nbirth-values", PASS);
+					}
+				}
+				/*else if (bdSeqFound == true && rebirthFound == true) {
 					// if bdseq and rebirth were already found, then we have
 					// the info we need and we can break out of this loop
 					break;
-				}
+				}*/
 			}
 		}
 		// every nbirth must include a bdSeq
@@ -514,6 +534,12 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_DBIRTH,
 			id = "topics-dbirth-seq")
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DBIRTH,
+			id = "topics-dbirth-metrics")
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = "operational-behavior-data-publish-dbirth-values")
 	public void checkDBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -565,7 +591,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		// making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the
 		// receivedBirthTime
 		String publishedTs = FAIL
-				+ " (NBIRTH must include payload timestamp that denotes the time at which the message was published)";
+				+ " (DBIRTH must include payload timestamp that denotes the time at which the message was published)";
 		prevResult = testResults.getOrDefault("topics-dbirth-timestamp", "");
 
 		if (!prevResult.contains(FAIL)) {
@@ -618,6 +644,25 @@ public class SessionEstablishmentTest extends TCKTest {
 			if (prevResult.equals("")) {
 				testResults.put("topics-dbirth-seq", seqValue);
 				testResults.put("payloads-dbirth-seq-inc", seqValue);
+			}
+		}
+
+		if (sparkplugPayload != null) {
+			List<Metric> metrics = sparkplugPayload.getMetrics();
+			for (Metric m : metrics) {
+				if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
+					testResults.put("topics-dbirth-metrics", FAIL);
+				} else if (testResults.get("topics-dbirth-metrics").equals("")) {
+					testResults.put("topics-dbirth-metrics", PASS);
+				}
+
+				if (m.getValue() == null) {
+					testResults.put("operational-behavior-data-publish-dbirth-values", FAIL);
+				} else {
+					if (testResults.get("operational-behavior-data-publish-dbirth-values").equals("")) {
+						testResults.put("operational-behavior-data-publish-dbirth-values", PASS);
+					}
+				}
 			}
 		}
 

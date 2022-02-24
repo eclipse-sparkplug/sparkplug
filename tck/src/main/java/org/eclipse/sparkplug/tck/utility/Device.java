@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -77,7 +77,6 @@ public class Device {
 	private static final String HW_VERSION = "Emulated Hardware";
 	private static final String SW_VERSION = "v1.0.0";
 	private String namespace = "spBv1.0";
-	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
 	private String log_topic_name = "SPARKPLUG_TCK/LOG";
 	
@@ -86,6 +85,7 @@ public class Device {
 	private MqttTopic log_topic = null;
 	private MessageListener control_listener = null;
 	
+	private String group_id = null;
 	private String edge_node_id = null;
 	private String device_id = null;
 	
@@ -134,10 +134,10 @@ public class Device {
 				MqttMessage msg = control_listener.getNextMessage();			
 				if (msg != null) {
 					String[] words = msg.toString().split(" ");
-					if (words.length == 5 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("DEVICE")) {
-						/* NEW DEVICE host application id, edge node id, device id */
-						edgeCreate(words[2], words[3]);
-						deviceCreate(words[3], words[4]);
+					if (words.length == 6 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("DEVICE")) {
+						/* NEW DEVICE host application id, group id, edge node id, device id */
+						edgeCreate(words[2], words[3], words[4]);
+						deviceCreate(words[5]);
 					}
 					else if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
 						/* SEND_EDGE_DATA host application id, edge node id, metric name */
@@ -176,15 +176,16 @@ public class Device {
 		return payload;
 	}
 	
-	public void edgeCreate(String host_application_id, String an_edge_node_id) throws Exception {
+	public void edgeCreate(String host_application_id, String a_group_id, String an_edge_node_id) throws Exception {
 		if (edge != null) {
 			log("Edge node already created");
 			log("Edge node "+edge_node_id+" successfully created");
 			return;
 		}
 		edge_node_id = an_edge_node_id;
+		group_id = a_group_id;
 		log("Creating new edge node \""+edge_node_id+"\"");
-		edge = new MqttClient(brokerURI, "Sparkplug TCK edge "+edge_node_id);
+		edge = new MqttClient(brokerURI, "Sparkplug TCK "+group_id+" "+edge_node_id);
 	    edge_listener = new MessageListener();
 	    edge.setCallback(edge_listener);
 	    
@@ -251,7 +252,7 @@ public class Device {
 		log("Edge node "+edge_node_id+" disconnected");
 	}
 	
-	public void deviceCreate(String edge_node_id, String a_device_id) throws Exception {
+	public void deviceCreate(String a_device_id) throws Exception {
 		if (edge == null) {
 			log("No edge node");		
 			return;
@@ -596,6 +597,7 @@ public class Device {
 		edge = null;
 		edge_node_id = null;
 		device_id = null;
+		group_id = null;
 	}
 	
 	class MessageListener implements MqttCallbackExtended {

@@ -245,6 +245,8 @@ export default {
         } else if (testType === "SendCommandTest") {
           const testParameters =
             this.sparkplugClient.hostApplication.hostId +
+             " " +
+            testParameter.parameters["group_id"].parameterValue +
             " " +
             testParameter.parameters["edge_node_id"].parameterValue +
             " " +
