@@ -23,6 +23,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
+import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,6 @@ public abstract class TCKTest {
 
     private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-
     public abstract void connect(String clientId, ConnectPacket packet);
 
     public abstract void disconnect(String clientId, DisconnectPacket packet);
@@ -48,13 +48,15 @@ public abstract class TCKTest {
 
     public abstract String getName();
 
+    public abstract Map<String, String> getResults();
+
     public abstract String[] getTestIds();
 
     public abstract void endTest();
 
     public void reportResults(final @NotNull Map<String, String> results) {
         final StringBuilder payload = new StringBuilder();
-        String overall = "PASS";
+        String overall = TopicConstants.PASS;
 
         for (final Map.Entry<String, String> reportResult : results.entrySet()) {
             payload.append(reportResult.getKey())
@@ -63,8 +65,8 @@ public abstract class TCKTest {
                     .append(";")
                     .append(System.lineSeparator());
 
-            if (!reportResult.getValue().equals("PASS")) {
-                overall = "FAIL";
+            if (!reportResult.getValue().startsWith(TopicConstants.PASS)) {
+                overall = TopicConstants.FAIL;
             }
         }
 

@@ -265,26 +265,26 @@ export default {
         const profile = "edge";
         const testType = testParameter.name;
         if (testType === "SessionEstablishmentTest") {
-          const testParameters =
-            this.sparkplugClient.hostApplication.hostId +
-            " " +
-            this.sparkplugClient.eonNode.groupId +
-            " " +
-            this.sparkplugClient.eonNode.edgeNodeId +
-            " " +
-            testParameter.parameters["device_ids"].parameterValue;
-          this.createTestRequest(profile, testType, testParameters);
-        } else if (testType === "SendDataTest") {
-          const testParameters =
-            this.sparkplugClient.hostApplication.hostId +
-            " " +
-            this.sparkplugClient.eonNode.groupId +
-            " " +
-            this.sparkplugClient.eonNode.edgeNodeId +
-            " " +
-            testParameter.parameters["device_id"].parameterValue;
-          this.createTestRequest(profile, testType, testParameters);
-        }  else if (testType === "ReceiveCommandTest") {
+            const testParameters =
+                this.sparkplugClient.hostApplication.hostId +
+                " " +
+                this.sparkplugClient.eonNode.groupId +
+                " " +
+                this.sparkplugClient.eonNode.edgeNodeId +
+                " " +
+                testParameter.parameters["device_ids"].parameterValue;
+            this.createTestRequest(profile, testType, testParameters);
+        } else if (testType === "SendDataTest" || testType === "PayloadTest") {
+            const testParameters =
+                this.sparkplugClient.hostApplication.hostId +
+                " " +
+                this.sparkplugClient.eonNode.groupId +
+                " " +
+                this.sparkplugClient.eonNode.edgeNodeId +
+                " " +
+                testParameter.parameters["device_id"].parameterValue;
+            this.createTestRequest(profile, testType, testParameters);
+        } else if (testType === "ReceiveCommandTest") {
           const testParameters =
             this.sparkplugClient.eonNode.groupId +
             " " +
