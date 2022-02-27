@@ -346,7 +346,7 @@ export default {
             readableName: "Send Data Test",
             description: "This is the Edge Node Sparkplug send data test.",
             requirements: [
-                "Setupa MQTT Connection.",
+                "Setup a MQTT Connection.",
                 "Set Device Id that is used by the configured Group and Edge.",
                 "Start this test.",
                 "Send some data by Edge Node and Devices.",
