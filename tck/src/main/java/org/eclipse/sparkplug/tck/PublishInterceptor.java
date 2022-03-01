@@ -54,8 +54,7 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			if (packet.getPayload().isPresent()) {
 				final ByteBuffer payloadByteBuffer = packet.getPayload().get();
 				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
-
-				logger.debug("\tPayload {}", payload);
+				logger.trace("\tPayload {}", payload);
 
 				if (topic.equals("SPARKPLUG_TCK/LOG")) {
 					logger.debug(clientId + ": " + payload); // display log message
