@@ -315,10 +315,10 @@ public class PayloadTest extends TCKTest {
                         isValid_PropertyValueType = false;
                         isValid_PropertyValueTypeValue = false;
                     }
-                }
-                if ((topic.contains(TOPIC_PATH_NBIRTH) || topic.contains(TOPIC_PATH_DBIRTH))
-                        && !m.hasProperties()) {
-                    isValid_PropertyValueTypeReq = false;
+                    if ((topic.contains(TOPIC_PATH_NBIRTH) || topic.contains(TOPIC_PATH_DBIRTH))
+                            && SparkplugBProto.Payload.PropertyValue.ValueCase.forNumber(propertyValue.getType()) == SparkplugBProto.Payload.PropertyValue.ValueCase.VALUE_NOT_SET) {
+                        isValid_PropertyValueTypeReq = false;
+                    }
                 }
             }
         }
