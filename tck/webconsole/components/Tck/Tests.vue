@@ -180,7 +180,7 @@ export default {
             hostTests: {
                 sessionEstablishmentTest: {
                     testValues: {
-                        type: "HOSTAPPLICATION",
+                        testType: "HOSTAPPLICATION",
                         name: "SessionEstablishmentTest",
                         readableName: "Session Establishment Test",
                         description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
@@ -197,7 +197,7 @@ export default {
                 },
                 sessionTerminationTest: {
                     testValues: {
-                        type: "HOSTAPPLICATION",
+                        testType: "HOSTAPPLICATION",
                         name: "SessionTerminationTest",
                         readableName: "Session Termination Test",
                         description: "This is the Host Application Sparkplug session termination test.",
@@ -222,7 +222,7 @@ export default {
                 },
                 sendCommandTest: {
                     testValues: {
-                        type: "HOSTAPPLICATION",
+                        testType: "HOSTAPPLICATION",
                         name: "SendCommandTest",
                         readableName: "Send Command Test",
                         description:
@@ -258,7 +258,7 @@ export default {
                 },
                 receiveDataTest: {
                     testValues: {
-                        type: "HOSTAPPLICATION",
+                        testType: "HOSTAPPLICATION",
                         name: "ReceiveDataTest",
                         readableName: "Receive Data Test",
                         description:
@@ -318,7 +318,7 @@ export default {
             eonTests: {
                 sessionEstablishmentTest: {
                     testValues: {
-                        type: "EONNODE",
+                        testType: "EONNODE",
                         name: "SessionEstablishmentTest",
                         readableName: "Session Establishment Test",
                         description: "This is the Edge Node Sparkplug session establishment test.",
@@ -343,7 +343,7 @@ export default {
                 },
                 sendDataTest: {
                     testValues: {
-                        type: "EONNODE",
+                        testType: "EONNODE",
                         name: "SendDataTest",
                         readableName: "Send Data Test",
                         description: "This is the Edge Node Sparkplug send data test.",
@@ -367,7 +367,7 @@ export default {
                 },
                 receiveCommandTest: {
                     testValues: {
-                        type: "EONNODE",
+                        testType: "EONNODE",
                         name: "ReceiveCommandTest",
                         readableName: "Receive Command Test",
                         description: "This is the Edge Node Sparkplug receive command test. (NCMD)",
@@ -392,7 +392,7 @@ export default {
                 },
                 payloadTest: {
                     testValues: {
-                        type: "EONNODE",
+                        testType: "EONNODE",
                         name: "PayloadTest",
                         readableName: "Payload Validation Test",
                         description: "This is the Edge Node Sparkplug payload validation test.",

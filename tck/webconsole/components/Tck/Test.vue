@@ -5,13 +5,14 @@
             <b-container bg-variant="light" fluid="xs" border-bottom-0 small >
                 <b-row>
                     <b-col sm="9" >
-                      <h5 class="text-dark" v-b-toggle="'my-collapse-' + test.name + test.type" >{{test.readableName}}</h5>
+                      <h5 v-b-toggle="'my-collapse-' + test.name + test.testType" class="text-dark">
+                          {{ test.readableName }}</h5>
                     </b-col>
                     <b-col sm="3" align="right">
                         <b-badge
                             variant="warning"
                             size="xs"
-                            v-b-toggle="'my-collapse-' + test.name + test.type"
+                            v-b-toggle="'my-collapse-' + test.name + test.testType"
                         >
                             Show/Hide </b-badge>
                     </b-col>
@@ -19,7 +20,7 @@
             </b-container>
 
         <b-collapse
-            :id="'my-collapse-' +  test.name + test.type"
+            :id="'my-collapse-' +  test.name + test.testType"
         ><hr>
         <b-container bg-variant="light"  fluid="xs" >
             <b-row>
@@ -92,15 +93,15 @@
             <b-row>
                 <b-col sm="12">
                 <hr>
-                <div v-show="test.type==='HOSTAPPLICATION'">
-                    <b-button-toolbar size="m">
+                    <div v-show="test.testType==='HOSTAPPLICATION'">
+                        <b-button-toolbar size="m">
                             <div v-show="startH">
                                 <b-button class="mr-1" variant="success"
                                           @click="$emit('start-single-test', test); testState(test)">Start Test
                                 </b-button>
                                 <span v-if="test.result != null">
                                     <b-button class="mr-5" variant="info"
-                                         @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
+                                              @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
                                 </span>
                             </div>
                             <div v-show="stopH">
@@ -133,8 +134,8 @@
                         </div>
                     </div>
                 </div>
-                <div v-show="test.type==='EONNODE'">
-                    <b-button-toolbar size="m">
+                    <div v-show="test.testType==='EONNODE'">
+                        <b-button-toolbar size="m">
                             <div v-show="start">
                                 <b-button class="mr-1" variant="success"
                                           @click="$emit('start-single-test', test); testState(test)">Start Test
@@ -182,7 +183,7 @@
 </template>
 
 <script>
-import {cloneDeep, tap, set} from "lodash";
+import {cloneDeep, set, tap} from "lodash";
 
 export default {
     data() {
@@ -206,7 +207,7 @@ export default {
              * This is the test type
              * @type {String}
              */
-            type: {
+            testType: {
                 type: String,
                 required: true,
                 default: "HOSTAPPLICATION",
@@ -356,7 +357,7 @@ export default {
 
         testState(test) {
 
-            if( test.type === "HOSTAPPLICATION") {
+            if (test.testType === "HOSTAPPLICATION") {
                 this.startH = !this.startH;
                 this.stopH = !this.stopH;
             } else {
@@ -365,7 +366,7 @@ export default {
             }
         },
         resetState(test ) {
-            if( test.type === "HOSTAPPLICATION") {
+            if (test.testType === "HOSTAPPLICATION") {
                 this.startH = true;
                 this.stopH = false;
             } else {

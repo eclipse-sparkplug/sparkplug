@@ -144,7 +144,7 @@ public class SessionEstablishmentTest extends TCKTest {
             id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
     public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
         logger.info("Edge session establishment test - connect");
-        
+
         /* Determine if this the connect packet for the Edge node under test.
 		 * Set the clientid if so. */
 		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
@@ -284,11 +284,13 @@ public class SessionEstablishmentTest extends TCKTest {
             section = Sections.PAYLOADS_DESC_NDEATH,
             id = ID_TOPICS_NDEATH_SEQ)
     @SpecAssertion(
-            section = Sections.PAYLOADS_B_NDEATH,
-            id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN)
+            section = Sections.PAYLOADS_B_NDEATH, id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN)
     @SpecAssertion(
             section = Sections.PAYLOADS_DESC_NDEATH,
             id = ID_TOPICS_NDEATH_PAYLOAD)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_PAYLOAD,
+            id = ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED)
     public Optional<WillPublishPacket> checkWillMessage(final @NotNull ConnectPacket packet) {
         final Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
         if (willPublishPacketOptional.isPresent()) {
@@ -315,6 +317,7 @@ public class SessionEstablishmentTest extends TCKTest {
                 bValid = (sparkplugPayload.getSeq() == -1);
                 testResults.put(ID_PAYLOADS_NDEATH_SEQ, setResult(bValid, PAYLOADS_NDEATH_SEQ));
                 testResults.put(ID_TOPICS_NDEATH_SEQ, setResult(bValid, TOPICS_NDEATH_SEQ));
+                testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
 
                 logger.debug("Check Req: NDEATH retained flag must be false");
                 bValid = !willPublishPacket.getRetain();
@@ -345,7 +348,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NBIRTH,
 			id = ID_TOPICS_NBIRTH_METRICS)
-    
+
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
             id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME)
@@ -355,7 +358,7 @@ public class SessionEstablishmentTest extends TCKTest {
     @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
             id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE)
-    
+
     @SpecAssertion(
             section = Sections.PAYLOADS_B_NBIRTH,
             id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
@@ -375,6 +378,9 @@ public class SessionEstablishmentTest extends TCKTest {
             section = Sections.PAYLOADS_B_PAYLOAD,
             id = ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED)
     @SpecAssertion(
+            section = Sections.PAYLOADS_B_PAYLOAD,
+            id = ID_PAYLOAD_SEQUENCE_NUM_ZERO_NBIRTH)
+    @SpecAssertion(
             section = Sections.PAYLOADS_B_NBIRTH,
             id = ID_PAYLOADS_NBIRTH_TIMESTAMP)
     @SpecAssertion(
@@ -384,11 +390,14 @@ public class SessionEstablishmentTest extends TCKTest {
             section = Sections.PAYLOADS_B_NDEATH,
             id = ID_PAYLOADS_NDEATH_BDSEQ)
     @SpecAssertion(
+            section = Sections.PAYLOADS_B_METRIC,
+            id = ID_PAYLOADS_METRIC_DATATYPE_REQ)
+    @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
             id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
-			id =  ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES)
     public void checkNBirth(final @NotNull PublishPacket packet) {
         Date receivedBirth = new Date();
         long millisReceivedBirth = receivedBirth.getTime();
@@ -442,8 +451,8 @@ public class SessionEstablishmentTest extends TCKTest {
 					datatype = m.getDataType();
 					rebirthVal = (boolean) m.getValue();
 				}
-				
-				if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
+
+                if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
 					testResults.put(ID_TOPICS_NBIRTH_METRICS, setResult(false, TOPICS_NBIRTH_METRICS));
 				} else if (testResults.get(ID_TOPICS_NBIRTH_METRICS) == null) {
 					testResults.put(ID_TOPICS_NBIRTH_METRICS, setResult(true, TOPICS_NBIRTH_METRICS));
@@ -619,21 +628,21 @@ public class SessionEstablishmentTest extends TCKTest {
                 int hasDataTypeCnt = countDataType(metrics);
                 testResults.put(ID_PAYLOADS_METRIC_DATATYPE_REQ, setResult(hasDataTypeCnt == metrics.size(), PAYLOADS_METRIC_DATATYPE_REQ));
             }
-        }
 
-        checkPayloadsNameInDataRequirement(sparkplugPayload);
-        checkPayloadsAliasAndNameRequirement(sparkplugPayload);
-        
-		if (sparkplugPayload != null) {
-			List<Metric> metrics = sparkplugPayload.getMetrics();
-			for (Metric m : metrics) {
-				if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
-					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(false, TOPICS_DBIRTH_METRICS));
-				} else if (testResults.get(ID_TOPICS_DBIRTH_METRICS) == null) {
-					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(true, TOPICS_DBIRTH_METRICS));
-				}
 
-				if (m.getValue() == null) {
+            checkPayloadsNameInDataRequirement(sparkplugPayload);
+            checkPayloadsAliasAndNameRequirement(sparkplugPayload);
+
+
+            List<Metric> metrics = sparkplugPayload.getMetrics();
+            for (Metric m : metrics) {
+                if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
+                    testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(false, TOPICS_DBIRTH_METRICS));
+                } else if (testResults.get(ID_TOPICS_DBIRTH_METRICS) == null) {
+                    testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(true, TOPICS_DBIRTH_METRICS));
+                }
+
+                if (m.getValue() == null) {
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES, setResult(false, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES));
 				} else {
 					if (testResults.get(ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES) == null) {

@@ -13,10 +13,12 @@
 
 package org.eclipse.sparkplug.tck.test.common;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
 import org.eclipse.tahu.message.model.SparkplugBPayload;
+import org.eclipse.tahu.protobuf.SparkplugBProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,13 @@ public class Utils {
         return sparkplugPayload;
     }
 
+    public static SparkplugBProto.Payload parseRaw(PublishPacket packet) throws InvalidProtocolBufferException {
+        ByteBuffer payload = packet.getPayload().get();
+        byte[] bytes = new byte[packet.getPayload().get().remaining()];
+        payload.get(bytes);
+        SparkplugBProto.Payload protoPayload = SparkplugBProto.Payload.parseFrom(bytes);
+        return protoPayload;
+    }
 
     public static SparkplugBPayload extractSparkplugPayload(PublishPacket packet) {
         final ByteBuffer payload = packet.getPayload().orElseGet(null);
