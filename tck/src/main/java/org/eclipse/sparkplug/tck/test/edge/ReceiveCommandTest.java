@@ -112,7 +112,7 @@ public class ReceiveCommandTest extends TCKTest {
 
         // indicate we are testing the receipt of NBIRTH and DBIRTH messages after a rebirth command
         // Dont understand this setting -- ???
-        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, FAIL);
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2));
 
         // this will fail if we receive a data message
         testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, PASS);
