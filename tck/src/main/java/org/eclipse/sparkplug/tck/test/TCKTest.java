@@ -58,7 +58,10 @@ public abstract class TCKTest {
         final StringBuilder payload = new StringBuilder();
         String overall = TopicConstants.PASS;
 
+        logger.info("Summary Test Results for {} ", getName());
+
         for (final Map.Entry<String, String> reportResult : results.entrySet()) {
+            logger.info("\t {}:{} ", reportResult.getKey(), reportResult.getValue());
             payload.append(reportResult.getKey())
                     .append(": ")
                     .append(reportResult.getValue())
@@ -70,21 +73,19 @@ public abstract class TCKTest {
             }
         }
 
+        logger.info("OVERALL:{} ", overall);
+
         payload.append("OVERALL: ")
                 .append(overall)
                 .append(";")
                 .append(System.lineSeparator());
 
-        logger.info("Test results " + payload);
-
         final PublishService publishService = Services.publishService();
-
         final Publish message = Builders.publish()
                 .topic("SPARKPLUG_TCK/RESULT")
                 .qos(Qos.AT_LEAST_ONCE)
                 .payload(ByteBuffer.wrap(payload.toString().getBytes()))
                 .build();
-
         publishService.publish(message);
     }
 }

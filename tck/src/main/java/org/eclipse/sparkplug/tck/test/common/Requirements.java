@@ -239,5 +239,12 @@ public class Requirements {
     public static final String PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE = "The 'value' of the Property Value MUST be an int_value and be one of the valid quality codes of 0, 192, or 500.";
 
 
-}
+    public static final String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1 = "operational-behavior-data-commands-rebirth-action-1";
+    public static final String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1 = "When an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.";
 
+    public static final String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2 = "operational-behavior-data-commands-rebirth-action-2";
+    public static final String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2 = "After an Edge Node stops sending DATA messages, it MUST send a complete BIRTH sequence including the NBIRTH and DBIRTH(s) if applicable.";
+
+    public static final String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3 = "operational-behavior-data-commands-rebirth-action-3";
+    public static final String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3 = "The NBIRTH MUST include the same bdSeq metric with the same value it had included in the Will Message of the previous MQTT CONNECT packet.";
+}

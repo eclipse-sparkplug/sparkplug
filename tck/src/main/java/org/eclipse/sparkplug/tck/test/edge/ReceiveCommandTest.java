@@ -4,7 +4,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -14,314 +14,300 @@
 package org.eclipse.sparkplug.tck.test.edge;
 
 /*
- * This is the edge node Sparkplug receive command test.  
- * 
+ * This is the edge node Sparkplug receive command test.
+ *
  * We send a rebirth command to an edge node and a device so we can
  * test the behavior of the those edge nodes and devices.
- * 
+ *
  * The parameters are the group_id, edge_node_id and device_id to use.
- * 
+ *
  * The edge node must start in the online state, potentially after running
- * the edge node session establishment test.  
- * 
+ * the edge node session establishment test.
+ *
  * 1. Send a node rebirth command.
  * 2. Wait for edge node and device rebirths
  * 3. Send MQTT client disconnect to the edge node
  * 4. Watch for connect to get client id
  * 5. Check bdSeq on nbirth
- *   
+ *
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.util.logging.Level;
-import java.util.function.BiConsumer;
-
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extension.sdk.api.services.publish.*;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
-import java.util.concurrent.CompletableFuture;
-
-import org.eclipse.tahu.SparkplugException;
-import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
-import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.MessageType;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.Topic;
-import org.eclipse.tahu.message.model.Metric.MetricBuilder;
-import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
-import org.eclipse.tahu.util.TopicUtil;
-
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
+import org.eclipse.tahu.message.model.Metric;
+import org.eclipse.tahu.message.model.Metric.MetricBuilder;
+import org.eclipse.tahu.message.model.MetricDataType;
+import org.eclipse.tahu.message.model.SparkplugBPayload;
+import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(
-		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+        spec = "sparkplug",
+        version = "3.0.0-SNAPSHOT")
 public class ReceiveCommandTest extends TCKTest {
 
-	private final String NAMESPACE = "spBv1.0";
+    private static final String BD_SEQ = "bdSeq";
+    private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
+    private static Logger logger = LoggerFactory.getLogger("Sparkplug");
+    private final @NotNull TCK theTCK;
+    private final @NotNull Map<String, String> testResults = new HashMap<>();
+    private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+    private @NotNull status state;
+    private @NotNull String deviceId;
+    private @NotNull String groupId;
+    private @NotNull String edgeNodeId;
+    private @NotNull String hostApplicationId;
+    private @NotNull long deathBdSeq;
+    private String edgeNodeClientId;
+    private boolean bNBirth = false, bDBirth = false;
+    private PublishService publishService = Services.publishService();
 
-	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private static final String PASS = "PASS";
-	private static final String FAIL = "FAIL";
+    public ReceiveCommandTest(TCK aTCK, String[] parms) {
+        logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
+        theTCK = aTCK;
 
-	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { "operational-behavior-data-commands-rebirth-action-1",
-			"operational-behavior-data-commands-rebirth-action-2",
-			"operational-behavior-data-commands-rebirth-action-3" };
-	private String state = "start";
-	private TCK theTCK = null;
-	private String host_application_id = null;
-	private String edge_node_clientid = null;
-	private String edge_node_id = null;
-	private String device_id = null;
-	private long deathBdSeq = -1;
-	private String group_id = null;
-	private PublishService publishService = Services.publishService();
-	private boolean nbirth = false, dbirth = false;
+        if (parms.length < 3) {
+            logger.error("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
+            return;
+        }
+        state = status.START;
+        deathBdSeq = -1;
+        groupId = parms[0];
+        edgeNodeId = parms[1];
+        deviceId = parms[2];
+        logger.info("Parameters are  GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
 
-	public ReceiveCommandTest(TCK aTCK, String[] parms) {
-		logger.info(getName());
-		theTCK = aTCK;
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3);
 
-		testResults = new HashMap<String, String>();
+        sendCommand(true);
 
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
+        // indicate we are testing the receipt of NBIRTH and DBIRTH messages after a rebirth command
+        // Dont understand this setting -- ???
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, FAIL);
 
-		if (parms.length < 3) {
-			logger.info("Parameters to receive command test must be: group_id edge_node_id device_id");
-			return;
-		}
+        // this will fail if we receive a data message
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, PASS);
+    }
 
-		System.out.println(parms);
+    private void disconnectClient(String clientId) {
+        final ClientService clientService = Services.clientService();
+        CompletableFuture<Boolean> disconnectFuture = clientService.disconnectClient(clientId, true);
+        disconnectFuture.whenComplete(new BiConsumer<Boolean, Throwable>() {
+            @Override
+            public void accept(Boolean disconnected, Throwable throwable) {
+                if (throwable == null) {
+                    if (disconnected) {
+                        logger.debug("Client {} was successfully disconnected and no Will message was sent", clientId);
+                    } else {
+                        logger.debug("Client {} not found", clientId);
+                    }
+                } else {
+                    logger.error("Client {} disconnectClient: {} ", clientId, throwable.getMessage());
+                    if (logger.isDebugEnabled()) {
+                        logger.error("Original error:", throwable);
+                    }
+                }
+            }
+        });
+    }
 
-		group_id = parms[0];
-		logger.info("Group id is " + group_id);
+    private void sendCommand(boolean isNode) {
+        String topicName = TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/";
+        if (isNode) {
+            state = status.SENDING_NODE_REBIRTH;
+            topicName += TOPIC_PATH_NCMD + "/" + edgeNodeId;
+        } else {
+            state = status.SENDING_DEVICE_REBIRTH;
+            topicName = TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId;
+        }
 
-		edge_node_id = parms[1];
-		logger.info("Edge node id is " + edge_node_id);
+        byte[] payload = null;
+        try {
+            payload = new SparkplugBPayloadEncoder().getBytes(new SparkplugBPayloadBuilder()
+                    .addMetric(new MetricBuilder(NODE_CONTROL_REBIRTH, MetricDataType.Boolean, true).createMetric())
+                    .createPayload());
+        } catch (Exception e) {
+            logger.error("Error building edge node rebirth command. Aborting test. {} ", e.getMessage());
+            endTest();
+        }
 
-		device_id = parms[2];
-		logger.info("Device id is " + device_id);
+        Publish message = Builders.publish()
+                .topic(topicName)
+                .qos(Qos.AT_LEAST_ONCE)
+                .payload(ByteBuffer.wrap(payload)).build();
 
-		sendCommand(true);
-		// indicate we are testing the receipt of NBIRTH and DBIRTH messages after a rebirth command
-		testResults.put("operational-behavior-data-commands-rebirth-action-2", FAIL);
+        logger.info("Requesting edge rebirth. Edge node id: {} ", edgeNodeId);
+        publishService.publish(message);
+    }
 
-		// this will fail if we receive a data message
-		testResults.put("operational-behavior-data-commands-rebirth-action-1", PASS);
-	}
+    public void endTest() {
+        state = status.END;
+        reportResults(testResults);
+        Utils.setEndTest(getName(), testIds, testResults);
+        reportResults(testResults);
+    }
 
-	public void disconnectClient(String clientId) {
-		final ClientService clientService = Services.clientService();
-		CompletableFuture<Boolean> disconnectFuture = clientService.disconnectClient(clientId, true);
+    public String getName() {
+        return "Sparkplug Edge Receive Command Test";
+    }
 
-		disconnectFuture.whenComplete(new BiConsumer<Boolean, Throwable>() {
-			@Override
-			public void accept(Boolean disconnected, Throwable throwable) {
-				if (throwable == null) {
-					if (disconnected) {
-						System.out.println("Client was successfully disconnected and no Will message was sent");
-					} else {
-						System.out.println("Client not found");
-					}
-				} else {
-					logger.error("disconnectClient", throwable);
-				}
-			}
-		});
-	}
+    public String[] getTestIds() {
+        return testIds.toArray(new String[0]);
+    }
 
-	public void sendCommand(boolean isNode) {
-		String topicName = "";
-		if (isNode) {
-			state = "SendingNodeRebirth";
-			topicName = NAMESPACE + "/" + group_id + "/NCMD/" + edge_node_id;
-		} else {
-			state = "SendingDeviceRebirth";
-			topicName = NAMESPACE + "/" + group_id + "/DCMD/" + edge_node_id + "/" + device_id;
-		}
+    public Map<String, String> getResults() {
+        return testResults;
+    }
 
-		byte[] payload = null;
-		try {
-			payload = new SparkplugBPayloadEncoder().getBytes(new SparkplugBPayloadBuilder()
-					.addMetric(new MetricBuilder("Node Control/Rebirth", MetricDataType.Boolean, true).createMetric())
-					.createPayload());
-		} catch (Exception e) {
-			logger.info("Error building edge node rebirth command. Aborting test.");
-			endTest();
-		}
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_NDEATH,
+            id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
+    @Override
+    public void connect(String clientId, ConnectPacket packet) {
+        // we can determine the clientId corresponding to the edge node id by
+        // checking the will contents to see if the edge node id matches.
+        Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+        if (willPublishPacketOptional.isPresent()) {
+            WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+            logger.debug("Edge - Receive Command test - CONNECT ClientId {} on and will topic ", clientId, willPublishPacket.getTopic());
+            String[] topicParts = willPublishPacket.getTopic().split("/");
+            if (topicParts.length >= 4) {
+                testIds.add(ID_PAYLOADS_NDEATH_WILL_MESSAGE);
+                String will_edge_node_id = topicParts[3];
+                boolean bIsEqual = edgeNodeId.equals(will_edge_node_id);
+                if (bIsEqual) {
+                    edgeNodeClientId = clientId;
+                    logger.debug("ClientId for edge node id {} is {} ", edgeNodeId, edgeNodeClientId);
+                    ByteBuffer payload = willPublishPacket.getPayload().orElseGet(null);
+                    deathBdSeq = getBdSeq(payload);
+                }
+                logger.debug("Check Req: {} NDEATH not registered as Will in connect packet.", ID_PAYLOADS_NDEATH_WILL_MESSAGE);
+                testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE, setResult(bIsEqual, PAYLOADS_NDEATH_WILL_MESSAGE));
+            }
+        }
+    }
 
-		Publish message =
-				Builders.publish().topic(topicName).qos(Qos.AT_LEAST_ONCE).payload(ByteBuffer.wrap(payload)).build();
-		logger.info("Requesting edge rebirth. Edge node id: " + edge_node_id);
-		publishService.publish(message);
-	}
+    private long getBdSeq(ByteBuffer payload) {
+        SparkplugBPayload inboundPayload = Utils.decode(payload);
+        if (inboundPayload != null) {
+            for (Metric m : inboundPayload.getMetrics()) {
+                if (m.getName().equals(BD_SEQ)) {
+                    return (long) m.getValue();
+                }
+            }
+        }
+        return -1L;
+    }
 
-	public void endTest() {
-		state = "end";
-		edge_node_clientid = null;
-		deathBdSeq = -1;
-		reportResults(testResults);
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
-		logger.info("Ending test " + getName());
-	}
+    @Override
+    public void disconnect(String clientId, DisconnectPacket packet) {
+        // TODO Auto-generated method stub
 
-	public String getName() {
-		return "Sparkplug Edge Receive Command Test";
-	}
+    }
 
-	public String[] getTestIds() {
-		return testIds;
-	}
+    @Override
+    public void subscribe(String clientId, SubscribePacket packet) {
+        // TODO Auto-generated method stub
+    }
 
-	public HashMap<String, String> getResults() {
-		return testResults;
-	}
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3)
+    @Override
+    public void publish(String clientId, PublishPacket packet) {
 
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_NDEATH,
-			id = "payloads-ndeath-will-message")
-	@Override
-	public void connect(String clientId, ConnectPacket packet) {
-		// we can determine the clientid corresponding to the edge node id by
-		// checking the will contents to see if the edge node id matches.
+        logger.info("Edge - Receive Command test - PUBLISH - topic: {}, state: {} ", packet.getTopic(), state);
+        if (state == status.SENDING_NODE_REBIRTH || state == status.DISCONNECTING_CLIENT) {
+            String[] levels = packet.getTopic().split("/");
+            if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0)
+                    && levels[1].equals(groupId)
+                    && levels[3].equals(edgeNodeId)) {
+                if (levels.length == 4 && levels[2].equals(TOPIC_PATH_NBIRTH)) {
+                    logger.info("Node birth received - ClientId {} on Topic {} ", clientId, packet.getTopic());
+                    edgeNodeClientId = clientId;
+                    bNBirth = true;
+                    if (state == status.DISCONNECTING_CLIENT) {
+                        // check bdSeq
+                        ByteBuffer payload = packet.getPayload().orElseGet(null);
+                        long birthSeq = getBdSeq(payload);
+                        logger.debug("Check Req: {} The NBIRTH MUST include the same bdSeq metric with the same value it had included in the Will Message of the previous MQTT CONNECT packet.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3);
+                        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3, setResult(birthSeq == deathBdSeq, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3));
+                        if (birthSeq != deathBdSeq) {
+                            logger.error("*** Death sequence no: {}  nBirth seq no: {}. Expected to be equal", deathBdSeq, birthSeq);
+                        }
+                    }
 
-		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
-		if (willPublishPacketOptional.isPresent()) {
-			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
-			String topic = willPublishPacket.getTopic();
-			String[] topicParts = topic.split("/");
-			if (topicParts.length >= 4) {
-				String will_edge_node_id = topicParts[3];
-				if (edge_node_id.equals(will_edge_node_id)) {
-					edge_node_clientid = clientId;
-					logger.info("Clientid for edge node id " + edge_node_id + " is " + edge_node_clientid);
+                } else if (levels.length == 5
+                        && levels[2].equals(TOPIC_PATH_DBIRTH)) {
+                    logger.debug("Device birth received for device: {}", levels[4]);
+                    bDBirth = true;
 
-					ByteBuffer payload = willPublishPacket.getPayload().orElseGet(null);
-					deathBdSeq = getBdSeq(payload);
-				}
-			}
-		}
-	}
+                } else if (levels[2].equals(TOPIC_PATH_NDATA)) {
+                    logger.error("Data received for edge node: {}", levels[3]);
+                    logger.debug("Check Req: {} When an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1);
+                    testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1));
 
-	private long getBdSeq(ByteBuffer payload) {
-		try {
-			SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
-			byte[] payload_array = new byte[payload.remaining()];
-			payload.get(payload_array);
-			SparkplugBPayload inboundPayload = decoder.buildFromByteArray(payload_array);
+                } else if (levels[2].equals(TOPIC_PATH_DDATA)) {
+                    logger.error("Data received for edge node: {} and device id: {} ", levels[3], levels[4]);
+                    logger.debug("Check Req: {}When an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1);
+                    testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1));
 
-			List<Metric> metrics = inboundPayload.getMetrics();
-			for (Metric m : metrics) {
-				if (m.getName().equals("bdSeq")) {
-					return (long) m.getValue();
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1L;
-	}
+                }
 
-	@Override
-	public void disconnect(String clientId, DisconnectPacket packet) {
-		// TODO Auto-generated method stub
+                if (bNBirth && bDBirth && state == status.SENDING_NODE_REBIRTH) {
+                    logger.debug("Check Req: {} After an Edge Node stops sending DATA messages, it MUST send a complete BIRTH sequence including the NBIRTH and DBIRTH(s) if applicable.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2);
+                    testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, PASS);
+                    state = status.DISCONNECTING_CLIENT;
+                    bNBirth = false;
+                    bDBirth = false;
+                    disconnectClient(clientId);
+                }
 
-	}
+                if (bNBirth && bDBirth && state == status.DISCONNECTING_CLIENT) {
+                    state = status.END;
+                    endTest();
+                }
+            }
+        }
+    }
 
-	@Override
-	public void subscribe(String clientId, SubscribePacket packet) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-rebirth-action-1")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-rebirth-action-2")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-rebirth-action-3")
-	@Override
-	public void publish(String clientId, PublishPacket packet) {
-		if (state.equals("SendingNodeRebirth") || state.equals("DisconnectingClient")) {
-			String[] levels = packet.getTopic().split("/");
-			if (levels.length == 4 && levels[2].equals("NBIRTH")) {
-				if (levels[0].equals(NAMESPACE) && levels[1].equals(group_id) && levels[3].equals(edge_node_id)) {
-					logger.info("Node birth received - clientid " + clientId);
-					edge_node_clientid = clientId;
-					nbirth = true;
-
-					if (state.equals("DisconnectingClient")) {
-						// check bdSeq
-						ByteBuffer payload = packet.getPayload().orElseGet(null);
-						long birthseq = getBdSeq(payload);
-						testResults.put("operational-behavior-data-commands-rebirth-action-3",
-								birthseq == deathBdSeq ? PASS : FAIL);
-						if (birthseq != deathBdSeq) {
-							logger.info("*** Death sequence no " + deathBdSeq + " nbirth seq no " + birthseq
-									+ ". Expected to be equal");
-						}
-					}
-				}
-			} else if (levels.length == 5 && levels[2].equals("DBIRTH")) {
-				if (levels[0].equals(NAMESPACE) && levels[1].equals(group_id) && levels[3].equals(edge_node_id)) {
-					logger.info("Device birth received for " + levels[4]);
-					dbirth = true;
-				}
-			} else if (levels[2].equals("NDATA")) {
-				if (levels[0].equals(NAMESPACE) && levels[1].equals(group_id) && levels[3].equals(edge_node_id)) {
-					testResults.put("operational-behavior-data-commands-rebirth-action-1", FAIL);
-					logger.info("Error: Data received for edge node" + levels[3]);
-				}
-			} else if (levels[2].equals("DDATA")) {
-				if (levels[0].equals(NAMESPACE) && levels[1].equals(group_id) && levels[3].equals(edge_node_id)) {
-					testResults.put("operational-behavior-data-commands-rebirth-action-1", FAIL);
-					logger.info("Error: Data received for edge node" + levels[3] + " device id " + levels[4]);
-				}
-			}
-
-			if (state.equals("SendingNodeRebirth") && nbirth && dbirth) {
-				testResults.put("operational-behavior-data-commands-rebirth-action-2", PASS);
-				state = "DisconnectingClient";
-				nbirth = false;
-				dbirth = false;
-				disconnectClient(clientId);
-			}
-			if (state.equals("DisconnectingClient") && nbirth && dbirth) {
-				endTest();
-			}
-		}
-	}
-
+    private enum status {
+        START, DISCONNECTING_CLIENT, SENDING_NODE_REBIRTH, SENDING_DEVICE_REBIRTH, END
+    }
 }
+
