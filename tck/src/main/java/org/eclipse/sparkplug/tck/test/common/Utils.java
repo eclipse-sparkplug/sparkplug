@@ -47,7 +47,7 @@ public class Utils {
         return bValid ? PASS : FAIL + " " + requirement;
     }
 
-    private static SparkplugBPayload decode(ByteBuffer payload) {
+    public static SparkplugBPayload decode(ByteBuffer payload) {
         byte[] bytes = new byte[payload.remaining()];
         payload.get(bytes);
         SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
@@ -71,8 +71,7 @@ public class Utils {
 
     public static SparkplugBPayload extractSparkplugPayload(PublishPacket packet) {
         final ByteBuffer payload = packet.getPayload().orElseGet(null);
-        if (payload != null &&
-                packet.getTopic().startsWith(TOPIC_ROOT_SP_BV_1_0)) {
+        if (payload != null && packet.getTopic().startsWith(TOPIC_ROOT_SP_BV_1_0)) {
             return decode(payload);
         }
         return null;
