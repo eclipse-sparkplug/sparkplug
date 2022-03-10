@@ -335,9 +335,18 @@ tasks.register("audit") {
     }
 }
 
+tasks.register("generateRequirements") {
+	dependsOn("audit")
+	doLast {
+		exec {
+			commandLine = listOf("python3", "requirements.py")
+		}
+	}
+}
+
 //Creates coverage-report with jboss audit annotation processor
 tasks.named("compileJava", JavaCompile::class.java) {
-    dependsOn("audit")
+    dependsOn("generateRequirements")
     options.compilerArgs.addAll(
         listOf(
             "-AauditXml=${
