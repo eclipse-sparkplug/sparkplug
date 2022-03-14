@@ -276,7 +276,6 @@ public class SendDataTest extends TCKTest {
 		testIds.add(ID_TOPICS_DDATA_PAYLOAD);
 		testResults.put(ID_TOPICS_DDATA_PAYLOAD, setResult(bValid[4], TOPICS_DDATA_PAYLOAD));
 
-
 		logger.info("Send data test payload::check Device data - {} - Finished",
 				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
 		isDeviceChecked = true;
