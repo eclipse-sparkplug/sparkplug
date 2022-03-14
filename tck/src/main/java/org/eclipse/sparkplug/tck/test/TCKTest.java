@@ -55,14 +55,14 @@ public abstract class TCKTest {
     public abstract void endTest();
 
     public void reportResults(final @NotNull Map<String, String> results) {
-        final StringBuilder payload = new StringBuilder();
-        String overall = TopicConstants.PASS;
-
         logger.info("Summary Test Results for {} ", getName());
+        final StringBuilder summary = new StringBuilder();
+
+        String overall = results.entrySet().isEmpty() ? TopicConstants.EMPTY : TopicConstants.PASS;
 
         for (final Map.Entry<String, String> reportResult : results.entrySet()) {
             logger.info("\t {}:{} ", reportResult.getKey(), reportResult.getValue());
-            payload.append(reportResult.getKey())
+            summary.append(reportResult.getKey())
                     .append(": ")
                     .append(reportResult.getValue())
                     .append(";")
@@ -72,10 +72,9 @@ public abstract class TCKTest {
                 overall = TopicConstants.FAIL;
             }
         }
-
         logger.info("OVERALL:{} ", overall);
 
-        payload.append("OVERALL: ")
+        summary.append("OVERALL: ")
                 .append(overall)
                 .append(";")
                 .append(System.lineSeparator());
@@ -84,7 +83,7 @@ public abstract class TCKTest {
         final Publish message = Builders.publish()
                 .topic("SPARKPLUG_TCK/RESULT")
                 .qos(Qos.AT_LEAST_ONCE)
-                .payload(ByteBuffer.wrap(payload.toString().getBytes()))
+                .payload(ByteBuffer.wrap(summary.toString().getBytes()))
                 .build();
         publishService.publish(message);
     }

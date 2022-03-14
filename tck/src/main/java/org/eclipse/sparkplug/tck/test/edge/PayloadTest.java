@@ -87,7 +87,7 @@ public class PayloadTest extends TCKTest {
     }
 
     public String getName() {
-        return "PayloadTest";
+        return "Sparkplug Edge Payload Test";
     }
 
     public String[] getTestIds() {
@@ -180,17 +180,17 @@ public class PayloadTest extends TCKTest {
 
     @SpecAssertion(
             section = Sections.PAYLOADS_B_PAYLOAD,
-            id = ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED)
+            id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
     public void checkSequenceNumberIncluded(final @NotNull PublishPacket packet, String topic) {
-        testIds.add(ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED);
-        logger.debug("Check Req: {} A sequence number MUST be included in the payload of every Sparkplug MQTT message except NDEATH messages.", ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED);
+        testIds.add(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
+        logger.debug("Check Req: {} A sequence number MUST be included in the payload of every Sparkplug MQTT message except NDEATH messages.", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
         boolean isValid = false;
         SparkplugBProto.Payload result = null;
         try {
             result = Utils.parseRaw(packet);
         } catch (InvalidProtocolBufferException e) {
             isValid = false;
-            logger.error("Check req set for : {}:  {}", ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED, e.getMessage());
+            logger.error("Check req set for : {}:  {}", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED, e.getMessage());
         }
 
         if (result != null) {
@@ -200,7 +200,7 @@ public class PayloadTest extends TCKTest {
                 isValid = true;
             }
         }
-        testResults.put(ID_PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED, setResult(isValid, PAYLOAD_SEQUENCE_NUM_ALWAYS_INCLUDED));
+        testResults.put(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED, setResult(isValid, PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED));
     }
 
     @SpecAssertion(

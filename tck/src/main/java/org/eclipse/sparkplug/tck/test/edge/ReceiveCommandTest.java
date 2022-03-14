@@ -89,19 +89,19 @@ public class ReceiveCommandTest extends TCKTest {
     private boolean bNBirth = false, bDBirth = false;
     private PublishService publishService = Services.publishService();
 
-    public ReceiveCommandTest(TCK aTCK, String[] parms) {
-        logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
+    public ReceiveCommandTest(TCK aTCK, String[] params) {
+        logger.info("{} Parameters: {} ", getName(), Arrays.asList(params));
         theTCK = aTCK;
 
-        if (parms.length < 3) {
+        if (params.length < 3) {
             logger.error("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
             return;
         }
         state = status.START;
         deathBdSeq = -1;
-        groupId = parms[0];
-        edgeNodeId = parms[1];
-        deviceId = parms[2];
+        groupId = params[0];
+        edgeNodeId = params[1];
+        deviceId = params[2];
         logger.info("Parameters are  GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
 
         testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1);
@@ -111,7 +111,7 @@ public class ReceiveCommandTest extends TCKTest {
         sendCommand(true);
 
         // indicate we are testing the receipt of NBIRTH and DBIRTH messages after a rebirth command
-        // Dont understand this setting -- ???
+        // set this assertion value to false by default, then track the receipt of both NBIRTH and DBIRTH messages for device attached to an edge node.
         testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2));
 
         // this will fail if we receive a data message
@@ -171,7 +171,6 @@ public class ReceiveCommandTest extends TCKTest {
 
     public void endTest() {
         state = status.END;
-        reportResults(testResults);
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
     }

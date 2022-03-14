@@ -28,5 +28,6 @@ public class TopicConstants {
 
     public static final @NotNull String PASS = "PASS";
     public static final @NotNull String FAIL = "FAIL";
+    public static final @NotNull String EMPTY = "EMPTY";
 
 }
