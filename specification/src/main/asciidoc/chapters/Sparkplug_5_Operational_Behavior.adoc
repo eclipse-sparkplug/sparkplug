@@ -340,7 +340,7 @@ the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, t
 terminate its session with this MQTT Server and move to the next available MQTT Server that is
 available.*#
 
-[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*The
+[tck-testable tck-id-operational-behavior-edge-node-birth-sequence-wait]#[yellow-background]*The
 Edge Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received
 by the Edge Node.*#
 This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
@@ -663,6 +663,6 @@ level command MUST use the DCMD Sparkplug verb.*#
 * [tck-testable tck-id-operational-behavior-data-commands-dcmd-metric-name]#[yellow-background]*A
 DCMD message MUST include a metric name that was included in the associated DBIRTH message for the
 Device.*#
-* [tck-testable tck-id-operational-behavior-data-commands-ncmd-metric-value]#[yellow-background]*A
+* [tck-testable tck-id-operational-behavior-data-commands-dcmd-metric-value]#[yellow-background]*A
 DCMD message MUST include a compatible metric value for the metric name that it is writing to.*#
 ** In other words, if the metric has a datatype of a boolean the value must be true or false.

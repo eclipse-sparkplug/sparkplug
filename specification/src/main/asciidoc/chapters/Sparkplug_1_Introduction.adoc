@@ -319,7 +319,7 @@ Specification.*#
 context of the Edge Node ID under which it exists.
 * Edge Node Descriptor (composite ID)
 ** The Edge Node Descriptor is the combination of the Group ID and Edge Node ID.
-** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Edge Node Descriptor MUST be
+** [tck-testable tck-id-intro-edge-node-id-uniqueness]#[yellow-background]*The Edge Node Descriptor MUST be
 unique within the context of all of other Edge Nodes within the Sparkplug infrastructure.*# In other
 words, no two Edge Nodes within a Sparkplug environment can have the same Group ID and same Edge
 Node ID.
