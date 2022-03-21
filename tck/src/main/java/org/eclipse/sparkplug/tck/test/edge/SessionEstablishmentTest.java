@@ -55,6 +55,13 @@ public class SessionEstablishmentTest extends TCKTest {
 
     private final @NotNull Map<String, String> testResults = new HashMap<>();
 
+    // not found in specification ???
+    public static final String ID_EDGE_SUBSCRIBE_NCMD = "edge-subscribe-ncmd";
+    public static final String EDGE_SUBSCRIBE_NCMD =
+            "Edge node should subscribe to NCMD level topics to ensure Edge node targeted message from the primary host application are delivered";
+    public static final String ID_EDGE_SUBSCRIBE_DCMD = "edge-subscribe-dcmd";
+    public static final String EDGE_SUBSCRIBE_DCMD = "Edge node should subscribe to DCMD level topics to ensure device targeted message from the primary host application are delivered";
+
     private final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
             ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION, ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ,
             ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD, ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN,
@@ -67,7 +74,7 @@ public class SessionEstablishmentTest extends TCKTest {
             ID_TOPICS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ,
             ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME,
             ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE,
-            ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES,  ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
+            ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
             ID_TOPICS_NBIRTH_METRICS, ID_TOPICS_DBIRTH_METRICS);
 
     private final @NotNull TCK theTCK;
@@ -678,18 +685,17 @@ public class SessionEstablishmentTest extends TCKTest {
 
     /**
      * @SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-     * id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT)
+     * id = ID_EDGE_SUBSCRIBE_NCMD)
      * @SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-     * id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE)
+     * id = ID_EDGE_SUBSCRIBE_DCMD)
      **/
     public void checkSubscribeTopics() {
 
-        logger.debug("Check Req: " +
+        logger.debug("Missing in spec - Req: " +
                 "Edge node should subscribe to NCMD level topics to ensure Edge node targeted message from the primary host application are delivered");
         //testResults.put(ID_EDGE_SUBSCRIBE_NCMD, setResult(ncmdFound, EDGE_SUBSCRIBE_NCMD));
         logger.debug("Check Req: " +
                 "Edge node should subscribe to DCMD level topics to ensure device targeted message from the primary host application are delivered");
         //testResults.put(ID_EDGE_SUBSCRIBE_DCMD, setResult(dcmdFound, EDGE_SUBSCRIBE_DCMD));
-
     }
 }

@@ -87,7 +87,7 @@ public class PayloadTest extends TCKTest {
     }
 
     public String getName() {
-        return "PayloadTest";
+        return "Sparkplug Edge Payload Test";
     }
 
     public String[] getTestIds() {

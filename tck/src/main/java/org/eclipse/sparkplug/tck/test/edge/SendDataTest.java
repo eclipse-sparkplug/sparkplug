@@ -23,43 +23,30 @@ package org.eclipse.sparkplug.tck.test.edge;
  *  
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
-
-import org.eclipse.tahu.SparkplugException;
-import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
-import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.MessageType;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.Topic;
-import org.eclipse.tahu.message.model.Metric.MetricBuilder;
-import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
-import org.eclipse.tahu.util.TopicUtil;
-
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.tahu.message.model.Metric;
+import org.eclipse.tahu.message.model.SparkplugBPayload;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.junit.jupiter.api.Test;
+import java.util.*;
+import java.util.function.Predicate;
 
-import java.util.HashMap;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.nio.ByteBuffer;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -68,50 +55,37 @@ public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { "topics-ndata-mqtt", "topics-ndata-seq-num", "topics-ndata-timestamp", "topics-ndata-payload",
-			"topics-ddata-mqtt", "topics-ddata-seq-num", "topics-ddata-timestamp", "topics-ddata-payload",
-			"payloads-ndata-timestamp", "payloads-ndata-seq", "payloads-ndata-qos", "payloads-ndata-retain",
-			"payloads-ddata-timestamp", "payloads-ddata-seq", "payloads-ddata-qos", "payloads-ddata-retain" };
+	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+	String[] testId = {ID_TOPICS_NDATA_MQTT, ID_TOPICS_NDATA_SEQ_NUM, ID_TOPICS_NDATA_TIMESTAMP, ID_TOPICS_NDATA_PAYLOAD,
+			ID_TOPICS_DDATA_MQTT, ID_TOPICS_DDATA_SEQ_NUM, ID_TOPICS_DDATA_TIMESTAMP, ID_TOPICS_DDATA_PAYLOAD,
+			ID_PAYLOADS_NDATA_TIMESTAMP, ID_PAYLOADS_NDATA_SEQ, ID_PAYLOADS_NDATA_QOS, ID_PAYLOADS_NDATA_RETAIN,
+			ID_PAYLOADS_DDATA_TIMESTAMP, ID_PAYLOADS_DDATA_SEQ, ID_PAYLOADS_DDATA_QOS, ID_PAYLOADS_DDATA_RETAIN};
 	private String myClientId = null;
 	private String state = null;
 	private TCK theTCK = null;
-	private String host_application_id = null;
-	private String edge_node_id = null;
-	private String device_id = null;
-	private boolean edge_node_checked = false, device_checked = false;
+	private String hostApplicationId = null;
+	private String edgeNodeId = null;
+	private String deviceId = null;
+	private boolean isEdgeNodeChecked = false, isDeviceChecked = false;
 
-	public SendDataTest(TCK aTCK, String[] parms) {
-		logger.info(getName());
+	public SendDataTest(TCK aTCK, String[] params) {
+		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-
 		testResults = new HashMap<String, String>();
 
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
-
-		if (parms.length < 3) {
-			logger.info("Parameters to edge send data test must be: host_application_id edge_node_id device_id");
+		if (params.length < 3) {
+			logger.error("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
 			return;
 		}
-
-		host_application_id = parms[0];
-		logger.info("Host application id is " + host_application_id);
-
-		edge_node_id = parms[1];
-		logger.info("Edge node id is " + edge_node_id);
-
-		device_id = parms[2];
-		logger.info("Device id is " + device_id);
+		hostApplicationId = params[0];
+		edgeNodeId = params[1];
+		deviceId = params[2];
+		logger.info("Parameters are HostApplicationId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, edgeNodeId, deviceId);
 	}
 
 	public void endTest() {
-		state = null;
-		myClientId = null;
+		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
 	}
 
 	public String getName() {
@@ -119,7 +93,7 @@ public class SendDataTest extends TCKTest {
 	}
 
 	public String[] getTestIds() {
-		return testIds;
+		return testIds.toArray(new String[0]);
 	}
 
 	public HashMap<String, String> getResults() {
@@ -129,13 +103,11 @@ public class SendDataTest extends TCKTest {
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -151,210 +123,184 @@ public class SendDataTest extends TCKTest {
 		String[] levels = packet.getTopic().split("/");
 		if (levels.length >= 3) {
 			cmd = levels[2];
-
 		}
 
-		if (cmd.equals("NDATA")) {
+		if (cmd.equals(TOPIC_PATH_NDATA)) {
 			// namespace/group_id/NDATA/edge_node_id
 			checkNodeData(clientId, packet);
-		} else if (cmd.equals("DDATA")) {
+		} else if (cmd.equals(TOPIC_PATH_DDATA)) {
 			// namespace/group_id/DDATA/edge_node_id/device_id
 			checkDeviceData(clientId, packet);
 		}
 
-		if (edge_node_checked && device_checked) {
+		if (isEdgeNodeChecked && isDeviceChecked) {
 			theTCK.endTest();
 		}
 	}
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDATA,
-			id = "payloads-ndata-timestamp")
+			id = ID_PAYLOADS_NDATA_TIMESTAMP)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDATA,
-			id = "payloads-ndata-seq")
+			id = ID_PAYLOADS_NDATA_SEQ)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDATA,
-			id = "payloads-ndata-qos")
+			id = ID_PAYLOADS_NDATA_QOS)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDATA,
-			id = "payloads-ndata-retain")
+			id = ID_PAYLOADS_NDATA_RETAIN)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDATA,
-			id = "topics-ndata-mqtt")
+			id = ID_TOPICS_NDATA_MQTT)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDATA,
-			id = "topics-ndata-seq-num")
+			id = ID_TOPICS_NDATA_SEQ_NUM)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDATA,
-			id = "topics-ndata-timestamp")
+			id = ID_TOPICS_NDATA_TIMESTAMP)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDATA,
-			id = "topics-ndata-payload")
+			id = ID_TOPICS_NDATA_PAYLOAD)
 	public void checkNodeData(String clientId, PublishPacket packet) {
-		String result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("topics-ndata-mqtt", result);
+		logger.info("Send data test payload::check Edge Node data - Start");
+		logger.debug("Check Req: {} NDATA messages MUST be published with MQTT QoS equal to 0 and retain equal to false.", ID_TOPICS_NDATA_MQTT);
+		testIds.add(ID_TOPICS_NDATA_MQTT);
+		boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
+		testResults.put(ID_TOPICS_NDATA_MQTT, setResult(isValidMQTT, TOPICS_NDATA_MQTT));
 
-		result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE) {
-			result = "PASS";
-		}
-		testResults.put("payloads-ndata-qos", result);
+		logger.debug("Check Req: {} NDATA messages MUST be published with the MQTT QoS set to 0.", ID_PAYLOADS_NDATA_QOS);
+		testIds.add(ID_PAYLOADS_NDATA_QOS);
+		boolean isValidQOS = (packet.getQos() == Qos.AT_MOST_ONCE);
+		testResults.put(ID_PAYLOADS_NDATA_QOS, setResult(isValidQOS, PAYLOADS_NDATA_QOS));
 
-		result = "FAIL";
-		if (packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("payloads-ndata-retain", result);
+		logger.debug("Check Req: {} NDATA messages MUST be published with the MQTT retain flag set to false.", ID_PAYLOADS_NDATA_RETAIN);
+		testIds.add(ID_PAYLOADS_NDATA_RETAIN);
+		boolean isValidNOTRetain = (packet.getRetain() == false);
+		testResults.put(ID_PAYLOADS_NDATA_RETAIN, setResult(isValidNOTRetain, PAYLOADS_NDATA_RETAIN));
 
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
-		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
+		// payload related tests
+		SparkplugBPayload inboundPayload = Utils.extractSparkplugPayload(packet);
+		Boolean[] bValid = checkValidPayload(inboundPayload);
 
-		SparkplugBPayload inboundPayload = null;
-		if (bpayload != null) {
-			try {
-				byte[] array = new byte[bpayload.remaining()];
-				bpayload.get(array);
-				inboundPayload = decoder.buildFromByteArray(array);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		logger.info("Send data test inboundpayload " + inboundPayload);
+		logger.debug("Check Req: {} Every NDATA message MUST include a sequence number.", ID_PAYLOADS_NDATA_SEQ);
+		testIds.add(ID_PAYLOADS_NDATA_SEQ);
+		testResults.put(ID_PAYLOADS_NDATA_SEQ, setResult(bValid[0], PAYLOADS_NDATA_SEQ));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			long seqno = inboundPayload.getSeq();
-			if (seqno >= 0) {
-				result = "PASS";
-			}
-		}
-		testResults.put("topics-ndata-seq-num", result);
-		testResults.put("payloads-ndata-seq", result);
+		logger.debug("Check Req: {} The NDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node " +
+				"contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.", ID_TOPICS_NDATA_SEQ_NUM);
+		testIds.add(ID_TOPICS_NDATA_SEQ_NUM);
+		testResults.put(ID_TOPICS_NDATA_SEQ_NUM, setResult(bValid[1], TOPICS_NDATA_SEQ_NUM));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			Date ts = inboundPayload.getTimestamp();
-			if (ts != null) {
-				result = "PASS";
-			}
-		}
-		testResults.put("topics-ndata-timestamp", result);
-		testResults.put("payloads-ndata-timestamp", result);
+		logger.debug("Check Req: {} The NDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.", ID_TOPICS_NDATA_TIMESTAMP);
+		testIds.add(ID_TOPICS_NDATA_TIMESTAMP);
+		testResults.put(ID_TOPICS_NDATA_TIMESTAMP, setResult(bValid[2], TOPICS_NDATA_TIMESTAMP));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			List<Metric> metrics = inboundPayload.getMetrics();
+		logger.debug("Check Req: {} NDATA messages MUST include a payload timestamp that denotes the time at which the message was published.", ID_PAYLOADS_NDATA_TIMESTAMP);
+		testIds.add(ID_PAYLOADS_NDATA_TIMESTAMP);
+		testResults.put(ID_PAYLOADS_NDATA_TIMESTAMP, setResult(bValid[3], PAYLOADS_NDATA_TIMESTAMP));
+
+		logger.debug("Check Req: {} The NDATA MUST include the Edge Node's metrics that have changed since the last NBIRTH or NDATA message.", ID_TOPICS_NDATA_PAYLOAD);
+		testIds.add(ID_TOPICS_NDATA_PAYLOAD);
+		testResults.put(ID_TOPICS_NDATA_PAYLOAD, setResult(bValid[4], TOPICS_NDATA_PAYLOAD));
+
+		logger.info("Send data test payload::check Edge Node data - {} - Finished",
+				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
+		isEdgeNodeChecked = true;
+	}
+
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_TIMESTAMP)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_SEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_QOS)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_RETAIN)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = ID_TOPICS_DDATA_MQTT)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = ID_TOPICS_DDATA_SEQ_NUM)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = ID_TOPICS_DDATA_TIMESTAMP)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DDATA,
+			id = ID_TOPICS_DDATA_PAYLOAD)
+	public void checkDeviceData(String clientId, PublishPacket packet) {
+		logger.info("Send data test payload::check Device data - Start");
+
+		logger.debug("Check Req: {} DDATA messages MUST be published with MQTT QoS equal to 0 and retain equal to false.", ID_TOPICS_NDATA_MQTT);
+		testIds.add(ID_TOPICS_DDATA_MQTT);
+		boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
+		testResults.put(ID_TOPICS_DDATA_MQTT, setResult(isValidMQTT, TOPICS_DDATA_MQTT));
+
+		logger.debug("Check Req: {} DDATA messages MUST be published with the MQTT QoS set to 0.", ID_PAYLOADS_DDATA_QOS);
+		testIds.add(ID_PAYLOADS_DDATA_QOS);
+		boolean isValidQOS = (packet.getQos() == Qos.AT_MOST_ONCE);
+		testResults.put(ID_PAYLOADS_DDATA_QOS, setResult(isValidQOS, PAYLOADS_DDATA_QOS));
+
+		logger.debug("Check Req: {} DDATA messages MUST be published with the MQTT retain flag set to false.", ID_PAYLOADS_DDATA_RETAIN);
+		testIds.add(ID_PAYLOADS_DDATA_RETAIN);
+		boolean isValidNOTRetain = (packet.getRetain() == false);
+		testResults.put(ID_PAYLOADS_DDATA_RETAIN, setResult(isValidNOTRetain, PAYLOADS_DDATA_RETAIN));
+
+		// payload related tests
+		SparkplugBPayload inboundPayload = Utils.extractSparkplugPayload(packet);
+		Boolean[] bValid = checkValidPayload(inboundPayload);
+
+		logger.debug("Check Req: {} Every DDATA message MUST include a sequence number.", ID_PAYLOADS_DDATA_SEQ);
+		testIds.add(ID_PAYLOADS_DDATA_SEQ);
+		testResults.put(ID_PAYLOADS_DDATA_SEQ, setResult(bValid[0], PAYLOADS_DDATA_SEQ));
+
+		logger.debug("Check Req: {} The DDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node " +
+				"contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.", ID_TOPICS_DDATA_SEQ_NUM);
+		testIds.add(ID_TOPICS_DDATA_SEQ_NUM);
+		testResults.put(ID_TOPICS_DDATA_SEQ_NUM, setResult(bValid[1], TOPICS_DDATA_SEQ_NUM));
+
+		logger.debug("Check Req: {} The DDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.", ID_TOPICS_DDATA_TIMESTAMP);
+		testIds.add(ID_TOPICS_DDATA_TIMESTAMP);
+		testResults.put(ID_TOPICS_DDATA_TIMESTAMP, setResult(bValid[2], TOPICS_DDATA_TIMESTAMP));
+
+		logger.debug("Check Req: {} DDATA messages MUST include a payload timestamp that denotes the time at which the message was published.", ID_PAYLOADS_DDATA_TIMESTAMP);
+		testIds.add(ID_PAYLOADS_DDATA_TIMESTAMP);
+		testResults.put(ID_PAYLOADS_DDATA_TIMESTAMP, setResult(bValid[3], PAYLOADS_DDATA_TIMESTAMP));
+
+		logger.debug("Check Req: {} The DDATA MUST include the Edge Node's metrics that have changed since the last DBIRTH or DDATA message.", ID_TOPICS_DDATA_PAYLOAD);
+		testIds.add(ID_TOPICS_DDATA_PAYLOAD);
+		testResults.put(ID_TOPICS_DDATA_PAYLOAD, setResult(bValid[4], TOPICS_DDATA_PAYLOAD));
+
+		logger.info("Send data test payload::check Device data - {} - Finished",
+				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
+		isDeviceChecked = true;
+	}
+
+	private Boolean[] checkValidPayload(SparkplugBPayload payload) {
+		Boolean[] bValidPayload = new Boolean[]{false, false, false, false, false};
+
+		if (payload != null) {
+			long seqNum = payload.getSeq();
+			Date ts = payload.getTimestamp();
+			bValidPayload[0] = true;
+			bValidPayload[1] = (seqNum >= 0 && seqNum <= 255);
+			bValidPayload[2] = (ts != null);
+			bValidPayload[3] = (ts != null);
+			List<Metric> metrics = payload.getMetrics();
+
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
 				// TODO: Must include metrics that have changed
-				// if (current.getName().equals(edge_metric)) {
-				result = "PASS";
-				// }
+				//if (current.getName().equals(edgeMetric))
+				bValidPayload[4] = true;
 			}
 		}
-		testResults.put("topics-ndata-payload", result);
-		logger.info("Send data test payload " + result);
-		edge_node_checked = true;
+		return bValidPayload;
 	}
-
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DDATA,
-			id = "payloads-ddata-timestamp")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DDATA,
-			id = "payloads-ddata-seq")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DDATA,
-			id = "payloads-ddata-qos")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DDATA,
-			id = "payloads-ddata-retain")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DDATA,
-			id = "topics-ddata-mqtt")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DDATA,
-			id = "topics-ddata-seq-num")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DDATA,
-			id = "topics-ddata-timestamp")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DDATA,
-			id = "topics-ddata-payload")
-	public void checkDeviceData(String clientId, PublishPacket packet) {
-		String result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("topics-ddata-mqtt", result);
-
-		result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE) {
-			result = "PASS";
-		}
-		testResults.put("payloads-ddata-qos", result);
-
-		result = "FAIL";
-		if (packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("payloads-ddata-retain", result);
-
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
-		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
-
-		SparkplugBPayload inboundPayload = null;
-		if (bpayload != null) {
-			try {
-				byte[] array = new byte[bpayload.remaining()];
-				bpayload.get(array);
-				inboundPayload = decoder.buildFromByteArray(array);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		logger.info("Send data test inboundpayload " + inboundPayload);
-
-		result = "FAIL";
-		if (inboundPayload != null) {
-			long seqno = inboundPayload.getSeq();
-			if (seqno >= 0) {
-				result = "PASS";
-			}
-		}
-		testResults.put("topics-ddata-seq-num", result);
-		testResults.put("payloads-ddata-seq", result);
-
-		result = "FAIL";
-		if (inboundPayload != null) {
-			Date ts = inboundPayload.getTimestamp();
-			if (ts != null) {
-				result = "PASS";
-			}
-		}
-		testResults.put("topics-ddata-timestamp", result);
-		testResults.put("payloads-ddata-timestamp", result);
-
-		result = "FAIL";
-		if (inboundPayload != null) {
-			List<Metric> metrics = inboundPayload.getMetrics();
-			ListIterator<Metric> metricIterator = metrics.listIterator();
-			while (metricIterator.hasNext()) {
-				// TODO: Must include metrics that have changed - how do we check that?
-				Metric current = metricIterator.next();
-				// if (current.getName().equals(device_metric)) {
-				result = "PASS";
-				// }
-			}
-		}
-		testResults.put("topics-ddata-payload", result);
-		logger.info("Send data test payload " + result);
-		device_checked = true;
-	}
-
 }
