@@ -670,7 +670,7 @@ MUST be a unsigned 32-bit integer representing the datatype.*#
 array MUST be one of the enumerated values as shown in the
 link:#payloads_b_datatypes_basic[Sparkplug Basic Data Types].*#
 // FIXME: Is this correct?
-[tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*This MUST be included
+[tck-testable tck-id-payloads-dataset-parameter-type-req]#[yellow-background]*This MUST be included
 in DataSet Definitions in NBIRTH and DBIRTH messages.*#
 * *rows*
 ** This is an array of DataSet.Row objects. It contains the data that makes up the data rows of this 

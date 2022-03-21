@@ -67,7 +67,7 @@ public class SessionEstablishmentTest extends TCKTest {
             ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD, ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN,
             ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS, ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ,
             ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH, ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP,
-            ID_PAYLOADS_NBIRTH_REBIRTH_REQ, ID_PAYLOADS_NDEATH_BDSEQ, ID_EDGE_SUBSCRIBE_NCMD, ID_EDGE_SUBSCRIBE_DCMD,
+            ID_PAYLOADS_NBIRTH_REBIRTH_REQ, ID_PAYLOADS_NDEATH_BDSEQ, /*ID_EDGE_SUBSCRIBE_NCMD, ID_EDGE_SUBSCRIBE_DCMD,*/
             ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE, ID_TOPICS_NBIRTH_MQTT, ID_TOPICS_NBIRTH_SEQ_NUM,
             ID_TOPICS_NBIRTH_TIMESTAMP, ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, ID_TOPICS_NBIRTH_BDSEQ_MATCHING,
             ID_TOPICS_NBIRTH_REBIRTH_METRIC, ID_PAYLOADS_DBIRTH_QOS, ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT,
@@ -367,7 +367,7 @@ public class SessionEstablishmentTest extends TCKTest {
             id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE)
 
     @SpecAssertion(
-            section = Sections.PAYLOADS_B_NBIRTH,
+            section = Sections.PAYLOADS_B_METRIC,
             id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
     @SpecAssertion(
             section = Sections.PAYLOADS_B_NBIRTH,
@@ -693,13 +693,9 @@ public class SessionEstablishmentTest extends TCKTest {
 
         logger.debug("Missing in spec - Req: " +
                 "Edge node should subscribe to NCMD level topics to ensure Edge node targeted message from the primary host application are delivered");
-
-        logger.debug("Missing in spec - Req: " +
+        //testResults.put(ID_EDGE_SUBSCRIBE_NCMD, setResult(ncmdFound, EDGE_SUBSCRIBE_NCMD));
+        logger.debug("Check Req: " +
                 "Edge node should subscribe to DCMD level topics to ensure device targeted message from the primary host application are delivered");
-
-        testResults.put(ID_EDGE_SUBSCRIBE_NCMD, setResult(ncmdFound, EDGE_SUBSCRIBE_NCMD));
-        testResults.put(ID_EDGE_SUBSCRIBE_DCMD, setResult(dcmdFound, EDGE_SUBSCRIBE_DCMD));
-
-
+        //testResults.put(ID_EDGE_SUBSCRIBE_DCMD, setResult(dcmdFound, EDGE_SUBSCRIBE_DCMD));
     }
 }
