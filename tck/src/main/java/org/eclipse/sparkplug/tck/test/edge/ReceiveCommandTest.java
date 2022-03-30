@@ -48,12 +48,7 @@ import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.Metric.MetricBuilder;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
+
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -67,6 +62,8 @@ import java.util.function.BiConsumer;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
 @SpecVersion(
         spec = "sparkplug",
@@ -151,10 +148,13 @@ public class ReceiveCommandTest extends TCKTest {
         }
 
         byte[] payload = null;
-        try {
-            payload = new SparkplugBPayloadEncoder().getBytes(new SparkplugBPayloadBuilder()
-                    .addMetric(new MetricBuilder(NODE_CONTROL_REBIRTH, MetricDataType.Boolean, true).createMetric())
-                    .createPayload());
+        try {         
+            payload = Payload.newBuilder().addMetrics(
+            		Metric.newBuilder()
+            			.setName(NODE_CONTROL_REBIRTH)
+            			.setDatatype(DataType.Boolean.getNumber())
+            			.setBooleanValue(true)
+            		).build().toByteArray();
         } catch (Exception e) {
             logger.error("Error building edge node rebirth command. Aborting test. {} ", e.getMessage());
             endTest();
@@ -216,11 +216,11 @@ public class ReceiveCommandTest extends TCKTest {
     }
 
     private long getBdSeq(ByteBuffer payload) {
-        SparkplugBPayload inboundPayload = Utils.decode(payload);
+        PayloadOrBuilder inboundPayload = Utils.decode(payload);
         if (inboundPayload != null) {
-            for (Metric m : inboundPayload.getMetrics()) {
+            for (Metric m : inboundPayload.getMetricsList()) {
                 if (m.getName().equals(BD_SEQ)) {
-                    return (long) m.getValue();
+                    return m.getLongValue();
                 }
             }
         }

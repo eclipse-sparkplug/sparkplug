@@ -61,6 +61,9 @@ public class Requirements {
     public final static String ID_INTRO_DEVICE_ID_CHARS = "intro-device-id-chars";
     public final static String INTRO_DEVICE_ID_CHARS = "Because the Device ID is used in MQTT topic strings the Device ID MUST only contain characters allowed for MQTT topics per the MQTT Specification.";
 
+    public final static String ID_INTRO_EDGE_NODE_ID_UNIQUENESS = "intro-edge-node-id-uniqueness";
+    public final static String INTRO_EDGE_NODE_ID_UNIQUENESS = "The Edge Node Descriptor MUST be unique within the context of all of other Edge Nodes within the Sparkplug infrastructure.";
+
     // 1.4.1.9 Sparkplug Metric
     // 1.5 Normative References
     // 1.6 Security
@@ -357,6 +360,9 @@ public class Requirements {
     public final static String ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK = "operational-behavior-primary-application-state-with-multiple-servers-walk";
     public final static String OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK = "If the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST terminate its session with this MQTT Server and move to the next available MQTT Server that is available.";
 
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT = "operational-behavior-edge-node-birth-sequence-wait";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT = "The Edge Node MUST also wait to publish its BIRTH sequence until an 'ONLINE' STATE message is received by the Edge Node.";
+
     // 5.9 Edge Node NDATA and NCMD Messages
     // 5.10 MQTT Enabled Device Session Establishment
     // 5.11 Sparkplug Host Application Session Establishment
@@ -477,6 +483,9 @@ public class Requirements {
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME = "operational-behavior-data-commands-dcmd-metric-name";
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME = "A DCMD message MUST include a metric name that was included in the associated DBIRTH message for the Device.";
 
+    public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE = "operational-behavior-data-commands-dcmd-metric-value";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE = "A DCMD message MUST include a compatible metric value for the metric name that it is writing to.";
+
     // 6 Payloads
     // 6.1 Overview
     // 6.2 Google Protocol Buffers
@@ -578,8 +587,8 @@ public class Requirements {
     public final static String ID_PAYLOADS_DATASET_TYPES_VALUE = "payloads-dataset-types-value";
     public final static String PAYLOADS_DATASET_TYPES_VALUE = "This values in the types array MUST be one of the enumerated values as shown in the Sparkplug Basic Data Types.";
 
-    public final static String ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ = "payloads-template-parameter-type-req";
-    public final static String PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ = "This MUST be included in DataSet Definitions in NBIRTH and DBIRTH messages.";
+    public final static String ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ = "payloads-dataset-parameter-type-req";
+    public final static String PAYLOADS_DATASET_PARAMETER_TYPE_REQ = "This MUST be included in DataSet Definitions in NBIRTH and DBIRTH messages.";
 
     // 6.4.12 DataSet.Row
     // 6.4.13 DataSet.DataSetValue
@@ -629,6 +638,9 @@ public class Requirements {
 
     public final static String ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE = "payloads-template-parameter-type-value";
     public final static String PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE = "This value MUST be one of the enumerated values as shown in the Sparkplug Basic Data Types.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ = "payloads-template-parameter-type-req";
+    public final static String PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ = "This MUST be included in Template Parameter Definitions in NBIRTH and DBIRTH messages.";
 
     public final static String ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE = "payloads-template-parameter-value";
     public final static String PAYLOADS_TEMPLATE_PARAMETER_VALUE = "The value supplied MUST be one of the following types: uint32, uint64, float, double, bool, or string.";
@@ -851,7 +863,6 @@ public class Requirements {
 
     public final static String ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP = "conformance-mqtt-aware-ndeath-timestamp";
     public final static String CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP = "A Sparkplug Aware MQTT Server MAY replace the timestmap of NDEATH messages. If it does, it MUST set the timestamp to the UTC time at which it attempts to deliver the NDEATH to subscribed clients";
-
 
     // 11 Appendix A: Open Source Software (non-normative)
     // 11.1 OASIS MQTT Specifications
