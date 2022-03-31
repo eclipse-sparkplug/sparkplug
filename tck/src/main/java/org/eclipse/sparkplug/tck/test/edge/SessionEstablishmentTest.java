@@ -26,9 +26,10 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
+
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -253,31 +254,38 @@ public class SessionEstablishmentTest extends TCKTest {
     @SpecAssertion(
             section = Sections.PAYLOADS_B_METRIC,
             id = ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT)
-    public void checkPayloadsNameInDataRequirement(final @NotNull SparkplugBPayload sparkplugPayload) {
+    public void checkPayloadsNameInDataRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
         logger.debug("Check Req: The timestamp MUST be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.");
-        boolean isValid = true;
-        for (Metric m : sparkplugPayload.getMetrics()) {
-            if (m.getTimestamp() == null) {
-                isValid = false;
-                break;
-            }
-        }
+            
+        boolean isValid = true;       
+		List<Metric> metrics = sparkplugPayload.getMetricsList();
+		ListIterator<Metric> metricIterator = metrics.listIterator();
+		while (metricIterator.hasNext()) {
+			Metric current = metricIterator.next();
+			if (!current.hasTimestamp()) {
+				isValid = false;
+				break;
+			}
+		}
         testResults.put(ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT, setResult(isValid, PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT));
     }
 
     @SpecAssertion(
             section = Sections.PAYLOADS_B_METRIC,
             id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
-    public void checkPayloadsAliasAndNameRequirement(final @NotNull SparkplugBPayload sparkplugPayload) {
-        logger.debug("Check Req: " + "NBIRTH and DBIRTH messages MUST include both a metric name and alias.");
-        boolean isValid = false;
-        for (Metric m : sparkplugPayload.getMetrics()) {
-            if (!m.getIsNull()
-                    && (!m.getName().isEmpty() && !m.getName().isBlank() && !m.hasAlias())) {
-                isValid = true;
-                break;
-            }
-        }
+    public void checkPayloadsAliasAndNameRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {  	
+        logger.debug("Check Req: " + "if alias is included, NBIRTH and DBIRTH messages MUST include both a metric name and alias.");
+        
+        boolean isValid = true;       
+		List<Metric> metrics = sparkplugPayload.getMetricsList();
+		ListIterator<Metric> metricIterator = metrics.listIterator();
+		while (metricIterator.hasNext()) {
+			Metric current = metricIterator.next();
+			if (current.hasAlias() && !current.hasName()) {
+				isValid = false;
+				break;
+			}
+		}
         testResults.put(ID_PAYLOADS_NAME_REQUIREMENT, setResult(isValid, PAYLOADS_ALIAS_BIRTH_REQUIREMENT));
     }
 
@@ -307,12 +315,13 @@ public class SessionEstablishmentTest extends TCKTest {
             boolean bValid = (willPublishPacket.getQos().getQosNumber() == 1);
             testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, setResult(bValid, PAYLOADS_NDEATH_WILL_MESSAGE_QOS));
 
-            SparkplugBPayload sparkplugPayload = Utils.extractSparkplugPayload(willPublishPacket);
-            if (sparkplugPayload != null && sparkplugPayload.getMetrics() != null) {
-                List<Metric> metrics = sparkplugPayload.getMetrics();
+            PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(willPublishPacket);
+                                  
+            if (sparkplugPayload != null && sparkplugPayload.getMetricsList() != null) {
+                List<Metric> metrics = sparkplugPayload.getMetricsList();
                 for (Metric m : metrics) {
-                    if (m.getName().equals("bdSeq") && m.getValue() != null) {
-                        deathBdSeq = (Long) m.getValue();
+                    if (m.getName().equals("bdSeq") && m.hasLongValue()) {
+                        deathBdSeq = m.getLongValue();
                         break;
                     }
                 }
@@ -421,7 +430,7 @@ public class SessionEstablishmentTest extends TCKTest {
         logger.debug("Check Req: NBIRTH retained flag must be false.");
         testResults.put(ID_PAYLOADS_NBIRTH_RETAIN, setResult(!packet.getRetain(), PAYLOADS_NBIRTH_RETAIN));
 
-        SparkplugBPayload sparkplugPayload = Utils.extractSparkplugPayload(packet);
+        PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
         if (sparkplugPayload != null) {
             logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
             logger.debug("Check Req: Every NBIRTH message MUST include a sequence number and it MUST have a value of 0.");
@@ -433,38 +442,35 @@ public class SessionEstablishmentTest extends TCKTest {
             // receivedBirthTime::making sure that the payload timestamp is greater than (receivedBirthTime - 5 min) and less than the
             logger.debug("Check Req: NBIRTH messages MUST include a payload timestamp that denotes the time at which the message was published.");
             boolean bHasTimeStamp = false;
-            Date ts = sparkplugPayload.getTimestamp();
-            if (ts != null) {
-                long millisPayload = ts.getTime();
-                bHasTimeStamp = (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth));
-
+            if (sparkplugPayload.hasTimestamp()) {
+            	long ts = sparkplugPayload.getTimestamp();
+                bHasTimeStamp = (ts > millisPastFiveMin && ts < (millisReceivedBirth));
             }
             testResults.put(ID_PAYLOADS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, PAYLOADS_NBIRTH_TIMESTAMP));
             testResults.put(ID_TOPICS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, TOPICS_NBIRTH_TIMESTAMP));
-
 
             logger.debug("Check Req: NBIRTH must include a bdSeq");
             boolean rebirthFound = false;
             boolean bdSeqFound = false;
             boolean rebirthVal = true;
-            MetricDataType datatype = null;
-            List<Metric> metrics = sparkplugPayload.getMetrics();
+            DataType datatype = null;
+            List<Metric> metrics = sparkplugPayload.getMetricsList();
             for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
 					bdSeqFound = true;
-					birthBdSeq = (long) m.getValue();
+					birthBdSeq = m.getLongValue();
 				} else if (m.getName().equals("Node Control/Rebirth")) {
 					rebirthFound = true;
-					datatype = m.getDataType();
-					rebirthVal = (boolean) m.getValue();
+					datatype = DataType.valueOf(m.getDatatype());
+					rebirthVal = m.getBooleanValue();
 				}
 
-                if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
+                if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
 					testResults.put(ID_TOPICS_NBIRTH_METRICS, setResult(false, TOPICS_NBIRTH_METRICS));
 				} else if (testResults.get(ID_TOPICS_NBIRTH_METRICS) == null) {
 					testResults.put(ID_TOPICS_NBIRTH_METRICS, setResult(true, TOPICS_NBIRTH_METRICS));
 				}
-				if (m.getValue() == null) {
+				if (!Utils.hasValue(m)) {
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES, setResult(false, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES));
 				} else {
 					if (testResults.get(ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES) == null) {
@@ -499,11 +505,11 @@ public class SessionEstablishmentTest extends TCKTest {
             testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME, setResult(rebirthFound, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME));
 
             logger.debug("Check Req: The 'Node Control/Rebirth' metric in the NBIRTH message MUST have a datatype of 'Boolean'.");
-            boolean bIsBoolean = (rebirthFound && datatype == MetricDataType.Boolean);
+            boolean bIsBoolean = (rebirthFound && datatype == DataType.Boolean);
             testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE, setResult(bIsBoolean, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE));
 
             logger.debug("Check Req: NBIRTH 'node control/rebirth' metric must == false.");
-            boolean bRebirthMetric = (rebirthFound && datatype == MetricDataType.Boolean && !rebirthVal);
+            boolean bRebirthMetric = (rebirthFound && datatype == DataType.Boolean && !rebirthVal);
             testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE, setResult(bRebirthMetric, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE));
 
             checkPayloadsNameInDataRequirement(sparkplugPayload);
@@ -578,7 +584,7 @@ public class SessionEstablishmentTest extends TCKTest {
             }
         }
 
-        SparkplugBPayload sparkplugPayload = Utils.extractSparkplugPayload(packet);
+        PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
         if (sparkplugPayload != null) {
 
             // making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the
@@ -587,8 +593,8 @@ public class SessionEstablishmentTest extends TCKTest {
             prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_TIMESTAMP, "");
             boolean bValid = false;
             if (!prevResult.contains(FAIL)) {
-                if (sparkplugPayload.getTimestamp() != null) {
-                    long millisPayload = sparkplugPayload.getTimestamp().getTime();
+                if (!sparkplugPayload.hasTimestamp()) {
+                    long millisPayload = sparkplugPayload.getTimestamp();
                     bValid = (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth));
                 }
                 if (prevResult.equals("")) {
@@ -631,7 +637,7 @@ public class SessionEstablishmentTest extends TCKTest {
             if (testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ) == null
                     || testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(PASS)) {
                 logger.debug("Check req: The datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.");
-                List<Metric> metrics = sparkplugPayload.getMetrics();
+                List<Metric> metrics = sparkplugPayload.getMetricsList();
                 int hasDataTypeCnt = countDataType(metrics);
                 testResults.put(ID_PAYLOADS_METRIC_DATATYPE_REQ, setResult(hasDataTypeCnt == metrics.size(), PAYLOADS_METRIC_DATATYPE_REQ));
             }
@@ -641,15 +647,15 @@ public class SessionEstablishmentTest extends TCKTest {
             checkPayloadsAliasAndNameRequirement(sparkplugPayload);
 
 
-            List<Metric> metrics = sparkplugPayload.getMetrics();
+            List<Metric> metrics = sparkplugPayload.getMetricsList();
             for (Metric m : metrics) {
-                if (m.getName() == null || m.getValue() == null || m.getDataType() == null) {
+                if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
                     testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(false, TOPICS_DBIRTH_METRICS));
                 } else if (testResults.get(ID_TOPICS_DBIRTH_METRICS) == null) {
                     testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(true, TOPICS_DBIRTH_METRICS));
                 }
 
-                if (m.getValue() == null) {
+                if (!Utils.hasValue(m)) {
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES, setResult(false, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES));
 				} else {
 					if (testResults.get(ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES) == null) {
@@ -674,7 +680,7 @@ public class SessionEstablishmentTest extends TCKTest {
         if (metrics != null) {
             final AtomicInteger hasDataTypeCnt = new AtomicInteger();
             metrics.forEach(m -> {
-                if (m.getDataType() != null) {
+                if (m.hasDatatype()) {
                     hasDataTypeCnt.incrementAndGet();
                 }
             });

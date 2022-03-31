@@ -42,20 +42,8 @@ import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.*;
 
-import org.eclipse.tahu.SparkplugException;
-import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
-import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.MessageType;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.Topic;
-import org.eclipse.tahu.message.model.Metric.MetricBuilder;
-import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
-import org.eclipse.tahu.util.TopicUtil;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
@@ -305,15 +293,14 @@ public class SendCommandTest extends TCKTest {
 		}
 		testResults.put("payloads-ncmd-retain", result);
 
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
 
-		SparkplugBPayload inboundPayload = null;
+		PayloadOrBuilder inboundPayload = null;
 		if (bpayload != null) {
 			try {
 				byte[] array = new byte[bpayload.remaining()];
 				bpayload.get(array);
-				inboundPayload = decoder.buildFromByteArray(array);
+				inboundPayload = Payload.parseFrom(array);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -322,8 +309,7 @@ public class SendCommandTest extends TCKTest {
 
 		result = "FAIL";
 		if (inboundPayload != null) {
-			Date ts = inboundPayload.getTimestamp();
-			if (ts != null) {
+			if (inboundPayload.hasTimestamp()) {
 				result = "PASS";
 			}
 		}
@@ -332,8 +318,7 @@ public class SendCommandTest extends TCKTest {
 
 		result = "FAIL";
 		if (inboundPayload != null) {
-			long seqno = inboundPayload.getSeq();
-			if (seqno < 0) {
+			if (!inboundPayload.hasSeq()) {
 				result = "PASS";
 			}
 		}
@@ -341,7 +326,7 @@ public class SendCommandTest extends TCKTest {
 
 		result = "FAIL";
 		if (inboundPayload != null) {
-			List<Metric> metrics = inboundPayload.getMetrics();
+			List<Metric> metrics = inboundPayload.getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
@@ -351,8 +336,8 @@ public class SendCommandTest extends TCKTest {
 				if (current.getName().equals("Node Control/Rebirth")) {
 					testResults.put("operational-behavior-data-commands-ncmd-rebirth-verb", "PASS");
 					testResults.put("operational-behavior-data-commands-ncmd-rebirth-name", "PASS");
-					if (current.getDataType() == org.eclipse.tahu.message.model.MetricDataType.Boolean) {
-						boolean value = (boolean)current.getValue();	
+					if (current.getDatatype() == DataType.Boolean.getNumber()) {
+						boolean value = current.getBooleanValue();	
 						if (value) {
 							testResults.put("operational-behavior-data-commands-ncmd-rebirth-value", "PASS");		
 						}
@@ -409,15 +394,14 @@ public class SendCommandTest extends TCKTest {
 		}
 		testResults.put("payloads-dcmd-retain", result);
 
-		SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
 		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
 
-		SparkplugBPayload inboundPayload = null;
+		PayloadOrBuilder inboundPayload = null;
 		if (bpayload != null) {
 			try {
 				byte[] array = new byte[bpayload.remaining()];
 				bpayload.get(array);
-				inboundPayload = decoder.buildFromByteArray(array);
+				inboundPayload = Payload.parseFrom(array);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -426,8 +410,7 @@ public class SendCommandTest extends TCKTest {
 
 		result = "FAIL";
 		if (inboundPayload != null) {
-			Date ts = inboundPayload.getTimestamp();
-			if (ts != null) {
+			if (inboundPayload.hasTimestamp()) {
 				result = "PASS";
 			}
 		}
@@ -436,8 +419,7 @@ public class SendCommandTest extends TCKTest {
 
 		result = "FAIL";
 		if (inboundPayload != null) {
-			long seqno = inboundPayload.getSeq();
-			if (seqno < 0) {
+			if (!inboundPayload.hasSeq()) {
 				result = "PASS";
 			}
 		}
@@ -446,7 +428,7 @@ public class SendCommandTest extends TCKTest {
 		// Check for metric Inputs/0
 		result = "FAIL";
 		if (inboundPayload != null) {
-			List<Metric> metrics = inboundPayload.getMetrics();
+			List<Metric> metrics = inboundPayload.getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();

@@ -72,6 +72,7 @@ dependencies {
     compileOnly("org.slf4j:slf4j-api:${property("slf4j.version")}")
     implementation("org.slf4j:slf4j-simple:${property("slf4j.version")}")
     implementation("log4j:log4j:${property("log4j.version")}")
+    implementation("com.google.protobuf:protobuf-java:${property("protobuf.version")}")
 
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${property("paho.version")}")
     implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")

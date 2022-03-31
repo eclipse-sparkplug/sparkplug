@@ -33,8 +33,10 @@ import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
+
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -180,7 +182,7 @@ public class SendDataTest extends TCKTest {
 		testResults.put(ID_PAYLOADS_NDATA_RETAIN, setResult(isValidNOTRetain, PAYLOADS_NDATA_RETAIN));
 
 		// payload related tests
-		SparkplugBPayload inboundPayload = Utils.extractSparkplugPayload(packet);
+		PayloadOrBuilder inboundPayload = Utils.getSparkplugPayload(packet);
 		Boolean[] bValid = checkValidPayload(inboundPayload);
 
 		logger.debug("Check Req: {} Every NDATA message MUST include a sequence number.", ID_PAYLOADS_NDATA_SEQ);
@@ -252,7 +254,7 @@ public class SendDataTest extends TCKTest {
 		testResults.put(ID_PAYLOADS_DDATA_RETAIN, setResult(isValidNOTRetain, PAYLOADS_DDATA_RETAIN));
 
 		// payload related tests
-		SparkplugBPayload inboundPayload = Utils.extractSparkplugPayload(packet);
+		PayloadOrBuilder inboundPayload = Utils.getSparkplugPayload(packet);
 		Boolean[] bValid = checkValidPayload(inboundPayload);
 
 		logger.debug("Check Req: {} Every DDATA message MUST include a sequence number.", ID_PAYLOADS_DDATA_SEQ);
@@ -281,17 +283,16 @@ public class SendDataTest extends TCKTest {
 		isDeviceChecked = true;
 	}
 
-	private Boolean[] checkValidPayload(SparkplugBPayload payload) {
+	private Boolean[] checkValidPayload(PayloadOrBuilder payload) {
 		Boolean[] bValidPayload = new Boolean[]{false, false, false, false, false};
 
 		if (payload != null) {
 			long seqNum = payload.getSeq();
-			Date ts = payload.getTimestamp();
 			bValidPayload[0] = true;
 			bValidPayload[1] = (seqNum >= 0 && seqNum <= 255);
-			bValidPayload[2] = (ts != null);
-			bValidPayload[3] = (ts != null);
-			List<Metric> metrics = payload.getMetrics();
+			bValidPayload[2] = payload.hasTimestamp();
+			bValidPayload[3] = payload.hasTimestamp();
+			List<Metric> metrics = payload.getMetricsList();
 
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
