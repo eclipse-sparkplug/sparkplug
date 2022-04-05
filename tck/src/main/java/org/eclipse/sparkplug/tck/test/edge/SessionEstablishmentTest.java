@@ -24,12 +24,11 @@ import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;

@@ -45,6 +45,8 @@ import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder
 import org.eclipse.tahu.message.model.Template.TemplateBuilder;
 import org.eclipse.tahu.util.CompressionAlgorithm;
 import org.eclipse.tahu.util.PayloadUtil;
+
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
 import static org.eclipse.tahu.message.model.MetricDataType.*;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
@@ -78,7 +80,6 @@ public class Device {
 	private static final String SW_VERSION = "v1.0.0";
 	private String namespace = "spBv1.0";
 	private String brokerURI = "tcp://localhost:1883";
-	private String log_topic_name = "SPARKPLUG_TCK/LOG";
 	
 	private String controlId = "Sparkplug TCK device utility"; 
 	private MqttClient control = null;
@@ -116,22 +117,22 @@ public class Device {
 	public void run(String[] args) {
 		System.out.println("*** Sparkplug TCK Device and Edge Node Utility ***");
 		try {
-			
+
 			MqttConnectOptions options = new MqttConnectOptions();
 			options.setAutomaticReconnect(true);
 			options.setCleanSession(true);
 			options.setConnectionTimeout(30);
 			options.setKeepAliveInterval(30);
-			
+
 			control = new MqttClient(brokerURI, controlId);
-		    control_listener = new MessageListener();
-		    control.setCallback(control_listener);
-			log_topic = control.getTopic(log_topic_name);
+			control_listener = new MessageListener();
+			control.setCallback(control_listener);
+			log_topic = control.getTopic(TCK_LOG_TOPIC);
 			control.connect(options);
 			log("starting");
 			//control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
 			while (true) {
-				MqttMessage msg = control_listener.getNextMessage();			
+				MqttMessage msg = control_listener.getNextMessage();
 				if (msg != null) {
 					String[] words = msg.toString().split(" ");
 					if (words.length == 6 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("DEVICE")) {

@@ -238,27 +238,22 @@ export default {
           this.createTestRequest(profile, testType, testParameters);
         } else if (testType === "SessionTerminationTest") {
           const testParameters =
-            this.sparkplugClient.hostApplication.hostId +
-            " " +
-            testParameter.parameters["client_id"].parameterValue;
+              this.sparkplugClient.hostApplication.hostId +
+              " " + testParameter.parameters["client_id"].parameterValue;
           this.createTestRequest(profile, testType, testParameters);
         } else if (testType === "SendCommandTest") {
-          const testParameters =
-            this.sparkplugClient.hostApplication.hostId +
-             " " +
-            testParameter.parameters["group_id"].parameterValue +
-            " " +
-            testParameter.parameters["edge_node_id"].parameterValue +
-            " " +
-            testParameter.parameters["device_id"].parameterValue;
+            const testParameters =
+                this.sparkplugClient.hostApplication.hostId +
+                " " + testParameter.parameters["group_id"].parameterValue +
+                " " + testParameter.parameters["edge_node_id"].parameterValue +
+                " " + testParameter.parameters["device_id"].parameterValue;
           this.createTestRequest(profile, testType, testParameters);
         }  else if (testType === "ReceiveDataTest") {
-          const testParameters =
-            this.sparkplugClient.hostApplication.hostId +
-            " " +
-            testParameter.parameters["edge_node_id"].parameterValue +
-            " " +
-            testParameter.parameters["device_id"].parameterValue;
+            const testParameters =
+                this.sparkplugClient.hostApplication.hostId +
+                " " + testParameter.parameters["group_id"].parameterValue +
+                " " + testParameter.parameters["edge_node_id"].parameterValue +
+                " " + testParameter.parameters["device_id"].parameterValue;
           this.createTestRequest(profile, testType, testParameters);
         } else {
           alert("Test does not exist");
@@ -269,30 +264,22 @@ export default {
         if (testType === "SessionEstablishmentTest") {
             const testParameters =
                 this.sparkplugClient.hostApplication.hostId +
-                " " +
-                this.sparkplugClient.eonNode.groupId +
-                " " +
-                this.sparkplugClient.eonNode.edgeNodeId +
-                " " +
-                testParameter.parameters["device_ids"].parameterValue;
+                " " + this.sparkplugClient.eonNode.groupId +
+                " " + this.sparkplugClient.eonNode.edgeNodeId +
+                " " + testParameter.parameters["device_ids"].parameterValue;
             this.createTestRequest(profile, testType, testParameters);
         } else if (testType === "SendDataTest" || testType === "PayloadTest") {
             const testParameters =
                 this.sparkplugClient.hostApplication.hostId +
-                " " +
-                this.sparkplugClient.eonNode.groupId +
-                " " +
-                this.sparkplugClient.eonNode.edgeNodeId +
-                " " +
-                testParameter.parameters["device_id"].parameterValue;
+                " " + this.sparkplugClient.eonNode.groupId +
+                " " + this.sparkplugClient.eonNode.edgeNodeId +
+                " " + testParameter.parameters["device_id"].parameterValue;
             this.createTestRequest(profile, testType, testParameters);
         } else if (testType === "ReceiveCommandTest") {
-          const testParameters =
-            this.sparkplugClient.eonNode.groupId +
-            " " +
-            this.sparkplugClient.eonNode.edgeNodeId +
-            " " +
-            testParameter.parameters["device_id"].parameterValue;
+            const testParameters =
+                this.sparkplugClient.eonNode.groupId +
+                " " + this.sparkplugClient.eonNode.edgeNodeId +
+                " " + testParameter.parameters["device_id"].parameterValue;
           this.createTestRequest(profile, testType, testParameters);
         } else{
           alert("Test does not exist");
