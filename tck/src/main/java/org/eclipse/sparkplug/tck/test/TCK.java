@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 
 import org.eclipse.sparkplug.tck.test.Monitor;
 
@@ -37,6 +38,7 @@ public class TCK {
 
 	private @Nullable TCKTest current = null;
 	private final Monitor monitor = new Monitor();
+	private final MQTTListener listener = new MQTTListener();
 
 	public void newTest(final @NotNull String profile, final @NotNull String test, final @NotNull String[] parms) {
 
@@ -49,6 +51,8 @@ public class TCK {
 
 			final Object[] parameters = { this, parms };
 			current = (TCKTest) constructor.newInstance(parameters);
+			monitor.startTest();
+			listener.run(new String[0]);
 		} catch (final Exception e) {
 			logger.error("Could not find or set test class " + profile + "." + test, e);
 		}
@@ -57,8 +61,13 @@ public class TCK {
 	public void endTest() {
 		if (current != null) {
 			logger.info("Test end requested for " + current.getName());
+			HashMap<String, String> testResults = monitor.getResults();
+			testResults.putAll(listener.getResults());
+			current.endTest(testResults);
 			current.endTest();
 			current = null;
+			monitor.endTest();
+			listener.clearResults();
 		} else {
 			logger.info("Test end requested but no test active");
 		}

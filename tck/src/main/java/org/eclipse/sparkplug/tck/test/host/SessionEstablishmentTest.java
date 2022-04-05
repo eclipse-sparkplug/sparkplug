@@ -22,8 +22,11 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.MQTTListener;
+import org.eclipse.sparkplug.tck.test.Monitor;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -105,8 +108,13 @@ public class SessionEstablishmentTest extends TCKTest {
 	}
 
 	@Override
-	public void endTest() {
+	public void endTest(Map<String, String> results) {
+		testResults.putAll(results);
 		reportResults(testResults);
+	}
+
+	@Override
+	public void endTest() {
 	}
 
 	@Override
@@ -123,19 +131,34 @@ public class SessionEstablishmentTest extends TCKTest {
 		return testResults;
 	}
 
+	private boolean isHostApplication(final @NotNull ConnectPacket packet) {
+		final Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			final WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+
+			// Topic is STATE/{host_application_id}
+			if (willPublishPacket.getTopic().equals("STATE/" + hostApplicationId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
-		logger.info("Primary host session establishment test - connect");
+		if (isHostApplication(packet)) {
+			logger.info("Primary host session establishment test - connect");
 
-		boolean overallPass = checkConnectMessage(packet);
-		overallPass = overallPass && checkDeathMessage(packet);
+			boolean overallPass = checkConnectMessage(packet);
+			overallPass = overallPass && checkDeathMessage(packet);
 
-		if (overallPass) {
-			hostClientId = clientId;
-			state = HostState.CONNECTED;
-		} else {
-			logger.error("Test failed on connect.");
-			theTCK.endTest();
+			if (overallPass) {
+				hostClientId = clientId;
+				state = HostState.CONNECTED;
+			} else {
+				logger.error("Test failed on connect.");
+				theTCK.endTest();
+			}
 		}
 	}
 
@@ -149,12 +172,12 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
 			id = "message-flow-phid-sparkplug-subscription")
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
-		logger.info("Primary host session establishment test - subscribe");
-
 		// ignore messages before connect
 		if (hostClientId == null) {
 			return;
 		}
+
+		logger.info("Primary host session establishment test - subscribe");
 
 		if (hostClientId.equals(clientId)) {
 			// Subscribe is after connect (and allow additional subscriptions)
@@ -194,14 +217,14 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.COMPONENTS_SPARKPLUG_HOST_APPLICATION,
 			id = "components-ph-state")
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
-		logger.info("Primary host session establishment test - publish");
-
 		// ignore messages before connect
 		if (hostClientId == null) {
 			return;
 		}
 
 		if (hostClientId.equals(clientId)) {
+			logger.info("Primary host session establishment test - publish");
+
 			// Check if subscribe completed
 			checkSubscribes(true);
 
@@ -231,15 +254,15 @@ public class SessionEstablishmentTest extends TCKTest {
 			// TODO: test reconnect
 			testResults.put("components-ph-state", PASS);
 			testResults.put("intro-sparkplug-host-state", PASS);
+
+			// TODO: now we can disconnect the client and allow it to reconnect and go throught the
+			// session re-establishment phases. It would be nice to be able to do this at after a
+			// short arbitrary interval, but I haven't worked out a good way of doing that yet (assuming
+			// that a sleep here is not a good idea). Using a PING interceptor could be one way but
+			// we probably can't rely on any particular keepalive interval values.
+
+			theTCK.endTest();
 		}
-
-		// TODO: now we can disconnect the client and allow it to reconnect and go throught the
-		// session re-establishment phases. It would be nice to be able to do this at after a
-		// short arbitrary interval, but I haven't worked out a good way of doing that yet (assuming
-		// that a sleep here is not a good idea). Using a PING interceptor could be one way but
-		// we probably can't rely on any particular keepalive interval values.
-
-		theTCK.endTest();
 	}
 
 	@SpecAssertion(

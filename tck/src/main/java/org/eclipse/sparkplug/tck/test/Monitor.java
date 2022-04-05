@@ -36,21 +36,6 @@ import com.hivemq.extension.sdk.api.services.publish.*;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.parameters.*;
 
-import org.eclipse.tahu.SparkplugException;
-import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
-import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.MessageType;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.Topic;
-import org.eclipse.tahu.message.model.Metric.MetricBuilder;
-import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
-import org.eclipse.tahu.util.TopicUtil;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
@@ -94,16 +79,21 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	public Monitor() {
 		logger.info("Sparkplug message monitor 1.0");
 
+		clearResults();
+	}
+
+	public void clearResults() {
 		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
+			testResults.put(testIds[i], "PASS");
 		}
 	}
 
+	public void startTest() {
+		clearResults();
+	}
+
 	public void endTest() {
-		reportResults(testResults);
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
+		clearResults();
 	}
 
 	public String getName() {
@@ -115,7 +105,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	public HashMap<String, String> getResults() {
-		return testResults;
+		HashMap labelledResults = new HashMap<String, String>();
+		for (int i = 0; i < testIds.length; ++i) {
+			labelledResults.put("Monitor:" + testIds[i], testResults.get(testIds[i]));
+		}
+		return labelledResults;
 	}
 
 	@Override
