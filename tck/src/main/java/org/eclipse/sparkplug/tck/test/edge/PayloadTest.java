@@ -13,7 +13,6 @@
  */
 package org.eclipse.sparkplug.tck.test.edge;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
@@ -22,8 +21,11 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -36,10 +38,7 @@ import java.util.Map;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
-import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
 /**
  * This is the edge node Sparkplug payload validation.
@@ -182,10 +181,10 @@ public class PayloadTest extends TCKTest {
             section = Sections.PAYLOADS_B_PAYLOAD,
             id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
     public void checkSequenceNumberIncluded(final @NotNull PublishPacket packet, String topic) {
-        testIds.add(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
         logger.debug("Check Req: {} A sequence number MUST be included in the payload of every Sparkplug MQTT message except NDEATH messages.", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
+        testIds.add(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
         boolean isValid = false;
-        PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
+        final PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
         if (result == null) {
             isValid = false;
             logger.error("Check req set for : {}", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
@@ -434,7 +433,7 @@ public class PayloadTest extends TCKTest {
     public void checkPayloadsTimestampCommand(final @NotNull PayloadOrBuilder sparkplugPayload, String topic) {
         testIds.add(ID_PAYLOADS_NAME_CMD_REQUIREMENT);
         logger.debug("Check Req: The timestamp MAY be included with metrics in NCMD and DCMD messages.");
-        boolean isValid = false;
+        boolean isValid = true;
         if (topic.contains(TOPIC_PATH_NCMD) || topic.contains(TOPIC_PATH_DCMD)) {
             for (Metric m : sparkplugPayload.getMetricsList()) {
                 if (!m.hasTimestamp()) {

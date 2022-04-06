@@ -4,7 +4,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -14,431 +14,384 @@
 package org.eclipse.sparkplug.tck.test.host;
 
 /*
- * This is the primary host Sparkplug send command test: 
- * 
+ * This is the primary host Sparkplug send command test:
+ *
  * to check that a command from a primary host under test is correct to both an
  * edge node (NCMD) and a device (DCMD).
- * 
- * There will be a prompt to the person executing the test to send a command to 
+ *
+ * There will be a prompt to the person executing the test to send a command to
  * a device and edge node we will connect.
- * 
+ *
  * The host application under test must be connected and online prior to starting this test.
  * The id of the host application must be passed as the first parameter to this test.
  * The second parameter is the id of the edge node to be used.
  * The third parameter is the id of the device to be used.
- * 
+ *
+ * @author Ian Craggs, Anja Helmbrecht-Schaar
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extension.sdk.api.services.publish.*;
-
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.common.Utils.TestStatus;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.nio.ByteBuffer;
-import java.util.concurrent.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_CONSOLE_PROMPT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(
-		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+        spec = "sparkplug",
+        version = "3.0.0-SNAPSHOT")
 public class SendCommandTest extends TCKTest {
 
-	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { "topics-ncmd-mqtt", "topics-ncmd-timestamp", "topics-ncmd-payload", "payloads-ncmd-timestamp",
-			"payloads-ncmd-seq", "payloads-ncmd-qos", "payloads-ncmd-retain", "topics-dcmd-mqtt",
-			"topics-dcmd-timestamp", "topics-dcmd-payload", "payloads-dcmd-timestamp", "payloads-dcmd-seq",
-			"payloads-dcmd-qos", "payloads-dcmd-retain", "operational-behavior-data-commands-ncmd-verb",
-			"operational-behavior-data-commands-dcmd-verb", "operational-behavior-data-commands-ncmd-rebirth-verb",
-			"operational-behavior-data-commands-ncmd-rebirth-name",  "operational-behavior-data-commands-ncmd-rebirth-value" };
-	private String myClientId = null;
-	private String state = null;
-	private TCK theTCK = null;
-	private String host_application_id = null;
-	private String group_id = null;
-	private String edge_node_id = null;
-	private String edge_metric = "TCK_metric/Boolean";
-	private String device_id = null;
-	private String device_metric = "Inputs/0";
-	private PublishService publishService = Services.publishService();
+    private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
+    private static final String EDGE_METRIC = "TCK_metric/Boolean";
+    private static final String DEVICE_METRIC = "Inputs/0";
 
-	public SendCommandTest(TCK aTCK, String[] parms) {
-		logger.info("Primary host send command test");
-		theTCK = aTCK;
+    private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
+    private final @NotNull Map<String, String> testResults = new HashMap<>();
+    private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+    private @NotNull String deviceId;
+    private @NotNull String groupId;
+    private @NotNull String edgeNodeId;
+    private @NotNull String hostApplicationId;
 
-		testResults = new HashMap<String, String>();
+    private TestStatus state = null;
+    private TCK theTCK = null;
 
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
+    private PublishService publishService = Services.publishService();
 
-		if (parms.length < 4) {
-			logger.info("Parameters to send command test must be: host_application_id group_id edge_node_id device_id");
-			String msg = "Message was: ";
-			for (int i = 0; i < parms.length; ++i) {
-				msg += parms[i] + " ";
-			}
-			logger.info(msg);
-			return;
-		}
-		host_application_id = parms[0];
-		logger.info("Host application id is " + host_application_id);
+    public SendCommandTest(TCK aTCK, String[] params) {
+        logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
+        theTCK = aTCK;
 
-		boolean host_online = false;
-		String topic = "STATE/" + host_application_id;
-		// Check that the host application status is ONLINE, ready for the test
-		final CompletableFuture<Optional<RetainedPublish>> getFuture =
-				Services.retainedMessageStore().getRetainedMessage(topic);
+        if (params.length < 4) {
+            logger.error("Parameters to host send command test must be: hostApplicationId, groupId edgeNodeId deviceId");
+            return;
+        }
+        hostApplicationId = params[0];
+        groupId = params[1];
+        edgeNodeId = params[2];
+        deviceId = params[3];
+        logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId, edgeNodeId, deviceId);
 
-		try {
-			Optional<RetainedPublish> retainedPublishOptional = getFuture.get();
-			if (retainedPublishOptional.isPresent()) {
-				final RetainedPublish retainedPublish = retainedPublishOptional.get();
-				String payload = null;
-				ByteBuffer bpayload = retainedPublish.getPayload().orElseGet(null);
-				if (bpayload != null) {
-					payload = StandardCharsets.UTF_8.decode(bpayload).toString();
-				}
-				if (!payload.equals("ONLINE")) {
-					logger.info("Host status payload: " + payload);
-				} else {
-					host_online = true;
-				}
-			} else {
-				logger.info("No retained message for topic: " + topic);
-			}
-		} catch (InterruptedException | ExecutionException e) {
+        final AtomicBoolean hostOnline = checkHostApplicationIsOnline(hostApplicationId);
 
-		}
+        if (!hostOnline.get()) {
+            logger.info("HostApplication {} not online - test not started.", hostApplicationId);
+            return;
+        }
 
-		if (!host_online) {
-			logger.info("Host application not online - test not started.");
-			return;
-		}
 
-		group_id = parms[1];
-		logger.info("Group id is " + group_id);
-		
-		edge_node_id = parms[2];
-		logger.info("Edge node id is " + edge_node_id);
+        // First we have to connect an edge node and device.
+        // We do this by sending an MQTT control message to the TCK device utility.
+        // ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
+        state = TestStatus.CONNECTING_DEVICE;
+        String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
+        Publish message = Builders.publish()
+                .topic(TopicConstants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
+                .payload(ByteBuffer.wrap(payload.getBytes()))
+                .build();
+        logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
+        publishService.publish(message);
+    }
 
-		device_id = parms[3];
-		logger.info("Device id is " + device_id);
+    public void endTest() {
+        Utils.setEndTest(getName(), testIds, testResults);
+        reportResults(testResults);
+    }
 
-		// First we have to connect an edge node and device.
-		// We do this by sending an MQTT control message to the TCK device utility.
-		state = "ConnectingDevice";
-		String payload = "NEW DEVICE " + host_application_id + " " + group_id + " "+ edge_node_id + " " + device_id;
-		Publish message = Builders.publish().topic("SPARKPLUG_TCK/DEVICE_CONTROL").qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting new device creation.  Group id: "+group_id+" edge node id: " + edge_node_id + " device id: " + device_id);
-		publishService.publish(message);
+    public String getName() {
+        return "Sparkplug Host Send Command Test";
+    }
 
-	}
+    public String[] getTestIds() {
+        return testIds.toArray(new String[0]);
+    }
 
-	public void endTest() {
-		state = null;
-		myClientId = null;
-		reportResults(testResults);
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "");
-		}
-	}
+    public Map<String, String> getResults() {
+        return testResults;
+    }
 
-	public String getName() {
-		return "SendCommandTest";
-	}
+    @Override
+    public void connect(String clientId, ConnectPacket packet) {
+    }
 
-	public String[] getTestIds() {
-		return testIds;
-	}
+    @Override
+    public void disconnect(String clientId, DisconnectPacket packet) {
+    }
 
-	public HashMap<String, String> getResults() {
-		return testResults;
-	}
+    @Override
+    public void subscribe(String clientId, SubscribePacket packet) {
+    }
 
-	@Override
-	public void connect(String clientId, ConnectPacket packet) {
+    private void publishToTckConsolePrompt(String payload) {
+        Publish message = Builders.publish().topic(TCK_CONSOLE_PROMPT_TOPIC).qos(Qos.AT_LEAST_ONCE)
+                .payload(ByteBuffer.wrap(payload.getBytes())).build();
+        logger.info("Requesting command to edge node id:{} ", edgeNodeId);
+        publishService.publish(message);
+    }
 
-	}
+    @Override
+    public void publish(String clientId, PublishPacket packet) {
+        logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
+        final String topic = packet.getTopic();
+        if (topic.equals(TCK_LOG_TOPIC)) {
+            ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
+            if (byteBuffer != null) {
+                final String payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
+                if (payload.equals("Device " + deviceId + " successfully created")) {
+                    logger.info("SendCommandTest: Device was created");
+                    publishToTckConsolePrompt("Send an edge rebirth to edge node " + edgeNodeId);
+                    state = TestStatus.EXPECT_NODE_REBIRTH;
+                }
+            }
+        } else if (topic.equals(TopicConstants.SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC + edgeNodeId)) {
+            if (state == TestStatus.EXPECT_NODE_REBIRTH) {
+                checkNodeCommand(clientId, packet);
+                publishToTckConsolePrompt("Send an edge command to edge node " + edgeNodeId + " metric " + EDGE_METRIC);
+                state = TestStatus.EXPECT_NODE_COMMAND;
+            } else if (state == TestStatus.EXPECT_NODE_COMMAND) {
+                checkNodeCommand(clientId, packet);
+                publishToTckConsolePrompt("Send a device rebirth command to device " + deviceId + " at edge node " + edgeNodeId);
+                state = TestStatus.EXPECT_DEVICE_REBIRTH;
+            }
+        } else if (topic.equals(TopicConstants.SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC + edgeNodeId + "/" + deviceId)) {
+            if (state == TestStatus.EXPECT_DEVICE_REBIRTH) {
+                checkDeviceCommand(clientId, packet);
+                publishToTckConsolePrompt("Send a device command to device " + deviceId + " at edge node " + edgeNodeId + " metric " + DEVICE_METRIC);
+                state = Utils.TestStatus.EXPECT_DEVICE_COMMAND;
+            } else if (state == TestStatus.EXPECT_DEVICE_COMMAND) {
+                checkDeviceCommand(clientId, packet);
+                theTCK.endTest();
+            }
+        }
+    }
 
-	@Override
-	public void disconnect(String clientId, DisconnectPacket packet) {
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_NCMD,
+            id = ID_PAYLOADS_NCMD_TIMESTAMP)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_NCMD,
+            id = ID_PAYLOADS_NCMD_SEQ)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_NCMD,
+            id = ID_PAYLOADS_NCMD_QOS)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_NCMD,
+            id = ID_PAYLOADS_NCMD_RETAIN)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_DESC_NCMD,
+            id = ID_TOPICS_NCMD_MQTT)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_DESC_NCMD,
+            id = ID_TOPICS_NCMD_TIMESTAMP)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_DESC_NCMD,
+            id = ID_TOPICS_NCMD_PAYLOAD)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE)
+    public void checkNodeCommand(final String clientId, final @NotNull PublishPacket packet) {
+        logger.info("Host - {}  - PUBLISH - checkNodeCommand {}, {}", getName(), packet.getTopic(), state);
 
-	}
+        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB);
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB, setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB));
 
-	@Override
-	public void subscribe(String clientId, SubscribePacket packet) {
+        // QoS and not retained - related tests
+        logger.debug("Check Req: {}:{}.", ID_TOPICS_NCMD_MQTT, TOPICS_NCMD_MQTT);
+        testIds.add(ID_TOPICS_NCMD_MQTT);
+        testResults.put(ID_TOPICS_NCMD_MQTT, setResult((packet.getQos() == Qos.AT_MOST_ONCE && !packet.getRetain()), TOPICS_NCMD_MQTT));
 
-	}
-	
-	private void prompt(String payload) {
-		Publish message = Builders.publish().topic("SPARKPLUG_TCK/CONSOLE_PROMPT").qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting command to edge node id: " + edge_node_id);
-		publishService.publish(message);		
-	}
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_NCMD_QOS, PAYLOADS_NCMD_QOS);
+        testIds.add(ID_PAYLOADS_NCMD_QOS);
+        testResults.put(ID_PAYLOADS_NCMD_QOS, setResult((packet.getQos() == Qos.AT_MOST_ONCE), PAYLOADS_NCMD_QOS));
 
-	@Override
-	public void publish(String clientId, PublishPacket packet) {
-		if (packet.getTopic().equals("SPARKPLUG_TCK/LOG")) {
-			String payload = null;
-			ByteBuffer bpayload = packet.getPayload().orElseGet(null);
-			if (bpayload != null) {
-				payload = StandardCharsets.UTF_8.decode(bpayload).toString();
-			}
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_NCMD_RETAIN, PAYLOADS_NCMD_RETAIN);
+        testIds.add(ID_PAYLOADS_NCMD_RETAIN);
+        testResults.put(ID_PAYLOADS_NCMD_RETAIN, setResult(!packet.getRetain(), PAYLOADS_NCMD_RETAIN));
 
-			if (payload.equals("Device " + device_id + " successfully created")) {
-				logger.info("SendCommandTest: Device was created");
-				prompt("Send an edge rebirth to edge node " + edge_node_id);				
-				state = "EXPECT NODE REBIRTH";
-			}
-		} else if (packet.getTopic().equals("spBv1.0/SparkplugTCK/NCMD/" + edge_node_id)) {
-			if (state.equals("EXPECT NODE REBIRTH")) {
-				checkNodeCommand(clientId, packet);
-				prompt("Send an edge command to edge node "+edge_node_id+" metric "+edge_metric);
-				state = "EXPECT NODE COMMAND";
-			} else if (state.equals("EXPECT NODE COMMAND")) {
-				checkNodeCommand(clientId, packet);
-				prompt("Send a device rebirth command to device "+device_id+" at edge node "+edge_node_id);
-				state = "EXPECT DEVICE REBIRTH";
-			}
-		} else if (packet.getTopic().equals("spBv1.0/SparkplugTCK/DCMD/" + edge_node_id + "/" + device_id)) {
-			if (state.equals("EXPECT DEVICE REBIRTH")) {
-				checkDeviceCommand(clientId, packet);
-				prompt("Send a device command to device "+device_id+" at edge node "+edge_node_id+" metric "+device_metric);
-				state = "EXPECT DEVICE COMMAND";
-			} else if (state.equals("EXPECT DEVICE COMMAND")) {
-				checkDeviceCommand(clientId, packet);
-				theTCK.endTest();
-			}
-		}
-	}
+        // payload related tests
+        PayloadOrBuilder inboundPayload = Utils.getSparkplugPayload(packet);
+        Boolean[] bValid = checkValidCommandPayload(inboundPayload);
 
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_NCMD,
-			id = "payloads-ncmd-timestamp")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_NCMD,
-			id = "payloads-ncmd-seq")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_NCMD,
-			id = "payloads-ncmd-qos")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_NCMD,
-			id = "payloads-ncmd-retain")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_NCMD,
-			id = "topics-ncmd-mqtt")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_NCMD,
-			id = "topics-ncmd-timestamp")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_NCMD,
-			id = "topics-ncmd-payload")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-ncmd-verb")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-ncmd-rebirth-verb")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-ncmd-rebirth-name")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-ncmd-rebirth-value")
-	public void checkNodeCommand(String clientId, PublishPacket packet) {
-		String result = "FAIL";
-		testResults.put("operational-behavior-data-commands-ncmd-verb", "PASS");
+        logger.debug("Check Req: {}:{}.", ID_TOPICS_NCMD_TIMESTAMP, TOPICS_NCMD_TIMESTAMP);
+        testIds.add(ID_TOPICS_NCMD_TIMESTAMP);
+        testResults.put(ID_TOPICS_NCMD_TIMESTAMP, setResult(bValid[0], TOPICS_NCMD_TIMESTAMP));
 
-		if (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("topics-ncmd-mqtt", result);
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_NCMD_SEQ, PAYLOADS_NCMD_SEQ);
+        testIds.add(ID_PAYLOADS_NCMD_SEQ);
+        testResults.put(ID_PAYLOADS_NCMD_SEQ, setResult(bValid[1], PAYLOADS_NCMD_SEQ));
 
-		result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE) {
-			result = "PASS";
-		}
-		testResults.put("payloads-ncmd-qos", result);
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_NCMD_TIMESTAMP, PAYLOADS_NCMD_TIMESTAMP);
+        testIds.add(ID_PAYLOADS_NCMD_TIMESTAMP);
+        testResults.put(ID_PAYLOADS_NCMD_TIMESTAMP, setResult(bValid[0], PAYLOADS_NCMD_TIMESTAMP));
 
-		result = "FAIL";
-		if (packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("payloads-ncmd-retain", result);
+        logger.debug("Check Req: {}:{}.", ID_TOPICS_NCMD_PAYLOAD, TOPICS_NCMD_PAYLOAD);
+        testIds.add(ID_TOPICS_NCMD_PAYLOAD);
+        testResults.put(ID_TOPICS_NCMD_PAYLOAD, setResult(bValid[2], TOPICS_NCMD_PAYLOAD));
 
-		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
+        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB);
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB, setResult(bValid[3], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB));
 
-		PayloadOrBuilder inboundPayload = null;
-		if (bpayload != null) {
-			try {
-				byte[] array = new byte[bpayload.remaining()];
-				bpayload.get(array);
-				inboundPayload = Payload.parseFrom(array);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		logger.info("Send command test inboundpayload " + inboundPayload);
+        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME);
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME, setResult(bValid[3], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			if (inboundPayload.hasTimestamp()) {
-				result = "PASS";
-			}
-		}
-		testResults.put("topics-ncmd-timestamp", result);
-		testResults.put("payloads-ncmd-timestamp", result);
+        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE);
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, setResult(bValid[4], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			if (!inboundPayload.hasSeq()) {
-				result = "PASS";
-			}
-		}
-		testResults.put("payloads-ncmd-seq", result);
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			List<Metric> metrics = inboundPayload.getMetricsList();
-			ListIterator<Metric> metricIterator = metrics.listIterator();
-			while (metricIterator.hasNext()) {
-				Metric current = metricIterator.next();
-				if (current.getName().equals(edge_metric)) {
-					result = "PASS";
-				}
-				if (current.getName().equals("Node Control/Rebirth")) {
-					testResults.put("operational-behavior-data-commands-ncmd-rebirth-verb", "PASS");
-					testResults.put("operational-behavior-data-commands-ncmd-rebirth-name", "PASS");
-					if (current.getDatatype() == DataType.Boolean.getNumber()) {
-						boolean value = current.getBooleanValue();	
-						if (value) {
-							testResults.put("operational-behavior-data-commands-ncmd-rebirth-value", "PASS");		
-						}
-					}
-				}
-			}
-		}
-		testResults.put("topics-ncmd-payload", result);
-		logger.info("Send command test payload " + result);
-	}
+    }
 
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DCMD,
-			id = "payloads-dcmd-timestamp")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DCMD,
-			id = "payloads-dcmd-seq")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DCMD,
-			id = "payloads-dcmd-qos")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DCMD,
-			id = "payloads-dcmd-retain")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DCMD,
-			id = "topics-dcmd-mqtt")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DCMD,
-			id = "topics-dcmd-timestamp")
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_DCMD,
-			id = "topics-dcmd-payload")
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = "operational-behavior-data-commands-dcmd-verb")
-	public void checkDeviceCommand(String clientId, PublishPacket packet) {
-		String result = "FAIL";
-		testResults.put("operational-behavior-data-commands-dcmd-verb", "PASS");
-		
-		if (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("topics-dcmd-mqtt", result);
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_DCMD,
+            id = ID_PAYLOADS_DCMD_TIMESTAMP)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_DCMD,
+            id = ID_PAYLOADS_DCMD_SEQ)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_DCMD,
+            id = ID_PAYLOADS_DCMD_QOS)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_DCMD,
+            id = ID_PAYLOADS_DCMD_RETAIN)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_DESC_DCMD,
+            id = ID_TOPICS_DCMD_MQTT)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_DESC_DCMD,
+            id = ID_TOPICS_DCMD_TIMESTAMP)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_DESC_DCMD,
+            id = ID_TOPICS_DCMD_PAYLOAD)
+    @SpecAssertion(
+            section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+            id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB)
+    public void checkDeviceCommand(String clientId, PublishPacket packet) {
+        logger.info("Host - {}  - PUBLISH - checkDeviceCommand {}, {} ", getName(), packet.getTopic(), state);
 
-		result = "FAIL";
-		if (packet.getQos() == Qos.AT_MOST_ONCE) {
-			result = "PASS";
-		}
-		testResults.put("payloads-dcmd-qos", result);
+        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB);
+        testIds.add(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB);
+        testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB, setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB));
 
-		result = "FAIL";
-		if (packet.getRetain() == false) {
-			result = "PASS";
-		}
-		testResults.put("payloads-dcmd-retain", result);
 
-		ByteBuffer bpayload = packet.getPayload().orElseGet(null);
+        // QoS and not retained - related tests
+        logger.debug("Check Req: {}:{}.", ID_TOPICS_DCMD_MQTT, TOPICS_DCMD_MQTT);
+        testIds.add(ID_TOPICS_DCMD_MQTT);
+        testResults.put(ID_TOPICS_DCMD_MQTT, setResult(packet.getQos() == Qos.AT_MOST_ONCE && !packet.getRetain(), TOPICS_DCMD_MQTT));
 
-		PayloadOrBuilder inboundPayload = null;
-		if (bpayload != null) {
-			try {
-				byte[] array = new byte[bpayload.remaining()];
-				bpayload.get(array);
-				inboundPayload = Payload.parseFrom(array);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		logger.info("Send command test inboundpayload " + inboundPayload);
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_DCMD_QOS, PAYLOADS_DCMD_QOS);
+        testIds.add(ID_PAYLOADS_DCMD_QOS);
+        testResults.put(ID_PAYLOADS_DCMD_QOS, setResult((packet.getQos() == Qos.AT_MOST_ONCE), PAYLOADS_DCMD_QOS));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			if (inboundPayload.hasTimestamp()) {
-				result = "PASS";
-			}
-		}
-		testResults.put("topics-dcmd-timestamp", result);
-		testResults.put("payloads-dcmd-timestamp", result);
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_DCMD_RETAIN, PAYLOADS_DCMD_RETAIN);
+        testIds.add(ID_PAYLOADS_DCMD_RETAIN);
+        testResults.put(ID_PAYLOADS_DCMD_RETAIN, setResult(!packet.getRetain(), PAYLOADS_DCMD_RETAIN));
 
-		result = "FAIL";
-		if (inboundPayload != null) {
-			if (!inboundPayload.hasSeq()) {
-				result = "PASS";
-			}
-		}
-		testResults.put("payloads-dcmd-seq", result);
 
-		// Check for metric Inputs/0
-		result = "FAIL";
-		if (inboundPayload != null) {
-			List<Metric> metrics = inboundPayload.getMetricsList();
-			ListIterator<Metric> metricIterator = metrics.listIterator();
-			while (metricIterator.hasNext()) {
-				Metric current = metricIterator.next();
-				logger.info("***** metric name: "+ current.getName());
-				if (current.getName().equals(device_metric)) {
-					result = "PASS";
-				}
-			}
-		}
-		testResults.put("topics-dcmd-payload", result);
-		logger.info("Send command test payload " + result);
-	}
+        // payload related tests
+        PayloadOrBuilder inboundPayload = Utils.getSparkplugPayload(packet);
+        Boolean[] bValid = checkValidDeviceCommandPayload(inboundPayload);
+
+        logger.debug("Check Req: {}:{}.", ID_TOPICS_DCMD_TIMESTAMP, TOPICS_DCMD_TIMESTAMP);
+        testIds.add(ID_TOPICS_DCMD_TIMESTAMP);
+        testResults.put(ID_TOPICS_DCMD_TIMESTAMP, setResult(bValid[0], TOPICS_DCMD_TIMESTAMP));
+
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_DCMD_TIMESTAMP, PAYLOADS_DCMD_TIMESTAMP);
+        testIds.add(ID_PAYLOADS_DCMD_TIMESTAMP);
+        testResults.put(ID_PAYLOADS_DCMD_TIMESTAMP, setResult(bValid[0], PAYLOADS_DCMD_TIMESTAMP));
+
+        logger.debug("Check Req: {}:{}.", ID_PAYLOADS_DCMD_SEQ, PAYLOADS_DCMD_SEQ);
+        testIds.add(ID_PAYLOADS_DCMD_SEQ);
+        testResults.put(ID_PAYLOADS_DCMD_SEQ, setResult(bValid[1], PAYLOADS_DCMD_SEQ));
+
+
+        logger.debug("Check Req: {}:{}.", ID_TOPICS_DCMD_PAYLOAD, TOPICS_DCMD_PAYLOAD);
+        testIds.add(ID_TOPICS_DCMD_PAYLOAD);
+        testResults.put(ID_TOPICS_DCMD_PAYLOAD, setResult(bValid[2], TOPICS_DCMD_PAYLOAD));
+    }
+
+    private Boolean[] checkValidDeviceCommandPayload(PayloadOrBuilder payload) {
+        Boolean[] bValidPayload = new Boolean[]{false, false, false};
+
+        if (payload != null) {
+            bValidPayload[0] = (payload.hasTimestamp());
+            bValidPayload[1] = (payload.getSeq() < 0);
+            List<Metric> metrics = payload.getMetricsList();
+
+            ListIterator<Metric> metricIterator = metrics.listIterator();
+            while (metricIterator.hasNext()) {
+                Metric current = metricIterator.next();
+                if (current.getName().equals(DEVICE_METRIC)) {
+                    bValidPayload[2] = true;
+                }
+            }
+        }
+        return bValidPayload;
+    }
+
+    private Boolean[] checkValidCommandPayload(PayloadOrBuilder payload) {
+        Boolean[] bValidPayload = new Boolean[]{false, false, false, false, false};
+
+        if (payload != null) {
+            bValidPayload[0] = payload.hasTimestamp();
+            bValidPayload[1] = (payload.getSeq() < 0);
+            List<Metric> metrics = payload.getMetricsList();
+
+            ListIterator<Metric> metricIterator = metrics.listIterator();
+            while (metricIterator.hasNext()) {
+                Metric current = metricIterator.next();
+                if (current.getName().equals(EDGE_METRIC)) {
+                    bValidPayload[2] = true;
+                }
+                if (current.getName().equals(NODE_CONTROL_REBIRTH)) {
+                    bValidPayload[3] = true;
+                    if (current.getDatatype() == DataType.Boolean.getNumber()) {
+                        bValidPayload[4] = current.getBooleanValue();
+                    }
+                }
+            }
+        }
+        return bValidPayload;
+    }
 }

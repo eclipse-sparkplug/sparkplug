@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Anja Helmbrecht-Schaar, Ian Craggs
+ * Copyright (c) 2022 Anja Helmbrecht-Schaar
  * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -16,16 +16,17 @@ package org.eclipse.sparkplug.tck.test.common;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-
+import com.hivemq.extension.sdk.api.services.Services;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
@@ -87,6 +88,44 @@ public class Utils {
 		}
 		return false;
 	}
+	
+    public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
+        AtomicBoolean hostOnline = new AtomicBoolean(false);
+        String topic = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
+        // Check that the host application status is ONLINE, ready for the test
+        Services.retainedMessageStore().getRetainedMessage(topic)
+                .whenComplete((retainedPublish, throwable) -> {
+                    if (throwable != null) {
+                        logger.error("Error getting retained message for HostApplication Status: {}", throwable.getMessage());
+                    } else if (retainedPublish.isPresent()) {
+                        ByteBuffer byteBuffer = retainedPublish.get().getPayload().orElseGet(null);
+                        if (byteBuffer != null) {
+                            String payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
+                            if (HostState.ONLINE.toString().equals(payload)) {
+                                hostOnline.set(true);
+                            }
+                            logger.info("checkHostApplicationIsOnline - " +
+                                            "Retained message for HostApplication: {} {} {} ",
+                                    hostApplicationId, hostOnline.get(), payload);
+                        }
+                    } else {
+                        logger.info("No retained message for topic: {} ", topic);
+                    }
+                });
+        return hostOnline;
+    }
+
+    private enum HostState {
+        ONLINE, OFFLINE
+    }
+
+
+    public enum TestStatus {
+        NONE,
+        CONSOLE_RESPONSE, CONNECTING_DEVICE, REQUESTED_NODE_DATA, REQUESTED_DEVICE_DATA,
+        KILLING_DEVICE, EXPECT_NODE_REBIRTH, EXPECT_NODE_COMMAND, EXPECT_DEVICE_REBIRTH, EXPECT_DEVICE_COMMAND,
+        DEATH_MESSAGE_RECEIVED
+    }
 
 	public static StringBuilder getSummary(final @NotNull Map<String, String> results) {
 		final StringBuilder summary = new StringBuilder();
