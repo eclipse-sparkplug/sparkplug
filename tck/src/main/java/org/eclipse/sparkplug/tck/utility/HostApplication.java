@@ -20,6 +20,7 @@ package org.eclipse.sparkplug.tck.utility;
  * 
  */
 
+import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,17 +60,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.nio.ByteBuffer;
 
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class HostApplication {
 
 	private String state = null;
-	
+
 	private String namespace = "spBv1.0";
 	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
-	private String log_topic_name = "SPARKPLUG_TCK/LOG";
 	
 	private String controlId = "Sparkplug TCK host application utility"; 
 	private MqttClient control = null;
@@ -97,22 +99,21 @@ public class HostApplication {
 		System.out.println("*** Sparkplug TCK Host Application Utility ***");
 		try {
 			control = new MqttClient(brokerURI, controlId);
-		    control_listener = new MessageListener();
-		    control.setCallback(control_listener);
-			log_topic = control.getTopic(log_topic_name);
+			control_listener = new MessageListener();
+			control.setCallback(control_listener);
+			log_topic = control.getTopic(TCK_LOG_TOPIC);
 			control.connect();
 			log("starting");
-			control.subscribe("SPARKPLUG_TCK/HOST_CONTROL");
+			control.subscribe(TopicConstants.TCK_HOST_CONTROL);
 			while (true) {
-				MqttMessage msg = control_listener.getNextMessage();			
+				MqttMessage msg = control_listener.getNextMessage();
 				if (msg != null) {
 					String[] words = msg.toString().split(" ");
 					if (words.length == 3 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("HOST")) {
 						//log(msg.toString());
 						hostCreate(words[2]);
-					}
-					else {
-						log("Command not understood: "+msg);
+					} else {
+						log("Command not understood: " + msg);
 					}
 				}
 				Thread.sleep(100);

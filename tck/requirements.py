@@ -6,7 +6,7 @@ outputFile = "src/main/java/org/eclipse/sparkplug/tck/test/common/Requirements.j
 outfile = open(outputFile, "w")
 
 outfile.write("""
-/**
+/*
  * Copyright (c) 2022 Anja Helmbrecht-Schaar, Ian Craggs
  * <p>
  * All rights reserved. This program and the accompanying materials

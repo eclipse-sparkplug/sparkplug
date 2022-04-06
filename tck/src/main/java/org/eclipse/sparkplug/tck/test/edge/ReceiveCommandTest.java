@@ -47,8 +47,11 @@ import com.hivemq.extension.sdk.api.services.session.ClientService;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -62,8 +65,6 @@ import java.util.function.BiConsumer;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
 @SpecVersion(
         spec = "sparkplug",
@@ -191,7 +192,7 @@ public class ReceiveCommandTest extends TCKTest {
             section = Sections.PAYLOADS_B_NDEATH,
             id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
     @Override
-    public void connect(String clientId, ConnectPacket packet) {
+    public void connect(final String clientId, final ConnectPacket packet) {
         // we can determine the clientId corresponding to the edge node id by
         // checking the will contents to see if the edge node id matches.
         Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
@@ -215,8 +216,8 @@ public class ReceiveCommandTest extends TCKTest {
         }
     }
 
-    private long getBdSeq(ByteBuffer payload) {
-        PayloadOrBuilder inboundPayload = Utils.decode(payload);
+    private long getBdSeq(final ByteBuffer payload) {
+        final PayloadOrBuilder inboundPayload = Utils.decode(payload);
         if (inboundPayload != null) {
             for (Metric m : inboundPayload.getMetricsList()) {
                 if (m.getName().equals(BD_SEQ)) {
@@ -228,13 +229,13 @@ public class ReceiveCommandTest extends TCKTest {
     }
 
     @Override
-    public void disconnect(String clientId, DisconnectPacket packet) {
+    public void disconnect(final String clientId, final DisconnectPacket packet) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void subscribe(String clientId, SubscribePacket packet) {
+    public void subscribe(final String clientId, final SubscribePacket packet) {
         // TODO Auto-generated method stub
     }
 
@@ -248,7 +249,7 @@ public class ReceiveCommandTest extends TCKTest {
             section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
             id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3)
     @Override
-    public void publish(String clientId, PublishPacket packet) {
+    public void publish(final String clientId, final PublishPacket packet) {
 
         logger.info("Edge - Receive Command test - PUBLISH - topic: {}, state: {} ", packet.getTopic(), state);
         if (state == status.SENDING_NODE_REBIRTH || state == status.DISCONNECTING_CLIENT) {
@@ -280,12 +281,10 @@ public class ReceiveCommandTest extends TCKTest {
                     logger.error("Data received for edge node: {}", levels[3]);
                     logger.debug("Check Req: {} When an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1);
                     testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1));
-
                 } else if (levels[2].equals(TOPIC_PATH_DDATA)) {
                     logger.error("Data received for edge node: {} and device id: {} ", levels[3], levels[4]);
                     logger.debug("Check Req: {}When an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1);
                     testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1));
-
                 }
 
                 if (bNBirth && bDBirth && state == status.SENDING_NODE_REBIRTH) {

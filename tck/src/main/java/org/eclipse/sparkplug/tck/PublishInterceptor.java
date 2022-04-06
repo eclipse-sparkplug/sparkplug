@@ -15,6 +15,7 @@ import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInbound
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInboundOutput;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_CONSOLE_TEST_CONTROL_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
 
 /**
  * @author Ian Craggs
@@ -56,11 +60,11 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
 				logger.trace("\tPayload {}", payload);
 
-				if (topic.equals("SPARKPLUG_TCK/LOG")) {
+				if (topic.equals(TCK_LOG_TOPIC)) {
 					logger.debug(clientId + ": " + payload); // display log message
 				}
 
-				if (topic.equals("SPARKPLUG_TCK/TEST_CONTROL")) {
+				if (topic.equals(TCK_CONSOLE_TEST_CONTROL_TOPIC)) {
 					String cmd = "NEW_TEST";
 					if (payload.toUpperCase().startsWith(cmd)) {
 						// find all tokens which are either plain tokens or

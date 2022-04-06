@@ -32,11 +32,9 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.Utils;
-
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -121,7 +119,6 @@ public class SendDataTest extends TCKTest {
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
 		String cmd = "";
-
 		String[] levels = packet.getTopic().split("/");
 		if (levels.length >= 3) {
 			cmd = levels[2];

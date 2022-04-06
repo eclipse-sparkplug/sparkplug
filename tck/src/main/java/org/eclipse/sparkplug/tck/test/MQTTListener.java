@@ -34,17 +34,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Date;
 
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class MQTTListener implements MqttCallbackExtended {
 
-	// Configuration
-	private String serverUrl = "tcp://localhost:1883";
-	private String clientId = "Sparkplug MQTT Listener";
-	private String username = "admin";
+    // Configuration
+    private String serverUrl = "tcp://localhost:1883";
+    private String clientId = "Sparkplug MQTT Listener";
+    private String username = "admin";
 	private String password = "changeme";
-	private String log_topic_name = "SPARKPLUG_TCK/LOG";
+
 	private MqttTopic log_topic = null;
 	private MqttClient client = null;
 
@@ -115,7 +117,7 @@ public class MQTTListener implements MqttCallbackExtended {
 			client = new MqttClient(serverUrl, clientId);
 			client.setTimeToWait(5000); // short timeout on failure to connect
 			client.setCallback(this);
-			log_topic = client.getTopic(log_topic_name);
+			log_topic = client.getTopic(TCK_LOG_TOPIC);
 			client.connect(options);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -128,7 +130,7 @@ public class MQTTListener implements MqttCallbackExtended {
 
 		try {
 			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
-			client.subscribe(new String[] { "spAv1.0/#", "spBv1.0/#", "STATE/#", log_topic_name },
+			client.subscribe(new String[] { "spAv1.0/#", "spBv1.0/#", "STATE/#", TCK_LOG_TOPIC},
 					new int[] { 2, 2, 2, 2 });
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -151,7 +153,7 @@ public class MQTTListener implements MqttCallbackExtended {
 		try {
 			if (topic.startsWith("STATE/")) {
 				System.out.println("Sparkplug message: " + topic + " " + new String(message.getPayload()));
-			} else if (topic.equals(log_topic_name)) {
+			} else if (topic.equals(TCK_LOG_TOPIC)) {
 				System.out.println("TCK log: " + new String(message.getPayload()));
 			} else {
 				if (topic.startsWith("spAv1.0/")) {
