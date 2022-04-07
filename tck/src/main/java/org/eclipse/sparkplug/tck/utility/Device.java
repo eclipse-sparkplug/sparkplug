@@ -180,21 +180,23 @@ public class Device {
 	public void edgeCreate(String host_application_id, String a_group_id, String an_edge_node_id) throws Exception {
 		if (edge != null) {
 			log("Edge node already created");
-			log("Edge node "+edge_node_id+" successfully created");
+			log("Edge node " + edge_node_id + " successfully created");
 			return;
 		}
 		edge_node_id = an_edge_node_id;
 		group_id = a_group_id;
-		log("Creating new edge node \""+edge_node_id+"\"");
-		edge = new MqttClient(brokerURI, "Sparkplug TCK "+group_id+" "+edge_node_id);
-	    edge_listener = new MessageListener();
-	    edge.setCallback(edge_listener);
-	    
-		// Build up DEATH payload - note DEATH payloads don't have a regular sequence number
+		log("Creating new edge node \"" + edge_node_id + "\"");
+		edge = new MqttClient(brokerURI, "Sparkplug TCK " + group_id + " " + edge_node_id);
+		edge_listener = new MessageListener();
+		edge.setCallback(edge_listener);
+
+		// Build up DEATH payload
+		// payloads don't have a regular sequence number, and can have a timestamp,
+		// and MUST have a bdseq - that fits to the NBIRTH
 		SparkplugBPayloadBuilder deathPayload = new SparkplugBPayloadBuilder().setTimestamp(new Date());
 		deathPayload = addBdSeqNum(deathPayload);
 		deathBytes = new SparkplugBPayloadEncoder().getBytes(deathPayload.createPayload());
-		
+
 		MqttConnectOptions options = new MqttConnectOptions();
 		options.setAutomaticReconnect(true);
 		options.setCleanSession(true);
@@ -202,17 +204,17 @@ public class Device {
 		options.setKeepAliveInterval(30);
 		//options.setUserName(username);
 		//options.setPassword(password.toCharArray());
-		options.setWill(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 0, false);
-		
+		options.setWill(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 1, false);
+
 		edge.connect(options);
-		
-		edge.subscribe("STATE/"+host_application_id); /* look for status of the host application we are to use */
-		
+
+		edge.subscribe("STATE/" + host_application_id); /* look for status of the host application we are to use */
+
 		/* wait for retained message indicating state of host application under test */
 		int count = 0;
 		while (true) {
 			MqttMessage msg = edge_listener.getNextMessage();
-			
+
 			if (msg != null) {
 				if (msg.toString().equals("ONLINE")) {
 					break;
@@ -241,16 +243,17 @@ public class Device {
 	
 	public void edgeDisconnect(String host_application_id, String an_edge_node_id) throws Exception {
 		if (edge == null) {
-			log("Edge node "+edge_node_id+" does not exist");
+			log("Edge node " + edge_node_id + " does not exist");
 			return;
 		}
 		// The intention here is to "disconnect" without sending the MQTT disconnect packet
 		// Will this work?
-		edge.publish(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 0, false);
+		// Publishing NDEATH - cause we gracefully disconnect
+		edge.publish(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 1, false);
 		edge.disconnect(0);
 		edge.close();
 		edge = null;
-		log("Edge node "+edge_node_id+" disconnected");
+		log("Edge node " + edge_node_id + " disconnected");
 	}
 	
 	public void deviceCreate(String a_device_id) throws Exception {
