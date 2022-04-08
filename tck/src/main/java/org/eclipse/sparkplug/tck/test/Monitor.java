@@ -39,6 +39,10 @@ import com.hivemq.extension.sdk.api.events.client.parameters.*;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 
@@ -60,12 +64,11 @@ import java.util.concurrent.*;
 public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private static final @NotNull String PASS = "PASS";
-	private static final @NotNull String FAIL = "FAIL";
-	private static final @NotNull String NAMESPACE = "spBv1.0";
+	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { "topic-structure-namespace-unique-edge-node-descriptor",
-			"topic-structure-namespace-unique-edge-node-descriptor", "topic-structure-namespace-unique-device-id" };
+	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
+			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
+			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID };
 
 	// edge_node_id to clientid
 	private HashMap edge_nodes = new HashMap<String, String>();
@@ -84,7 +87,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public void clearResults() {
 		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "PASS");
+			testResults.put(testIds[i], PASS);
 		}
 	}
 
@@ -166,9 +169,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	}
 
-	@SpecAssertion(
-			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
-			id = "topic-structure-namespace-duplicate-device-id-across-edge-node")
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
 
@@ -207,14 +207,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	@SpecAssertion(
 			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
-			id = "topic-structure-namespace-unique-edge-node-descriptor")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR)
 	private void handleNBIRTH(String edge_node_id, String clientId) {
 		logger.info("Monitor: *** NBIRTH *** {} {}", edge_node_id, clientId);
 		String client_id = (String) edge_nodes.get(edge_node_id);
 		if (client_id != null && !client_id.equals(clientId)) {
 			logger.error("Monitor: two clientids {} {} using the same group_id/edge_node_id {}", client_id, clientId,
 					edge_node_id);
-			testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
+			testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR,
+					setResult(false, TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR));
 		} else {
 			logger.info("Monitor: adding edge node {} for client id {} on NBIRTH", edge_node_id, clientId);
 			edge_nodes.put(edge_node_id, clientId);
@@ -225,7 +226,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	@SpecAssertion(
 			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
-			id = "topic-structure-namespace-unique-edge-node-descriptor")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR)
 	private void handleNDEATH(String edge_node_id, String clientId) {
 		logger.info("Monitor: *** NDEATH *** {} {}", edge_node_id, clientId);
 		String found_client_id = (String) edge_nodes.get(edge_node_id);
@@ -233,7 +234,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		if (found_client_id != null && !found_client_id.equals(clientId)) {
 			logger.error("Monitor: two clientids {} {} using the same groups_id/edge_node_id {}", found_client_id,
 					clientId, edge_node_id);
-			testResults.put("topic-structure-namespace-unique-edge-node-descriptor", FAIL);
+			testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR,
+					setResult(false, TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR));
 		} else {
 			logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId);
 			if (clientids.remove(clientId) == null) {
@@ -253,8 +255,14 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	@SpecAssertion(
+			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
+			id = ID_INTRO_EDGE_NODE_ID_UNIQUENESS)
+	@SpecAssertion(
 			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
-			id = "topic-structure-namespace-unique-device-id")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID)
+	@SpecAssertion(
+			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE)
 	private void handleDBIRTH(String device_id, String edge_node_id) {
 		logger.info("Monitor: *** DBIRTH *** {} {}", device_id, edge_node_id);
 		if (!edge_to_devices.keySet().contains(edge_node_id)) {
@@ -263,8 +271,13 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
 			if (devices.contains(device_id)) {
 				logger.error("Monitor: edge_node {} using device_id {} twice", edge_node_id, device_id);
-				testResults.put("topic-structure-namespace-unique-device-id", FAIL);
+				testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
+						setResult(false, TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID));
+				testResults.put(ID_INTRO_EDGE_NODE_ID_UNIQUENESS, setResult(false, INTRO_EDGE_NODE_ID_UNIQUENESS));
 			} else {
+				// the following is true as it's a MAY clause. So record a +ve result
+				testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE, 
+						setResult(true, TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE));
 				logger.info("Monitor: adding device id {} for edge node id {} on DBIRTH", device_id, edge_node_id);
 				devices.add(device_id);
 			}
