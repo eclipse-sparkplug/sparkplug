@@ -68,7 +68,7 @@ public class SessionTerminationTest extends TCKTest {
         logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
         theTCK = aTCK;
 
-        if (params.length < 4) {
+        if (params.length != 2) {
             logger.error("Parameters to edge receive command test must be: hostApplicationId, hostClientId ");
             return;
         }
@@ -79,7 +79,9 @@ public class SessionTerminationTest extends TCKTest {
 
     }
 
-    public void endTest() {
+    @Override
+    public void endTest(Map<String, String> results) {
+    	testResults.putAll(results);
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
     }

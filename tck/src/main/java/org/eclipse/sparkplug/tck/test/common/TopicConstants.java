@@ -28,6 +28,7 @@ public class TopicConstants {
 
     public static final @NotNull String PASS = "PASS";
     public static final @NotNull String FAIL = "FAIL";
+    public static final @NotNull String NOT_EXECUTED = "NOT EXECUTED";
     public static final @NotNull String EMPTY = "EMPTY";
 
     public static final String TCK_LOG_TOPIC = "SPARKPLUG_TCK/LOG";

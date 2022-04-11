@@ -48,13 +48,8 @@ import org.jboss.test.audit.annotations.SpecVersion;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.nio.ByteBuffer;
 import java.util.concurrent.*;
 
@@ -87,7 +82,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public void clearResults() {
 		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], PASS);
+			testResults.put(testIds[i], NOT_EXECUTED);
 		}
 	}
 
@@ -95,7 +90,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		clearResults();
 	}
 
-	public void endTest() {
+	public void endTest(Map<String, String> results) {
 		clearResults();
 	}
 

@@ -115,12 +115,12 @@ public class SessionEstablishmentTest extends TCKTest {
             }
         } else {
             // no devices
-            testResults.put(ID_PAYLOADS_DBIRTH_QOS, PASS);
-            testResults.put(ID_PAYLOADS_DBIRTH_RETAIN, PASS);
-            testResults.put(ID_PAYLOADS_DBIRTH_TIMESTAMP, PASS);
-            testResults.put(ID_PAYLOADS_DBIRTH_SEQ, PASS);
-            testResults.put(ID_TOPICS_DBIRTH_MQTT, PASS);
-            testResults.put(ID_TOPICS_DBIRTH_TIMESTAMP, PASS);
+            testResults.put(ID_PAYLOADS_DBIRTH_QOS, NOT_EXECUTED);
+            testResults.put(ID_PAYLOADS_DBIRTH_RETAIN, NOT_EXECUTED);
+            testResults.put(ID_PAYLOADS_DBIRTH_TIMESTAMP, NOT_EXECUTED);
+            testResults.put(ID_PAYLOADS_DBIRTH_SEQ, NOT_EXECUTED);
+            testResults.put(ID_TOPICS_DBIRTH_MQTT, NOT_EXECUTED);
+            testResults.put(ID_TOPICS_DBIRTH_TIMESTAMP, NOT_EXECUTED);
         }
         logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device ids: {}", hostApplicationId, groupId, edgeNodeId, deviceIds.keySet());
     }
@@ -136,8 +136,10 @@ public class SessionEstablishmentTest extends TCKTest {
     public Map<String, String> getResults() {
         return testResults;
     }
-
-    public void endTest() {
+    
+    @Override
+	public void endTest(Map<String, String> results) {
+		testResults.putAll(results);
     	testClientId = null;
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
@@ -589,24 +591,24 @@ public class SessionEstablishmentTest extends TCKTest {
             // making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the
             // receivedBirthTime
             logger.debug("Check Req: NBIRTH must include payload timestamp that denotes the time at which the message was published");
-            prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_TIMESTAMP, "");
+            prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_TIMESTAMP, NOT_EXECUTED);
             boolean bValid = false;
             if (!prevResult.contains(FAIL)) {
-                if (!sparkplugPayload.hasTimestamp()) {
+                if (sparkplugPayload.hasTimestamp()) {
                     long millisPayload = sparkplugPayload.getTimestamp();
                     bValid = (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth));
                 }
-                if (prevResult.equals("")) {
+                if (prevResult.equals(NOT_EXECUTED)) {
                     testResults.put(ID_TOPICS_DBIRTH_TIMESTAMP, setResult(bValid, TOPICS_DBIRTH_TIMESTAMP));
                     testResults.put(ID_PAYLOADS_DBIRTH_TIMESTAMP, setResult(bValid, PAYLOADS_DBIRTH_TIMESTAMP));
                 }
             }
 
             logger.debug("Check Req: DBIRTH must include a sequence number");
-            prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_SEQ, "");
+            prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_SEQ, NOT_EXECUTED);
             if (!prevResult.contains(FAIL)) {
                 boolean bContains = (sparkplugPayload.getSeq() != -1);
-                if (prevResult.equals("")) {
+                if (prevResult.equals(NOT_EXECUTED)) {
                     testResults.put(ID_PAYLOADS_DBIRTH_SEQ, setResult(bContains, PAYLOADS_DBIRTH_SEQ));
                 }
             }

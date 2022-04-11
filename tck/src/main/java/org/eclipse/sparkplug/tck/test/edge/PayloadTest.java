@@ -79,8 +79,9 @@ public class PayloadTest extends TCKTest {
         logger.info("Parameters are HostId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId, edgeNodeId, deviceId);
     }
 
-    public void endTest() {
-
+    @Override
+    public void endTest(Map<String, String> results) {
+    	testResults.putAll(results);
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
     }

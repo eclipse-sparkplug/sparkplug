@@ -55,11 +55,7 @@ public abstract class TCKTest {
 
 	public abstract String[] getTestIds();
 
-	public abstract void endTest();
-
-	public void endTest(Map<String, String> results) {
-
-	}
+	public abstract void endTest(Map<String, String> results);
 
 	public void reportResults(final @NotNull Map<String, String> results) {
 		logger.info("Summary Test Results for {} ", getName());

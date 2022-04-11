@@ -158,7 +158,7 @@ public class ReceiveCommandTest extends TCKTest {
             		).build().toByteArray();
         } catch (Exception e) {
             logger.error("Error building edge node rebirth command. Aborting test. {} ", e.getMessage());
-            endTest();
+            theTCK.endTest();
         }
 
         Publish message = Builders.publish()
@@ -170,7 +170,9 @@ public class ReceiveCommandTest extends TCKTest {
         publishService.publish(message);
     }
 
-    public void endTest() {
+    @Override
+    public void endTest(Map<String, String> results) {
+    	testResults.putAll(results);
         state = status.END;
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
@@ -298,7 +300,7 @@ public class ReceiveCommandTest extends TCKTest {
 
                 if (bNBirth && bDBirth && state == status.DISCONNECTING_CLIENT) {
                     state = status.END;
-                    endTest();
+                    theTCK.endTest();
                 }
             }
         }

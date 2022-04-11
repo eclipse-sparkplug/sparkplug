@@ -101,7 +101,9 @@ public class EdgeNodeDeathTest extends TCKTest {
         publishService.publish(message);
     }
 
-    public void endTest() {
+    @Override
+    public void endTest(Map<String, String> results) {
+    	testResults.putAll(results);
         state = TestStatus.NONE;
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);

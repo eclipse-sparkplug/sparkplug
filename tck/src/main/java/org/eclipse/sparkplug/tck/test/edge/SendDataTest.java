@@ -74,7 +74,7 @@ public class SendDataTest extends TCKTest {
 		testResults = new HashMap<String, String>();
 
 		if (params.length < 3) {
-			logger.error("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
+			logger.error("Parameters to send data test must be: groupId edgeNodeId deviceId");
 			return;
 		}
 		hostApplicationId = params[0];
@@ -83,7 +83,9 @@ public class SendDataTest extends TCKTest {
 		logger.info("Parameters are HostApplicationId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, edgeNodeId, deviceId);
 	}
 
-	public void endTest() {
+	@Override
+	public void endTest(Map<String, String> results) {
+		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 	}

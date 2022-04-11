@@ -22,7 +22,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
-import org.eclipse.sparkplug.tck.test.common.Utils;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
@@ -53,12 +56,12 @@ public class MQTTListener implements MqttCallbackExtended {
 	private String primary_host_application_id = null;
 
 	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { "intro-secondary-host-state", "intro-group-id-string", "intro-group-id-chars",
-			"intro-edge-node-id-string", "intro-edge-node-id-chars", "intro-device-id-string", "intro-device-id-chars",
-			"topic-structure", "topic-structure-namespace-device-id-associated-message-types",
-			"topic-structure-namespace-device-id-non-associated-message-types",
-			"topic-structure-namespace-valid-group-id", "topic-structure-namespace-valid-edge-node-id",
-			"topic-structure-namespace-valid-device-id", "payloads_timestamp_in_UTC" };
+	String[] testIds = { ID_INTRO_GROUP_ID_STRING, ID_INTRO_GROUP_ID_CHARS, ID_INTRO_EDGE_NODE_ID_STRING,
+			ID_INTRO_EDGE_NODE_ID_CHARS, ID_INTRO_DEVICE_ID_STRING, ID_INTRO_DEVICE_ID_CHARS, ID_TOPIC_STRUCTURE,
+			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
+			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_PAYLOADS_TIMESTAMP_IN_UTC };
 
 	public void log(String message) {
 		try {
@@ -76,7 +79,7 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	public void clearResults() {
 		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], "PASS");
+			testResults.put(testIds[i], NOT_EXECUTED);
 		}
 	}
 
@@ -130,7 +133,8 @@ public class MQTTListener implements MqttCallbackExtended {
 
 		try {
 			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
-			client.subscribe(new String[] { "spAv1.0/#", "spBv1.0/#", "STATE/#", TCK_LOG_TOPIC},
+			client.subscribe(
+					new String[] { "spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#", TCK_LOG_TOPIC },
 					new int[] { 2, 2, 2, 2 });
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -144,21 +148,21 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_PAYLOAD,
-			id = "payloads_timestamp_in_UTC")
+			id = ID_PAYLOADS_TIMESTAMP_IN_UTC)
 	@SpecAssertion(
 			section = Sections.TOPICS_NAMESPACE_ELEMENT,
-			id = "topic-structure-namespace-a")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_A)
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		try {
-			if (topic.startsWith("STATE/")) {
+			if (topic.startsWith(TOPIC_ROOT_STATE+"/")) {
 				System.out.println("Sparkplug message: " + topic + " " + new String(message.getPayload()));
 			} else if (topic.equals(TCK_LOG_TOPIC)) {
 				System.out.println("TCK log: " + new String(message.getPayload()));
 			} else {
 				if (topic.startsWith("spAv1.0/")) {
 					log("Warning - non-standard Sparkplug A message received");
-					testResult("topic-structure-namespace-a", "FAIL");
+					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_A, setResult(false, TOPIC_STRUCTURE_NAMESPACE_A));
 				} else {
 					System.out.println("Message arrived on Sparkplug topic " + topic);
 
@@ -169,13 +173,11 @@ public class MQTTListener implements MqttCallbackExtended {
 
 					if (inboundPayload.hasTimestamp()) {
 						Date now = new Date();
-						long diff = now.getTime() - inboundPayload.getTimestamp();
-
-						if (diff < 0 || diff > 1000) {
-							testResult("payloads_timestamp_in_UTC", "FAIL");
+						long diff = now.getTime() - inboundPayload.getTimestamp();						
+						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC, setResult(
+								diff >= 0 && diff <= 20000, PAYLOADS_TIMESTAMP_IN_UTC));
+						if (diff < 0 || diff > 20000) {
 							System.out.println("Timestamp diff " + diff);
-						} else {
-							testResult("payloads_timestamp_in_UTC", "PASS");
 						}
 					}
 				}
@@ -192,72 +194,57 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	private void testResult(String id, String state) {
 		// Don't override a failing test fail
-		if (!testResults.get(id).equals("FAIL")) {
+		if (!((String)testResults.get(id)).startsWith(FAIL)) {
 			testResults.put(id, state);
 		}
 	}
 
-	/*@SpecAssertion(
-			section = Sections.INTRODUCTION_SECONDARY_HOST_APPLICATION,
-			id = "intro-secondary-host-state")
-	public void checkState(String topic, MqttMessage message) {
-		String[] words = topic.split("/");
-		if (words.length == 2) {
-			if (!words[1].equals(primary_host_application_id)) {
-				log("Error: non-primary host "+words[1]+" publishing STATE message");
-				testResult("intro-secondary-host-state", "FAIL");
-			}
-		} else {
-			log("Error: STATE message with wrong topic "+topic);
-		}
-	}*/
-
 	@SpecAssertion(
 			section = Sections.TOPICS_SPARKPLUG_TOPIC_NAMESPACE_ELEMENTS,
-			id = "topic-structure")
+			id = ID_TOPIC_STRUCTURE)
 	@SpecAssertion(
 			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
-			id = "intro-group-id-string")
+			id = ID_INTRO_GROUP_ID_STRING)
 	@SpecAssertion(
 			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
-			id = "intro-group-id-chars")
+			id = ID_INTRO_GROUP_ID_CHARS)
 	@SpecAssertion(
 			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
-			id = "intro-edge-node-id-string")
+			id = ID_INTRO_EDGE_NODE_ID_STRING)
 	@SpecAssertion(
 			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
-			id = "intro-edge-node-id-chars")
+			id = ID_INTRO_EDGE_NODE_ID_CHARS)
 	@SpecAssertion(
 			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
-			id = "intro-device-id-string")
+			id = ID_INTRO_DEVICE_ID_STRING)
 	@SpecAssertion(
 			section = Sections.INTRODUCTION_SPARKPLUG_IDS,
-			id = "intro-device-id-chars")
+			id = ID_INTRO_DEVICE_ID_CHARS)
 	@SpecAssertion(
 			section = Sections.TOPICS_GROUP_ID_ELEMENT,
-			id = "topic-structure-namespace-valid-group-id")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID)
 	@SpecAssertion(
 			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
-			id = "topic-structure-namespace-valid-edge-node-id")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID)
 	@SpecAssertion(
 			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
-			id = "topic-structure-namespace-valid-device-id")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID)
 	@SpecAssertion(
 			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
-			id = "topic-structure-namespace-device-id-associated-message-types")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES)
 	@SpecAssertion(
 			section = Sections.TOPICS_DEVICE_ID_ELEMENT,
-			id = "topic-structure-namespace-device-id-non-associated-message-types")
+			id = ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES)
 	public void checkTopic(String[] elements) {
-		String result = "FAIL";
-		if (elements[0].equals("STATE")) {
+		Boolean result = false;
+		if (elements[0].equals(TOPIC_ROOT_STATE)) {
 			if (elements.length == 2) {
-				result = "PASS";
-			}
-			testResult("topic-structure", result);
+				result = true;
+			}	
+			testResult(ID_TOPIC_STRUCTURE, setResult(result, TOPIC_STRUCTURE));
 		} else {
 			if (elements.length < 4) {
-				log("topic-structure: FAIL (too few topic elements)");
+				testResult(ID_TOPIC_STRUCTURE, setResult(false, "(too few topic elements)"));
 			} else {
 				String namespace = elements[0];
 				String group_id = elements[1];
@@ -269,68 +256,60 @@ public class MQTTListener implements MqttCallbackExtended {
 				}
 
 				if (message_type.equals("DBIRTH") || message_type.equals("DDEATH") || message_type.equals("DDATA")
-						|| message_type.equals("DCMD")) {
-					if (elements.length != 5) {
-						result = "FAIL";
-						testResult("topic-structure-namespace-device-id-associated-message-types", "FAIL");
-					} else {
-						testResult("topic-structure-namespace-device-id-associated-message-types", "TRUE");
-					}
+						|| message_type.equals("DCMD")) {				
+					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES, 
+							setResult(elements.length == 5, TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES));	
+					result = (elements.length == 5) ? true : false;
 				}
 
 				if (message_type.equals("NBIRTH") || message_type.equals("NDEATH") || message_type.equals("NDATA")
 						|| message_type.equals("NCMD")) {
-					if (elements.length != 4) {
-						result = "FAIL";
-						testResult("topic-structure-namespace-device-id-non-associated-message-types", "FAIL");
-					} else {
-						testResult("topic-structure-namespace-device-id-non-associated-message-types", "TRUE");
-					}
+					
+					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES, 
+							setResult(elements.length == 4, TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES));					
+					result = (elements.length == 4) ? true : false;
 				}
-				testResult("topic-structure", result);
+				testResult(ID_TOPIC_STRUCTURE, setResult(result, TOPIC_STRUCTURE));
 
-				result = "TRUE";
+				result = true;
 				if (!checkUTF8String(group_id)) {
-					result = "FAIL";
-					testResult("intro-group-id-string", "FAIL");
-					log("Group id string is invalid");
+					result = false;
+					testResult(ID_INTRO_GROUP_ID_STRING, setResult(false, INTRO_GROUP_ID_STRING));
 				}
 
 				if (!checkMQTTChars(group_id)) {
-					result = "FAIL";
-					testResult("intro-group-id-chars", "FAIL");
-					log("Group id chars are invalid");
+					result = false;
+					testResult(ID_INTRO_GROUP_ID_CHARS, setResult(false, INTRO_GROUP_ID_CHARS));
 				}
-				testResult("topic-structure-namespace-valid-group-id", result);
+				testResult(ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID,
+						setResult(result, TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID));
 
-				result = "TRUE";
+				result = true;
 				if (!checkUTF8String(edge_node_id)) {
-					result = "FAIL";
-					testResult("intro-edge-node-id-string", "FAIL");
-					log("Edge node id string is invalid");
+					result = false;
+					testResult(ID_INTRO_EDGE_NODE_ID_STRING, setResult(false, INTRO_EDGE_NODE_ID_STRING));
 				}
 
 				if (!checkMQTTChars(edge_node_id)) {
-					result = "FAIL";
-					testResult("intro-edge-node-id-chars", "FAIL");
-					log("Edge node id chars are invalid");
+					result = false;
+					testResult(ID_INTRO_EDGE_NODE_ID_CHARS, setResult(false, INTRO_EDGE_NODE_ID_CHARS));
 				}
-				testResult("topic-structure-namespace-valid-edge-node-id", result);
+				testResult(ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
+						setResult(result, TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID));
 
 				if (device_id != null) {
-					result = "TRUE";
+					result = true;
 					if (!checkUTF8String(device_id)) {
-						result = "FAIL";
-						testResult("intro-device-id-string", "FAIL");
-						log("Device id string is invalid");
+						result = false;
+						testResult(ID_INTRO_DEVICE_ID_STRING, setResult(false, INTRO_DEVICE_ID_STRING));
 					}
 
 					if (!checkMQTTChars(device_id)) {
-						result = "FAIL";
-						testResult("intro-device-id-chars", "FAIL");
-						log("Device id chars are invalid");
+						result = false;
+						testResult(ID_INTRO_DEVICE_ID_CHARS, setResult(false, INTRO_DEVICE_ID_STRING));
 					}
-					testResult("topic-structure-namespace-valid-device-id", result);
+					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID,
+							setResult(result, TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID));
 				}
 			}
 		}

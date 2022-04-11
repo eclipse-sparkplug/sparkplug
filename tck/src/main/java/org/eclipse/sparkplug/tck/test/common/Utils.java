@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Anja Helmbrecht-Schaar
+ * Copyright (c) 2022 Anja Helmbrecht-Schaar, Ian Craggs
  * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -39,7 +39,7 @@ public class Utils {
 			testIds.forEach(test -> {
 				if (!testResults.containsKey(test)) {
 					logger.info("Test {} - {} not yet executed. ", name, test);
-					testResults.put(test, "");
+					testResults.put(test, NOT_EXECUTED);
 				}
 			});
 		}
@@ -136,7 +136,7 @@ public class Utils {
 			summary.append(reportResult.getKey()).append(": ").append(reportResult.getValue()).append(";")
 					.append(System.lineSeparator());
 
-			if (!reportResult.getValue().startsWith(TopicConstants.PASS)) {
+			if (reportResult.getValue().startsWith(TopicConstants.FAIL)) {
 				overall = TopicConstants.FAIL;
 			}
 		}
