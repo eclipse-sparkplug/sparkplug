@@ -123,7 +123,9 @@ public class SendCommandTest extends TCKTest {
         publishService.publish(message);
     }
 
-    public void endTest() {
+    @Override
+    public void endTest(Map<String, String> results) {
+    	testResults.putAll(results);
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
     }

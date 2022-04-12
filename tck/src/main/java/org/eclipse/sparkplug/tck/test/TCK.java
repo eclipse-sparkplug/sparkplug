@@ -64,9 +64,8 @@ public class TCK {
 			HashMap<String, String> testResults = monitor.getResults();
 			testResults.putAll(listener.getResults());
 			current.endTest(testResults);
-			current.endTest();
 			current = null;
-			monitor.endTest();
+			monitor.endTest(null);
 			listener.clearResults();
 		} else {
 			logger.info("Test end requested but no test active");
