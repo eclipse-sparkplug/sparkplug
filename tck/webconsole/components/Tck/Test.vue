@@ -165,16 +165,59 @@
                                 <b-icon v-else-if="test.result === false" class="my-auto h3" icon="x-circle-fill" variant="danger"/>
                             </span>
                         </b-button-toolbar>
-                    <div v-if="loggingSplitInLines.length > 0" class="mt-3">
-                        <h6 class="text-primary">Logging:</h6>
-                        <div>
-                            <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
-                                <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
-                            </ul>
+                        <div v-if="loggingSplitInLines.length > 0" class="mt-3">
+                            <h6 class="text-primary">Logging:</h6>
+                            <div>
+                                <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
+                                    <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
+                                </ul>
 
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div v-show="test.testType==='BROKER'">
+                        <b-button-toolbar size="m">
+                            <div v-show="startB">
+                                <b-button class="mr-1" variant="success"
+                                          @click="$emit('start-single-test', test); testState(test)">Start Test
+                                </b-button>
+                                <span v-if="test.result != null">
+                                    <b-button class="mr-5" variant="info"
+                                              @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
+                                </span>
+                            </div>
+                            <div v-show="stopB">
+                              <span v-if="test.result === null">
+                                  <b-button class="ml-1" variant="danger"
+                                            @click="$emit('abort-single-test', test); testState(test) ">Stop Test</b-button>
+                              </span>
+                                <b-button class="mr-5" variant="info"
+                                          @click="$emit('reset-single-test', test); resetState(test)">Reset Test
+                                </b-button>
+                                <span v-if="test.result === null" class="float-right">
+                                       <strong>Test is running...</strong>
+                                       <b-spinner class="ml-auto" variant="info"></b-spinner>
+                                </span>
+                            </div>
+
+                            <span v-if="test.result != null">
+                                <span class="my-auto mr-5">overall Result: </span>
+                                <b-icon v-if="test.result === true" class="my-auto h3" icon="check-circle-fill"
+                                        variant="success"/>
+                                <b-icon v-else-if="test.result === false" class="my-auto h3" icon="x-circle-fill"
+                                        variant="danger"/>
+                            </span>
+                        </b-button-toolbar>
+                        <div v-if="loggingSplitInLines.length > 0" class="mt-3">
+                            <h6 class="text-primary">Logging:</h6>
+                            <div>
+                                <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
+                                    <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
                 </b-col>
             </b-row>
         </b-container>
@@ -192,6 +235,8 @@ export default {
             stop: false,
             startH: true,
             stopH: false,
+            startB: true,
+            stopB: false,
             isVisible: false
         }
     },
@@ -360,6 +405,9 @@ export default {
             if (test.testType === "HOSTAPPLICATION") {
                 this.startH = !this.startH;
                 this.stopH = !this.stopH;
+            } else if (test.testType === "BROKER") {
+                this.startB = !this.startB;
+                this.stopB = !this.stopB;
             } else {
                 this.start = !this.start;
                 this.stop = !this.stop;
@@ -369,6 +417,9 @@ export default {
             if (test.testType === "HOSTAPPLICATION") {
                 this.startH = true;
                 this.stopH = false;
+            } else if (test.testType === "BROKER") {
+                this.startB = true;
+                this.stopB = false;
             } else {
                 this.start = true;
                 this.stop = false;

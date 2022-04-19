@@ -9,6 +9,7 @@
  *
  * Contributors:
  *    Ian Craggs - initial implementation and documentation
+ *    Anja Helmbrecht-Schaar
  *******************************************************************************/
 
 package org.eclipse.sparkplug.tck.test.host;
