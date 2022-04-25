@@ -88,6 +88,10 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
+
+    implementation("com.google.guava:guava:${property("guava.version")}")
+    implementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-client.version")}")
+    implementation("org.jetbrains:annotations:${property("jetbrainsAnnotations.version")}")
 }
 
 

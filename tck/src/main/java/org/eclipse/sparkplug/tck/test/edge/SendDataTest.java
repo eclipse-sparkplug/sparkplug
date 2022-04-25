@@ -69,19 +69,20 @@ public class SendDataTest extends TCKTest {
 	private boolean isEdgeNodeChecked = false, isDeviceChecked = false;
 
 	public SendDataTest(TCK aTCK, String[] params) {
-		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
-		theTCK = aTCK;
-		testResults = new HashMap<String, String>();
+        logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
+        theTCK = aTCK;
+        testResults = new HashMap<String, String>();
+        testIds.addAll(Arrays.asList(testId));
 
-		if (params.length < 3) {
-			logger.error("Parameters to send data test must be: groupId edgeNodeId deviceId");
-			return;
-		}
-		hostApplicationId = params[0];
-		edgeNodeId = params[1];
-		deviceId = params[2];
-		logger.info("Parameters are HostApplicationId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, edgeNodeId, deviceId);
-	}
+        if (params.length < 3) {
+            logger.error("Parameters to send data test must be: groupId edgeNodeId deviceId");
+            return;
+        }
+        hostApplicationId = params[0];
+        edgeNodeId = params[1];
+        deviceId = params[2];
+        logger.info("Parameters are HostApplicationId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, edgeNodeId, deviceId);
+    }
 
 	@Override
 	public void endTest(Map<String, String> results) {

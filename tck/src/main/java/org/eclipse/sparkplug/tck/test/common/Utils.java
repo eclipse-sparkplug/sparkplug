@@ -24,6 +24,8 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -3,33 +3,34 @@
 <template>
   <div>
     <b-collapse v-model="change" id="collapse-2" class="mt-2">
-      <b-card title="Sparkplug Client Configuration" border-variant="primary">
-        <b-form>
-          <b-form-group label="Sparkplug Client Type:" description="Choose the type of Client you want to test.">
-            <b-form-radio-group
-              id="radio-group-2"
-              :disabled="currentTest !== null"
-              :checked="local.clientType"
-              @change="update('clientType', $event)"
-              name="clientType"
-            >
-              <b-form-radio value="HOSTAPPLICATION">Host Application</b-form-radio>
-              <b-form-radio value="EONNODE">Edge of Network Node</b-form-radio>
-            </b-form-radio-group>
-          </b-form-group>
+      <b-card title="Sparkplug conformance profile configuration" border-variant="primary">
+          <b-form>
+              <b-form-group label="Sparkplug conformance:" description="Choose the type of profile you want to test.">
+                  <b-form-radio-group
+                      id="radio-group-2"
+                      :disabled="currentTest !== null"
+                      :checked="local.testType"
+                      @change="update('testType', $event)"
+                      name="testType"
+                  >
+                      <b-form-radio value="HOSTAPPLICATION">Host Application</b-form-radio>
+                      <b-form-radio value="EONNODE">Edge Node</b-form-radio>
+                      <b-form-radio value="BROKER">Broker</b-form-radio>
+                  </b-form-radio-group>
+              </b-form-group>
 
-          <div v-if="local.clientType === 'HOSTAPPLICATION'">
-
-            <SparkplugHostApplication
-              :hostApplication="local.hostApplication"
-              @on-updated="update('hostApplication', $event)"
-            />
-          </div>
-          <div v-else-if="local.clientType === 'EONNODE'">
-            <SparkplugEoNNode :eonNode="local.eonNode" @on-updated="update('eonNode', $event)" />
-          </div>
-          <div v-else></div>
-        </b-form>
+              <div v-if="local.testType === 'HOSTAPPLICATION'">
+                  <SparkplugHostApplication :hostApplication="local.hostApplication"
+                                            @on-updated="update('hostApplication', $event)"/>
+              </div>
+              <div v-else-if="local.testType === 'EONNODE'">
+                  <SparkplugEoNNode :eonNode="local.eonNode" @on-updated="update('eonNode', $event)"/>
+              </div>
+              <div v-else-if="local.testType === 'BROKER'">
+                  <SparkplugBroker :broker="local.broker" @on-updated="update('broker', $event)"/>
+              </div>
+              <div v-else></div>
+          </b-form>
       </b-card>
     </b-collapse>
   </div>
@@ -75,21 +76,38 @@ export default {
      * @type {String} sparkplugClient.hostApplication.hostId
      */
     sparkplugClient: {
-      clientType: {
-        type: String,
-        required: true,
-        default: "HOSTAPPLICATION",
-      },
-      eonNode: {
-        complete: {
-          type: Boolean,
-          required: true,
-          default: false,
+        testType: {
+            type: String,
+            required: true,
+            default: "HOSTAPPLICATION",
         },
-        groupId: {
-          type: String,
-          required: true,
-          default: "",
+        broker: {
+            complete: {
+                type: Boolean,
+                required: true,
+                default: false,
+            },
+            host: {
+                type: String,
+                required: true,
+                default: "localhost",
+            },
+            port: {
+                type: Number,
+                required: true,
+                default: 1883,
+            },
+        },
+        eonNode: {
+            complete: {
+                type: Boolean,
+                required: true,
+                default: false,
+            },
+            groupId: {
+                type: String,
+                required: true,
+                default: "",
         },
         edgeNodeId: {
           type: String,
@@ -122,15 +140,17 @@ export default {
       return this.sparkplugClient
         ? this.sparkplugClient
         : {
-            complete: false,
-            clientType: "HOSTAPPLICATION",
-            hostApplication: {
-              hostId: "",
-            },
-            eonNode: {
-              groupId: "",
-              edgeNodeId: "",
-            },
+              complete: false,
+              testType: "HOSTAPPLICATION",
+              hostApplication: {
+                  hostId: "",
+              },
+              eonNode: {
+                  groupId: "", edgeNodeId: "",
+              },
+              broker: {
+                  host: "localhost", port: 1883,
+              },
           };
     },
   },

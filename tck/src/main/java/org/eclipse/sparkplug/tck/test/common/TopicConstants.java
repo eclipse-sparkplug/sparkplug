@@ -29,12 +29,14 @@ public class TopicConstants {
     public static final @NotNull String PASS = "PASS";
     public static final @NotNull String FAIL = "FAIL";
     public static final @NotNull String NOT_EXECUTED = "NOT EXECUTED";
+    public static final @NotNull String NOT_YET_IMPLEMENTED = "NOT YET IMPLEMENTED";
     public static final @NotNull String EMPTY = "EMPTY";
 
     public static final String TCK_LOG_TOPIC = "SPARKPLUG_TCK/LOG";
     public static final String TCK_DEVICE_CONTROL_TOPIC = "SPARKPLUG_TCK/DEVICE_CONTROL";
     public static final String TCK_CONSOLE_PROMPT_TOPIC = "SPARKPLUG_TCK/CONSOLE_PROMPT";
     public static final String TCK_CONSOLE_TEST_CONTROL_TOPIC = "SPARKPLUG_TCK/TEST_CONTROL";
+
     public static final String TCK_HOST_CONTROL = "SPARKPLUG_TCK/HOST_CONTROL";
     public static final String SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC = "spBv1.0/SparkplugTCK/NCMD/";
     public static final String SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC = "spBv1.0/SparkplugTCK/DCMD/";

@@ -13,20 +13,12 @@
 
 <template>
     <div>
-        <h3 v-if="clientType === 'HOSTAPPLICATION'">Host Application Tests</h3>
-        <h3 v-else>EoN Node Tests</h3>
-        <!--
-        <TckAllTests
-          @start-all-tests="$emit('start-all-tests=', hostTests, eonTests)"
-          @abort-all-tests="$emit('abort-all-tests=', hostTests, eonTests)"
-          @reset-all-tests="$emit('reset-all-tests=', hostTests, eonTests)"
-          @show-all-tests="toggleSidebar"
-        />
-        -->
+        <h3 v-if="testType === 'HOSTAPPLICATION'">Host Application Tests</h3>
+        <h3 v-else-if="testType === 'EONNODE'">EoN Node Tests</h3>
+        <h3 v-else>Broker Tests</h3>
         <TckTestsInformation :testNames="getTestNames" v-model="sidebar"/>
-        <!--<h3>Individual Tests</h3>-->
         <div>
-            <div v-if="clientType === 'HOSTAPPLICATION'">
+            <div v-if="testType === 'HOSTAPPLICATION'">
                 <TckTest
                     v-for="test in hostTests"
                     :id="test.testValues.name"
@@ -38,9 +30,21 @@
                     @reset-single-test="(testParameter) => resetTest(testParameter)"
                 />
             </div>
-            <div v-else-if="clientType === 'EONNODE'">
+            <div v-else-if="testType === 'EONNODE'">
                 <TckTest
                     v-for="test in eonTests"
+                    :id="test.testValues.name"
+                    :key="test.testValues.name"
+                    :ref="test.testValues.name"
+                    v-model="test.testValues"
+                    @start-single-test="(testParameter) => $emit('start-single-test', testParameter)"
+                    @abort-single-test="(testParameter) => $emit('abort-single-test', testParameter)"
+                    @reset-single-test="(testParameter) => resetTest(testParameter)"
+                />
+            </div>
+            <div v-else-if="testType === 'BROKER'">
+                <TckTest
+                    v-for="test in brokerTests"
                     :id="test.testValues.name"
                     :key="test.testValues.name"
                     :ref="test.testValues.name"
@@ -61,7 +65,7 @@ export default {
          * The client type denotes the current used client.
          * @type {String}
          */
-        clientType: {
+        testType: {
             type: String,
             required: true,
             default: "HOSTAPPLICATION",
@@ -76,11 +80,13 @@ export default {
          * Calculates a readable name out of the client type property.
          * @return {String} Readable name
          */
-        clientTypeReadableName: function () {
-            if (this.clientType === "HOSTAPPLICATION") {
+        testTypeReadableName: function () {
+            if (this.testType === "HOSTAPPLICATION") {
                 return "Host Application Tests";
-            } else if (this.clientType === "EONNODE") {
+            } else if (this.testType === "EONNODE") {
                 return "EoN Node Tests";
+            } else if (this.testType === "BROKER") {
+                return "Sparkplug MQTT Broker Tests";
             }
         },
 
@@ -89,8 +95,8 @@ export default {
          * @return {Object[]} List of objects with test name & readable name
          */
         getTestNames: function () {
-            if (this.clientType === "HOSTAPPLICATION") {
-                const testNames = [];
+            const testNames = [];
+            if (this.testType === "HOSTAPPLICATION") {
                 for (const [_, testValue] of Object.entries(this.hostTests)) {
                     const message = {
                         name: testValue.testValues.name,
@@ -99,9 +105,17 @@ export default {
                     testNames.push(message);
                 }
                 return testNames;
-            } else if (this.clientType === "EONNODE") {
-                const testNames = [];
+            } else if (this.testType === "EONNODE") {
                 for (const [_, testValue] of Object.entries(this.eonTests)) {
+                    const message = {
+                        name: testValue.testValues.name,
+                        readableName: testValue.testValues.readableName,
+                    };
+                    testNames.push(message);
+                }
+                return testNames;
+            } else if (this.testType === "BROKER") {
+                for (const [_, testValue] of Object.entries(this.brokerTests)) {
                     const message = {
                         name: testValue.testValues.name,
                         readableName: testValue.testValues.readableName,
@@ -121,7 +135,7 @@ export default {
          */
         currentTestLogging: function (newValue, oldValue) {
             if (newValue === null) return;
-            if (this.clientType === "HOSTAPPLICATION") {
+            if (this.testType === "HOSTAPPLICATION") {
                 for (const [_, testValue] of Object.entries(this.hostTests)) {
                     if (testValue.testValues.name === this.currentTest) {
                         testValue.testValues.logging.push(newValue);
@@ -132,7 +146,7 @@ export default {
                         }
                     }
                 }
-            } else if (this.clientType === "EONNODE") {
+            } else if (this.testType === "EONNODE") {
                 for (const [_, testValue] of Object.entries(this.eonTests)) {
                     if (testValue.testValues.name === this.currentTest) {
                         testValue.testValues.logging.push(newValue);
@@ -143,8 +157,18 @@ export default {
                         }
                     }
                 }
+            } else if (this.testType === "BROKER") {
+                for (const [_, testValue] of Object.entries(this.brokerTests)) {
+                    if (testValue.testValues.name === this.currentTest) {
+                        testValue.testValues.logging.push(newValue);
+                        if (newValue.logValue.includes("OVERALL: PASS")) {
+                            testValue.testValues.result = true;
+                        } else if (newValue.logValue.includes("OVERALL: FAIL")) {
+                            testValue.testValues.result = false;
+                        }
+                    }
+                }
             }
-
             this.$emit("reset-current-test");
         },
     },
@@ -416,6 +440,36 @@ export default {
                     },
                 },
             },
+            brokerTests: {
+                sparkplugCompliantBrokerTest: {
+                    testValues: {
+                        testType: "BROKER",
+                        name: "CompliantBrokerTest",
+                        readableName: "Sparkplug Compliant Broker Test",
+                        description: "This is the test, that checks requirements for a Sparkplug compliant MQTT Broker.",
+                        requirements: [
+                            "Start this test with the given broker host and port.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        result: null,
+                        logging: [],
+                    },
+                },
+                sparkplugAwareBrokerTest: {
+                    testValues: {
+                        testType: "BROKER",
+                        name: "AwareBrokerTest",
+                        readableName: "Sparkplug Aware Broker Test",
+                        description: "This is the test, that checks requirements for a Sparkplug aware MQTT Broker.",
+                        requirements: [
+                            "Start this test with the given broker host and port.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        result: null,
+                        logging: [],
+                    },
+                },
+            },
         };
     },
 
@@ -430,15 +484,22 @@ export default {
         resetTest: function (testParameter) {
             this.$emit("reset-single-test", testParameter);
 
-            if (this.clientType === "HOSTAPPLICATION") {
+            if (this.testType === "HOSTAPPLICATION") {
                 for (const [_, testValue] of Object.entries(this.hostTests)) {
                     if (testValue.testValues.name === testParameter.name) {
                         testValue.testValues.logging = [];
                         testValue.testValues.result = null;
                     }
                 }
-            } else if (this.clientType === "EONNODE") {
+            } else if (this.testType === "EONNODE") {
                 for (const [_, testValue] of Object.entries(this.eonTests)) {
+                    if (testValue.testValues.name === testParameter.name) {
+                        testValue.testValues.logging = [];
+                        testValue.testValues.result = null;
+                    }
+                }
+            } else if (this.testType === "BROKER") {
+                for (const [_, testValue] of Object.entries(this.brokerTests)) {
                     if (testValue.testValues.name === testParameter.name) {
                         testValue.testValues.logging = [];
                         testValue.testValues.result = null;
