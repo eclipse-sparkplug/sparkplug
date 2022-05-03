@@ -1466,9 +1466,10 @@ MUST set the MQTT Will Retained flag to false in the MQTT CONNECT packet.*#
 the same bdSeq number value that will be used in the associated NBIRTH message.*#
 This is used by Host Applications to correlate the NDEATH messages with a previously received NBIRTH
 message.
+** It is important to note that any new CONNEC
 * [tck-testable tck-id-payloads-ndeath-will-message-publisher]#[yellow-background]*An NDEATH message
 SHOULD be published by the Edge Node before it intentionally disconnects from the MQTT Server.*#
-This allows host applications advanced notice that an Edge Node has disconnected rather than waiting
+This allows Host Applications advanced notice that an Edge Node has disconnected rather than waiting
 for the NDEATH to be delivered by the MQTT Server based on an MQTT keep alive timeout.
 * An NDEATH message MAY include a timestamp.
 ** It should be noted that this timestamp is typically set at the time of the MQTT CONNECT message

@@ -105,6 +105,7 @@ messages.*#
 Node in the MQTT infrastructure MUST verify the Primary Host Application is ONLINE via the
 STATE topic if a Primary Host Application is configured for the Edge Node before publishing NBIRTH
 and DBIRTH messages.*#
+
 Most implementations of a Sparkplug Edge Node for real time SCADA systems will try to maintain a
 persistent MQTT Session with the MQTT Server Infrastructure. But there are use cases where the
 MQTT Session does not need to be persistent. In either case, an Edge Node can try to establish an
@@ -228,7 +229,8 @@ Application can build out the proper metric structure and set the Sparkplug Devi
 
 . Following the Sparkplug Specification in link:#payloads_ddata[Device Data Messages] (DDATA), all
 subsequent metrics are published to the Primary Host Application on a Report by Exception (RBE)
-basis using the DDATA message format.
+basis using the DDATA message format. Time based reporting is not explicitly disallowed by the
+Sparkplug Specification but it is discouraged and often unnecessary.
 
 . If at any time the Sparkplug Device cannot provide real time information, the Sparkplug
 Specification requires that an DDEATH be published. This will inform the Primary Host Application
