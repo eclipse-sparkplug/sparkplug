@@ -41,11 +41,16 @@ between MQTT clients in a system.
 ==== Define MQTT State Management
 
 One of the unique aspects of MQTT is that it was originally designed for real time SCADA systems to
-help reduce data latency over bandwidth limited and often unreliable network infrastructures. In
-many implementations the full benefit of this “Continuous Session Awareness” is not well understood,
-or not even implemented. The intent of the Sparkplug Specification is to take full advantage of
-MQTT’s native Continuous Session Awareness capability as it applies to real time SCADA/IIoT
-solutions.
+help reduce data latency over bandwidth limited and outage prone network infrastructures. These can
+include cellular, satellite, and other radio based networks. In many implementations the full
+benefit of this “Continuous Session Awareness” is not well understood, or not even implemented. The
+intent of the Sparkplug Specification is to take full advantage of MQTT’s native Continuous Session
+Awareness capability as it applies to real time SCADA/IIoT solutions.
+
+It is important to note that reducing bandwidth usage and being resilient to network drops is
+advantageous on more reliable and high bandwidth networks as well. By reducing the bandwidth usage,
+Sparkplug is able to move more data through the network because of its efficiency. This in turn can
+reduce network costs.
 
 [[introduction_define_the_mqtt_payload]]
 ==== Define the MQTT Payload
