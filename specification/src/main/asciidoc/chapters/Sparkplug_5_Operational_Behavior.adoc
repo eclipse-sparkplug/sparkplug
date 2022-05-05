@@ -98,13 +98,61 @@ quality if the Host Application loses connection to the MQTT Server.*#
 [[operational_behavior_edge_node_session_establishment]]
 === Edge Node Session Establishment
 
+Prior to sending an NBIRTH message, the MQTT client associated with the Edge Node must subscribe to
+receive NCMD messages with the following rules.
+
+* [tck-testable tck-id-message-flow-device-dcmd-subscribe]#[yellow-background]*The MQTT client
+associated with the Edge Node MUST subscribe to a topic of the form
+'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id
+is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of
+1.*#
+** This subscription is not optional as Edge Nodes MUST be able to respond to 'rebirth requests'.
+
+After subscribing, the Edge Node must follow these additional rules.
+
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#[yellow-background]*Any Edge
 Node in the MQTT infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH
 messages.*#
-* [tck-testable tck-id-message-flow-edge-node-birth-publish-subscribe]#[yellow-background]*Any Edge
-Node in the MQTT infrastructure MUST verify the Primary Host Application is ONLINE via the
-STATE topic if a Primary Host Application is configured for the Edge Node before publishing NBIRTH
-and DBIRTH messages.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message]#[yellow-background]*When
+a Sparkplug Edge Node sends its MQTT CONNECT packet, it MUST include a Will Message.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-topic]#[yellow-background]*The
+Edge Node's MQTT Will Message's topic MUST be of the form 'spBv1.0/group_id/NDEATH/edge_node_id'
+where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this
+Edge Node*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload]#[yellow-background]*The
+Edge Node's MQTT Will Message's payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]#[yellow-background]*The
+Edge Node's MQTT Will Message's payload MUST include a metric with the name of 'bdSeq' the datatype
+of INT64 and the value MUST be incremented by one from the value in the previous MQTT CONNECT
+packet.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-qos]#[yellow-background]*The
+Edge Node's MQTT Will Message's MQTT QoS MUST be 0.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]#[yellow-background]*The
+Edge Node's MQTT Will Message's retained flag MUST be set to false.*#
+
+Once the Sparkplug Host Application has successfully connected to the MQTT Server, it must publish a
+NBIRTH message. The NBIRTH message must follow the following rules.
+
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait]#[yellow-background]*If the
+Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host
+Application is ONLINE via the STATE topic before publishing NBIRTH and DBIRTH messages.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-topic]#[yellow-background]*The
+Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where
+group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge
+Node*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload]#[yellow-background]*The
+Edge Node's NBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-bdSeq]#[yellow-background]*The
+Edge Node's NBIRTH payload MUST include a metric with the name of 'bdSeq' the datatype of INT64 and
+the value MUST be the same as the previous MQTT CONNECT packet.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-qos]#[yellow-background]*The
+Edge Node's NBIRTH MQTT QoS MUST be 0.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-retained]#[yellow-background]*The
+Edge Node's NBIRTH retained flag MUST be set to false.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-seq]#[yellow-background]*The
+Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive).*#
+** This will become the starting sequence number which all following messages will include a
+sequence number that is one more than the previous up to 255 where it wraps back to zero.
 
 Most implementations of a Sparkplug Edge Node for real time SCADA systems will try to maintain a
 persistent MQTT Session with the MQTT Server Infrastructure. But there are use cases where the
@@ -172,7 +220,8 @@ This allows the MQTT Server to be notified that the Edge Node is offline and as 
 Will Message of the Edge Node will not be delivered by the MQTT Server to subscribed MQTT clients.
 
 When an Edge Node goes offline by sending its NDEATH, it is implied that all of the Edge Node's
-associated Devices are also offline.
+associated Devices are also offline. This means that a Host Application needs to stale the tags for
+all Sparkplug Device's associated with this Edge Node.
 
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
@@ -189,6 +238,38 @@ MQTT Server infrastructure and how that infrastructure interacts with the notion
 Edge Node. But to a large extent the technical requirements of those pieces of the infrastructure
 have already been provided. For most use cases in this market sector the primary focus will be on
 the implementation of the Sparkplug Specification between the native device and the Edge Node API’s.
+
+Prior to sending a DBIRTH message, if the Device supports 'writing to outputs' the MQTT client
+associated with the Sparkplug Device must subscribe to receive DCMD messages with the following
+rules.
+* [tck-testable tck-id-message-flow-device-dcmd-subscribe]#[yellow-background]*If the Device
+supports writing to outputs, the MQTT client associated with the Device MUST subscribe to a topic of
+the form 'spBv1.0/group_id/DCMD/edge_node_id/device_id' where group_id is the Sparkplug Group ID the
+edge_node_id is the Sparkplug Edge Node ID and the device_id is the Sparkplug Device ID for this
+Device. It MUST subscribe on this topic with a QoS of 1.*#
+
+A Device can publish a DBIRTH as long as an NBIRTH has been sent previously and the MQTT session is
+active. The DBIRTH message must follow the following rules.
+
+* [tck-testable tck-id-message-flow-device-birth-publish-nbirth-wait]#[yellow-background]*The NBIRTH
+message must have been sent within the current MQTT session prior to a DBIRTH being published.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-topic]#[yellow-background]*The
+Device's DBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/DBIRTH/edge_node_id/device_id'
+where group_id is the Sparkplug Group ID the edge_node_id is the Sparkplug Edge Node ID and the
+device_id is the Sparkplug Device ID for this Device.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-match-edge-node-topic]#[yellow-background]*The
+Device's DBIRTH MQTT topic group_id and edge_node_id MUST match the group_id and edge_node_id that
+were sent in the prior NBIRTH message for the Edge Node this Device is associated with.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload]#[yellow-background]*The
+Device's DBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-qos]#[yellow-background]*The
+Device's DBIRTH MQTT QoS MUST be 0.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-retained]#[yellow-background]*The
+Device's DBIRTH retained flag MUST be set to false.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload-seq]#[yellow-background]*The
+Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive) and be one
+more than was included in the prior Sparkplug message sent from the Edge Node associated with this
+Device.*#
 
 In order to expose and populate the metrics from any intelligent device, the following simple
 session diagram outlines the requirements:
@@ -543,9 +624,9 @@ Node within the established Sparkplug session.*#
 * [tck-testable tck-id-operational-behavior-data-publish-nbirth-values]#[yellow-background]*NBIRTH
 messages MUST include current values for all metrics.*#
 * [tck-testable tck-id-operational-behavior-data-publish-nbirth-change]#[yellow-background]*NDATA
-messages MUST only be published when Edge Node level metrics change.*#
-** In other words, metric values that have not changed within the same Sparkplug Session MUST not be
-resent until a new Sparkplug session is established.
+messages SHOULD only be published when Edge Node level metrics change.*#
+** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
+be resent until a new Sparkplug session is established.
 * NDATA messages SHOULD be aggregated to include multiple metrics.
 ** This is up to the application developer in terms of how many metrics should be aggregated in a
 single message, but it typically doesn't make sense to publish an MQTT message for every single
@@ -564,9 +645,9 @@ the established Sparkplug session.*#
 * [tck-testable tck-id-operational-behavior-data-publish-dbirth-values]#[yellow-background]*DBIRTH
 messages MUST include current values for all metrics.*#
 * [tck-testable tck-id-operational-behavior-data-publish-dbirth-change]#[yellow-background]*DDATA
-messages MUST only be published when Device level metrics change.*#
-** In other words, metric values that have not changed within the same Sparkplug Session MUST not be
-resent until a new Sparkplug session is established.
+messages SHOULD only be published when Device level metrics change.*#
+** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
+be resent until a new Sparkplug session is established.
 * DDATA messages SHOULD be aggregated to include multiple metrics.
 ** This is up to the application developer in terms of how many metrics should be aggregated in a
 single message, but it typically doesn't make sense to publish an MQTT message for every single
