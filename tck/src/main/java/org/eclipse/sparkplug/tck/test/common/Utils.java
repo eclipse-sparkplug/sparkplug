@@ -146,4 +146,18 @@ public class Utils {
 
 		return summary;
 	}
+	
+	public static boolean checkUTF8String(String inString) {
+		// MUST be a valid UTF-8 string
+
+		byte[] bytes = inString.getBytes(StandardCharsets.UTF_8);
+
+		String utf8EncodedString = new String(bytes, StandardCharsets.UTF_8);
+
+		boolean rc = false;
+		if (inString.equals(utf8EncodedString)) {
+			rc = true;
+		}
+		return rc;
+	}
 }

@@ -64,7 +64,16 @@ public class PayloadTest extends TCKTest {
 			ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ, ID_PAYLOADS_NAME_REQUIREMENT, ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT,
 			ID_PAYLOADS_NAME_CMD_REQUIREMENT, ID_PAYLOADS_DATASET_COLUMN_SIZE, ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS,
 			ID_PAYLOADS_DATASET_TYPES_DEF, ID_PAYLOADS_DATASET_TYPES_TYPE, ID_PAYLOADS_DATASET_TYPES_VALUE,
-			ID_PAYLOADS_DATASET_TYPES_NUM, ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_DATASET_VALUE };
+			ID_PAYLOADS_DATASET_TYPES_NUM, ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_DATASET_VALUE,
+			ID_PAYLOADS_TEMPLATE_IS_DEFINITION, ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION,
+			ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION, ID_PAYLOADS_TEMPLATE_DEFINITION_REF,
+			ID_PAYLOADS_TEMPLATE_INSTANCE_REF, ID_PAYLOADS_TEMPLATE_REF_DEFINITION,
+            ID_PAYLOADS_TEMPLATE_IS_DEFINITION_DEFINITION, ID_PAYLOADS_TEMPLATE_IS_DEFINITION_INSTANCE,
+            ID_PAYLOADS_TEMPLATE_VERSION, ID_PAYLOADS_TEMPLATE_REF_INSTANCE,
+            ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED, ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE,
+            ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE, ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE,
+            ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE
+            };
 	
 	private final @NotNull TCK theTCK;
 
@@ -150,6 +159,7 @@ public class PayloadTest extends TCKTest {
             }
             
             checkDataSet(packet);
+            checkTemplate(packet);
         } finally {
             theTCK.endTest();
         }
@@ -487,7 +497,7 @@ public class PayloadTest extends TCKTest {
 					if (types.size() == d.getTypesCount()) {
 						for (int i = 0; i < types.size(); ++i) {
 							int curtype = d.getTypes(i);
-							if (curtype >= 0 && curtype <= DataType.DateTimeArray.getNumber()) {
+							if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
 								uint32types = false;
 							}
 							if (!valueTypes.contains(DataType.valueOf(curtype))) {
@@ -533,4 +543,156 @@ public class PayloadTest extends TCKTest {
 
 	}
     
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_IS_DEFINITION)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_DEFINITION_REF)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+			id = ID_PAYLOADS_TEMPLATE_REF_DEFINITION)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_TEMPLATE,
+			id = ID_PAYLOADS_TEMPLATE_INSTANCE_REF)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_IS_DEFINITION_DEFINITION)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_IS_DEFINITION_INSTANCE)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_REF_INSTANCE)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE,
+            id = ID_PAYLOADS_TEMPLATE_VERSION)
+    
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
+            id = ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
+            id = ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
+            id = ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
+            id = ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE)  
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
+            id = ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ)
+    @SpecAssertion(
+            section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
+            id = ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE)
+	public void checkTemplate(final @NotNull PublishPacket packet) {
+		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+		for (Metric m : sparkplugPayload.getMetricsList()) {
+			if (m.hasDatatype()) {
+				DataType datatype = DataType.valueOf(m.getDatatype());
+
+				if (datatype == DataType.Template && m.hasTemplateValue()) {
+					Payload.Template t = m.getTemplateValue();
+
+					// Template definitions must be in NBIRTH messages
+					testResults.put(ID_PAYLOADS_TEMPLATE_IS_DEFINITION,
+							setResult(t.hasIsDefinition(), PAYLOADS_TEMPLATE_IS_DEFINITION));
+
+					if (t.hasIsDefinition()) {
+						if (t.getIsDefinition()) {
+							testResults.put(ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION,
+									setResult(t.hasIsDefinition(), PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION));
+							testResults.put(ID_PAYLOADS_TEMPLATE_IS_DEFINITION_DEFINITION,
+									setResult(t.hasIsDefinition() && t.getIsDefinition(),
+											PAYLOADS_TEMPLATE_IS_DEFINITION_DEFINITION));
+							// templateRef must be omitted
+							testResults.put(ID_PAYLOADS_TEMPLATE_DEFINITION_REF,
+									setResult(t.hasTemplateRef() == false, PAYLOADS_TEMPLATE_DEFINITION_REF));
+							testResults.put(ID_PAYLOADS_TEMPLATE_REF_DEFINITION,
+									setResult(t.hasTemplateRef() == false, PAYLOADS_TEMPLATE_REF_DEFINITION));
+						} else {
+							testResults.put(ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION,
+									setResult(t.hasIsDefinition(), PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION));
+							testResults.put(ID_PAYLOADS_TEMPLATE_IS_DEFINITION_INSTANCE,
+									setResult(t.hasIsDefinition() && (t.getIsDefinition() == false),
+											PAYLOADS_TEMPLATE_IS_DEFINITION_INSTANCE));
+							// templateRef must be included
+							testResults.put(ID_PAYLOADS_TEMPLATE_INSTANCE_REF,
+									setResult(t.hasTemplateRef(), PAYLOADS_TEMPLATE_INSTANCE_REF));
+							boolean ref = false;
+							if (t.hasTemplateRef()) {
+								ref = Utils.checkUTF8String(t.getTemplateRef());
+							}
+							testResults.put(ID_PAYLOADS_TEMPLATE_REF_INSTANCE,
+									setResult(ref, PAYLOADS_TEMPLATE_REF_INSTANCE));	
+						}
+					}
+					
+					boolean version = true;
+					if (t.hasVersion()) {
+						version = Utils.checkUTF8String(t.getVersion());
+					}
+					testResults.put(ID_PAYLOADS_TEMPLATE_VERSION,
+							setResult(version, PAYLOADS_TEMPLATE_VERSION));
+					
+					if (t.getParametersCount() > 0) {
+						for (Payload.Template.Parameter p : t.getParametersList()) {
+						
+							if (t.getIsDefinition()) {
+								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED,
+									setResult(p.hasName(), PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED));
+							}
+							if (p.hasName()) {
+								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE,
+									setResult(Utils.checkUTF8String(p.getName()), PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE));							
+							}
+							
+							
+							if (p.hasType()) {
+								int curtype = p.getType();
+								boolean uint32types = true;
+								if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
+									uint32types = false;
+								}
+								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
+									setResult(uint32types, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
+								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
+										setResult(uint32types, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
+								
+							}
+							
+					        final String topic = packet.getTopic();
+							String[] topicParts = topic.split("/");
+							if (topicParts.length > 2 && (topicParts[2].equals(TOPIC_PATH_NBIRTH)
+									|| topicParts[2].equals(TOPIC_PATH_DBIRTH))) {
+								
+								if (t.getIsDefinition()) {
+									testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ,
+										setResult(p.hasType(), PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ));
+								}
+							}
+							
+								
+							boolean valuetype = true;
+							if (!p.hasIntValue() && !p.hasLongValue() && !p.hasFloatValue() &&
+											!p.hasDoubleValue() && !p.hasBooleanValue() && !p.hasStringValue()) {
+								valuetype = false;
+							}
+							testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE,
+									setResult(valuetype, PAYLOADS_TEMPLATE_PARAMETER_VALUE));
+						}
+					}
+				}
+			}
+		}
+
+	}
+
 }
