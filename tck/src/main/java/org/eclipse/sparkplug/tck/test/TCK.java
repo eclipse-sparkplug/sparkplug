@@ -53,6 +53,8 @@ public class TCK {
 			current = (TCKTest) constructor.newInstance(parameters);
 			monitor.startTest();
 			listener.run(new String[0]);
+		} catch (java.lang.reflect.InvocationTargetException e) {
+			logger.error(e.getMessage());
 		} catch (final Exception e) {
 			logger.error("Could not find or set test class " + profile + "." + test, e);
 		}
