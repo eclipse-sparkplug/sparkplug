@@ -1018,6 +1018,10 @@ structures that can be represented in folder structures with metrics which are o
 The NBIRTH is responsible for informing host applications of all of the information about the Edge
 Node. This includes every metric it will publish data for in the future.
 
+There is a dependency on the MQTT CONNECT packet with regard to NBIRTH messages that are
+subsequently sent for that given MQTT Session. These are can be found in the 
+link:#operational_behavior_edge_node_session_establishment[Edge Node Session Establishment Section]
+
 * [tck-testable tck-id-payloads-nbirth-timestamp]#[yellow-background]*NBIRTH messages MUST include a
 payload timestamp that denotes the time at which the message was published.*#
 * [tck-testable tck-id-payloads-nbirth-edge-node-descriptor]#[yellow-background]*Every Edge Node
@@ -1027,10 +1031,12 @@ These are used like addresses and need to be unique as a result.
 sequence number and it MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-nbirth-bdseq]#[yellow-background]*Every NBIRTH message MUST include
 a bdSeq number metric.*#
-* [tck-testable tck-id-payloads-nbirth-bdseq-inc]#[yellow-background]*Every NBIRTH message in a new
-Sparkplug MQTT session SHOULD include a bdSeq number value that is one greater than the previous
-NBIRTH's bdSeq number. This value MUST never exceed 255. If in the previous NBIRTH a value of 255
-was sent, the next NBIRTH MUST have a value of 0.*#
+* [tck-testable tck-id-payloads-nbirth-bdseq-repeat]#[yellow-background]*The bdSeq number value MUST
+match the bdSeq number value that was sent in the prior MQTT CONNECT packet WILL Message.*#
+** Note if a new NBIRTH is being sent (due to a Rebirth request or ant other reason) the Sparkplug
+Edge Node MQTT client MUST publish the same bdSeq number that was sent in the prior MQTT CONNECT
+packet Will Message payload. This is because the NDEATH bdSeq number MUST always match the bdSeq
+number of the associated NBIRTH that is stored in the MQTT Server via the MQTT Will Message.
 * [tck-testable tck-id-payloads-nbirth-rebirth-req]#[yellow-background]*Every NBIRTH MUST include a
 metric with the name 'Node Control/Rebirth' and have a boolean value of false.*#
 This is used by Host Applications to force an Edge Node to send a new birth sequence (NBIRTH and

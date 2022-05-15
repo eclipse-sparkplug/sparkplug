@@ -122,9 +122,10 @@ Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload]#[yellow-background]*The
 Edge Node's MQTT Will Message's payload MUST be a Sparkplug Google Protobuf encoded payload.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]#[yellow-background]*The
-Edge Node's MQTT Will Message's payload MUST include a metric with the name of 'bdSeq' the datatype
-of INT64 and the value MUST be incremented by one from the value in the previous MQTT CONNECT
-packet.*#
+Edge Node's MQTT Will Message's payload MUST include a metric with the name of 'bdSeq', the datatype
+of INT64, and the value MUST be incremented by one from the value in the previous MQTT CONNECT
+packet unless the value would be greater than 255. If in the previous NBIRTH a value of 255 was
+sent, the next MQTT Connect packet Will Message payload bdSeq number value MUST have a value of 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-qos]#[yellow-background]*The
 Edge Node's MQTT Will Message's MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]#[yellow-background]*The
