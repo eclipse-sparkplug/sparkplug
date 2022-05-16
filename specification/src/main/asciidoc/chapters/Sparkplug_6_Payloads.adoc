@@ -1028,7 +1028,7 @@ payload timestamp that denotes the time at which the message was published.*#
 Descriptor in any Sparkplug infrastructure MUST be unique in the system.*#
 These are used like addresses and need to be unique as a result.
 * [tck-testable tck-id-payloads-nbirth-seq]#[yellow-background]*Every NBIRTH message MUST include a
-sequence number and it MUST have a value of 0.*#
+sequence number and it MUST have a value between 0 and 255 (inclusive).*#
 * [tck-testable tck-id-payloads-nbirth-bdseq]#[yellow-background]*Every NBIRTH message MUST include
 a bdSeq number metric.*#
 * [tck-testable tck-id-payloads-nbirth-bdseq-repeat]#[yellow-background]*The bdSeq number value MUST
