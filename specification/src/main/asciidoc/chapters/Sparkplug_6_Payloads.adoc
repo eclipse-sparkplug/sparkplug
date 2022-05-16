@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[payloads]]
@@ -21,7 +21,7 @@ standpoint, the payload is treated as an agnostic binary array of bytes that can
 payload at all, to a maximum of 256MB. But for applications within a known solution space to work
 using MQTT the payload representation does need to be defined.
 
-This section of the Eclipse Sparkplug™ specification defines how MQTT Sparkplug payloads are encoded
+This section of the Eclipse Sparkplug specification defines how MQTT Sparkplug payloads are encoded
 and the data that is required. Sparkplug supports multiple payloads encoding definitions. There is
 an 'A' payload format as well as a 'B' payload format. As described in the
 link:#introduction_define_the_mqtt_payload[Introduction Section] Sparkplug A is deprecated and is

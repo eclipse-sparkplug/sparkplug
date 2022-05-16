@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[operational_behavior]]
@@ -22,7 +22,7 @@ Edge Node/Device. Additional Sparkplug Host Application MQTT clients can connect
 any of the real time data without impacting the Primary Host Application.
 
 Due to the nature of real time SCADA solutions, it is very important for the Primary Host
-Application and all connected Eclipse Sparkplug™ Edge Nodes to have the MQTT Session STATE
+Application and all connected Eclipse Sparkplug Edge Nodes to have the MQTT Session STATE
 information for each other. In order to accomplish this the Sparkplug Topic Namespace definitions
 for Birth/Death Certificates along with the defined payloads provide both state and context between
 the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios

@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[components]]
@@ -23,7 +23,7 @@ Figure 1 - MQTT SCADA Infrastructure
 === MQTT Server(s)
 
 MQTT enabled infrastructure requires that one or more MQTT Servers are present in the
-infrastructure. The only requirement that the Eclipse Sparkplug™ specification places on the
+infrastructure. The only requirement that the Eclipse Sparkplug specification places on the
 selection of an MQTT Server component in the architecture is it is required to be compliant with a
 subset of the MQTT specification. Specifically it must meet the requirements defined in the
 link:#conformance_sparkplug_mqtt_server[MQTT Server Conformance Section]. The MQTT Server should

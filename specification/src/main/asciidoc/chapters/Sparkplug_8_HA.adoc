@@ -7,13 +7,13 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[high_availability]]
 == High Availability
 
-Sparkplug™ based infrastructures are often used in mission-critical environments. Planning for high
+Sparkplug based infrastructures are often used in mission-critical environments. Planning for high
 availability is a key requirement for many Sparkplug users. This section discusses non-normative
 approaches to achieving high availability.
 

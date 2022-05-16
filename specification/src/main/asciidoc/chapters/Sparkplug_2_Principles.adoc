@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[principles]]
@@ -70,7 +70,7 @@ real-time SCADA, the “state” of the end device needs to be always known. In 
 host could only rely on RBE data arriving reliably if it could be assured of the state of the MQTT
 session.
 
-The Eclipse Sparkplug™ specification defines the use of the MQTT “Will Message” feature to provide
+The Eclipse Sparkplug specification defines the use of the MQTT “Will Message” feature to provide
 MQTT session state information to any other interested MQTT client in the infrastructure. The
 session state awareness is implemented around a set of defined BIRTH and DEATH topic namespace and
 payload definitions in conjunction with the MQTT connection “Keep Alive” timer.
