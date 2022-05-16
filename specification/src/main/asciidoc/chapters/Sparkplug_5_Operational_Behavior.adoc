@@ -370,7 +370,10 @@ continue.
 It is also important to note that depending on the Sparkplug Host Application's purpose, it may make
 sense to never process messages out of order. It also may make sense to not process a message that
 arrived out of sequence if its preceding messages didn't arrive before the Reorder Timeout. These
-choices are left to the Sparkplug Host Application developer.
+choices are left to the Sparkplug Host Application developer. For example, a Host Application that
+is a time series database may want to insert all data that arrives regardless of the message order.
+However, a rules engine Host Application may require that messages are processed in order of their
+sequence numbers to preserve the order of events as they occurred at the Edge Node.
 
 * [tck-testable tck-id-operational-behavior-host-reordering-param]#[yellow-background]*Sparkplug
 Host Applications SHOULD provide a configurable 'Reorder Timeout' parameter*#
