@@ -734,8 +734,10 @@ For Edge Node level commands, the following rules must be followed.
 * [tck-testable tck-id-operational-behavior-data-commands-ncmd-verb]#[yellow-background]*An Edge
 Node level command MUST use the NCMD Sparkplug verb.*#
 * [tck-testable tck-id-operational-behavior-data-commands-ncmd-metric-name]#[yellow-background]*An
-NCMD message MUST include a metric name that was included in the associated NBIRTH message for the
+NCMD message SHOULD include a metric name that was included in the associated NBIRTH message for the
 Edge Node.*#
+** Sparkplug Edge Node Applications should be resilient to receiving metrics names that were not
+included in the NBIRTH message.
 * [tck-testable tck-id-operational-behavior-data-commands-ncmd-metric-value]#[yellow-background]*An
 NCMD message MUST include a compatible metric value for the metric name that it is writing to.*#
 ** In other words, if the metric has a datatype of a boolean the value must be true or false.
@@ -745,8 +747,10 @@ For Device level commands, the following rules must be followed.
 * [tck-testable tck-id-operational-behavior-data-commands-dcmd-verb]#[yellow-background]*A Device
 level command MUST use the DCMD Sparkplug verb.*#
 * [tck-testable tck-id-operational-behavior-data-commands-dcmd-metric-name]#[yellow-background]*A
-DCMD message MUST include a metric name that was included in the associated DBIRTH message for the
+DCMD message SHOULD include a metric name that was included in the associated DBIRTH message for the
 Device.*#
+** Sparkplug Edge Node Applications should be resilient to receiving metrics names that were not
+included in the DBIRTH message.
 * [tck-testable tck-id-operational-behavior-data-commands-dcmd-metric-value]#[yellow-background]*A
 DCMD message MUST include a compatible metric value for the metric name that it is writing to.*#
 ** In other words, if the metric has a datatype of a boolean the value must be true or false.
