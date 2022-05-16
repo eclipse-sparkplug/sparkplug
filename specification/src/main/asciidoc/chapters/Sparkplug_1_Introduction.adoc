@@ -8,7 +8,7 @@ https://www.eclipse.org/legal/epl-2.0.
 SPDX-License-Identifier: EPL-2.0
 ////
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+_Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation._
 
 [[introduction]]
 == Introduction
@@ -16,7 +16,7 @@ _Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation
 [[introduction_rationale_and_use_case]]
 === Rationale and Use Case
 
-Eclipse Sparkplug™ provides an open and freely available specification for how Edge of Network
+Eclipse Sparkplug provides an open and freely available specification for how Edge of Network
 Gateways (Sparkplug Edge Nodes) or native MQTT enabled end devices and Sparkplug Host Applications
 communicate bi-directionally within an MQTT Infrastructure. This document details the structure and
 implementation requirements for Sparkplug compliant MQTT Client implementations on both Edge Nodes
