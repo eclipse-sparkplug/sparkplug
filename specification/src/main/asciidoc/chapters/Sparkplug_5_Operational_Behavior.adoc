@@ -101,7 +101,7 @@ quality if the Host Application loses connection to the MQTT Server.*#
 Prior to sending an NBIRTH message, the MQTT client associated with the Edge Node must subscribe to
 receive NCMD messages with the following rules.
 
-* [tck-testable tck-id-message-flow-device-dcmd-subscribe]#[yellow-background]*The MQTT client
+* [tck-testable tck-id-message-flow-edge-node-ncmd-subscribe]#[yellow-background]*The MQTT client
 associated with the Edge Node MUST subscribe to a topic of the form
 'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id
 is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of
