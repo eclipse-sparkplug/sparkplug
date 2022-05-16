@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[payloads]]
@@ -21,7 +21,7 @@ standpoint, the payload is treated as an agnostic binary array of bytes that can
 payload at all, to a maximum of 256MB. But for applications within a known solution space to work
 using MQTT the payload representation does need to be defined.
 
-This section of the Eclipse Sparkplug™ specification defines how MQTT Sparkplug payloads are encoded
+This section of the Eclipse Sparkplug specification defines how MQTT Sparkplug payloads are encoded
 and the data that is required. Sparkplug supports multiple payloads encoding definitions. There is
 an 'A' payload format as well as a 'B' payload format. As described in the
 link:#introduction_define_the_mqtt_payload[Introduction Section] Sparkplug A is deprecated and is
@@ -1018,6 +1018,10 @@ structures that can be represented in folder structures with metrics which are o
 The NBIRTH is responsible for informing host applications of all of the information about the Edge
 Node. This includes every metric it will publish data for in the future.
 
+There is a dependency on the MQTT CONNECT packet with regard to NBIRTH messages that are
+subsequently sent for that given MQTT Session. These are can be found in the 
+link:#operational_behavior_edge_node_session_establishment[Edge Node Session Establishment Section]
+
 * [tck-testable tck-id-payloads-nbirth-timestamp]#[yellow-background]*NBIRTH messages MUST include a
 payload timestamp that denotes the time at which the message was published.*#
 * [tck-testable tck-id-payloads-nbirth-edge-node-descriptor]#[yellow-background]*Every Edge Node
@@ -1027,9 +1031,12 @@ These are used like addresses and need to be unique as a result.
 sequence number and it MUST have a value between 0 and 255 (inclusive).*#
 * [tck-testable tck-id-payloads-nbirth-bdseq]#[yellow-background]*Every NBIRTH message MUST include
 a bdSeq number metric.*#
-* [tck-testable tck-id-payloads-nbirth-bdseq-inc]#[yellow-background]*Every NBIRTH message in a new
-Sparkplug MQTT session MUST include a bdSeq number value that is the same value as the bdSeq number
-that was included in the previous MQTT CONNECT packet Will Message payload.*#
+* [tck-testable tck-id-payloads-nbirth-bdseq-repeat]#[yellow-background]*The bdSeq number value MUST
+match the bdSeq number value that was sent in the prior MQTT CONNECT packet WILL Message.*#
+** Note if a new NBIRTH is being sent (due to a Rebirth request or ant other reason) the Sparkplug
+Edge Node MQTT client MUST publish the same bdSeq number that was sent in the prior MQTT CONNECT
+packet Will Message payload. This is because the NDEATH bdSeq number MUST always match the bdSeq
+number of the associated NBIRTH that is stored in the MQTT Server via the MQTT Will Message.
 * [tck-testable tck-id-payloads-nbirth-rebirth-req]#[yellow-background]*Every NBIRTH MUST include a
 metric with the name 'Node Control/Rebirth' and have a boolean value of false.*#
 This is used by Host Applications to force an Edge Node to send a new birth sequence (NBIRTH and

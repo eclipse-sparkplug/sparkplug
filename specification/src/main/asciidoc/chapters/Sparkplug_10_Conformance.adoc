@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[conformance]]
@@ -72,7 +72,11 @@ In addition, it also must have the ability to store NBIRTH and DBIRTH messages o
 Nodes that pass through it. Any stored NBIRTH or DBIRTH message must always be the most recent
 NBIRTH or DBIRTH that was published to the MQTT Server. In addition, it must make the stored NBIRTH
 and DBIRTH messages available to MQTT clients via a retained MQTT message on the appropriate
-$sparkplug topic.
+$sparkplug topic. Note this does not mean that NBIRTH or DBIRTH messages must be published with the
+MQTT retain flag set to true. NBIRTH and DBIRTH messages must be published with the MQTT retain flag
+set to false. The difference with a 'Sparkplug Aware MQTT Server' is that it will treat NBIRTH and
+DBIRTH messages as though their retain flag is set to true even though it is not when published by
+a Sparkplug Edge Node.
 
 It is important to note these stored messages are the original NBIRTH and DBIRTH messages published
 by each Edge Node. As a result, the metric values can not be expected to be the current values. In a
