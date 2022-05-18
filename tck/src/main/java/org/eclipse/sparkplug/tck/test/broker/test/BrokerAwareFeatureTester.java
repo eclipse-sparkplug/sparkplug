@@ -12,32 +12,16 @@
 package org.eclipse.sparkplug.tck.test.broker.test;
 
 import com.hivemq.client.mqtt.MqttClientSslConfig;
-import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
-import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
-import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscribe;
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
-import com.hivemq.client.mqtt.mqtt5.message.subscribe.Mqtt5Subscription;
-import org.eclipse.sparkplug.tck.test.broker.test.results.AwareTestResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient.Mqtt3Publishes;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
 
 public class BrokerAwareFeatureTester {
 

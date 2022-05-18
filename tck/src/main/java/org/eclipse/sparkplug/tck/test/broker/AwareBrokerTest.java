@@ -1,10 +1,21 @@
+/**
+ * Copyright (c) 2022 Anja Helmbrecht-Schaar
+ * <p>
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ * <p>
+ * Contributors:
+ * Anja Helmbrecht-Schaar - initial implementation and documentation
+ */
+
 package org.eclipse.sparkplug.tck.test.broker;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.message.subscribe.Mqtt5Subscription;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
@@ -22,7 +33,10 @@ import org.jboss.test.audit.annotations.SpecAssertion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.eclipse.sparkplug.tck.test.broker.CompliantBrokerTest.checkCompliance;

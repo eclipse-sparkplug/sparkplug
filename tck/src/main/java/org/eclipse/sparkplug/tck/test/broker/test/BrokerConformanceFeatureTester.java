@@ -23,7 +23,6 @@ import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck;
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
-import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3WillPublishBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscribe;
 import org.eclipse.sparkplug.tck.test.broker.test.results.*;
 import org.jetbrains.annotations.NotNull;
@@ -44,10 +43,10 @@ import static com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient.Mqtt3Publishes;
 
 public class BrokerConformanceFeatureTester {
 
-    private static Logger Logger = LoggerFactory.getLogger("Sparkplug");
     private static final String ONE_BYTE = "a";
     private static final int MAX_TOPIC_LENGTH = 65535;
     private static final int MAX_CLIENT_ID_LENGTH = 65535;
+    private static Logger Logger = LoggerFactory.getLogger("Sparkplug");
     private final String host;
     private final int port;
     private final String username;
