@@ -161,11 +161,11 @@ public class MQTTListener implements MqttCallbackExtended {
 					checkTopic(topic.split("/"));
 
 					PayloadOrBuilder inboundPayload = Payload.parseFrom(message.getPayload());
-					System.out.println(inboundPayload.toString());
+					//System.out.println(inboundPayload.toString());
 
 					if (inboundPayload.hasTimestamp()) {
 						Date now = new Date();
-						long diff = now.getTime() - inboundPayload.getTimestamp();						
+						long diff = now.getTime() - inboundPayload.getTimestamp();
 						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC, setResult(
 								diff >= 0 && diff <= 20000, PAYLOADS_TIMESTAMP_IN_UTC));
 						if (diff < 0 || diff > 20000) {

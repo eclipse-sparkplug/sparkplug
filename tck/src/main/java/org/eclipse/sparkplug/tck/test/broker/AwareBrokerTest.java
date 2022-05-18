@@ -101,8 +101,8 @@ public class AwareBrokerTest extends TCKTest {
     @Override
     public void endTest(Map<String, String> results) {
         testResults.putAll(results);
-        brokerAwareFeatureTester.finish(subscriber);
         Utils.setEndTest(getName(), testIds, testResults);
+        brokerAwareFeatureTester.finish(subscriber);
         reportResults(testResults);
     }
 
@@ -162,6 +162,7 @@ public class AwareBrokerTest extends TCKTest {
         }
 
         if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
+            logger.debug("AWARE:: Broker {}, publish - end test", getName());
             theTCK.endTest();
         }
     }
@@ -202,6 +203,7 @@ public class AwareBrokerTest extends TCKTest {
         }
 
         if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
+            logger.debug("AWARE:: Broker {}, checkPublishOnSysTopic - end test", getName());
             theTCK.endTest();
         }
     }
