@@ -390,7 +390,12 @@ tasks.prepareHivemqHome {
     from(projectDir.resolve("hivemq-configuration/logback.xml")) {
         into("conf")
     }
-
+    /**
+    from(projectDir.resolve("hivemq-configuration/extensions/hivemq-sparkplug-aware-extension.zip")) {
+    into("extensions")
+    /** must be unzipped for aware tests **/
+    }
+     **/
 }
 
 tasks.runHivemqWithExtension {
