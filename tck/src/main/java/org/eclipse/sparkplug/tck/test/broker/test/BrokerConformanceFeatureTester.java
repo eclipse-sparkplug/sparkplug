@@ -77,7 +77,7 @@ public class BrokerConformanceFeatureTester {
     public @Nullable Mqtt3ConnAck testConnectWithWill() {
         final String topic = (maxTopicLength == -1 ? TopicUtils.generateTopicUUID() : TopicUtils.generateTopicUUID(maxTopicLength));
         Logger.debug(" .        COMPLIANCE CHECK: Testing Connect with Will");
-        final Mqtt3Client client = buildClient();
+        final Mqtt3Client client = buildClient("ConformanceTestPublisher");
         final Mqtt3Publish will = Mqtt3Publish.builder()
                 .topic(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
@@ -111,9 +111,11 @@ public class BrokerConformanceFeatureTester {
 
         final String topic = (maxTopicLength == -1 ? TopicUtils.generateTopicUUID() : TopicUtils.generateTopicUUID(maxTopicLength));
         final String sharedTopic = "$share/" + UUID.randomUUID().toString().replace("-", "") + "/" + topic;
-        final Mqtt3Client publisher = buildClient();
-        final Mqtt3Client sharedSubscriber1 = buildClient();
-        final Mqtt3Client sharedSubscriber2 = buildClient();
+
+        final Mqtt3Client publisher = buildClient("ConformanceTestPublisher");
+        final Mqtt3Client sharedSubscriber1 = buildClient("sharedSubscriber1");
+        final Mqtt3Client sharedSubscriber2 = buildClient("sharedSubscriber2");
+
         final Mqtt3Subscribe sharedSubscribe = Mqtt3Subscribe.builder()
                 .topicFilter(sharedTopic)
                 .qos(maxQos)
@@ -219,8 +221,9 @@ public class BrokerConformanceFeatureTester {
     public @NotNull ComplianceTestResult testRetain() {
         Logger.debug(" .        COMPLIANCE CHECK: Testing retained messages");
 
-        final Mqtt3Client publisher = buildClient();
-        final Mqtt3Client subscriber = buildClient();
+        final Mqtt3Client publisher = buildClient("ConformanceTestPublisher");
+        final Mqtt3Client subscriber = buildClient("ConformanceTestSubscriber");
+
         final String topic = (maxTopicLength == -1 ? TopicUtils.generateTopicUUID() : TopicUtils.generateTopicUUID(maxTopicLength));
         final CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -281,8 +284,9 @@ public class BrokerConformanceFeatureTester {
     public @NotNull QosTestResult testQos(final @NotNull MqttQos qos, final int tries) {
         Logger.debug(" .        COMPLIANCE CHECK: Testing qos {} with {} tries", qos, tries);
 
-        final Mqtt3Client publisher = buildClient();
-        final Mqtt3Client subscriber = buildClient();
+        final Mqtt3Client publisher = buildClient("ConformanceTestPublisher");
+        final Mqtt3Client subscriber = buildClient("ConformanceTestSubscriber");
+
         final String topic = TopicUtils.generateTopicUUID(maxTopicLength);
         final byte[] payload = qos.toString().getBytes();
 
@@ -385,9 +389,8 @@ public class BrokerConformanceFeatureTester {
                                 final @NotNull List<Tuple<Integer, ComplianceTestResult>> testResults,
                                 final int payloadSize) {
         Logger.debug(" .        COMPLIANCE CHECK: Testing payload with {} bytes", payloadSize);
-
-        final Mqtt3Client publisher = buildClient();
-        final Mqtt3Client subscriber = buildClient();
+        final Mqtt3Client publisher = buildClient("ConformanceTestPublisher");
+        final Mqtt3Client subscriber = buildClient("ConformanceTestSubscriber");
         final String currentPayload = Strings.repeat(ONE_BYTE, payloadSize);
         final Mqtt3Publish publish = Mqtt3Publish.builder()
                 .topic(topic)
@@ -478,8 +481,9 @@ public class BrokerConformanceFeatureTester {
                               final int topicSize) {
         Logger.debug(" .        COMPLIANCE CHECK: Testing topic with length of {} bytes", topicSize);
 
-        final Mqtt3Client publisher = buildClient();
-        final Mqtt3Client subscriber = buildClient();
+        final Mqtt3Client publisher = buildClient("ConformanceTestPublisher");
+        final Mqtt3Client subscriber = buildClient("ConformanceTestSubscriber");
+
         final String currentTopicName = Strings.repeat(ONE_BYTE, topicSize);
         final Mqtt3Publish publish = Mqtt3Publish.builder()
                 .topic(currentTopicName)
@@ -580,7 +584,7 @@ public class BrokerConformanceFeatureTester {
         Logger.debug(" .        COMPLIANCE CHECK: Testing client identifier with a length of {} bytes", clientIdLength);
 
         final String currentIdentifier = Strings.repeat(ONE_BYTE, clientIdLength);
-        final Mqtt3Client currClient = getClientBuilder()
+        final Mqtt3Client currClient = getClientBuilder("ConformanceTestClient")
                 .identifier(currentIdentifier)
                 .build();
 
@@ -611,8 +615,9 @@ public class BrokerConformanceFeatureTester {
     private @NotNull ComplianceTestResult testWildcard(final String subscribeWildcardTopic, final String publishTopic) {
         Logger.debug(" .        COMPLIANCE CHECK: Testing wildcard {} on topic {}", subscribeWildcardTopic, publishTopic);
 
-        final Mqtt3Client subscriber = buildClient();
-        final Mqtt3Client publisher = buildClient();
+        final Mqtt3Client publisher = buildClient("ConformanceTestPublisher");
+        final Mqtt3Client subscriber = buildClient("ConformanceTestSubscriber");
+
         final String topic = (maxTopicLength == -1 ? TopicUtils.generateTopicUUID() : TopicUtils.generateTopicUUID(maxTopicLength));
         final String subscribeToTopic = topic + "/" + subscribeWildcardTopic;
         final String publishToTopic = topic + "/" + publishTopic;
@@ -678,7 +683,7 @@ public class BrokerConformanceFeatureTester {
         final List<Tuple<Character, String>> connectResults = new LinkedList<>();
 
         boolean allSuccess = false;
-        final Mqtt3Client client = getClientBuilder()
+        final Mqtt3Client client = getClientBuilder("TestClient")
                 .identifier(ASCII)
                 .build();
 
@@ -709,7 +714,7 @@ public class BrokerConformanceFeatureTester {
     private void testAsciiChar(final @NotNull List<Tuple<Character, String>> connectResults,
                                final char asciiChar) {
         Logger.debug(" .        COMPLIANCE CHECK: Testing ascii character '{}'", asciiChar);
-        final Mqtt3Client client = getClientBuilder()
+        final Mqtt3Client client = getClientBuilder("TestClient")
                 .identifier(String.valueOf(asciiChar))
                 .build();
         try {
@@ -735,15 +740,13 @@ public class BrokerConformanceFeatureTester {
     }
 
     // Helpers
-
-    private @NotNull Mqtt3Client buildClient() {
-        return getClientBuilder().build();
+    private @NotNull Mqtt3Client buildClient(String identifier) {
+        return getClientBuilder(identifier).build();
     }
 
-
-    private @NotNull Mqtt3ClientBuilder getClientBuilder() {
-
+    private @NotNull Mqtt3ClientBuilder getClientBuilder(String identifier) {
         return Mqtt3Client.builder()
+                .identifier(identifier)
                 .serverHost(host)
                 .serverPort(port)
                 .simpleAuth(buildAuth())

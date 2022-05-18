@@ -40,4 +40,6 @@ public class TopicConstants {
     public static final String TCK_HOST_CONTROL = "SPARKPLUG_TCK/HOST_CONTROL";
     public static final String SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC = "spBv1.0/SparkplugTCK/NCMD/";
     public static final String SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC = "spBv1.0/SparkplugTCK/DCMD/";
+    public static final String SPARKPLUG_AWARE_ROOT = "$sparkplug/certificates/";
+
 }

@@ -308,8 +308,15 @@ export default {
             if (this.sparkplugClient.testType === "BROKER") {
                 const profile = "broker";
                 const testType = testParameter.name;
-                if (testType === "CompliantBrokerTest" || testType === "AwareBrokerTest") {
+                if (testType === "CompliantBrokerTest") {
                     const testParameters = this.sparkplugClient.broker.host + " " + this.sparkplugClient.broker.port;
+                    this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "AwareBrokerTest") {
+                    const testParameters =
+                        this.sparkplugClient.broker.host +
+                        " " + this.sparkplugClient.broker.port +
+                        " " + testParameter.parameters["group_id"].parameterValue +
+                        " " + testParameter.parameters["edge_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test:'" + testType + "' does not exist");

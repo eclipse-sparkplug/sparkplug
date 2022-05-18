@@ -98,7 +98,7 @@ public class CompliantBrokerTest extends TCKTest {
     }
 
     public String getName() {
-        return "Sparkplug Broker compliant Test";
+        return "Sparkplug Broker Compliant Test";
     }
 
     public String[] getTestIds() {
@@ -125,7 +125,6 @@ public class CompliantBrokerTest extends TCKTest {
         logger.info("Broker - Sparkplug Broker compliant Test - subscribe - " +
                 "clientId: {} topic: {}", clientId, packet.getSubscriptions().get(0));
     }
-
 
     @Override
     public void publish(String clientId, PublishPacket packet) {

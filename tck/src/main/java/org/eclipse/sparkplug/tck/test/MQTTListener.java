@@ -32,6 +32,8 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -43,11 +45,11 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class MQTTListener implements MqttCallbackExtended {
-
-    // Configuration
-    private String serverUrl = "tcp://localhost:1883";
-    private String clientId = "Sparkplug MQTT Listener";
-    private String username = "admin";
+	private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
+	// Configuration
+	private String serverUrl = "tcp://localhost:1883";
+	private String clientId = "Sparkplug MQTT Listener";
+	private String username = "admin";
 	private String password = "changeme";
 
 	private MqttTopic log_topic = null;
@@ -96,18 +98,8 @@ public class MQTTListener implements MqttCallbackExtended {
 			return;
 		}
 
-		System.out.println("*** Sparkplug TCK MQTT Listener ***");
-
-		/*if (args.length < 1) {
-			System.out.println("Parameter must be: primary_host_application_id");
-			return;
-		}
-		
-		primary_host_application_id = args[0];
-		System.out.println("Primary host application id is " + primary_host_application_id);*/
-
+		logger.info("*** Sparkplug TCK MQTT Listener ***");
 		clearResults();
-
 		try {
 			// Connect to the MQTT Server
 			MqttConnectOptions options = new MqttConnectOptions();
@@ -118,10 +110,11 @@ public class MQTTListener implements MqttCallbackExtended {
 			// options.setUserName(username);
 			// options.setPassword(password.toCharArray());
 			client = new MqttClient(serverUrl, clientId);
-			client.setTimeToWait(5000); // short timeout on failure to connect
+			client.setTimeToWait(10000); // short timeout on failure to connect
 			client.setCallback(this);
 			log_topic = client.getTopic(TCK_LOG_TOPIC);
 			client.connect(options);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -165,7 +158,6 @@ public class MQTTListener implements MqttCallbackExtended {
 					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_A, setResult(false, TOPIC_STRUCTURE_NAMESPACE_A));
 				} else {
 					System.out.println("Message arrived on Sparkplug topic " + topic);
-
 					checkTopic(topic.split("/"));
 
 					PayloadOrBuilder inboundPayload = Payload.parseFrom(message.getPayload());

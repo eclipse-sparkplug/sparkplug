@@ -11,8 +11,11 @@ package org.eclipse.sparkplug.tck;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
+import com.hivemq.extension.sdk.api.interceptor.publish.PublishOutboundInterceptor;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInboundInput;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInboundOutput;
+import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundInput;
+import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundOutput;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.common.TopicConstants;
@@ -33,7 +36,7 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC
  * @author Ian Craggs
  * @author Lukas Brand
  */
-public class PublishInterceptor implements PublishInboundInterceptor {
+public class PublishInterceptor implements PublishInboundInterceptor, PublishOutboundInterceptor {
 
 	private final static @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
@@ -48,13 +51,9 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 			final @NotNull PublishInboundOutput publishInboundOutput) {
 		try {
 			final String clientId = publishInboundInput.getClientInformation().getClientId();
-			logger.info("Inbound publish from '{}'", clientId);
-
 			final PublishPacket packet = publishInboundInput.getPublishPacket();
-
 			final String topic = packet.getTopic();
-			logger.info("\tTopic {}", topic);
-
+			logger.info("Inbound publish from '{}' at {} ", clientId, topic);
 			if (packet.getPayload().isPresent()) {
 				final ByteBuffer payloadByteBuffer = packet.getPayload().get();
 				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
@@ -105,5 +104,14 @@ public class PublishInterceptor implements PublishInboundInterceptor {
 		} catch (final Exception e) {
 			logger.error("Publish Exception", e);
 		}
+	}
+
+	@Override
+	public void onOutboundPublish(@NotNull PublishOutboundInput publishOutboundInput, @NotNull PublishOutboundOutput publishOutboundOutput) {
+		final String clientId = publishOutboundInput.getClientInformation().getClientId();
+		final PublishPacket packet = publishOutboundInput.getPublishPacket();
+		final String topic = packet.getTopic();
+		logger.info("Outbound publish from '{}' at {} ", clientId, topic);
+		theTCK.publish(clientId, packet);
 	}
 }
