@@ -55,30 +55,40 @@ public class SessionEstablishmentTest extends TCKTest {
 
     private final @NotNull Map<String, String> testResults = new HashMap<>();
 
-    // not found in specification ???
-    public static final String ID_EDGE_SUBSCRIBE_NCMD = "edge-subscribe-ncmd";
-    public static final String EDGE_SUBSCRIBE_NCMD =
-            "Edge node should subscribe to NCMD level topics to ensure Edge node targeted message from the primary host application are delivered";
-    public static final String ID_EDGE_SUBSCRIBE_DCMD = "edge-subscribe-dcmd";
-    public static final String EDGE_SUBSCRIBE_DCMD = "Edge node should subscribe to DCMD level topics to ensure device targeted message from the primary host application are delivered";
+	private final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
+			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION, ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ,
+			ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD, ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN,
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS, ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ,
+			ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH, ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP,
+			ID_PAYLOADS_NBIRTH_REBIRTH_REQ, ID_PAYLOADS_NDEATH_BDSEQ, ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE,
+			ID_TOPICS_NBIRTH_MQTT, ID_TOPICS_NBIRTH_SEQ_NUM, ID_TOPICS_NBIRTH_TIMESTAMP,
+			ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, ID_TOPICS_NBIRTH_BDSEQ_MATCHING, ID_TOPICS_NBIRTH_REBIRTH_METRIC,
+			ID_PAYLOADS_DBIRTH_QOS, ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT, ID_TOPICS_DBIRTH_TIMESTAMP,
+			ID_PAYLOADS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ, ID_PAYLOADS_DBIRTH_SEQ_INC,
+			ID_PAYLOADS_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE,
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
+			ID_TOPICS_NBIRTH_METRICS, ID_TOPICS_DBIRTH_METRICS, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT,
+			ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE, ID_MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC);
 
-    private final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
-            ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION, ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ,
-            ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD, ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN,
-            ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS, ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ,
-            ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH, ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP,
-            ID_PAYLOADS_NBIRTH_REBIRTH_REQ, ID_PAYLOADS_NDEATH_BDSEQ, /*ID_EDGE_SUBSCRIBE_NCMD, ID_EDGE_SUBSCRIBE_DCMD,*/
-            ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE, ID_TOPICS_NBIRTH_MQTT, ID_TOPICS_NBIRTH_SEQ_NUM,
-            ID_TOPICS_NBIRTH_TIMESTAMP, ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, ID_TOPICS_NBIRTH_BDSEQ_MATCHING,
-            ID_TOPICS_NBIRTH_REBIRTH_METRIC, ID_PAYLOADS_DBIRTH_QOS, ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT,
-            ID_TOPICS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ,
-            ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME,
-            ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE,
-            ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
-            ID_TOPICS_NBIRTH_METRICS, ID_TOPICS_DBIRTH_METRICS);
-
-    private final @NotNull TCK theTCK;
-    private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
+	private final @NotNull TCK theTCK;
+	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
 
 
 	private @NotNull String testClientId = null;
@@ -90,10 +100,12 @@ public class SessionEstablishmentTest extends TCKTest {
     private @NotNull boolean stateFound = false;
     private @NotNull boolean ndataFound = false;
     private @NotNull boolean ddataFound = false;
+    private @NotNull boolean nbirthFound = false;
+    private @NotNull boolean nbirthTopic = false;
     private @NotNull long seq = -1;
     private @NotNull long deathBdSeq = -1;
     private @NotNull long birthBdSeq = -1;
-
+        
     public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
         logger.info("Edge Node session establishment test. Parameters: {} ", Arrays.asList(parms));
         theTCK = aTCK;
@@ -141,6 +153,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
     	testClientId = null;
+    	nbirthFound = false;
+    	nbirthTopic = false;
+    	deathBdSeq = -1;
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
     }
@@ -151,6 +166,16 @@ public class SessionEstablishmentTest extends TCKTest {
     @SpecAssertion(
             section = Sections.PAYLOADS_B_NDEATH,
             id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
+
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC)
     public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
         logger.info("Edge session establishment test - connect");
 
@@ -163,9 +188,14 @@ public class SessionEstablishmentTest extends TCKTest {
 			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0+"/"+groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
 				testClientId = clientId;
 				logger.info("Edge session establishment test - connect - client id is "+clientId);
+				testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC,
+						setResult(true, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC));
 			}
 		}
 
+		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT,
+				setResult(testClientId != null, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT));
+		
 		if (testClientId != null) {
 			logger.debug("Check Req: Clean session should be set to true.");
 			testResults.put(ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION,
@@ -176,6 +206,9 @@ public class SessionEstablishmentTest extends TCKTest {
 				logger.debug("Check Req: NDEATH not registered as Will in connect packet");
 				testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE,
 						setResult(willPublishPacketOptional.isPresent(), PAYLOADS_NDEATH_WILL_MESSAGE));
+				
+				testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE,
+						setResult(willPublishPacketOptional.isPresent(), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE));
 			} catch (Exception e) {
 				logger.error("Exception in Edge session establishment test: ", e);
 			}
@@ -232,6 +265,7 @@ public class SessionEstablishmentTest extends TCKTest {
 					boolean bValid = !(ndataFound || ddataFound);
 					testResults.put(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
 							setResult(bValid, PRINCIPLES_BIRTH_CERTIFICATES_ORDER));
+					nbirthFound = true;
 				}
 			}
 			if (topicLevels[2].equals(TOPIC_PATH_DBIRTH) && topicLevels[3].equals(edgeNodeId)) {
@@ -307,6 +341,16 @@ public class SessionEstablishmentTest extends TCKTest {
     @SpecAssertion(
             section = Sections.PAYLOADS_B_PAYLOAD,
             id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
+    
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS)    
     public Optional<WillPublishPacket> checkWillMessage(final @NotNull ConnectPacket packet) {
         final Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
         if (willPublishPacketOptional.isPresent()) {
@@ -315,8 +359,15 @@ public class SessionEstablishmentTest extends TCKTest {
             WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
             boolean bValid = (willPublishPacket.getQos().getQosNumber() == 1);
             testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, setResult(bValid, PAYLOADS_NDEATH_WILL_MESSAGE_QOS));
+            
+            // TODO: conflicts with above
+            testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS, 
+            		setResult((willPublishPacket.getQos().getQosNumber() == 0), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS));
 
             PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(willPublishPacket);
+            
+            testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD, 
+            		setResult(sparkplugPayload != null, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD));            
                                   
             if (sparkplugPayload != null && sparkplugPayload.getMetricsList() != null) {
                 List<Metric> metrics = sparkplugPayload.getMetricsList();
@@ -331,7 +382,7 @@ public class SessionEstablishmentTest extends TCKTest {
                 testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
 
                 logger.debug("Check Req: NDEATH must not include a sequence number");
-                bValid = (sparkplugPayload.getSeq() == -1);
+                bValid = sparkplugPayload.hasSeq();
                 testResults.put(ID_PAYLOADS_NDEATH_SEQ, setResult(bValid, PAYLOADS_NDEATH_SEQ));
                 testResults.put(ID_TOPICS_NDEATH_SEQ, setResult(bValid, TOPICS_NDEATH_SEQ));
                 testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
@@ -339,6 +390,9 @@ public class SessionEstablishmentTest extends TCKTest {
                 logger.debug("Check Req: NDEATH retained flag must be false");
                 bValid = !willPublishPacket.getRetain();
                 testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN, setResult(bValid, PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN));
+                
+                testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED, 
+                		setResult(bValid, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED));
             }
         }
         return willPublishPacketOptional;
@@ -410,42 +464,85 @@ public class SessionEstablishmentTest extends TCKTest {
             section = Sections.PAYLOADS_B_METRIC,
             id = ID_PAYLOADS_METRIC_DATATYPE_REQ)
     @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-            id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE)
-    @SpecAssertion(
             section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
             id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES)
+    
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ)
     public void checkNBirth(final @NotNull PublishPacket packet) {
         Date receivedBirth = new Date();
         long millisReceivedBirth = receivedBirth.getTime();
         long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
-        logger.debug("Check Req: Edge node must subscribe to state before publishing NBIRTH");
-        testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE, setResult(stateFound, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE));
+        
+		// TODO: if the edge node is configured to wait for a primary host application:
+		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT,
+				setResult(stateFound, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT));
 
-        logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
-        testResults.put(ID_PAYLOADS_NBIRTH_QOS, setResult(packet.getQos().getQosNumber() == 0, PAYLOADS_NBIRTH_QOS));
+		logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
+		testResults.put(ID_PAYLOADS_NBIRTH_QOS, setResult(packet.getQos().getQosNumber() == 0, PAYLOADS_NBIRTH_QOS));
+		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS,
+				setResult(packet.getQos().getQosNumber() == 0, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS));
 
         logger.debug("Check Req: NBIRTH messages MUST be published.");
-        testResults.put(ID_TOPICS_NBIRTH_MQTT, setResult(true, TOPICS_NBIRTH_MQTT));
+		testResults.put(ID_TOPICS_NBIRTH_MQTT, setResult(true, TOPICS_NBIRTH_MQTT));
 
-        logger.debug("Check Req: NBIRTH retained flag must be false.");
-        testResults.put(ID_PAYLOADS_NBIRTH_RETAIN, setResult(!packet.getRetain(), PAYLOADS_NBIRTH_RETAIN));
+		logger.debug("Check Req: NBIRTH retained flag must be false.");
+		testResults.put(ID_PAYLOADS_NBIRTH_RETAIN, setResult(!packet.getRetain(), PAYLOADS_NBIRTH_RETAIN));
+		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED,
+				setResult(!packet.getRetain(), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED));
 
-        PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
-        if (sparkplugPayload != null) {
-            logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
-            logger.debug("Check Req: Every NBIRTH message MUST include a sequence number and it MUST have a value of 0.");
-            seq = sparkplugPayload.getSeq();
-            testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((seq == 0), PAYLOADS_NBIRTH_SEQ));
-            testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((seq == 0), TOPICS_NBIRTH_SEQ_NUM));
-            testResults.put(ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH, setResult((seq == 0), PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH));
+		// Topic check
+		String topic = packet.getTopic();
+		nbirthTopic = topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NBIRTH + "/" + edgeNodeId);
+		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC,
+				setResult(nbirthTopic, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC));
 
-            // receivedBirthTime::making sure that the payload timestamp is greater than (receivedBirthTime - 5 min) and less than the
-            logger.debug("Check Req: NBIRTH messages MUST include a payload timestamp that denotes the time at which the message was published.");
-            boolean bHasTimeStamp = false;
-            if (sparkplugPayload.hasTimestamp()) {
-            	long ts = sparkplugPayload.getTimestamp();
-                bHasTimeStamp = (ts > millisPastFiveMin && ts < (millisReceivedBirth));
+		// Payload checks
+		PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+
+		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD,
+				setResult(sparkplugPayload != null, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD));		
+		
+		if (sparkplugPayload != null) {
+			logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
+			logger.debug(
+					"Check Req: Every NBIRTH message MUST include a sequence number and it MUST have a value of 0.");
+			seq = sparkplugPayload.getSeq();
+			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((seq == 0), PAYLOADS_NBIRTH_SEQ));
+			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((seq == 0), TOPICS_NBIRTH_SEQ_NUM));
+			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH,
+					setResult((seq == 0), PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH));
+
+			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
+					setResult((seq >= 0 && seq <= 255), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
+
+			// receivedBirthTime::making sure that the payload timestamp is greater than (receivedBirthTime - 5 min) and
+			// less than the
+			logger.debug(
+					"Check Req: NBIRTH messages MUST include a payload timestamp that denotes the time at which the message was published.");
+			boolean bHasTimeStamp = false;
+			if (sparkplugPayload.hasTimestamp()) {
+				long ts = sparkplugPayload.getTimestamp();
+		        bHasTimeStamp = (ts > millisPastFiveMin && ts < (millisReceivedBirth));
             }
             testResults.put(ID_PAYLOADS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, PAYLOADS_NBIRTH_TIMESTAMP));
             testResults.put(ID_TOPICS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, TOPICS_NBIRTH_TIMESTAMP));
@@ -482,6 +579,8 @@ public class SessionEstablishmentTest extends TCKTest {
 
             testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ, setResult(birthBdSeq != -1, PAYLOADS_NBIRTH_BDSEQ));
             testResults.put(ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, setResult(birthBdSeq != -1, TOPICS_NBIRTH_BDSEQ_INCLUDED));
+            testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ, setResult(birthBdSeq == deathBdSeq, 
+            		MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ));            
 
             if (testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ) == null
                     || testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(TopicConstants.PASS)) {
@@ -551,28 +650,52 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
 			id =  ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id =  ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id =  ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id =  ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id =  ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id =  ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id =  ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC)
     public void checkDBirth(final @NotNull PublishPacket packet) {
         Date receivedBirth = new Date();
         long millisReceivedBirth = receivedBirth.getTime();
         long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
+        
+		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
+				setResult(nbirthFound, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT));
 
-        logger.debug("Check Req: NBIRTH message must have Qos set to 0");
-        String prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_QOS, "");
-        if (!prevResult.contains(FAIL)) {
-            boolean bValid = (packet.getQos().getQosNumber() == 0);
-            if (prevResult.equals("")) {
-                testResults.put(ID_PAYLOADS_DBIRTH_QOS, setResult(bValid, PAYLOADS_DBIRTH_QOS));
-            }
-        }
+		logger.debug("Check Req: NBIRTH message must have Qos set to 0");
+		String prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_QOS, "");
+		if (!prevResult.contains(FAIL)) {
+			boolean bValid = (packet.getQos().getQosNumber() == 0);
+			if (prevResult.equals("")) {
+				testResults.put(ID_PAYLOADS_DBIRTH_QOS, setResult(bValid, PAYLOADS_DBIRTH_QOS));
+				testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS,
+						setResult(bValid, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS));
+			}
+		}
 
         logger.debug("Check Req: NBIRTH retained flag must be false");
         prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_RETAIN, "");
         if (!prevResult.contains(FAIL)) {
             if (prevResult.equals("")) {
                 testResults.put(ID_PAYLOADS_DBIRTH_RETAIN, setResult(!packet.getRetain(), PAYLOADS_DBIRTH_RETAIN));
+                testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED, setResult(!packet.getRetain(), 
+                		MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED));
             }
         }
-
 
         logger.debug("Check Req: DBIRTH Qos must be 0 and retained must be false");
         prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_MQTT, "");
@@ -584,8 +707,26 @@ public class SessionEstablishmentTest extends TCKTest {
                 testResults.put(ID_TOPICS_DBIRTH_MQTT, setResult(bValid, TOPICS_DBIRTH_MQTT));
             }
         }
+        
+		// Topic check
+		String topic = packet.getTopic();
+		String[] topicLevels = topic.split("/");
+		
+		boolean goodTopic = topicLevels.length >= 5 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId) && topicLevels[2].equals(TOPIC_PATH_DBIRTH)
+				&& topicLevels[3].equals(edgeNodeId) && deviceIds.keySet().contains(topicLevels[4]);
+		
+		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC,
+				setResult(goodTopic, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC));
+		
+		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC,
+				setResult(goodTopic && nbirthTopic, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC));
 
+		// Payload checks
         PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+        
+		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC,
+				setResult(sparkplugPayload != null, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC));	
+        
         if (sparkplugPayload != null) {
 
             // making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the
@@ -690,19 +831,16 @@ public class SessionEstablishmentTest extends TCKTest {
         return 0;
     }
 
-    /**
-     * @SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-     * id = ID_EDGE_SUBSCRIBE_NCMD)
-     * @SpecAssertion(section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-     * id = ID_EDGE_SUBSCRIBE_DCMD)
-     **/
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE)
     public void checkSubscribeTopics() {
+        testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE, setResult(ncmdFound, MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE));
 
-        logger.debug("Missing in spec - Req: " +
-                "Edge node should subscribe to NCMD level topics to ensure Edge node targeted message from the primary host application are delivered");
-        //testResults.put(ID_EDGE_SUBSCRIBE_NCMD, setResult(ncmdFound, EDGE_SUBSCRIBE_NCMD));
-        logger.debug("Check Req: " +
-                "Edge node should subscribe to DCMD level topics to ensure device targeted message from the primary host application are delivered");
-        //testResults.put(ID_EDGE_SUBSCRIBE_DCMD, setResult(dcmdFound, EDGE_SUBSCRIBE_DCMD));
+        // TODO: this assertion only applies if the device supports writing to outputs (an input parameter?
+        testResults.put(ID_MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE, setResult(dcmdFound, MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE));
     }
 }
