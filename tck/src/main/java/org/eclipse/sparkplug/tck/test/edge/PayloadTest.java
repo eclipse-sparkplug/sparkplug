@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2022 Anja Helmbrecht-Schaar
  * <p>
@@ -186,6 +187,7 @@ public class PayloadTest extends TCKTest {
         boolean isValid = false;
         final PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
         if (result == null) {
+            isValid = false;
             logger.error("Check req set for : {}", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
         } else {
             if (result.getSeq() >= 0) {
