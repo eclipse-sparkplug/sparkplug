@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-2.0.
 
 SPDX-License-Identifier: EPL-2.0
 
-_Sparkplug™ and the Sparkplug™ logo are trademarks of the Eclipse Foundation_
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
 [[topics]]
@@ -22,7 +22,7 @@ participating in the data exchange.
 
 Every MQTT message published typically consists of a *_topic_* and *_payload_* components. These
 components are the overhead of an MQTT message as measured in bytes on the wire. The Eclipse
-Sparkplug™ Specification is designed to keep these components meaningful and easy to understand, but
+Sparkplug Specification is designed to keep these components meaningful and easy to understand, but
 not to get so verbose as to negatively impact bandwidth/time sensitive data exchange.
 
 [[topics_sparkplug_topic_namespace_elements]]
