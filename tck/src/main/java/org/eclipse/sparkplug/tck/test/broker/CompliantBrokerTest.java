@@ -1,15 +1,15 @@
-/*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
- *
+/**
+ * Copyright (c) 2022 Anja Helmbrecht-Schaar
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
+ * <p>
  * SPDX-License-Identifier: EPL-2.0
- *
+ * <p>
  * Contributors:
- *    Ian Craggs - initial implementation and documentation
- *******************************************************************************/
+ * Anja Helmbrecht-Schaar - initial implementation and documentation
+ */
 
 package org.eclipse.sparkplug.tck.test.broker;
 
@@ -43,7 +43,10 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
@@ -54,12 +57,12 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
         version = "3.0.0-SNAPSHOT")
 public class CompliantBrokerTest extends TCKTest {
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
+    private static int TIME_OUT = 60;
     private final @NotNull String[] testId = {ID_CONFORMANCE_MQTT_QOS0,
             ID_CONFORMANCE_MQTT_QOS1, ID_CONFORMANCE_MQTT_WILL_MESSAGES, ID_CONFORMANCE_MQTT_RETAINED};
-    private HashMap testResults;
     private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+    private HashMap testResults;
     private TCK theTCK = null;
-    private static int TIME_OUT = 60;
     private @NotNull String host;
     private @NotNull String port;
 
@@ -87,50 +90,6 @@ public class CompliantBrokerTest extends TCKTest {
                 }
             }
         }, 5, TimeUnit.SECONDS);
-    }
-
-
-    @Override
-    public void endTest(Map<String, String> results) {
-        testResults.putAll(results);
-        Utils.setEndTest(getName(), testIds, testResults);
-        reportResults(testResults);
-    }
-
-    public String getName() {
-        return "Sparkplug Broker compliant Test";
-    }
-
-    public String[] getTestIds() {
-        return testIds.toArray(new String[0]);
-    }
-
-    public HashMap<String, String> getResults() {
-        return testResults;
-    }
-
-    @Override
-    public void connect(String clientId, ConnectPacket packet) {
-        // TODO Auto-generated method stub
-        logger.info("Broker - Sparkplug Broker compliant Test - connect - clientId: {}", clientId);
-    }
-
-    @Override
-    public void disconnect(String clientId, DisconnectPacket packet) {
-        logger.info("Broker - Sparkplug Broker compliant Test - disconnect - clientId: {}", clientId);
-    }
-
-    @Override
-    public void subscribe(String clientId, SubscribePacket packet) {
-        logger.info("Broker - Sparkplug Broker compliant Test - subscribe - " +
-                "clientId: {} topic: {}", clientId, packet.getSubscriptions().get(0));
-    }
-
-
-    @Override
-    public void publish(String clientId, PublishPacket packet) {
-        final String topic = packet.getTopic();
-        logger.info("Broker - Sparkplug Broker compliant Test - publish - topic: {}", topic);
     }
 
     @SpecAssertion(
@@ -166,6 +125,48 @@ public class CompliantBrokerTest extends TCKTest {
         logger.debug("Check Req: {} ", ID_CONFORMANCE_MQTT_RETAINED);
         ComplianceTestResult retain = brokerConformanceFeatureTester.testRetain();
         testResults.put(ID_CONFORMANCE_MQTT_RETAINED, setResult(retain == ComplianceTestResult.OK, CONFORMANCE_MQTT_RETAINED));
+    }
+
+    @Override
+    public void endTest(Map<String, String> results) {
+        testResults.putAll(results);
+        Utils.setEndTest(getName(), testIds, testResults);
+        reportResults(testResults);
+    }
+
+    public String getName() {
+        return "Sparkplug Broker Compliant Test";
+    }
+
+    public String[] getTestIds() {
+        return testIds.toArray(new String[0]);
+    }
+
+    public HashMap<String, String> getResults() {
+        return testResults;
+    }
+
+    @Override
+    public void connect(String clientId, ConnectPacket packet) {
+        // TODO Auto-generated method stub
+        logger.info("Broker - Sparkplug Broker compliant Test - connect - clientId: {}", clientId);
+    }
+
+    @Override
+    public void disconnect(String clientId, DisconnectPacket packet) {
+        logger.info("Broker - Sparkplug Broker compliant Test - disconnect - clientId: {}", clientId);
+    }
+
+    @Override
+    public void subscribe(String clientId, SubscribePacket packet) {
+        logger.info("Broker - Sparkplug Broker compliant Test - subscribe - " +
+                "clientId: {} topic: {}", clientId, packet.getSubscriptions().get(0));
+    }
+
+    @Override
+    public void publish(String clientId, PublishPacket packet) {
+        final String topic = packet.getTopic();
+        logger.info("Broker - Sparkplug Broker compliant Test - publish - topic: {}", topic);
     }
 
 }

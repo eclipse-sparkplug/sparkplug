@@ -463,8 +463,22 @@ export default {
                         description: "This is the test, that checks requirements for a Sparkplug aware MQTT Broker.",
                         requirements: [
                             "Start this test with the given broker host and port.",
+                            "Start connect an Edge Node to trigger a Birth Message for Edge and its Devices of the given Group.",
+                            "Stop connection to trigger the DEATH Messages of the Edge Node.",
                             "Wait until Tests are finished and check Results."
                         ],
+                        parameters: {
+                            group_id: {
+                                parameterReadableName: "Group Id",
+                                parameterValue: "",
+                                parameterDescription: "The Id of the group of the edge node",
+                            },
+                            edge_id: {
+                                parameterReadableName: "EdgeNode Id",
+                                parameterValue: "",
+                                parameterDescription: "The Id of the edge node",
+                            },
+                        },
                         result: null,
                         logging: [],
                     },

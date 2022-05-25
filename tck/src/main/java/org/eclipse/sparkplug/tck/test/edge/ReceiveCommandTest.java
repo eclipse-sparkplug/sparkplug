@@ -149,13 +149,13 @@ public class ReceiveCommandTest extends TCKTest {
         }
 
         byte[] payload = null;
-        try {         
+        try {
             payload = Payload.newBuilder().addMetrics(
-            		Metric.newBuilder()
-            			.setName(NODE_CONTROL_REBIRTH)
-            			.setDatatype(DataType.Boolean.getNumber())
-            			.setBooleanValue(true)
-            		).build().toByteArray();
+                    Metric.newBuilder()
+                            .setName(NODE_CONTROL_REBIRTH)
+                            .setDatatype(DataType.Boolean.getNumber())
+                            .setBooleanValue(true)
+            ).build().toByteArray();
         } catch (Exception e) {
             logger.error("Error building edge node rebirth command. Aborting test. {} ", e.getMessage());
             theTCK.endTest();
@@ -172,7 +172,7 @@ public class ReceiveCommandTest extends TCKTest {
 
     @Override
     public void endTest(Map<String, String> results) {
-    	testResults.putAll(results);
+        testResults.putAll(results);
         state = status.END;
         Utils.setEndTest(getName(), testIds, testResults);
         reportResults(testResults);
@@ -200,7 +200,7 @@ public class ReceiveCommandTest extends TCKTest {
         Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
         if (willPublishPacketOptional.isPresent()) {
             WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
-            logger.debug("Edge - Receive Command test - CONNECT ClientId {} on and will topic ", clientId, willPublishPacket.getTopic());
+            logger.debug("Edge - Receive Command test - CONNECT ClientId {} on and will topic {}", clientId, willPublishPacket.getTopic());
             String[] topicParts = willPublishPacket.getTopic().split("/");
             if (topicParts.length >= 4) {
                 testIds.add(ID_PAYLOADS_NDEATH_WILL_MESSAGE);

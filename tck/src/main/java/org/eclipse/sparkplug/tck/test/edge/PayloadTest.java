@@ -100,7 +100,7 @@ public class PayloadTest extends TCKTest {
 
     @Override
     public void endTest(Map<String, String> results) {
-    	testResults.putAll(results);	
+    	  testResults.putAll(results);	
         Utils.setEndTest(getName(), new ArrayList<String>(Arrays.asList(testIds)), testResults);
         reportResults(testResults);
     }
@@ -229,8 +229,8 @@ public class PayloadTest extends TCKTest {
         boolean isValid_DataTypeValue = true;
 
         logger.debug("Check Req: {} The datatype MUST be an unsigned 32-bit integer representing the datatype.", ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE);
-        
-        PayloadOrBuilder result = Utils.getSparkplugPayload(packet);        
+
+        PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
 
         if (result == null) {
             isValid_DataType = false;
@@ -282,9 +282,9 @@ public class PayloadTest extends TCKTest {
         boolean qualityCodeSettingIsUsed = false;
 
         logger.debug("Check Req: {} The datatype MUST be an unsigned 32-bit integer representing the datatype.", ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE);
-        
-        PayloadOrBuilder result = Utils.getSparkplugPayload(packet);        
-        
+
+        PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
+
         if (result == null) {
             isValid_KeyArraySize = false;
             isValid_PropertyValueType = false;
