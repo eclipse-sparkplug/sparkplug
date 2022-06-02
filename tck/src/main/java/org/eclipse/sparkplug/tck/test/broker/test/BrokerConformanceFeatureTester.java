@@ -46,7 +46,7 @@ public class BrokerConformanceFeatureTester {
     private static final String ONE_BYTE = "a";
     private static final int MAX_TOPIC_LENGTH = 65535;
     private static final int MAX_CLIENT_ID_LENGTH = 65535;
-    private static Logger Logger = LoggerFactory.getLogger("Sparkplug");
+    private static final Logger Logger = LoggerFactory.getLogger("Sparkplug");
     private final String host;
     private final int port;
     private final String username;

@@ -1,15 +1,15 @@
-/**
- * Copyright (c) 2022 Anja Helmbrecht-Schaar
- * <p>
+/*******************************************************************************
+ * Copyright (c) 2021, 2022 Anja Helmbrecht-Schaar
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * <p>
+ *
  * SPDX-License-Identifier: EPL-2.0
- * <p>
+ *
  * Contributors:
- * Anja Helmbrecht-Schaar - initial implementation and documentation
- */
+ *    Anja Helmbrecht-Schaar - initial implementation and documentation
+ *******************************************************************************/
 
 package org.eclipse.sparkplug.tck.test.broker;
 
@@ -30,6 +30,7 @@ import org.eclipse.sparkplug.tck.test.broker.test.results.AwareTestResult;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
+import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,9 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
+@SpecVersion(
+        spec = "sparkplug",
+        version = "3.0.0-SNAPSHOT")
 public class AwareBrokerTest extends TCKTest {
     private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
     private final @NotNull String[] testId = {

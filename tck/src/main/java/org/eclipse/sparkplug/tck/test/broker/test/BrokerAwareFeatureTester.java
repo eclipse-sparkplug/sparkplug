@@ -18,14 +18,11 @@ import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
 public class BrokerAwareFeatureTester {
 
-    private static Logger Logger = LoggerFactory.getLogger("Sparkplug");
     private final String host;
     private final int port;
     private final String username;
