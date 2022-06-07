@@ -84,7 +84,7 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api:${property("jakarta.annotation.version")}")
     implementation("jakarta.validation:jakarta.validation-api:${property("jakarta.validation.version")}")
 
-    implementation("org.eclipse.tahu:tahu-java:${property("tahu.version")}")
+    implementation("org.eclipse.tahu:tahu-core:${property("tahu.version")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
