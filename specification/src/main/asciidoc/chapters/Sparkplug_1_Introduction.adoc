@@ -123,8 +123,6 @@ efficient, easy to understand, and implement.
 [[introduction_eclipse_foundation_specification_license]]
 ==== Eclipse Foundation Specification License
 
-// TODO: Github #72
-
 By using and/or copying this document, or the Eclipse Foundation document from which this statement
 is linked, you (the licensee) agree that you have read, understood, and will comply with the
 following terms and conditions:
@@ -152,7 +150,8 @@ specification is expressly prohibited.
 
 The notice is:
 
-"Copyright (c) 2016-2021 Eclipse Foundation. This software or document includes material copied from
+// TODO - the Specification Link below needs to be updated Github Issue: #72
+"Copyright (c) 2016-2022 Eclipse Foundation. This software or document includes material copied from
 or derived from the Sparkplug Specification: 
 https://www.eclipse.org/tahu/spec/Sparkplug%20Topic%20Namespace%20and%20State%20ManagementV2.2-with%20appendix%20B%20format%20-%20Eclipse.pdf
 
