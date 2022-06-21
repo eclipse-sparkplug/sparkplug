@@ -62,10 +62,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
-			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
-			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
-			ID_PAYLOADS_DBIRTH_SEQ_INC };
+	String[] testIds =
+			{ ID_INTRO_EDGE_NODE_ID_UNIQUENESS, ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
+					ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR,
+					ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID, ID_PAYLOADS_DBIRTH_SEQ_INC };
 
 	// edge_node_id to clientid
 	private HashMap edge_nodes = new HashMap<String, String>();
@@ -75,12 +75,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	// edge_node_id to device_id
 	private HashMap edge_to_devices = new HashMap<String, HashSet<String>>();
-	
+
+	// edge_node_id to last messsage (NBIRTH/NDEATH) + sequence number
+	private HashMap edgeBdSeqs = new HashMap<String, ArrayList<Object>>();
+
 	// device_id to last messsage (DBIRTH/DDEATH) + sequence number
 	private HashMap deviceBdSeqs = new HashMap<String, ArrayList<Object>>();
 
 	public Monitor() {
-		logger.info("Sparkplug message monitor 1.0");
+		logger.info("Sparkplug TCK message monitor 1.0");
 
 		clearResults();
 	}
@@ -117,12 +120,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	@Override
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
-		logger.info("Monitor: Client {} connects.", connectionStartInput.getConnectPacket().getClientId());
+		logger.debug("Monitor: Client {} connects.", connectionStartInput.getConnectPacket().getClientId());
 	}
 
 	@Override
 	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
-		logger.info("Monitor: Client {} authenticated successfully.",
+		logger.debug("Monitor: Client {} authenticated successfully.",
 				authenticationSuccessfulInput.getClientInformation().getClientId());
 	}
 
@@ -132,7 +135,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@Override
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
 		String clientid = disconnectEventInput.getClientInformation().getClientId();
-		logger.info("Monitor: Client {} disconnected.", clientid);
+		logger.debug("Monitor: Client {} disconnected.", clientid);
 
 		String edge_node_id = (String) clientids.get(clientid);
 		if (edge_node_id != null) {
@@ -145,7 +148,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 
 			HashSet devices = (HashSet) edge_to_devices.get(edge_node_id);
-			logger.info("Monitor: devices for edge_node_id {} were {}", edge_node_id, devices);
+			logger.debug("Monitor: devices for edge_node_id {} were {}", edge_node_id, devices);
 			if (edge_to_devices.remove(edge_node_id) == null) {
 				logger.error("Monitor: Error removing edge_node_id {} from edge_to_devices on disconnect",
 						edge_node_id);
@@ -191,7 +194,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			// Uniqueness for edge node ids is within group id, so
 			// we add the group_id to the edge node id as a shortcut to make it so.
 			edge_node_id = group_id + ":" + edge_node_id;
-			
+
 			PayloadOrBuilder payload = getSparkplugPayload(packet);
 
 			// if we have more than one MQTT client id with the same edge node id then it's an error
@@ -268,6 +271,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_SEQ_INC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ)
 	private void handleDBIRTH(String group_id, String device_id, String edge_node_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DBIRTH *** {} {}", device_id, edge_node_id);
 		if (!edge_to_devices.keySet().contains(edge_node_id)) {
@@ -281,26 +287,30 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				testResults.put(ID_INTRO_EDGE_NODE_ID_UNIQUENESS, setResult(false, INTRO_EDGE_NODE_ID_UNIQUENESS));
 			} else {
 				// the following is true as it's a MAY clause. So record a +ve result
-				testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE, 
+				testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 						setResult(true, TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE));
 				logger.info("Monitor: adding device id {} for edge node id {} on DBIRTH", device_id, edge_node_id);
 				devices.add(device_id);
 			}
 		}
-		
+
 		// record sequence numbers for checking
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id + "/" + device_id;
-			
+
 			if (deviceBdSeqs.get(id) != null) {
-				ArrayList data = (ArrayList)deviceBdSeqs.get(id);
-				
+				ArrayList data = (ArrayList) deviceBdSeqs.get(id);
+
 				if (data.get(0).equals("DDEATH")) {
-					boolean bSeqValid = (payload.getSeq() != getNextSeq((long)data.get(1)));	
-	                testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(bSeqValid, PAYLOADS_DBIRTH_SEQ_INC));
-				} else { // repeat DBIRTH - should be same sequence number 
-					boolean bSeqValid = (payload.getSeq() != (long)data.get(1));	
-	                testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(bSeqValid, PAYLOADS_DBIRTH_SEQ_INC));
+					boolean bSeqValid = (payload.getSeq() != getNextSeq((long) data.get(1)));
+					testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(bSeqValid, PAYLOADS_DBIRTH_SEQ_INC));
+
+					testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ,
+							setResult(bSeqValid, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
+
+				} else { // repeat DBIRTH - should be same sequence number
+					boolean bSeqValid = (payload.getSeq() != (long) data.get(1));
+					testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(bSeqValid, PAYLOADS_DBIRTH_SEQ_INC));
 				}
 			}
 			ArrayList data = new ArrayList();
@@ -316,8 +326,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		else
 			return seq + 1;
 	}
-	
-	
+
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_SEQ_INC)
@@ -334,20 +343,20 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				devices.remove(device_id);
 			}
 		}
-		
+
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id + "/" + device_id;
-			
+
 			if (deviceBdSeqs.get(id) == null) {
 				logger.error("Monitor: DDEATH without DBIRTH for device {} on edge {}", device_id, edge_node_id);
 			} else {
-				ArrayList data = (ArrayList)deviceBdSeqs.get(id);
-				
+				ArrayList data = (ArrayList) deviceBdSeqs.get(id);
+
 				if (data.get(0).equals("DDEATH")) {
 					logger.error("Monitor: repeat DDEATH for device {} on edge {}", device_id, edge_node_id);
-				} else { // DBIRTH - should be same sequence number 
-					boolean bSeqValid = (payload.getSeq() != (long)data.get(1));	
-	                testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(bSeqValid, PAYLOADS_DBIRTH_SEQ_INC));
+				} else { // DBIRTH - should be same sequence number
+					boolean bSeqValid = (payload.getSeq() != (long) data.get(1));
+					testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(bSeqValid, PAYLOADS_DBIRTH_SEQ_INC));
 				}
 			}
 			ArrayList data = new ArrayList();
@@ -355,6 +364,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			data.add(payload.getSeq());
 			deviceBdSeqs.put(id, data);
 		}
-		
+
 	}
 }

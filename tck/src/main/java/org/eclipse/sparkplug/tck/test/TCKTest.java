@@ -23,15 +23,17 @@ import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Date;
+import java.sql.Timestamp;
 
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.sparkplug.tck.test.Monitor;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
 /**
  * @author Ian Craggs
@@ -57,13 +59,31 @@ public abstract class TCKTest {
 
 	public abstract void endTest(Map<String, String> results);
 
+	public void log(String message) {
+		logger.info("TCKTest log " + message);
+		final PublishService publishService = Services.publishService();
+		final Publish payload = Builders.publish().topic(TCK_LOG_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(message.getBytes())).build();
+		publishService.publish(payload);
+	}
+
+	public void prompt(String message) {
+		final PublishService publishService = Services.publishService();
+		final Publish payload = Builders.publish().topic(TCK_CONSOLE_PROMPT_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(message.getBytes())).build();
+		publishService.publish(payload);
+	}
+
 	public void reportResults(final @NotNull Map<String, String> results) {
 		logger.info("Summary Test Results for {} ", getName());
 
 		final StringBuilder summary = Utils.getSummary(results);
+		logger.info(summary.toString());
+		summary.insert(0, new Timestamp(new Date().getTime()) + " Summary Test Results for " + getName()
+				+ System.lineSeparator());
 
 		final PublishService publishService = Services.publishService();
-		final Publish message = Builders.publish().topic("SPARKPLUG_TCK/RESULT").qos(Qos.AT_LEAST_ONCE)
+		final Publish message = Builders.publish().topic(TCK_RESULTS_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(summary.toString().getBytes())).build();
 		publishService.publish(message);
 	}

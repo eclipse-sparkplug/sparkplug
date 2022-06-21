@@ -135,14 +135,20 @@ export default {
          */
         currentTestLogging: function (newValue, oldValue) {
             if (newValue === null) return;
+            let finished = false;
             if (this.testType === "HOSTAPPLICATION") {
                 for (const [_, testValue] of Object.entries(this.hostTests)) {
                     if (testValue.testValues.name === this.currentTest) {
                         testValue.testValues.logging.push(newValue);
+                        finished = true;
                         if (newValue.logValue.includes("OVERALL: PASS")) {
                             testValue.testValues.result = true;
                         } else if (newValue.logValue.includes("OVERALL: FAIL")) {
                             testValue.testValues.result = false;
+                        } else if (newValue.logValue.includes("OVERALL: NOT EXECUTED")) {
+                            testValue.testValues.result = false;
+                        } else {
+                            finished = false;
                         }
                     }
                 }
@@ -150,10 +156,15 @@ export default {
                 for (const [_, testValue] of Object.entries(this.eonTests)) {
                     if (testValue.testValues.name === this.currentTest) {
                         testValue.testValues.logging.push(newValue);
+                        finished = true;
                         if (newValue.logValue.includes("OVERALL: PASS")) {
                             testValue.testValues.result = true;
                         } else if (newValue.logValue.includes("OVERALL: FAIL")) {
                             testValue.testValues.result = false;
+                        } else if (newValue.logValue.includes("OVERALL: NOT EXECUTED")) {
+                            testValue.testValues.result = false;
+                        } else {
+                            finished = false;
                         }
                     }
                 }
@@ -161,15 +172,22 @@ export default {
                 for (const [_, testValue] of Object.entries(this.brokerTests)) {
                     if (testValue.testValues.name === this.currentTest) {
                         testValue.testValues.logging.push(newValue);
+                        finished = true;
                         if (newValue.logValue.includes("OVERALL: PASS")) {
                             testValue.testValues.result = true;
                         } else if (newValue.logValue.includes("OVERALL: FAIL")) {
                             testValue.testValues.result = false;
+                        } else if (newValue.logValue.includes("OVERALL: NOT EXECUTED")) {
+                            testValue.testValues.result = false;
+                        } else {
+                            finished = false;
                         }
                     }
                 }
             }
-            this.$emit("reset-current-test");
+            if (finished === true) {
+                this.$emit("reset-current-test");
+            }
         },
     },
 
@@ -352,6 +370,30 @@ export default {
                             "Start this test.",
                             "Start the Host Application to trigger events of MQTT messages.",
                             "Connect Edge Node and Device.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        parameters: {
+                            device_ids: {
+                                parameterReadableName: "Device Ids",
+                                parameterValue: "",
+                                parameterDescription: "The space separated list of Ids of devices connected to the edge node.",
+                            },
+                        },
+                        result: null,
+                        logging: [],
+                    },
+                },
+                sessionTerminationTest: {
+                    testValues: {
+                        testType: "EONNODE",
+                        name: "SessionTerminationTest",
+                        readableName: "Session Termination Test",
+                        description: "This is the Edge Node Sparkplug session termination test.",
+                        requirements: [
+                            "Setup a MQTT Connection to the HiveMQ Sparkplug test server.",
+                            "Set a Group, Edge and Device Ids to be checked.",
+                            "Start this test.",
+                            "Terminate the edge node and device named.",
                             "Wait until Tests are finished and check Results."
                         ],
                         parameters: {

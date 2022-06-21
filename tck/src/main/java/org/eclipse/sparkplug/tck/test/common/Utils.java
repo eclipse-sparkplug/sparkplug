@@ -17,6 +17,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.publish.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
@@ -29,18 +31,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.*;
+import java.util.Optional;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
 public class Utils {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
+	/**
+	 * Set the not executed text for any test with a blank status
+	 */
 	public static @NotNull void setEndTest(final String name, final List<String> testIds,
 			final Map<String, String> testResults) {
 		if (!(testIds.size() == testResults.size())) {
 			testIds.forEach(test -> {
 				if (!testResults.containsKey(test)) {
-					logger.info("Test {} - {} not yet executed. ", name, test);
+					// logger.info("Test {} - {} not yet executed. ", name, test);
 					testResults.put(test, NOT_EXECUTED);
 				}
 			});
@@ -90,63 +97,78 @@ public class Utils {
 		}
 		return false;
 	}
-	
-    public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
-        AtomicBoolean hostOnline = new AtomicBoolean(false);
-        String topic = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
-        // Check that the host application status is ONLINE, ready for the test
-        Services.retainedMessageStore().getRetainedMessage(topic)
-                .whenComplete((retainedPublish, throwable) -> {
-                    if (throwable != null) {
-                        logger.error("Error getting retained message for HostApplication Status: {}", throwable.getMessage());
-                    } else if (retainedPublish.isPresent()) {
-                        ByteBuffer byteBuffer = retainedPublish.get().getPayload().orElseGet(null);
-                        if (byteBuffer != null) {
-                            String payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
-                            if (HostState.ONLINE.toString().equals(payload)) {
-                                hostOnline.set(true);
-                            }
-                            logger.info("checkHostApplicationIsOnline - " +
-                                            "Retained message for HostApplication: {} {} {} ",
-                                    hostApplicationId, hostOnline.get(), payload);
-                        }
-                    } else {
-                        logger.info("No retained message for topic: {} ", topic);
-                    }
-                });
-        return hostOnline;
-    }
 
-    private enum HostState {
-        ONLINE, OFFLINE
-    }
+	public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
+		// Check that the host application status is ONLINE
+		
+		AtomicBoolean hostOnline = new AtomicBoolean(false);
+		String topic = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
+		final CompletableFuture<Optional<RetainedPublish>> getFuture =
+				Services.retainedMessageStore().getRetainedMessage(topic);
+		try {
+			Optional<RetainedPublish> retainedPublishOptional = getFuture.get();
+			if (retainedPublishOptional.isPresent()) {
+				final RetainedPublish retainedPublish = retainedPublishOptional.get();
+				String payload = null;
+				ByteBuffer bpayload = retainedPublish.getPayload().orElseGet(null);
+				if (bpayload != null) {
+					payload = StandardCharsets.UTF_8.decode(bpayload).toString();
+				}
+				if (!payload.equals(HostState.ONLINE.toString())) {
+					logger.info("Host status payload: " + payload);
+				} else {
+					hostOnline.set(true);
+				}
+			} else {
+				logger.info("No retained message for topic: " + topic);
+			}
+		} catch (InterruptedException | ExecutionException e) {
 
+		}
+		return hostOnline;
+	}
 
-    public enum TestStatus {
-        NONE,
-        CONSOLE_RESPONSE, CONNECTING_DEVICE, REQUESTED_NODE_DATA, REQUESTED_DEVICE_DATA,
-        KILLING_DEVICE, EXPECT_NODE_REBIRTH, EXPECT_NODE_COMMAND, EXPECT_DEVICE_REBIRTH, EXPECT_DEVICE_COMMAND,
-        DEATH_MESSAGE_RECEIVED
-    }
+	private enum HostState {
+		ONLINE,
+		OFFLINE
+	}
+
+	public enum TestStatus {
+		NONE,
+		CONSOLE_RESPONSE,
+		CONNECTING_DEVICE,
+		REQUESTED_NODE_DATA,
+		REQUESTED_DEVICE_DATA,
+		KILLING_DEVICE,
+		EXPECT_NODE_REBIRTH,
+		EXPECT_NODE_COMMAND,
+		EXPECT_DEVICE_REBIRTH,
+		EXPECT_DEVICE_COMMAND,
+		DEATH_MESSAGE_RECEIVED
+	}
 
 	public static StringBuilder getSummary(final @NotNull Map<String, String> results) {
 		final StringBuilder summary = new StringBuilder();
 
-		String overall = results.entrySet().isEmpty() ? TopicConstants.EMPTY : TopicConstants.PASS;
+		String overall = results.entrySet().isEmpty() ? TopicConstants.EMPTY : TopicConstants.NOT_EXECUTED;
 
 		for (final Map.Entry<String, String> reportResult : results.entrySet()) {
 			summary.append(reportResult.getKey()).append(": ").append(reportResult.getValue()).append(";")
 					.append(System.lineSeparator());
 
-			if (reportResult.getValue().startsWith(TopicConstants.FAIL)) {
-				overall = TopicConstants.FAIL;
+			if (!overall.equals(TopicConstants.FAIL)) { // don't overwrite an overall fail status
+				if (reportResult.getValue().startsWith(TopicConstants.PASS)) {
+					overall = TopicConstants.PASS;
+				} else if (reportResult.getValue().startsWith(TopicConstants.FAIL)) {
+					overall = TopicConstants.FAIL;
+				}
 			}
 		}
 		summary.append("OVERALL: ").append(overall).append(";").append(System.lineSeparator());
 
 		return summary;
 	}
-	
+
 	public static boolean checkUTF8String(String inString) {
 		// MUST be a valid UTF-8 string
 
