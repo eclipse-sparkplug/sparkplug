@@ -625,8 +625,9 @@ Rules for Edge Node data (NBIRTH and NDATA) messages:
 * [tck-testable tck-id-operational-behavior-data-publish-nbirth]#[yellow-background]*NBIRTH messages
 MUST include all metrics for the specified Edge Node that will ever be published for that Edge
 Node within the established Sparkplug session.*#
-* [tck-testable tck-id-operational-behavior-data-publish-nbirth-values]#[yellow-background]*NBIRTH
-messages MUST include current values for all metrics.*#
+* [tck-testable tck-id-operational-behavior-data-publish-nbirth-values]#[yellow-background]*For each
+metric in the NBIRTH, the value must be set to the current value or if the current value is null,
+have the is_null flag set to true and no value specified.*#
 * [tck-testable tck-id-operational-behavior-data-publish-nbirth-change]#[yellow-background]*NDATA
 messages SHOULD only be published when Edge Node level metrics change.*#
 ** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
@@ -646,8 +647,9 @@ Rules for Device data (DBIRTH and DDATA) messages:
 * [tck-testable tck-id-operational-behavior-data-publish-dbirth]#[yellow-background]*DBIRTH messages
 MUST include all metrics for the specified Device that will ever be published for that Device within
 the established Sparkplug session.*#
-* [tck-testable tck-id-operational-behavior-data-publish-dbirth-values]#[yellow-background]*DBIRTH
-messages MUST include current values for all metrics.*#
+* [tck-testable tck-id-operational-behavior-data-publish-dbirth-values]#[yellow-background]*For each
+metric in the DBIRTH, the value must be set to the current value or if the current value is null,
+have the is_null flag set to true and no value specified.*#
 * [tck-testable tck-id-operational-behavior-data-publish-dbirth-change]#[yellow-background]*DDATA
 messages SHOULD only be published when Device level metrics change.*#
 ** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
