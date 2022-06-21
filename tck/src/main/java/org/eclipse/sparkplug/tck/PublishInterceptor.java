@@ -18,7 +18,6 @@ import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboun
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundOutput;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,7 @@ public class PublishInterceptor implements PublishInboundInterceptor, PublishOut
 			final String clientId = publishInboundInput.getClientInformation().getClientId();
 			final PublishPacket packet = publishInboundInput.getPublishPacket();
 			final String topic = packet.getTopic();
-			logger.info("Inbound publish from '{}' at {} ", clientId, topic);
+			logger.debug("Inbound publish from '{}' at {} ", clientId, topic);
 			if (packet.getPayload().isPresent()) {
 				final ByteBuffer payloadByteBuffer = packet.getPayload().get();
 				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();
@@ -111,7 +110,7 @@ public class PublishInterceptor implements PublishInboundInterceptor, PublishOut
 		final String clientId = publishOutboundInput.getClientInformation().getClientId();
 		final PublishPacket packet = publishOutboundInput.getPublishPacket();
 		final String topic = packet.getTopic();
-		logger.info("Outbound publish from '{}' at {} ", clientId, topic);
+		logger.debug("Outbound publish from '{}' at {} ", clientId, topic);
 		theTCK.publish(clientId, packet);
 	}
 }

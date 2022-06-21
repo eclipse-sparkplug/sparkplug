@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+ * Copyright © 2021, 2022 The Eclipse Foundation, Cirrus Link Solutions, and others
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -34,7 +34,7 @@ public class SparkplugHiveMQExtension implements ExtensionMain {
 			final @NotNull ExtensionStartOutput extensionStartOutput) {
 
 		try {
-			logger.info("Starting Sparkplug Extension");
+			logger.info("Starting Sparkplug TCK Extension");
 
 			final TCK aTCK = new TCK();
 
@@ -67,6 +67,6 @@ public class SparkplugHiveMQExtension implements ExtensionMain {
 	@Override
 	public void extensionStop(final @NotNull ExtensionStopInput extensionStopInput,
 			final @NotNull ExtensionStopOutput extensionStopOutput) {
-		logger.info("Stopping Sparkplug Extension");
+		logger.info("Stopping Sparkplug TCK Extension");
 	}
 }
