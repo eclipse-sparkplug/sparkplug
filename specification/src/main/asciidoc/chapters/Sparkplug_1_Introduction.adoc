@@ -1,0 +1,404 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+////
+
+_Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation._
+
+[[introduction]]
+== Introduction
+
+[[introduction_rationale_and_use_case]]
+=== Rationale and Use Case
+
+Eclipse Sparkplug provides an open and freely available specification for how Edge of Network
+Gateways (Sparkplug Edge Nodes) or native MQTT enabled end devices and Sparkplug Host Applications
+communicate bi-directionally within an MQTT Infrastructure. This document details the structure and
+implementation requirements for Sparkplug compliant MQTT Client implementations on both Edge Nodes
+and Host Applications.
+
+It is recognized that MQTT is used across a wide spectrum of application solution use-cases, and an
+almost indefinable variation of network topologies. To that end the Sparkplug Specification strives
+to accomplish the three following goals.
+
+[[introduction_define_an_mqtt_topic_namespace]]
+==== Define an MQTT Topic Namespace
+
+As noted many times in this document one of the many attractive features of MQTT is that it does not
+specify any required MQTT Topic Namespace within its implementation. This fact has meant that MQTT
+has taken a dominant position across a wide spectrum of IoT solutions. The intent of the Sparkplug
+Specification is to identify and document a Topic Namespace that is well thought out and optimized
+for the SCADA/IIoT solution sector. In addition, Sparkplug defines a Topic Namespace in such a way
+that it provides semantics which allow for automatic discovery and bi-directional communication
+between MQTT clients in a system.
+
+[[introduction_define_mqtt_state_management]]
+==== Define MQTT State Management
+
+One of the unique aspects of MQTT is that it was originally designed for real time SCADA systems to
+help reduce data latency over bandwidth limited and outage prone network infrastructures. These can
+include cellular, satellite, and other radio based networks. In many implementations the full
+benefit of this “Continuous Session Awareness” is not well understood, or not even implemented. The
+intent of the Sparkplug Specification is to take full advantage of MQTT’s native Continuous Session
+Awareness capability as it applies to real time SCADA/IIoT solutions.
+
+It is important to note that reducing bandwidth usage and being resilient to network drops is
+advantageous on more reliable and high bandwidth networks as well. By reducing the bandwidth usage,
+Sparkplug is able to move more data through the network because of its efficiency. This in turn can
+reduce network costs.
+
+[[introduction_define_the_mqtt_payload]]
+==== Define the MQTT Payload
+
+Just as the MQTT Specification does not dictate any particular Topic Namespace, it also does not
+dictate any particular payload data encoding. The intent of the Sparkplug Specification is to define
+payload encoding mechanisms that remain true to the original, lightweight, bandwidth efficient, low
+latency features of MQTT while adding modern encoding schemes targeting the SCADA/IIoT solution
+space.
+
+Sparkplug has defined an approach where the Topic Namespace can aid in the determination of the
+encoding scheme of any particular payload. Historically there have been two Sparkplug defined
+encoding schemes. The first one was the 'Sparkplug A' and the second is 'Sparkplug B'. Each of
+these uses a 'first topic token identifier' so Sparkplug Edge Nodes can declare the payload encoding
+scheme they are using. These first topic tokens are:
+
+----
+spAv1.0
+spBv1.0
+----
+
+Each token is divided up into three distinct components. These are:
+
+* Sparkplug Identifier
+** Always 'sp'
+* Payload Encoding Scheme
+** Currently 'A' or 'B' but there could be future versions
+* Payload Encoding Scheme Version
+** Currently v1.0 but denoted in the event that future versions are released
+
+The original 'Sparkplug A' encoding scheme was based on the Eclipse Kura™ open source Google
+Protocol Buffer definition. 'Sparkplug B' was released shortly after the release of Sparkplug A and
+addressed a number of issues that were present in the A version of the payload encoding scheme. Due
+to lack of adoption and the fact that 'Sparkplug B' was made available shortly after the release of
+'A', the Sparkplug A definition has been omitted from this document and is no longer supported.
+
+The 'Sparkplug B' encoding scheme was created with a richer data model developed with the feedback
+of many system integrators and end user customers using MQTT. These additions included metric
+timestamp support, complex datatype support, metadata, and other improvements.
+
+[[introduction_background]]
+==== Background
+
+MQTT was originally designed as a message transport for real-time SCADA systems. The MQTT
+Specification does not specify the Topic Namespace nor does it define the Payload representation
+of the data being published and/or subscribed to. In addition to this, since the original use-case
+for MQTT was targeting real-time SCADA, there are mechanisms defined to provide the state of an
+MQTT session such that SCADA/Control Human-Machine Interface (HMI) application can monitor the
+current state of any MQTT enabled device in the infrastructure. As with the Topic Namespace and
+Payload the way state information is implemented and managed within the MQTT infrastructure is not
+defined. All of this was intentional within the original MQTT Specification to provide maximum
+flexibility across any solution sector that might choose to use MQTT infrastructures.
+
+But at some point, for MQTT based solutions to be interoperable within a given market sector, the
+Topic Namespace, Payload representation, and session state must be defined. The intent and purpose
+of the Sparkplug Specification is to define an MQTT Topic Namespace, payload, and session state
+management that can be applied generically to the overall IIoT market sector, but specifically meets
+the requirements of real-time SCADA/Control HMI solutions. Meeting the operational requirements for
+these systems will enable MQTT based infrastructures to provide more valuable real-time information
+to Line of Business and MES solution requirements as well.
+
+The purpose of the Sparkplug Specification is to remain true to the original notion of keeping the
+Topic Namespace and message sizes to a minimum while still making the overall message transactions
+and session state management between MQTT enabled devices and MQTT SCADA/IIoT applications simple,
+efficient, easy to understand, and implement.
+
+[[introduction_intellectual_property_rights]]
+=== Intellectual Property Rights
+
+[[introduction_eclipse_foundation_specification_license]]
+==== Eclipse Foundation Specification License
+
+By using and/or copying this document, or the Eclipse Foundation document from which this statement
+is linked, you (the licensee) agree that you have read, understood, and will comply with the
+following terms and conditions:
+
+Permission to copy, and distribute the contents of this document, or the Eclipse Foundation document
+from which this statement is linked, in any medium for any purpose and without fee or royalty is
+hereby granted, provided that you include the following on ALL copies of the document, or portions
+thereof, that you use:
+
+* link or URL to the original Eclipse Foundation document.
+* All existing copyright notices, or if one does not exist, a notice (hypertext is preferred, but a
+  textual representation is permitted) of the form: "Copyright © [$date-of-document]
+  "Eclipse Foundation, Inc. \<<url to this license>> "
+
+Inclusion of the full text of this NOTICE must be provided. We request that authorship attribution
+be provided in any software, documents, or other items or products that you create pursuant to the 
+implementation of the contents of this document, or any portion thereof.
+
+No right to create modifications or derivatives of Eclipse Foundation documents is granted pursuant
+to this license, except anyone may prepare and distribute derivative works and portions of this
+document in software that implements the specification, in supporting materials accompanying such
+software, and in documentation of such software, PROVIDED that all such works include the notice
+below. HOWEVER, the publication of derivative works of this document for use as a technical
+specification is expressly prohibited.
+
+The notice is:
+
+// TODO - the Specification Link below needs to be updated Github Issue: #72
+"Copyright (c) 2016-2022 Eclipse Foundation. This software or document includes material copied from
+or derived from the Sparkplug Specification: 
+https://www.eclipse.org/tahu/spec/Sparkplug%20Topic%20Namespace%20and%20State%20ManagementV2.2-with%20appendix%20B%20format%20-%20Eclipse.pdf
+
+[[introduction_disclaimers]]
+==== Disclaimers
+
+THIS DOCUMENT IS PROVIDED "AS IS," AND THE COPYRIGHT HOLDERS AND THE ECLIPSE FOUNDATION MAKE NO 
+REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF 
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT THE CONTENTS OF
+THE DOCUMENT ARE SUITABLE FOR ANY PURPOSE; NOR THAT THE IMPLEMENTATION OF SUCH CONTENTS WILL NOT
+INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+
+THE COPYRIGHT HOLDERS AND THE ECLIPSE FOUNDATION WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT,
+SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE DOCUMENT OR THE PERFORMANCE OR
+IMPLEMENTATION OF THE CONTENTS THEREOF.
+
+The name and trademarks of the copyright holders or the Eclipse Foundation may NOT be used in 
+advertising or publicity pertaining to this document or its contents without specific, written prior
+permission. Title to copyright in this document will at all times remain with copyright holders.
+
+[[introduction_organization_of_the_sparkplug_specification]]
+=== Organization of the Sparkplug Specification
+
+This specification is split into the following chapters and appendices:
+
+* link:#introduction[Chapter 1 - Introduction]
+* link:#principles[Chapter 2 - Principles]
+* link:#components[Chapter 3 - Sparkplug Architecture and Infrastructure Components]
+* link:#topics[Chapter 4 - Topics and Messages]
+* link:#operational_behavior[Chapter 5 - Operational Behavior]
+* link:#payloads[Chapter 6 - Payloads]
+* link:#security[Chapter 7 - Security]
+* link:#high_availability[Chapter 8 - High Availability]
+* link:#acknowledgements[Chapter 9 - Acknowledgements]
+* link:#conformance[Chapter 10 - Conformance]
+* link:#appendix_a[Appendix A - Open Source Software]
+* link:#appendix_c[Appendix B - List of Normative Statements]
+
+[[introduction_terminology]]
+=== Terminology
+
+[[introduction_infrastructure_components]]
+==== Infrastructure Components
+
+This section details the infrastructure components implemented.
+
+image:extracted-media/media/image5.png[image,width=660,height=314]
+Figure 1 - MQTT SCADA Infrastructure
+
+[[introduction_mqtt_servers]]
+===== MQTT Server(s)
+
+MQTT enabled infrastructure requires that one or more MQTT Servers are present in the
+infrastructure. An MQTT Server must be compatible with the requirements outlined in the
+link:#conformance[Conformance Section]. In addition, it must be sized to properly manage all MQTT
+message traffic.
+
+One can implement the use (if required) of multiple MQTT servers for redundancy, high availability,
+and scalability within any given infrastructure.
+
+[[introduction_sparkplug_group]]
+===== Sparkplug Group
+
+A 'Sparkplug Group' is a logical or physical group of Edge Nodes that makes sense in the context of
+a distributed Sparkplug application. Groups can represent physical groups of Edge Nodes. For
+example, a Sparkplug Group could represent a set of Edge Nodes at a particular location, facility,
+or along a specific oil pipeline. Alternatively, a Sparkplug Group could represent group of similar
+types of Edge Nodes. For example, it could represent a particular set of like make and models of
+embedded gateways. The groups are meant to be defined by the system architects as appropriate for
+their particular application.
+
+[[introduction_sparkplug_edge_node]]
+===== Sparkplug Edge Node
+
+In the context of this specification, a Sparkplug Edge Node is any v3.1.1 or v5.0 compliant MQTT
+Client application that manages an MQTT Session and provides the physical and/or logical gateway
+functions required to participate in the Topic Namespace and Payload definitions described in
+this document. The Edge Node is responsible for any local protocol interface to existing devices
+(PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete I/O, and/or any logical
+internal process variables (PVs).
+
+[[introduction_sparkplug_device]]
+===== Sparkplug Device
+
+A Sparkplug Device represents a physical or logical device that makes sense in the context of a
+distributed Sparkplug application. Often times a Sparkplug Device will be a physical PLC, RTU, Flow
+Computer, Sensor, etc. However, a Sparkplug device could also represent a logical grouping of data
+points as makes sense for the specific Sparkplug Application being developed. For example, it could
+represent a set of data points across multiple PLCs that make up a logical device that makes sense
+within the context of that application.
+
+[[introduction_mqtt_sparkplug_enabled_device]]
+===== MQTT/Sparkplug Enabled Device
+
+This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using
+a compliant MQTT v3.1.1 or v5.0 connection with the payload and topic notation as outlined in this
+Sparkplug Specification. With MQTT/Sparkplug enabled directly in the device this could bypass the
+use of a Sparkplug Edge Node in the infrastructure. In this case, the physical device or sensor is
+the Edge Node. It is up to the developer of the application to decide if the concept of a 'Sparkplug
+Device' is to be used within their application.
+
+[[introduction_host_applications]]
+===== Host Applications
+
+A Host Application is defined as an application that consumes data from Sparkplug Edge Nodes.
+Depending on the nature of the Host Application it may consume Edge Node data and display it in a
+dashboard, it may historize the data in a database, or it may analyze the data in some way.
+SCADA/IIoT Hosts, MES, Historians, and Analytics applications are all examples of potential
+Sparkplug Host Applications. A Host Application may perform many different functions in handling the
+data. In addition, Host Applications may also send Sparkplug NCMD or DCMD messages to Edge Nodes.
+
+A Sparkplug Edge Node may specify one Host Application as its 'Primary Host Application'. This is
+handled by the Edge Node waiting to publish its NBIRTH and DBIRTH messages until the Host
+Application that the Edge Node has designated as its Primary Host application has come online.
+Sparkplug does not support the notion of multiple Primary Host Applications. This does not preclude
+any number of additional Host Applications participating in the infrastructure that are in either a
+pure monitoring mode, or in the role of a hot standby should the Edge Node's Primary Host
+Application go offline or become unavailable within the infrastructure.
+
+[tck-testable tck-id-intro-sparkplug-host-state]#[yellow-background]*Sparkplug Host Applications
+MUST publish STATE messages denoting their online and offline status.*#
+
+[[introduction_primary_host_application]]
+===== Primary Host Application
+
+A Primary Host Application may be defined by an Edge Node. The Edge Node's behavior may change
+based on the status of its configured Primary Host. It is not required that an Edge Node must have
+a Primary Host configured but it may be useful in certain applications. This allows Edge Nodes to
+make decisions based on whether or not the Primary Host Application is online or not. For example,
+an Edge Node may store data at the edge until a Primary Host Application comes back online. When the
+Primary Host Application publishes a new STATE message denoting it is online, the Edge Node can
+resume publishing data and also flush any historical data that it may have stored while offline.
+
+In a traditional SCADA system the SCADA Host would be the Primary Host Application. It is the most
+important consumer of data to keep operations running. With this same concept in mind, there can
+only be one Primary Host Application configured in an Edge Node as a result.
+
+[[introduction_sparkplug_ids]]
+===== Sparkplug Identifiers
+
+Sparkplug defines identifiers or IDs for different physical or logical components within the
+infrastructure. There are three primary IDs and one that is a composite ID. These are defined as
+the following.
+
+* Group ID
+** [tck-testable tck-id-intro-group-id-string]#[yellow-background]*The Group ID MUST be a UTF-8 string
+and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-group-id-chars]#[yellow-background]*Because the Group ID is used in
+MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
+Specification.*#
+** Non-normative comment: The Group ID represents a general grouping of Edge Nodes that makes sense
+within the context of the Sparkplug application and use-case.
+* Edge Node ID
+** [tck-testable tck-id-intro-edge-node-id-string]#[yellow-background]*The Edge Node ID MUST be a 
+UTF-8 string and used as part of the Sparkplug topics as defined in the
+link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-edge-node-id-chars]#[yellow-background]*Because the Edge Node ID is
+used in MQTT topic strings the Edge Node ID MUST only contain characters allowed for MQTT topics per the
+MQTT Specification.*#
+** Non-normative comment: The Edge Node ID represents a unique identifier for an Edge Node within
+the context of the Group ID under which it exists.
+* Device ID
+** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Device ID MUST be a UTF-8
+string and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-device-id-chars]#[yellow-background]*Because the Device ID is used in
+MQTT topic strings the Device ID MUST only contain characters allowed for MQTT topics per the MQTT
+Specification.*#
+** Non-normative comment: The Device ID represents a unique identifier for a Device within the
+context of the Edge Node ID under which it exists.
+* Edge Node Descriptor (composite ID)
+** The Edge Node Descriptor is the combination of the Group ID and Edge Node ID.
+** [tck-testable tck-id-intro-edge-node-id-uniqueness]#[yellow-background]*The Edge Node Descriptor MUST be
+unique within the context of all of other Edge Nodes within the Sparkplug infrastructure.*# In other
+words, no two Edge Nodes within a Sparkplug environment can have the same Group ID and same Edge
+Node ID.
+** Non-normative comment: The Device ID represents a unique identifier for a Device within the
+context of the Edge Node ID under which it exists.
+
+[[introduction_sparkplug_metrics]]
+===== Sparkplug Metric
+
+A Sparkplug Metric is the term used for a single 'tag change event' in the Sparkplug Payload. It
+represents an event that occurred at the Edge Node or Device such as a value or quality of a data
+point changing. For example, it could represent the value of an analog or boolean changing at a
+Sparkplug Device. A Sparkplug Metric typically includes a name, value, and timestamp. Sparkplug
+Metrics are also used in NCMD and DCMD messages to send messages to Edge Nodes and Devices to
+change values at the Edge.
+
+[[introduction_normative_references]]
+=== Normative References
+
+A list of all normative statements made in the Sparkplug specification document can be found in
+link:#appendix_b[Appendix B].
+
+[[introduction_security]]
+=== Security
+
+Security is not directly addressed in the Sparkplug Specification with normative statements.
+However, security should be addressed appropriately in every Sparkplug system. MQTT clients,
+servers, authentication, authorization, network access, physical access, and all other aspects of
+security should be addressed based on how the system will be deployed and used. Because Sparkplug
+utilizes MQTT and TCP/IP, the security features and best practices of those protocols also applies
+to Sparkplug. The security practices related to TCP/IP and MQTT have changed throughout the years
+and likely will continue to do so. As a result, the Sparkplug Specification will defer to the
+underlying protocols and industry standards for best practices. However, some non-normative
+statements are included with regard to security in the Sparkplug Specification.
+
+[[introduction_authentication]]
+==== Authentication
+
+There are several levels of security and access control configured within an MQTT infrastructure.
+From a pure MQTT client perspective, the client must provide a unique MQTT Client ID, and an
+optional MQTT username and password.
+
+[[introduction_autorization]]
+==== Authorization
+
+Although access control is not mandated in the MQTT Specification for use in MQTT Server
+implementations, Access Control List (ACL) functionality is available in many MQTT Server
+implementations. The ACL of an MQTT Server implementation is used to specify which Topic Namespace
+any MQTT Client can subscribe to and publish on. For example, it may make sense to have an Edge
+Node's MQTT client only able to publish on topics associated with it's Group and Edge Node ID. This
+would make it difficult for an MQTT client to spoof another Edge Node whether it be malicious or a
+configuration setup error.
+
+[[introduction_encryption]]
+==== Encryption
+
+The MQTT Specification does not specify any TCP/IP security scheme as it was envisaged during
+development of the MQTT Specification that TCP/IP security would (and did) change over time.
+Although this document will not specify any TCP/IP security schema it will provide examples on how
+to secure an MQTT infrastructure using TLS security.
+
+[[introduction_editing_convention]]
+=== Editing Convention
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+"RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC
+2119. RFC 2119: https://tools.ietf.org/html/rfc2119
+
+All normative statements in this document are highlighted in [yellow-background]*yellow text as
+shown here*.
+
+[[introduction_leveragint_standards_and_open_source]]
+=== Leveraging Standards and Open Source
+
+In addition to leveraging MQTT v3.1.1 and MQTT v5.0 standards, the Sparkplug Specification leverages
+as much open source development tooling and data encoding as possible. Many different open source
+organizations, projects, and ideas were used in the development of the Sparkplug Specification. More
+information on these can be found in link:#appendix_a[Appendix A]

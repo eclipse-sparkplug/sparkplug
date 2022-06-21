@@ -1,0 +1,80 @@
+@startuml
+participant "Primary Host Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "Sparkplug Edge Node" as EdgeNode #lightblue
+
+activate PrimApp
+activate Server
+
+
+autonumber 1 "<b>(#)"
+Server <- EdgeNode : CONNECT
+
+|||
+
+Server <- EdgeNode : SUBSCRIBE( **NCMD, DCMD, STATE** )
+
+Server <- EdgeNode : PUBLISH( **NBIRTH** )
+activate EdgeNode
+
+note left
+Create/update Edge Node
+folder and metrics.
+Create and update all
+metrics and set data
+quality to 'GOOD'.
+end note
+
+note right of EdgeNode
+Sparkplug Node Session
+established. Current 'STATE'
+is ONLINE.
+end note
+
+... (normal operation) ...
+|||
+
+Server <--> EdgeNode : "Loss of Connection"
+autonumber stop
+deactivate EdgeNode
+
+[<-- Server : Death Certificate
+
+note left of Server
+All Edge Node metrics set
+to 'STALE'. OFFLINE
+time and metrics updated.
+end note
+
+note right of EdgeNode
+Sparkplug Edge Node
+Session terminated.
+Current 'STATE' is
+OFFLINE.
+end note
+
+|||
+
+Server <- EdgeNode : CONNECT
+
+Server <- EdgeNode : SUBSCRIBE( **NCMD, DCMD, STATE** )
+
+|||
+Server <- EdgeNode : PUBLISH( **NBIRTH** )
+activate EdgeNode
+note left
+All Edge Node metrics set
+to 'GOOD'. OFFLINE
+time and metrics updated.
+end note
+
+
+note right of EdgeNode
+Sparkplug Edge Node Session
+reestablished. Current 'STATE'
+is ONLINE.
+end note
+
+... (normal operation) ...
+|||
+@enduml

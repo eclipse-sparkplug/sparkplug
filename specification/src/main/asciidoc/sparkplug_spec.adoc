@@ -1,0 +1,59 @@
+////
+Copyright © 2016-2020 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+////
+
+= Sparkplug 3.0.0-SNAPSHOT: Sparkplug Specification
+Eclipse Sparkplug Contributors
+Version 3.0.0-SNAPSHOT Snapshot Release, {docdate}
+
+image::extracted-media/media/image3.png[image,width=195,height=90]
+image::extracted-media/media/image4.png[image,width=200,height=80]
+
+[cols=",,,",options="header",]
+|===
+|*Revision Number* |*Date* |*Author* |*Description*
+|1.0 |5/26/16 |Cirrus Link |Initial Release
+|2.1 |12/10/16 |Cirrus Link |Payload B Addition
+|2.2 |10/11/19 |Cirrus Link |Re-branding for Eclipse foundation added TM to Sparkplug
+|3.0 |11/1/20 |Eclipse Sparkplug Specification Project Team |Reorganized to be in adoc format and to include normative and non-normative statements
+| | | |
+| | | |
+|===
+
+// Settings:
+//:experimental:
+:reproducible:
+:icons: font
+:listing-caption: Listing
+:sectnums:
+:toc:
+:toclevels: 3
+:docinfo: shared,private
+:autofit-option:
+ifdef::backend-pdf[]
+:sectanchors:
+:doctype: book
+:compat-mode:
+:pdf-page-size: Letter
+:source-highlighter: rouge
+:rouge-style: googlecode
+endif::[]
+
+include::chapters/Sparkplug_1_Introduction.adoc[]
+include::chapters/Sparkplug_2_Principles.adoc[]
+include::chapters/Sparkplug_3_Components.adoc[]
+include::chapters/Sparkplug_4_Topics.adoc[]
+include::chapters/Sparkplug_5_Operational_Behavior.adoc[]
+include::chapters/Sparkplug_6_Payloads.adoc[]
+include::chapters/Sparkplug_7_Security.adoc[]
+include::chapters/Sparkplug_8_HA.adoc[]
+include::chapters/Sparkplug_9_Acknowledgements.adoc[]
+include::chapters/Sparkplug_10_Conformance.adoc[]
+include::chapters/Sparkplug_Appendix_A.adoc[]
+include::chapters/Sparkplug_Appendix_B.adoc[]

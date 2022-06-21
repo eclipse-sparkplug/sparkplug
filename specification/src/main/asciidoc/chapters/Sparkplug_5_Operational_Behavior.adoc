@@ -1,0 +1,761 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
+////
+
+[[operational_behavior]]
+== Operational Behavior
+
+An MQTT based SCADA system is unique in that the Primary Host Application is not responsible for
+establishing and maintaining connections to the Edge Nodes as is the case in most existing legacy
+poll/response device protocols. With an MQTT based architecture, both the Host Applications as well
+as the Edge Nodes establish MQTT Sessions with one or more central MQTT Servers. This is the desired
+functionality as it provides the necessary decoupling from any one application and any given
+Edge Node/Device. Additional Sparkplug Host Application MQTT clients can connect and subscribe to
+any of the real time data without impacting the Primary Host Application.
+
+Due to the nature of real time SCADA solutions, it is very important for the Primary Host
+Application and all connected Eclipse Sparkplug Edge Nodes to have the MQTT Session STATE
+information for each other. In order to accomplish this the Sparkplug Topic Namespace definitions
+for Birth/Death Certificates along with the defined payloads provide both state and context between
+the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios
+there are two main reasons for this "designation" of a Primary Host Application:
+
+[arabic]
+. Only the Primary Host Application should have the permission to issue commands to Edge Nodes.
+. In high availability and redundancy use cases where multiple MQTT Servers are used, Sparkplug Edge
+Nodes need to be aware of whether the Primary Host Application has network connectivity to each
+MQTT Server in the infrastructure. If the Primary Host Application STATE shows that an Edge Node
+is connected to an MQTT Server that the Primary Host Application is *NOT* connected to, then the
+Edge Node should connect to the next available MQTT Server where STATE for the Primary Host
+Application is ‘ONLINE’.
+
+[[operational_behavior_primary_host_application_session_establishment]]
+=== Host Application Session Establishment
+
+The Sparkplug Host Application upon startup or reconnect will immediately try to create a Host MQTT
+Session with the configured MQTT Server infrastructure. Note that the establishment of an Host
+Application MQTT session is asynchronous of any other MQTT Client session. If Edge Nodes are already
+connected to the MQTT Server infrastructure, the Sparkplug Host Application will synchronize using
+the STATE MQTT topic. If associated Edge Nodes are not connected, the Sparkplug Host Application
+will synchronize with the Edge Nodes and their data streams when the Edge Nodes publish their Birth
+Certificates. Any Edge Node that has specified this Sparkplug Host Application as its Primary Host
+Application will will wait to publish their Birth Certificates until after they receive the STATE
+message denoting that the Primary Host application is online.
+
+// suppress inspection "AsciiDocLinkResolve"
+plantuml::assets/plantuml/host-session-establishment.puml[format=png, alt="Host Session Establishment"]
+//image:extracted-media/media/image7.png[image,width=660,height=492]
+Figure 3 - Host Session Establishment
+
+The session diagram in Figure 3 - Host Session Establishment shows a very simple topology with a
+single MQTT Server. The steps outlined in the session diagram are defined as follows:
+
+[arabic]
+. Sparkplug Host Applications will try to create an MQTT Session using the MQTT CONNECT Control
+Packet. A Death Certificate is constructed into the MQTT Will Topic and Will Payload of the
+CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true.
+[tck-testable tck-id-message-flow-phid-sparkplug-clean-session]#[yellow-background]*The CONNECT
+Control Packet for all Sparkplug Host Applications MUST set the MQTT 'Clean Session' flag to
+true.*#
+The MQTT CONNECT Control Packet is acknowledged as successful with a valid MQTT CONNACK Control
+Packet from the MQTT Server. From this point forward in time, the MQTT Server is ready to deliver a
+Host Death Certificate any time the Sparkplug Host Application MQTT Client loses connectivity to the
+MQTT Server.
+
+. With the MQTT Session established, Sparkplug Host Application MUST issue an MQTT subscription for
+the defined Sparkplug Topic Namespace.
+[tck-testable tck-id-message-flow-phid-sparkplug-subscription]#[yellow-background]*The subscription
+on the Sparkplug Topic Namespace and the STATE topic MUST be done immediately after successfully
+establishing the MQTT session and before publishing its own STATE message.*#
+
+. [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#[yellow-background]*Once an MQTT
+Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic
+Namespace have been established, and the STATE topic subscription has been been established, the
+Sparkplug Host Application MUST publish a new STATE message with a Payload of a UTF-8 string of
+'ONLINE'.*#
+The Host Application is now ready to start receiving MQTT messages from any connected Edge Node
+within the infrastructure. At this point, the Host Application can update the MQTT Client metrics in
+the Host Application with a current state of ONLINE once each Edge Node publishes its Sparkplug
+NBIRTH and DBIRTH messages. Since the Sparkplug Host Application is also relying on the MQTT Session
+to the MQTT Server(s), the availability of MQTT Servers to the Host Application is also being
+monitored and reflected in the MQTT Client metrics in the Host Application.
+
+. If at any point in time Host Application loses connectivity with the defined MQTT Server(s), the
+ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the Host
+Application.
+[tck-not-testable]#[yellow-background]*All metric data associated with any Sparkplug Edge Node that
+was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data
+quality if the Host Application loses connection to the MQTT Server.*#
+
+[[operational_behavior_edge_node_session_establishment]]
+=== Edge Node Session Establishment
+
+Prior to sending an NBIRTH message, the MQTT client associated with the Edge Node must subscribe to
+receive NCMD messages with the following rules.
+
+* [tck-testable tck-id-message-flow-edge-node-ncmd-subscribe]#[yellow-background]*The MQTT client
+associated with the Edge Node MUST subscribe to a topic of the form
+'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id
+is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of
+1.*#
+** This subscription is not optional as Edge Nodes MUST be able to respond to 'rebirth requests'.
+
+After subscribing, the Edge Node must follow these additional rules.
+
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-connect]#[yellow-background]*Any Edge
+Node in the MQTT infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH
+messages.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message]#[yellow-background]*When
+a Sparkplug Edge Node sends its MQTT CONNECT packet, it MUST include a Will Message.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-topic]#[yellow-background]*The
+Edge Node's MQTT Will Message's topic MUST be of the form 'spBv1.0/group_id/NDEATH/edge_node_id'
+where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this
+Edge Node*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload]#[yellow-background]*The
+Edge Node's MQTT Will Message's payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]#[yellow-background]*The
+Edge Node's MQTT Will Message's payload MUST include a metric with the name of 'bdSeq', the datatype
+of INT64, and the value MUST be incremented by one from the value in the previous MQTT CONNECT
+packet unless the value would be greater than 255. If in the previous NBIRTH a value of 255 was
+sent, the next MQTT Connect packet Will Message payload bdSeq number value MUST have a value of 0.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-qos]#[yellow-background]*The
+Edge Node's MQTT Will Message's MQTT QoS MUST be 0.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]#[yellow-background]*The
+Edge Node's MQTT Will Message's retained flag MUST be set to false.*#
+
+Once the Sparkplug Host Application has successfully connected to the MQTT Server, it must publish a
+NBIRTH message. The NBIRTH message must follow the following rules.
+
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait]#[yellow-background]*If the
+Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host
+Application is ONLINE via the STATE topic before publishing NBIRTH and DBIRTH messages.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-topic]#[yellow-background]*The
+Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where
+group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge
+Node*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload]#[yellow-background]*The
+Edge Node's NBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-bdSeq]#[yellow-background]*The
+Edge Node's NBIRTH payload MUST include a metric with the name of 'bdSeq' the datatype of INT64 and
+the value MUST be the same as the previous MQTT CONNECT packet.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-qos]#[yellow-background]*The
+Edge Node's NBIRTH MQTT QoS MUST be 0.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-retained]#[yellow-background]*The
+Edge Node's NBIRTH retained flag MUST be set to false.*#
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-seq]#[yellow-background]*The
+Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive).*#
+** This will become the starting sequence number which all following messages will include a
+sequence number that is one more than the previous up to 255 where it wraps back to zero.
+
+Most implementations of a Sparkplug Edge Node for real time SCADA systems will try to maintain a
+persistent MQTT Session with the MQTT Server Infrastructure. But there are use cases where the
+MQTT Session does not need to be persistent. In either case, an Edge Node can try to establish an
+MQTT Session at any time and is completely asynchronous from any other MQTT Client in the
+infrastructure. The only exception to this rule is the use case where there are multiple MQTT
+Servers and a Primary Host Application. Note this does not refer to the use of the MQTT 'Clean
+Session' flag. All types of MQTT clients (both Host and Edge Nodes) in a Sparkplug system MUST
+always set the 'Clean Session' flag in the MQTT CONNECT packet to true.
+
+
+// suppress inspection "AsciiDocLinkResolve"
+plantuml::assets/plantuml/edge-node-mqtt-session-establishment.puml[format=png, alt="Edge Node MQTT Session Establishment"]
+//image:extracted-media/media/image8.png[image,width=660,height=508]
+
+Figure 4 - Edge Node MQTT Session Establishment
+
+The session diagram in Figure 4 - Edge Node MQTT Session Establishment shows a very simple topology
+with a single MQTT Server. The steps outlined in the session diagram are defined as follows:
+
+[arabic]
+. The Edge Node MQTT Client will attempt to create an MQTT connection to the available MQTT
+Server(s) using the MQTT CONNECT Control Packet.
+The Death Certificate constructed into the Will Topic and Will Payload follows the format defined
+in section on link:#payloads_ndeath[NDEATH messages].
+
+. The subscription to NCMD level topics ensures that Edge Node targeted messages from the Primary
+Host Application are delivered. The subscription to DCMD ensures that device targeted messages from
+the Primary Host Application are delivered. In infrastructures with multiple MQTT Servers and a
+designated Primary Host Application, the subscription to STATE informs the Edge Node the current
+state of the Primary Host Application. At this point the Edge node has fully completed the steps
+required for establishing a valid MQTT Session with the Primary Host Application.
+
+. Once an MQTT Session has been established, the Edge Node MQTT client MUST publish an application
+level NBIRTH as defined link:#topics_birth_message_nbirth[here]. At this point, the Primary Host
+Application will have all the information required to build out the Edge Node metric structure and
+show the Edge Node in an "ONLINE" state once it publishes its NBIRTH and DBIRTH messages.
+
+. If at any point in time the Edge Node MQTT Client loses connectivity to the defined MQTT
+Server(s), a Death Certificate (NDEATH) is issued by the MQTT Server on behalf of the Edge Node.
+Upon receipt of the Death Certificate with a bdSeq number metric that matches the preceding bdSeq
+number in the NBIRTH messages, the Primary Host Application should set the state of the Edge Node
+to ‘OFFLINE’ and update all metric timestamps related to this Edge Node. Any defined metrics will be
+set to a STALE data quality.
+
+.. The bdSeq number is used to correlate an NBIRTH with a NDEATH. Because the NDEATH is included in
+the MQTT CONNECT packet, its timestamp (if included) is not useful to Sparkplug Host Applications.
+Instead, a bdSeq number must be included as a metric in the payload of the NDEATH. The same bdSeq
+number metric value must also be included in the NBIRTH message published immediately after the MQTT
+CONNECT. This allows Host Applications to know that a NDEATH matches a specific NBIRTH message. This
+is required because timing with Will Messages may result in NDEATH messages arriving after a
+new/next NBIRTH message. The bdSeq number allows Host Applications to know when it must consider the
+Edge Node offline.
+
+[[operational_behavior_edge_node_session_termination]]
+=== Edge Node Session Termination
+
+Edge Nodes for various reasons may disconnect intentionally.
+When this is done,
+[tck-testable tck-id-operational-behavior-edge-node-intentional-disconnect-ndeath]#[yellow-background]*an
+Edge Node MUST publish an NDEATH before terminating the connection.*#
+[tck-testable tck-id-operational-behavior-edge-node-intentional-disconnect-packet]#[yellow-background]*Immediately
+following the NDEATH publish, a DISCONNECT packet MUST be sent to the MQTT Server.*#
+This allows the MQTT Server to be notified that the Edge Node is offline and as a result the MQTT
+Will Message of the Edge Node will not be delivered by the MQTT Server to subscribed MQTT clients.
+
+When an Edge Node goes offline by sending its NDEATH, it is implied that all of the Edge Node's
+associated Devices are also offline. This means that a Host Application needs to stale the tags for
+all Sparkplug Device's associated with this Edge Node.
+
+[[operational_behavior_device_session_establishment]]
+=== Device Session Establishment
+
+The Sparkplug Specification is provided to get real time process variable information from existing
+and new end devices measuring, monitoring, and controlling a physical process into an MQTT
+infrastructure and the Host Application Industrial Internet of Things application platform. In the
+context of this document an MQTT Device can represent anything from existing legacy poll/response
+driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and instrumentation
+devices that can implement a conformant MQTT client natively.
+
+The preceding sections in this document detail how the Sparkplug Host Application interacts with the
+MQTT Server infrastructure and how that infrastructure interacts with the notion of a Sparkplug
+Edge Node. But to a large extent the technical requirements of those pieces of the infrastructure
+have already been provided. For most use cases in this market sector the primary focus will be on
+the implementation of the Sparkplug Specification between the native device and the Edge Node API’s.
+
+Prior to sending a DBIRTH message, if the Device supports 'writing to outputs' the MQTT client
+associated with the Sparkplug Device must subscribe to receive DCMD messages with the following
+rules.
+* [tck-testable tck-id-message-flow-device-dcmd-subscribe]#[yellow-background]*If the Device
+supports writing to outputs, the MQTT client associated with the Device MUST subscribe to a topic of
+the form 'spBv1.0/group_id/DCMD/edge_node_id/device_id' where group_id is the Sparkplug Group ID the
+edge_node_id is the Sparkplug Edge Node ID and the device_id is the Sparkplug Device ID for this
+Device. It MUST subscribe on this topic with a QoS of 1.*#
+
+A Device can publish a DBIRTH as long as an NBIRTH has been sent previously and the MQTT session is
+active. The DBIRTH message must follow the following rules.
+
+* [tck-testable tck-id-message-flow-device-birth-publish-nbirth-wait]#[yellow-background]*The NBIRTH
+message must have been sent within the current MQTT session prior to a DBIRTH being published.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-topic]#[yellow-background]*The
+Device's DBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/DBIRTH/edge_node_id/device_id'
+where group_id is the Sparkplug Group ID the edge_node_id is the Sparkplug Edge Node ID and the
+device_id is the Sparkplug Device ID for this Device.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-match-edge-node-topic]#[yellow-background]*The
+Device's DBIRTH MQTT topic group_id and edge_node_id MUST match the group_id and edge_node_id that
+were sent in the prior NBIRTH message for the Edge Node this Device is associated with.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload]#[yellow-background]*The
+Device's DBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-qos]#[yellow-background]*The
+Device's DBIRTH MQTT QoS MUST be 0.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-retained]#[yellow-background]*The
+Device's DBIRTH retained flag MUST be set to false.*#
+* [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload-seq]#[yellow-background]*The
+Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive) and be one
+more than was included in the prior Sparkplug message sent from the Edge Node associated with this
+Device.*#
+
+In order to expose and populate the metrics from any intelligent device, the following simple
+session diagram outlines the requirements:
+
+// suppress inspection "AsciiDocLinkResolve"
+plantuml::assets/plantuml/mqtt-device-session-establishment.puml[format=png, alt="MQTT Device Session Establishment"]
+//image:extracted-media/media/image9.png[image,width=660,height=309]
+Figure 5 - MQTT Device Session Establishment
+
+The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with
+all the Sparkplug elements in place i.e. Host Application, MQTT Server(s), Sparkplug Edge Node and
+this element, the device element. The steps outlined in the session diagram are defined as follows:
+
+This flow diagram assumes that at least one MQTT Server is available and operational within the
+infrastructure. Without at least a single MQTT Server the remainder of the infrastructure is
+unavailable.
+
+[arabic]
+. Assuming MQTT Server is available.
+
+. Assuming the Primary Host Application established MQTT Session with the MQTT Server(s).
+
+. The Session Establishment of the associated Sparkplug Edge Node is described in
+link:#operational_behavior_edge_node_session_establishment[Edge Node Session Establishment]. This
+flow diagram assumes that the Edge Node session has already been established with the Primary Host
+Application. Depending on the target platform, the Edge Node may be a physical "Edge of Network"
+gateway device polling physical legacy devices via Modbus, AB, DNP3.0, HART, etc, an MQTT enabled
+sensor or device, or it might be a logical implementation of one of the Eclipse Tahu compatible
+implementations for prototype Edge Nodes running on the Raspberry PI platform. Regardless of the
+implementation, at some point the device interface will need to provide a state and associated
+metrics to publish to the MQTT infrastructure.
+
+. State #4 in the session diagram represents the state at which the Edge Node is ready to report all
+of its metric data to the MQTT Server(s) as defined in Sparkplug. It is the responsibility of the
+Edge node (logical or physical) to put this information in a form defined in
+link:#payloads_dbirth[DBIRTH messages]. Upon receiving the DBIRTH message, the Primary Host
+Application can build out the proper metric structure and set the Sparkplug Device to 'online'.
+
+. Following the Sparkplug Specification in link:#payloads_ddata[Device Data Messages] (DDATA), all
+subsequent metrics are published to the Primary Host Application on a Report by Exception (RBE)
+basis using the DDATA message format. Time based reporting is not explicitly disallowed by the
+Sparkplug Specification but it is discouraged and often unnecessary.
+
+. If at any time the Sparkplug Device cannot provide real time information, the Sparkplug
+Specification requires that an DDEATH be published. This will inform the Primary Host Application
+that all metric information associated with that Sparkplug Device be set to a STALE data quality.
+
+[[operational_behavior_device_session_termination]]
+=== Device Session Termination
+
+[tck-testable tck-id-operational-behavior-device-ddeath]#[yellow-background]*If a Sparkplug Edge
+Node loses connection with an attached Sparkplug Device, it MUST publish a DDEATH message on behalf
+of the device.*# This allows Sparkplug Host Applications to know that the Device is no longer
+connected and therefore the Edge Node is not able to report live/accurate data values. In turn, the
+Sparkplug Host Applications MUST mark the Device offline and denote that Device's tags as stale.
+
+[[operational_behavior_sparkplug_host_applications]]
+=== Sparkplug Host Applications
+
+As noted above, there is the notion of a Sparkplug Host Application in the infrastructure that has
+the required permissions to send commands to Edge Nodes and Sparkplug Devices and the fact that all
+Edge Nodes need to know the Primary Host Application is connected to the same MQTT Server its
+connected to or it needs to walk to another one in the infrastructure. Both are common requirements
+of a mission critical SCADA system.
+
+But unlike legacy SCADA system implementations, all real time process variable information being
+published thru the MQTT infrastructure is available to any number of additional MQTT Clients in the
+business that might be interested in subsets if not all of the real time data.
+
+The only fundamental difference between a Primary Host Application MQTT Client and other Sparkplug
+Host Application MQTT Clients is that the Edge Nodes in the infrastructure know to make sure the
+Primary Host Application is online before publishing data.
+
+[[operational_behavior_host_application_message_ordering]]
+=== Sparkplug Host Application Message Ordering
+
+Sparkplug Host Applications are required to validate the order of messages arriving from Edge Nodes.
+This is done using the sequence number which is sent in every NBIRTH, DBIRTH, NDATA, and DDATA
+message that comes from an Edge Node. Because these MQTT messages are sent on different topics, it
+is possible based on MQTT Server implementations that these messages may arrive at the Sparkplug
+Host Application in a different order than they were sent from the Edge Node. This can be especially
+common when using clustered MQTT Servers. It is the responsibility of the Sparkplug Host Application
+to ensure that all messages arrive within a 'Reorder Timeout'. In typical environments this timeout
+can be as little as a couple of seconds. In deployments with very slow networks or clustered MQTT
+servers it may need to be longer. In some environments, the MQTT Server may ensure in-order delivery
+of QoS0 MQTT messages even across topics. In these cases this timeout could be zero.
+
+If a Sparkplug Host Applications receives messages from Edge Node with sequence numbers 1, 2, and 4.
+At the time the message with a sequence number of 4 arrives, a timer SHOULD be started within the
+Host Application. This is the start of the Reordering Timeout timer. A messages with sequence number
+3 MUST arrive before the Reordering Timeout elapses. If a message with sequence number 3 does not
+arrive before the timeout, a Rebirth Request SHOULD be sent to the Edge Node. The ensures the
+session state is properly reestablished. If a message with a sequence number of 3 arrives before the
+Reorder Timeout occurs, the timer can be shutdown and normal operation of the Host Application can
+continue.
+
+It is also important to note that depending on the Sparkplug Host Application's purpose, it may make
+sense to never process messages out of order. It also may make sense to not process a message that
+arrived out of sequence if its preceding messages didn't arrive before the Reorder Timeout. These
+choices are left to the Sparkplug Host Application developer. For example, a Host Application that
+is a time series database may want to insert all data that arrives regardless of the message order.
+However, a rules engine Host Application may require that messages are processed in order of their
+sequence numbers to preserve the order of events as they occurred at the Edge Node.
+
+* [tck-testable tck-id-operational-behavior-host-reordering-param]#[yellow-background]*Sparkplug
+Host Applications SHOULD provide a configurable 'Reorder Timeout' parameter*#
+* [tck-testable tck-id-operational-behavior-host-reordering-start]#[yellow-background]*If a message
+arrives with an out of order sequence number, the Host Application SHOULD start a timer denoting the
+start of the Reorder Timeout window*#
+* [tck-testable tck-id-operational-behavior-host-reordering-rebirth]#[yellow-background]*If the
+Reorder Timeout elapses and the missing message(s) have not been received, the Sparkplug Host
+Application SHOULD send an NCMD to the Edge Node with a 'Node Control/Rebirth' request*#
+** Non-normative comment: In most cases a 'Primary Host Application' would send a Rebirth Request
+but a Non-Primary Host may not
+* [tck-testable tck-id-operational-behavior-host-reordering-success]#[yellow-background]*If the
+missing messages that triggered the start of the Reorder Timeout timer arrive before the reordering
+timer elapses, the timer can be terminated and normal operation in the Host Application can
+continue*#
+
+[[operational_behavior_primary_application_state_in_multiple_mqtt_server_topologies]]
+=== Primary Host Application STATE in Multiple MQTT Server Topologies
+
+For implementations with multiple MQTT Servers, there is one additional aspect that needs to be
+understood and managed properly. When multiple MQTT Servers are available there is the possibility
+of "stranding" an Edge Node if the Primary command/control of the Primary Host Application loses
+network connectivity to one of the MQTT Servers. In this instance the Edge Node would stay properly
+connected to the MQTT Server publishing information not knowing that Primary Host Application was
+not able to receive the messages.
+// TODO: This is a normative statement - but it is testable?
+When using multiple MQTT Servers, the Primary Host Application instance must be configured to
+publish a STATE Birth Certificate and all Edge Nodes need to subscribe to this STATE message.
+
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-state]#[yellow-background]*Regardless
+of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application
+establishes a new MQTT Session with an MQTT Server, the STATE Birth Certificate defined in the
+link:#payloads_desc_state[STATE description section] MUST be the first message that is published
+after a successful MQTT Session is established with each MQTT Server.*#
+
+Sparkplug Edge Nodes in an infrastructure that provides multiple MQTT Servers can establish a
+session to any one of the MQTT Servers.
+
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-single-server]#[yellow-background]*The
+Edge Nodes MUST not connected to more than one server at any point in time.*#
+
+Upon establishing a session, the Edge Node should issue a subscription to the STATE message
+published by Primary Host Application. Since the STATE message is published with the RETAIN message
+flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
+examine the payload of this message to ensure that it is a value of "ONLINE". If the value is
+"OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT
+Server.
+
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*If
+the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST
+terminate its session with this MQTT Server and move to the next available MQTT Server that is
+available.*#
+
+[tck-testable tck-id-operational-behavior-edge-node-birth-sequence-wait]#[yellow-background]*The
+Edge Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received
+by the Edge Node.*#
+This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
+to the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
+because of network issues. The following message flow diagram outlines how the STATE message is
+used when three (3) MQTT Servers are available in the infrastructure:
+
+// suppress inspection "AsciiDocLinkResolve"
+plantuml::assets/plantuml/primary-host-application-state-flow-diagram.puml[format=png, alt="Primary Host Application STATE flow diagram"]
+//image:extracted-media/media/image11.png[image,width=660,height=304]
+Figure 7 – Primary Host Application STATE flow diagram
+
+[arabic]
+. When an Edge Node is configured with multiple available MQTT Servers in the infrastructure it
+should issue a subscription to the Primary Host Application STATE message. The Edge Nodes are free
+to establish an MQTT Session to any of the available servers over any available network at any time
+and examine the current STATE value. If the STATE message payload is ‘OFFLINE’ then the Edge Node
+should disconnect and walk to the next available server.
+
+. Upon startup, the configured Primary Host Application's MQTT Client MUST include the Primary Host
+Application DEATH Certificate that indicates STATE is ‘OFFLINE’ with the message RETAIN flag set to
+true in the MQTT Will Message. Then the Primary Host Application BIRTH Certificate MUST be published
+with a STATE payload of ‘ONLINE’.
+
+. As the Edge Node walks its available MQTT Server list, it will establish an MQTT Session with a
+server that has a STATE message with a payload of ‘ONLINE’. The Edge Node can stay connected to
+this server if its MQTT Session stays intact and it does not receive the Primary Host Application
+DEATH Certificate.
+
+. Having a subscription registered to the MQTT Server on the STATE topic will result in any change
+to the current Primary Host Application STATE being received immediately. In this case, a
+network disruption causes the Primary Host Application MQTT Session to server #2 to be terminated.
+This will cause the MQTT Server, on behalf of the now terminated the Primary Host Application MQTT
+Client to publish the Death Certificate to anyone that is currently subscribed to it. Upon receipt
+of the Primary Host Application Death Certificate this Edge Node will move to the next MQTT Server
+in its list.
+
+. The Edge Node connected to the next available MQTT Server and since the current STATE on this
+server is ‘ONLINE’, it can stay connected. In the meantime, the network disruption between Primary
+Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a new MQTT
+Session established to server #2 with an update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is
+ready to accept new Edge Node session requests.
+
+[[operational_behavior_edge_node_ndata_and_ncmd_messages]]
+=== Edge Node NDATA and NCMD Messages
+
+We’ll start this section with a description of how metric information is published to the Primary
+Host Application from an Edge Node in the MQTT infrastructure. The definition of an Edge Node is
+generic in that it can represent both physical "Edge of Network Gateway" devices that are
+interfacing with existing legacy equipment and a logical MQTT endpoint for devices that natively
+implement the Sparkplug Specification. The link:#payloads_nbirth[NBIRTH Section] defines the Edge
+Node Birth Certificate MQTT Payload and the fact that it can provide any number of metrics that will
+be exposed in the Primary Host Application. Some examples of these will be "read only" such as:
+
+* Edge Node Manufacture ID
+* Edge Node Device Type
+* Edge Node Serial Number
+* Edge Node Software Version Number
+* Edge Node Configuration Change Count
+* Edge Node Position (if GPS device is available)
+* Edge Node Cellular RSSI value (if cellular is being used)
+* Edge Node Power Supply voltage level
+* Edge Node Temperature
+
+Other metrics may be dynamic and "read/write" such as:
+
+* Edge Node Rebirth command to republish all Edge Node and Device Birth Certificates
+* Edge Node Next server command to move to next available MQTT Server
+* Edge Node Reboot command to reboot the Edge Node
+* Edge Node Primary Network (PRI_NETWORK) where 1 = Cellular, 2 = Ethernet
+
+The important point to realize is that the metrics exposed in the Primary Host Application for use
+in the design of applications are completely determined by what metric information is published in
+the NBIRTH. This is entirely dependent on the application and use-case. Each specific Edge Node can
+best determine what data to expose, and how to expose it, and it will automatically appear in the
+Primary Host Application metric structure. Metrics can even be added dynamically at runtime and with
+a new NBIRTH and DBIRTH sequence of messages. These metrics will automatically be added to the
+Primary Host Application metric structure.
+
+// FIXME: This needs a bit of cleanup to be precise with non-normative MQTT concepts (e.g. ACLs)
+The other very important distinction to make here is that Edge Node NDATA and NCMD messages are
+decoupled from the Sparkplug Device level data and command messages of DDATA and DCMD. This
+decoupling in the Topic Namespace is important because it allows interaction from all MQTT Clients
+in the system (to the level of permission and application) with the Edge Nodes, but NOT to the level
+of sending device commands. The Primary Host Application could provide a configuration parameter
+that would BLOCK output DDATA and DCMD messages but still allow NDATA and NCMD messages to flow. In
+this manner, multiple application systems can be connected to the same MQTT infrastructure, but only
+the ones with DCMD enabled can publish Device commands.
+
+The following simple message flow diagram demonstrates the messages used to update a changing
+cellular RSSI value in the Primary Host Application and sending a command from the Primary Host
+Application to the Edge Node to use a different primary network path.
+
+// suppress inspection "AsciiDocLinkResolve"
+plantuml::assets/plantuml/edge-node-ndata-and-ncmd-message-flow.puml[format=png, alt="Edge Node NDATA and NCMD Message Flow"]
+//image:extracted-media/media/image10.png[image,width=660,height=303]
+Figure 6 - Edge Node NDATA and NCMD Message Flow
+
+[arabic]
+. Assuming MQTT Server is available.
+. Assuming the Primary Host Application established MQTT Session with the MQTT Server(s).
+. The Edge Node has an established MQTT Session and the NBIRTH has been published. Primary Host
+Application now has all defined metrics and their current value.
+. The Edge Node is monitoring its local cellular RSSI level. The level has changed and now the Edge
+Node wants to publish the new value to the associated metric in Primary Host Application.
+. From an operational requirement, the Edge Node needs to be told to switch its primary network
+interface from cellular to Ethernet. From the Primary Host Application, the new metric value is
+published to the Edge Node using a NCMD Sparkplug message.
+
+[[operational_behavior_mqtt_enabled_device_session_establishment]]
+=== MQTT Enabled Device Session Establishment
+
+When implementing Sparkplug directly on an I/O enabled Device, there are two options. The notion of
+a 'Sparkplug Device' can be removed entirely. In this scenario the MQTT Client can publish 'Edge
+Node level' messages (e.g. NBIRTH, NDEATH, NCMD, and NDATA) and never use the concept of 'Device
+level' messages (e.g. DBIRTH, DDEATH, DCMD, and DDATA messages. All of the metrics can be published
+on the Edge Node level Sparkplug verbs and simply omit use of the Device level Sparkplug verbs.
+Because the Edge Node level verbs encapsulate the MQTT/Sparkplug Session, this is all that is
+required.
+
+Alternatively, the implementation can use the concept of both Edge Node and Device Sparkplug verbs
+(NBIRTH, NDEATH, NDATA, NCMD, DBIRTH, DDEATH, DDATA, and DCMD) as any other Gateway based Edge Node
+would. From any consuming application this would look like any other Edge Node Gateway that may be
+managing one or more attached devices.
+
+[[operational_behavior_sparkplug_host_application_session_establishment]]
+=== Sparkplug Host Application Session Establishment
+
+Sparkplug Host Applications must follow the following rules when connecting to the MQTT Server.
+
+* [tck-testable tck-id-operational-behavior-host-application-host-id]#[yellow-background]*The
+host_id MUST be unique to all other Sparkplug Host IDs in the infrastructure.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-will]#[yellow-background]*When
+a Sparkplug Host Application sends its MQTT CONNECT packet, it MUST include a Will Message.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-will-topic]#[yellow-background]*The
+MQTT Will Message's topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
+of the Sparkplug Host Application*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-will-payload]#[yellow-background]*The
+MQTT Will Message's payload MUST be the UTF-8 String of 'OFFLINE'.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-will-qos]#[yellow-background]*The
+MQTT Will Message's MQTT QoS MUST be 1 (at least once).*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-will-retained]#[yellow-background]*The
+MQTT Will Message's retained flag MUST be set to true.*#
+
+Once the Sparkplug Host Application has successfully connected to the MQTT Server, it must publish a
+birth with the following rules.
+
+* [tck-testable tck-id-operational-behavior-host-application-connect-birth]#[yellow-background]*The
+MQTT Client associated with the Sparkplug Host Application MUST send a birth message immediately
+after successfully connecting to the MQTT Server.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-birth-topic]#[yellow-background]*The
+Host Application's Birth topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
+of the Sparkplug Host Application*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-birth-payload]#[yellow-background]*The
+Host Application's Birth payload MUST be the UTF-8 String of 'ONLINE'.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-birth-qos]#[yellow-background]*The
+Host Application's Birth MQTT QoS MUST be 1 (at least once).*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-birth-retained]#[yellow-background]*The
+Host Application's Birth retained flag MUST be set to true.*#
+
+[[operational_behavior_sparkplug_host_application_session_termination]]
+=== Sparkplug Host Application Session Termination
+
+[tck-testable tck-id-operational-behavior-host-application-termination]#[yellow-background]*If the
+Sparkplug Host Application ever disconnects intentionally, it must publish a Death message with the
+following characteristics.
+
+* [tck-testable tck-id-operational-behavior-host-application-death-topic]#[yellow-background]*The
+Sparkplug Host Application's Death topic MUST be of the form 'STATE/host_id' where host_id is the
+unique identifier of the Sparkplug Host Application.*#
+* [tck-testable tck-id-operational-behavior-host-application-death-payload]#[yellow-background]*The
+Sparkplug Host Application's Death payload MUST be the UTF-8 String of 'OFFLINE'.*#
+* [tck-testable tck-id-operational-behavior-host-application-death-qos]#[yellow-background]*The
+Sparkplug Host Application's Death MQTT QoS MUST be 1 (at least once).*#
+* [tck-testable tck-id-operational-behavior-host-application-death-retained]#[yellow-background]*The
+Sparkplug Host Application's Death retained flag MUST be set to true.*#
+
+[tck-testable tck-id-operational-behavior-host-application-disconnect-intentional]#[yellow-background]*In
+the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after
+the Death message is sent.*#
+
+[[operational_behavior_data_publish]]
+=== Data Publish
+
+Publishing of data messages occurs from an Edge Node any time it is online as denoted by previously
+publishing its BIRTH messages within the same MQTT Session. A Sparkplug session begins with an MQTT
+CONNECT and then the NBIRTH message. A Sparkplug session ends with an NDEATH. Using the fact that
+MQTT uses TCP as the underlying protocol as well as facilities in Sparkplug to encapsulate a
+session, data messages are sent 'by exception'. In other words, data only has to be sent when it
+changes. This is true as long as the session remains established and valid. The following set of
+rules defines how data messages should be sent.
+
+Rules for Edge Node data (NBIRTH and NDATA) messages:
+
+* [tck-testable tck-id-operational-behavior-data-publish-nbirth]#[yellow-background]*NBIRTH messages
+MUST include all metrics for the specified Edge Node that will ever be published for that Edge
+Node within the established Sparkplug session.*#
+* [tck-testable tck-id-operational-behavior-data-publish-nbirth-values]#[yellow-background]*For each
+metric in the NBIRTH, the value must be set to the current value or if the current value is null,
+have the is_null flag set to true and no value specified.*#
+* [tck-testable tck-id-operational-behavior-data-publish-nbirth-change]#[yellow-background]*NDATA
+messages SHOULD only be published when Edge Node level metrics change.*#
+** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
+be resent until a new Sparkplug session is established.
+* NDATA messages SHOULD be aggregated to include multiple metrics.
+** This is up to the application developer in terms of how many metrics should be aggregated in a
+single message, but it typically doesn't make sense to publish an MQTT message for every single
+metric change.
+** Multiple value changes for the same metric MAY be included in the same Sparkplug NDATA message as
+long as they have different timestamps.
+* [tck-testable tck-id-operational-behavior-data-publish-nbirth-order]#[yellow-background]*For all
+metrics where is_historical=false, NBIRTH and NDATA messages MUST keep metric values in
+chronological order in the list of metrics in the payload.*#
+
+Rules for Device data (DBIRTH and DDATA) messages:
+
+* [tck-testable tck-id-operational-behavior-data-publish-dbirth]#[yellow-background]*DBIRTH messages
+MUST include all metrics for the specified Device that will ever be published for that Device within
+the established Sparkplug session.*#
+* [tck-testable tck-id-operational-behavior-data-publish-dbirth-values]#[yellow-background]*For each
+metric in the DBIRTH, the value must be set to the current value or if the current value is null,
+have the is_null flag set to true and no value specified.*#
+* [tck-testable tck-id-operational-behavior-data-publish-dbirth-change]#[yellow-background]*DDATA
+messages SHOULD only be published when Device level metrics change.*#
+** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
+be resent until a new Sparkplug session is established.
+* DDATA messages SHOULD be aggregated to include multiple metrics.
+** This is up to the application developer in terms of how many metrics should be aggregated in a
+single message, but it typically doesn't make sense to publish an MQTT message for every single
+metric change.
+** Multiple value changes for the same metric MAY be included in the same Sparkplug DDATA message as
+long as they have different timestamps.
+* [tck-testable tck-id-operational-behavior-data-publish-dbirth-order]#[yellow-background]*For all
+metrics where is_historical=false, DBIRTH and DDATA messages MUST keep metric values in
+chronological order in the list of metrics in the payload.*#
+
+[[operational_behavior_commands]]
+=== Commands
+
+Commands are used in Sparkplug to allow Sparkplug Host Applications to send data to Sparkplug Edge
+Nodes. Examples include writing to outputs of Sparkplug Edge Nodes and Devices or to request
+Rebirths from Edge Nodes. Custom command endpoints can be declared in an NBIRTH or DBIRTH message by
+an Edge Node or Device that may support functionality such as rebooting an Edge Node or Device. This
+is up to the Sparkplug implementor to define what functionality can be exposed.
+
+Security and access is an important aspect of commands. It may be the case that not all Sparkplug
+Host Applications should have the ability to send commands. This can be be controlled in multiple
+ways. ACLs (Access Control Lists) may be used to allow/disallow certain MQTT clients from publishing
+NCMD and DCMD messages. Security features in the Sparkplug Host Application itself could be used to
+allow/disallow certain users or applications from sending certain commands. Security features in the
+Sparkplug Edge Node application could be used to allow/disallow CMD messages to be honored. There
+are a number of ways in which this can be done and should be considered. However, implementation
+details are not covered in the Sparkplug Specification and is left to specific application designers
+to consider.
+
+There are two types of command (CMD) verbs in Sparkplug. These are NCMD and DCMD messages which
+target Edge Nodes and Devices respectively.
+
+There is one NCMD that is required to be implemented for all Sparkplug Edge Nodes and that is the
+'Node Control/Rebirth' command. This exists to allow a Sparkplug Host Application to reset its
+end-to-end session with a specific Edge Node. For example, say an Edge Node has been in an
+established Sparkplug session and is publishing DATA messages. Now say a new Sparkplug Host
+Application connects to the same MQTT Server that the Edge Node is connected to. On the next DATA
+message published by the Edge Node, the Host Application will receive it without ever having
+received the BIRTH message(s) associated with the Edge Node. As a result, it can send a 'Rebirth
+Request' using the 'Node Control/Refresh' metric to reset its understanding of that Edge Node and
+become aware of all metrics associated with it.
+
+These are the rules around the 'Node Control/Rebirth' metric.
+
+* [tck-testable tck-id-operational-behavior-data-commands-rebirth-name]#[yellow-background]*An
+NBIRTH message MUST include a metric with a name of 'Node Control/Rebirth'.*#
+* [tck-testable tck-id-operational-behavior-data-commands-rebirth-datatype]#[yellow-background]*The
+'Node Control/Rebirth' metric in the NBIRTH message MUST have a datatype of 'Boolean'.*#
+* [tck-testable tck-id-operational-behavior-data-commands-rebirth-value]#[yellow-background]*The
+'Node Control/Rebirth' metric value in the NBIRTH message MUST have a value of false.*#
+
+A 'Rebirth Request' consists of the following message from a Sparkplug Host Application with the
+following characteristics.
+
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-verb]#[yellow-background]*A
+Rebirth Request MUST use the NCMD Sparkplug verb.*#
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-name]#[yellow-background]*A
+Rebirth Request MUST include a metric with a name of 'Node Control/Rebirth'.*#
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-value]#[yellow-background]*A
+Rebirth Request MUST include a metric value of true.*#
+
+Upon receipt of a Rebirth Request, the Edge Node must do the following.
+
+* [tck-testable tck-id-operational-behavior-data-commands-rebirth-action-1]#[yellow-background]*When
+an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.*#
+* [tck-testable tck-id-operational-behavior-data-commands-rebirth-action-2]#[yellow-background]*After
+an Edge Node stops sending DATA messages, it MUST send a complete BIRTH sequence including the
+NBIRTH and DBIRTH(s) if applicable.*#
+* [tck-testable tck-id-operational-behavior-data-commands-rebirth-action-3]#[yellow-background]*The
+NBIRTH MUST include the same bdSeq metric with the same value it had included in the Will Message
+of the previous MQTT CONNECT packet.*#
+** Because a new MQTT Session is not being established, there is no reason to update the bdSeq number
+* After the new BIRTH sequence is published, the Edge Node may continue sending DATA messages.
+
+Another common use case for sending commands is to use them to 'write' to outputs on Sparkplug
+Devices. Often these are PLCs or RTUs with writable outputs. NCMD and DCMD messages can be used for
+these writes. The general flow is for a Host Application to send a command message, the Edge Device
+receives the message and writes to the output using the native protocol. Then when the output
+changes value, it results in the Edge Node publishing a DATA message denoting the new value.
+
+For Edge Node level commands, the following rules must be followed.
+
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-verb]#[yellow-background]*An Edge
+Node level command MUST use the NCMD Sparkplug verb.*#
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-metric-name]#[yellow-background]*An
+NCMD message SHOULD include a metric name that was included in the associated NBIRTH message for the
+Edge Node.*#
+** Sparkplug Edge Node Applications should be resilient to receiving metrics names that were not
+included in the NBIRTH message.
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-metric-value]#[yellow-background]*An
+NCMD message MUST include a compatible metric value for the metric name that it is writing to.*#
+** In other words, if the metric has a datatype of a boolean the value must be true or false.
+
+For Device level commands, the following rules must be followed.
+
+* [tck-testable tck-id-operational-behavior-data-commands-dcmd-verb]#[yellow-background]*A Device
+level command MUST use the DCMD Sparkplug verb.*#
+* [tck-testable tck-id-operational-behavior-data-commands-dcmd-metric-name]#[yellow-background]*A
+DCMD message SHOULD include a metric name that was included in the associated DBIRTH message for the
+Device.*#
+** Sparkplug Edge Node Applications should be resilient to receiving metrics names that were not
+included in the DBIRTH message.
+* [tck-testable tck-id-operational-behavior-data-commands-dcmd-metric-value]#[yellow-background]*A
+DCMD message MUST include a compatible metric value for the metric name that it is writing to.*#
+** In other words, if the metric has a datatype of a boolean the value must be true or false.

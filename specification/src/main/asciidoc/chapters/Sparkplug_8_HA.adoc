@@ -1,0 +1,170 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
+////
+
+[[high_availability]]
+== High Availability
+
+Sparkplug based infrastructures are often used in mission-critical environments. Planning for high
+availability is a key requirement for many Sparkplug users. This section discusses non-normative
+approaches to achieving high availability.
+
+[[high_availability_for_mqtt_servers]]
+=== High Availability for MQTT Servers
+
+A core component of MQTT based infrastructures is the MQTT Server. It is the central data broker and
+together with the Primary Host Application a potential single point of failure. All components are
+connected to the MQTT Server all the time and a failure of the MQTT Server will cause unavailability
+of the whole infrastructure.
+
+There are two options for MQTT Server High Availability in Sparkplug:
+
+. MQTT Server HA Clustering
+. Multiple isolated MQTT Servers
+
+Both approaches have been deployed successfully in mission critical environments and depending on
+the MQTT Server software used, not all options might be available.
+
+[[high_availability_ha_clusters]]
+==== MQTT Server HA Clustering (non-normative)
+
+A single MQTT Server is a single point of failure in a Sparkplug infrastructure, which means a
+failure of the Server will cause a downtime for all other components.
+
+MQTT Servers that support clustering allow to install multiple MQTT Servers and connect them to a
+cluster. This means all relevant MQTT data is synchronized between these servers. If one or multiple
+MQTT Server fail, all data is still present at the other MQTT Servers.
+
+The main advantage of MQTT Server clusters is operations simplicity. Sparkplug components don't need
+to distribute state themselves between MQTT Servers (which is required for
+<<high_availability_multiple_mqtt_server_topology,Multiple MQTT Server Topologies>>). From the
+perspective of an MQTT Edge node, MQTT enabled Device, or Sparkplug Host Application, any of the
+MQTT Servers can be used and devices are not required to be connected to the same MQTT Server. A
+MQTT cluster provides the illusion to MQTT clients that there is only one MQTT server while
+providing High Availability.
+
+There are two options available for deploying HA MQTT Server clusters:
+
+. High Availability Cluster without Load Balancer
+. High Availability Cluster with Load Balancer
+
+
+[[high_availability_cluster]]
+==== High Availability Cluster
+
+In traditional clustered MQTT Server settings, each MQTT Server is reachable by all MQTT Edge Nodes,
+Sparkplug Host Applications, and MQTT enabled Devices. Each component can connect directly to any
+MQTT Server. A message sent to any MQTT Server will be distributed to all available MQTT Servers in
+the cluster (which will distribute the message to all subscribing Sparkplug components).
+
+image:extracted-media/media/image15.png[image,width=660,height=314]
+
+Figure X – High Availability MQTT Server Cluster
+
+If any MQTT Server would fail, the MQTT connection for components connected to the broker will break
+and the component can connect to any other MQTT Server to resume operations.
+
+
+[[high_availability_cluster_with_load_balancer]]
+==== High Availability Cluster with Load Balancer
+
+For dynamic environments where the IP addresses of the MQTT Servers might not be available
+beforehand (like in cloud native deployment environments such as Kubernetes) or for cases where it's
+not desired that all IP addresses (or DNS lookup names) are configured on the Sparkplug components,
+a load balancer might be used.
+
+image:extracted-media/media/image16.png[image,width=660,height=314]
+
+Figure X – High Availability MQTT Server Cluster with Load Balancer
+
+A load balancer acts as the single point of contact for Sparkplug components, so only a single IP
+address or DNS name needs to be configured on the components. The load balancer will proxy the MQTT
+connections of the components and route to one available MQTT Server. In case of a MQTT Server
+failure, the component only needs to reconnect to the load balancer again.
+
+The use of a specific load balancer depends on the MQTT Server used. Usually most load balancers
+work with most Sparkplug compatible MQTT Servers on the market.
+
+
+[[high_availability_multiple_mqtt_server_topology]]
+=== Multiple Isolated MQTT Servers (non-normative)
+
+A second approach to high availability is the use of several isolated MQTT Servers. This approach
+works with all Sparkplug certified MQTT Servers and does not need cluster technology but requires
+Primary Host Applications that support multiple isolated MQTT brokers. The
+_Primary Host Application_ is responsible for managing state across the several MQTT brokers.
+
+When multiple MQTT Servers are available there is the possibility of “stranding” and EoN node if the
+Primary command/control of the _Primary Host Application_ loses network connectivity to one of the
+MQTT Servers. In this instance the EoN node would stay properly connected to the MQTT Server
+publishing information not knowing that _Primary Host Application_ was not able to receive the
+messages. When using multiple MQTT Servers, the _Primary Host Application_ instance must be
+configured to publish a STATE Birth Certificate and all EoN nodes need to subscribe to this STATE
+message.
+
+The _Primary Host Application_ will need to specify whether it is a “Primary” command/control
+instance or not. If it is a primary instance then every time it establishes a new MQTT Session with
+an MQTT Server, the STATE Birth Certificate defined in section above is the first message that is
+published after a successful MQTT Session is established.
+
+EoN node devices in an infrastructure that provides multiple MQTT Servers can establish a session to
+any one of the MQTT Servers. Upon establishing a session, the EoN node should issue a subscription
+to the STATE message published by _Primary Host Application_. Since the STATE message is published
+with the RETAIN message flag set, MQTT will guarantee that the last STATE message is always
+available. The EoN node should examine the payload of this message to ensure that it is a value of
+“ONLINE”. If the value is “OFFLINE”, this indicates the Primary Application has lost its MQTT
+Session to this particular MQTT Server. This should cause the EoN node to terminate its session
+with this MQTT Server and move to the next available MQTT Server that is available. This use of the
+STATE message in this manner ensures that any loss of connectivity to an MQTT Server to the
+_Primary Host Application_ does not result in EoN nodes being “stranded” on an MQTT server because
+of network issues. The following message flow diagram outlines how the STATE message is used when
+three (3) MQTT Servers are available in the infrastructure:
+
+image:extracted-media/media/image11.png[image,width=660,height=304]
+
+Figure 7 – Primary Application STATE flow diagram
+
+[arabic]
+. When an EoN node is configured with multiple available MQTT Servers in the infrastructure it
+should issue a subscription to the _Primary Host Application_ STATE message. The EoN nodes are free
+to establish an MQTT Session to any of the available servers over any available network at any time
+and examine the current STATE value. If the STATE message payload is ‘OFFLINE’ then the EoN node
+should disconnect and walk to the next available server.
+. Upon startup, the configured Primary Application, the MQTT Session will be configured to register
+the _Primary Host Application_ DEATH Certificate that indicates STATE is ‘OFFLINE’ with the message
+RETAIN flag set to true. Then the _Primary Host Application_ BIRTH Certificate will be published
+with a STATE payload of ‘ONLINE’.
+. As the EoN node walks its available MQTT Server table, it will establish an MQTT Session with a
+server that has a STATE message with a payload of ‘ONLINE’. The EoN node can stay connected to this
+server if its MQTT Session stays intact and it does not receive the _Primary Host Application_ DEATH
+Certificate.
+. Having a subscription registered to the MQTT Server on the STATE topic will result in any change
+to the current the _Primary Host Application_ STATE being received immediately. In this case, a
+network disruption causes the _Primary Host Application_ MQTT Session to server #2 to be terminated.
+This will cause the MQTT Server, on behalf of the now terminated the _Primary Host Application_ MQTT
+Client to publish the DEATH certificate to anyone that is currently subscribed to it. Upon receipt
+of the _Primary Host Application_ DEATH Certificate this EoN node will move to the next MQTT Server
+in its table.
+. The EoN node moved to the next available MQTT Server and since the current STATE on this server is
+‘ONLINE’, it can stay connected.
+. In the meantime, the network disruption between _Primary Host Application_ and MQTT Server #2 has
+been corrected. The _Primary Host Application_ has a new MQTT Session established to server #2 with
+an update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is ready to accept new EoN node session
+requests.
+
+////
+[[high_availability_other_considerations]]
+=== Other High Availability considerations
+
+[[high_availability_client_message_buffering]]
+==== Client Message Buffering (non-normative)
+
+////

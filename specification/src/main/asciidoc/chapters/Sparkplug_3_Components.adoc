@@ -1,0 +1,81 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
+////
+
+[[components]]
+== Sparkplug Architecture and Infrastructure Components
+
+This section details the infrastructure components implemented.
+
+image:extracted-media/media/image5.png[image,width=660,height=314]
+
+Figure 1 - MQTT SCADA Infrastructure
+
+[[components_mqtt_servers]]
+=== MQTT Server(s)
+
+MQTT enabled infrastructure requires that one or more MQTT Servers are present in the
+infrastructure. The only requirement that the Eclipse Sparkplug specification places on the
+selection of an MQTT Server component in the architecture is it is required to be compliant with a
+subset of the MQTT specification. Specifically it must meet the requirements defined in the
+link:#conformance_sparkplug_mqtt_server[MQTT Server Conformance Section]. The MQTT Server should
+also be sized to properly manage all MQTT message traffic.
+
+One can implement the use (if required) of multiple MQTT servers for redundancy, high availability,
+and scalability within any given infrastructure.
+
+[[components_mqtt_edge_node]]
+=== MQTT Edge Node
+
+In the context of this specification, an MQTT Edge Node is any MQTT v3.1.1 or v5.0 compliant MQTT
+Client application that manages an MQTT session and provides the physical and/or logical gateway
+functions required to participate in the topic namespace and payload definitions described in this
+document. The Edge Node is responsible for any local protocol interface to existing legacy devices
+(PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete I/O, and/or any logical
+internal process variables(PVs).
+
+[[components_device_sensor]]
+=== Device / Sensor 
+
+The Device/Sensor represents any physical or logical device connected to the MQTT Edge Node
+providing any data, process variables or metrics.
+
+[[components_mqtt_enabled_device]]
+=== MQTT Enabled Device (Sparkplug)
+
+This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using
+a compliant MQTT v3.1.1 or v5.0 connection with the payload and topic notation as outlined in this
+Sparkplug Specification. Note that it will be represented as an Edge Node in the Sparkplug topic.
+
+[[components_primary_host_application]]
+=== Primary Host Application
+
+A Primary Host Application is an MQTT client application that subscribes to MQTT Sparkplug Edge Node
+originated messages. It is deemed 'primary' by the Edge Node. An Edge Node may be configured to
+modify its behavior based on one specific Sparklug Host Application being online or offline. This
+specific Host Application is referred to as the Edge Node's 'Primary Host Application'.
+
+The Primary Host Application is often also referred to as the SCADA Host or IIoT Host. In typical
+SCADA/IIoT infrastructure implementations, there will be only one Primary Host Application
+responsible for the monitoring and control of a given MQTT Edge Node. Sparkplug does support the
+notion of multiple Primary Host Applications for any one Edge Node. This does not preclude any
+number of additional Sparkplug Host Applications from participating in the infrastructure that are
+in either a pure monitoring mode, or in the role of a hot standby should the Primary Host
+Application go offline. In addition, there could be multiple Host Applications which are each the
+Primary Host Application for some subset of Edge Nodes connected to the MQTT infrastructure.
+
+[[components_sparkplug_host_application]]
+=== Sparkplug Host Application
+
+A Sparkplug Host Application is any Sparkplug MQTT client that consumes the real-time Sparkplug
+messages or any other data being published with proper permission and security.
+[tck-testable tck-id-components-ph-state]#[yellow-background]*A Sparkplug Host Application MUST
+utilize the STATE messages to denote whether it is online or offline at any given point in time.*#

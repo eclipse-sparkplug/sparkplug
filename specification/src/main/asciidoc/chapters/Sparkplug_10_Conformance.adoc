@@ -1,0 +1,113 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
+////
+
+[[conformance]]
+== Conformance
+// TODO: See Section 7 of http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html as a
+// model to use for this chapter
+
+[[conformance_profiles]]
+=== Conformance Profiles
+
+There are four Sparkplug target applications. A Sparkplug infrastructure typically consists of one
+or more of the following application types
+
+* Sparkplug Edge Node
+* Sparkplug Host Application
+* Sparkplug Compliant MQTT Server
+* Sparkplug Aware MQTT Server
+
+Each application type has specific conformance requirements that must be met. Typically a Sparkplug
+application would only implement one of these profiles. For example an MQTT client wouldn't
+typically be both an Edge Node and a Host Application.
+
+[[conformance_sparkplug_edge_node]]
+==== Sparkplug Edge Node
+
+A Sparkplug Edge Node is typically an 'Edge Gateway'. It sends and receives data to an MQTT Server
+using the spBv1.0/# namespace. Edge Nodes typically interact with physical devices to gather data
+and also write to device outputs.
+
+[[conformance_sparkplug_host_application]]
+==== Sparkplug Host Application
+
+A Sparkplug Host Application is typically at a 'central location' and primarily receives data from
+multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes to write to
+outputs of Sparkplug Edge Nodes and/or Devices. Sparkplug Host Applications may also sends rebirth
+requests to Edge Nodes when required.
+[tck-testable tck-id-conformance-primary-host]#[yellow-background]*Sparkplug Host Applications MUST
+publish 'STATE' messages that represent its Birth and Death Certificates.*#
+
+[[conformance_mqtt_server]]
+==== Sparkplug Compliant MQTT Server
+
+Sparkplug infrastructures have a specific subset of requirements on MQTT Servers. Any fully MQTT
+v3.1.1 or v5.0 MQTT Server will meet the requirements of Sparkplug infrastructures. However, not all
+of the features of the MQTT Specification are required. The following are the required portions of
+the MQTT Specification that a Sparkplug Compliant MQTT Server must meet.
+
+* [tck-testable tck-id-conformance-mqtt-qos0]#[yellow-background]*A Sparkplug conformant MQTT Server
+MUST support publish and subscribe on QoS 0*#
+* [tck-testable tck-id-conformance-mqtt-qos1]#[yellow-background]*A Sparkplug conformant MQTT Server
+MUST support publish and subscribe on QoS 1*#
+* [tck-testable tck-id-conformance-mqtt-will-messages]#[yellow-background]*A Sparkplug conformant
+MQTT Server MUST support all aspects of Will Messages including use of the 'retain flag' and QoS 1*#
+* [tck-testable tck-id-conformance-mqtt-retained]#[yellow-background]*A Sparkplug conformant MQTT
+Server MUST support all aspects of the 'retain flag'*#
+
+[[conformance_sparkplug_aware_mqtt_server]]
+==== Sparkplug Aware MQTT Server
+
+A 'Sparkplug Aware' MQTT Server includes all of the aspects of a Sparkplug Compliant MQTT Server.
+In addition, it also must have the ability to store NBIRTH and DBIRTH messages of Sparkplug Edge
+Nodes that pass through it. Any stored NBIRTH or DBIRTH message must always be the most recent
+NBIRTH or DBIRTH that was published to the MQTT Server. In addition, it must make the stored NBIRTH
+and DBIRTH messages available to MQTT clients via a retained MQTT message on the appropriate
+$sparkplug topic. Note this does not mean that NBIRTH or DBIRTH messages must be published with the
+MQTT retain flag set to true. NBIRTH and DBIRTH messages must be published with the MQTT retain flag
+set to false. The difference with a 'Sparkplug Aware MQTT Server' is that it will treat NBIRTH and
+DBIRTH messages as though their retain flag is set to true even though it is not when published by
+a Sparkplug Edge Node.
+
+It is important to note these stored messages are the original NBIRTH and DBIRTH messages published
+by each Edge Node. As a result, the metric values can not be expected to be the current values. In a
+typical Sparkplug environment the Edge Node likely would have published NDATA and/or DDATA messages
+after the NBIRTH and DBIRTH messages denoting metric values that had changed at the Edge Node and
+its associated Sparkplug Devices. Consumers of the stored NBIRTH and DBIRTH messages should take
+this into consideration when using the information in the stored NBIRTH and DBIRTH payloads.
+
+* [tck-testable tck-id-conformance-mqtt-aware-basic]#[yellow-background]*A Sparkplug Aware MQTT
+Server MUST support all aspects of a Sparkplug Compliant MQTT Server*#
+* [tck-testable tck-id-conformance-mqtt-aware-store]#[yellow-background]*A Sparkplug Aware MQTT
+Server MUST store NBIRTH and DBIRTH messages as they pass through the MQTT Server*#
+* [tck-testable tck-id-conformance-mqtt-aware-nbirth-mqtt-topic]#[yellow-background]*A Sparkplug
+Aware MQTT Server MUST make NBIRTH messages available on a topic of the form:
+$sparkplug/certificates/namespace/group_id/NBIRTH/edge_node_id*#
+** Example: Given a group_id=G1 and edge_node_id=E1, the topic the Sparkplug Aware MQTT Server must
+make the NBIRTH message available on is: $sparkplug/certificates/spBv1.0/G1/NBIRTH/E1
+* [tck-testable tck-id-conformance-mqtt-aware-nbirth-mqtt-retain]#[yellow-background]*A Sparkplug
+Aware MQTT Server MUST make NBIRTH messages available on the topic:
+$sparkplug/certificates/namespace/group_id/NBIRTH/edge_node_id with the MQTT retain flag set to
+true*#
+* [tck-testable tck-id-conformance-mqtt-aware-dbirth-mqtt-topic]#[yellow-background]*A Sparkplug
+Aware MQTT Server MUST make DBIRTH messages available on a topic of the form:
+$sparkplug/certificates/namespace/group_id/DBIRTH/edge_node_id/device_id*#
+** Example: Given a group_id=G1, edge_node_id=E1 and device_id=D1, the topic the Sparkplug Aware
+MQTT Server must make the DBIRTH message available on is:
+$sparkplug/certificates/spBv1.0/G1/DBIRTH/E1/D1
+* [tck-testable tck-id-conformance-mqtt-aware-dbirth-mqtt-retain]#[yellow-background]*A Sparkplug
+Aware MQTT Server MUST make DBIRTH messages available on the topic:
+$sparkplug/certificates/namespace/group_id/DBIRTH/edge_node_id/device_id with the MQTT retain flag
+set to true*#
+* [tck-testable tck-id-conformance-mqtt-aware-ndeath-timestamp]#[yellow-background]*A Sparkplug
+Aware MQTT Server MAY replace the timestmap of NDEATH messages. If it does, it MUST set the
+timestamp to the UTC time at which it attempts to deliver the NDEATH to subscribed clients*#

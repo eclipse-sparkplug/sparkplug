@@ -1,0 +1,68 @@
+@startuml
+participant "Primary Host Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "Sparkplug Edge Node" as EdgeNode #lightblue
+
+activate PrimApp
+activate Server
+activate EdgeNode
+
+
+autonumber 1 "<b>(#)"
+PrimApp <--> Server
+autonumber 1 "<b>(#)"
+Server <--> EdgeNode
+
+PrimApp <--> Server
+
+
+Server <--> EdgeNode
+autonumber 3 "<b>(#)"
+PrimApp <--> EdgeNode
+note left
+All metrics provided in Birth
+Certificate are created in the
+Edge Node folder within the
+Primary Application
+end note
+
+|||
+
+Server <- EdgeNode : PUBLISH( **NDATA** )
+note right
+Cellular RSSI level changes
+value. New value is updated
+in a payload and published.
+end note
+
+autonumber 4 "<b>(#)"
+PrimApp <-- Server
+note left
+New RSSI metric is updated in
+the associated Edge Node
+folder.
+end note
+
+|||
+
+autonumber 5 "<b>(#)"
+PrimApp -> Server : PUBLISH( **NCMD** )
+note left
+Send a command to the Edge
+Node to set Ethernet as the
+Primary network. Writing to
+the tag PRI_NETWORK in the
+Primary Host Application
+will automatically publish
+the new value.
+end note
+
+autonumber 5 "<b>(#)"
+Server --> EdgeNode
+note right
+PRI_NETWORK set to a
+new value of 2.
+end note
+
+|||
+@enduml

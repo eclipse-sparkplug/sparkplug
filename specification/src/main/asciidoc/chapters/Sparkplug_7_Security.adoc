@@ -1,0 +1,116 @@
+////
+Copyright © 2016-2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
+////
+
+[[security]]
+== Security
+
+This chapter is provided for guidance only and is non-normative.
+
+[[security_tls]]
+=== TLS
+The MQTT specification does not specify any TCP/IP security scheme as it was envisaged that TCP/IP
+security would (and did) change over time. Although this document will not specify any TCP/IP
+specific security requirements it will provide guidelines on how to secure a Sparkplug
+infrastructure.
+
+[[security_authentication]]
+=== Authentication
+There are several levels of security and access control configured within an MQTT infrastructure.
+From a pure MQTT client perspective, the client does need to provide a unique Client ID, and an
+optional username and password.
+
+[[security_authorization]]
+=== Authorization
+Although access control is not mandated in the MQTT specification for use in MQTT Server
+implementations, Access Control List (ACL) functionality is available for many MQTT Server
+implementations. The ACL of an MQTT Server implementation is used to specify which MQTT topics any
+MQTT Client can subscribe and/or publish on. Examples are provided on how to setup and manage
+MQTT Client credentials and some considerations on setting up proper ACL’s on the MQTT Servers.
+
+[[security_implementation_notes]]
+=== Implementation Notes
+
+[[security_implementation_notes_mqtt]]
+==== Underlying MQTT Security
+All aspects specified in the MQTT Specification's
+link:++http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718111++[Security Section]
+should be considered when implementing a Sparkplug solution.
+
+[[security_implementation_notes_encryption]]
+==== Encrypted Sockets
+When using public networks and data is sensitive, the underlying socket connections being used by
+Sparkplug components should be encrypted. This can be done using
+link:++https://datatracker.ietf.org/doc/html/rfc5246++[TLS] or potential future mechanisms for
+securing and encrypting the underlying TCP/IP connection.
+
+[[security_implementation_notes_acls]]
+==== Access Control Lists
+ACLs can be defined for Sparkplug clients to restrict each Edge Node to a specific set of topics it
+can publish and subscribe on. Many MQTT Servers offer the ability to configure ACLs based on client
+connection credentials. When supported by the MQTT Server, ACLs offer some security in preventing
+compromised credentials from being able to be used to spoof Edge Nodes, write to other Edge Node
+outputs, or see all messages flowing through the MQTT Server. Consider the Edge Node with a single
+attached Device with the following Sparkplug IDs.
+```
+Group ID = G1
+Edge Node ID = E1
+Device ID = D1
+```
+
+Based on this, the following could be reasonable MQTT ACLs to be provisioned in the MQTT Server for
+the MQTT client associated with this Edge Node:
+```
+Publish: spBv1.0/G1/NBIRTH/E1
+Publish: spBv1.0/G1/NDATA/E1
+Publish: spBv1.0/G1/NDEATH/E1
+Publish: spBv1.0/G1/DBIRTH/E1/D1
+Publish: spBv1.0/G1/DDATA/E1/D1
+Publish: spBv1.0/G1/DDEATH/E1/D1
+Subscribe: STATE/my_primary_host
+Subscribe: spBv1.0/G1/NCMD/E1
+Subscribe: spBv1.0/G1/DCMD/E1/D1
+```
+
+However, there may be other considerations when creating ACLs for clients. It may be the case that
+an Edge Node has many dynamic associated devices. In this case, it may make sense to wildcard the
+device level topic token. For example, it could look like this:
+```
+Publish: spBv1.0/G1/NBIRTH/E1
+Publish: spBv1.0/G1/NDATA/E1
+Publish: spBv1.0/G1/NDEATH/E1
+Publish: spBv1.0/G1/DBIRTH/E1/+
+Publish: spBv1.0/G1/DDATA/E1/+
+Publish: spBv1.0/G1/DDEATH/E1/+
+Subscribe: STATE/my_primary_host
+Subscribe: spBv1.0/G1/NCMD/E1
+Subscribe: spBv1.0/G1/DCMD/E1/+
+```
+
+Also, it may be the case that DCMD messages should not be 'writable'. In this case, maybe DCMD
+subscriptions should not be allowed at all. In this case, the ACLs could look like this:
+```
+Publish: spBv1.0/G1/NBIRTH/E1
+Publish: spBv1.0/G1/NDATA/E1
+Publish: spBv1.0/G1/NDEATH/E1
+Publish: spBv1.0/G1/DBIRTH/E1/+
+Publish: spBv1.0/G1/DDATA/E1/+
+Publish: spBv1.0/G1/DDEATH/E1/+
+Subscribe: STATE/my_primary_host
+Subscribe: spBv1.0/G1/NCMD/E1
+```
+
+By using ACLs in this way, the access each Edge Node has is restricted to only topics that it should
+be able to publish and subscribe on. If the client credentials for some Edge Node were to be
+compromised, the potential harm that could be done by a malicious client would be limited in scope.
+For example, a client would not be able to appear to be as some other client. Subscribing on # would
+not be allowed so the full scope of a Sparkplug topic namespace could not be realized by the
+malicious client with the compromised credentials.

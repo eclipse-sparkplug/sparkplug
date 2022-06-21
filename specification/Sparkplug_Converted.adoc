@@ -1,0 +1,165 @@
+== Table of Figures
+
+Figure 1 - MQTT SCADA Infrastructure 8
+
+Figure 2 - Simple MQTT Infrastructure 11
+
+Figure 3 - Host Session Establishment 20
+
+Figure 4 - EoN node MQTT Session Establishment 22
+
+Figure 5 - MQTT Device Session Establishment 24
+
+Figure 6 - EoN node NDATA and NCMD Message Flow 29
+
+Figure 7 – Primary Application STATE flow diagram 30
+
+== Sparkplug™ MQTT Data and Command Messages
+
+Looking back in this document we’ve described the following components:
+
+* Primary Application
+* MQTT Server(s)
+* Edge of Network (EoN) nodes
+* Devices
+* Topic Namespace
+* Birth Certificates
+* Death Certificates
+* STATE Messages
+* Primary Application, EoN node, and Device Session Establishment
+
+All of these specifications and definitions get to the primary goal of Sparkplug™, that is to deliver a rich set of real time device metric data extremely efficiently to many data consumers within the Enterprise while still providing a best in class Command/Control SCADA/IIoT system.
+
+The disruptive notion of the emerging IIoT mindset is that intelligent devices should be smart enough to deliver metric information to the infrastructure when it is required. But the fact of the matter is that the existing population of 100’s of millions of the smart devices need to be “asked” if something has changed using poll/response protocols. This is why we’re seeing the emergence of edge devices throughout the industrial sector. For the decade or more that it will take for device manufactures to embed IIoT technology natively, the solution being employed today is to place this capability in small embedded devices closer to the data producers themselves. So within the Sparkplug™ specification these devices called Edge of Network Nodes (EoN) represent this new class of Gateway, Edge Controller, Edge of Network Node, Protocol Gateway, and many more acronyms for the same class of devices. The capabilities of these devices are in an extreme range of low power microcontrollers to multicore Intel and ARM based processors. The operating systems range from full embedded Linux kernels and Windows embedded to small bare metal RTOS’s. Regardless of the category these gateway devices fall into the simplicity of MQTT and the Sparkplug™ specification should be applicable across the board.
+
+This section of the Sparkplug™ specification goes into detail on how metrics are published/subscribed to within an MQTT infrastructure in real time and the resulting metric information that the _Primary Application_ can read/write to.
+
+== Contact Information 
+
+The Eclipse Foundation appreciates any and all feedback on this specification. It is only from the feedback of end users that Sparkplug™ can a viable and vibrant reference implementation for MQTT based SCADA and IIoT solutions.
+
+For any questions regarding this Sparkplug™ specification or for more information, please use the following details:
+
+*Eclipse Foundation*
+
+Website: http://www.eclipse.org[www.eclipse.org]
+
+Phone: +1.613.224.9461
+
+[arabic]
+. Sparkplug™ B Payload Definition
+
+Sparkplug™ Specification
+
+Sparkplug™ B Payload Definition
+
+Version v1.0
+
+image:extracted-media/media/image4.png[image,width=400,height=160]** +
+**
+
+[cols=",,,",options="header",]
+|===
+|*Revision Number* |*Date* |*Author* |*Description*
+|1.0 |1/16/2017 |Cirrus Link |Initial Release
+| | | |
+| | | |
+|===
+
+== Table of Contents
+
+Table of Figures 39
+
+{empty}13. Introduction 40
+
+{empty}14. Sparkplug™ B MQTT Payload Definition 40
+
+14.1. Google Protocol Buffers 41
+
+14.2. Sparkplug™ B Google Protocol Buffer Schema 41
+
+14.3. Payload Metric Naming Convention 44
+
+{empty}15. Sparkplug™ Bv1.0 Payload Components 46
+
+15.1. Payload Component Definitions 46
+
+15.1.1. Payload 46
+
+15.1.2. Metric 46
+
+15.1.3. MetaData 48
+
+15.1.4. PropertySet 48
+
+15.1.5. PropertyValue 49
+
+15.1.6. PropertySetList 49
+
+15.1.7. DataSet 49
+
+15.1.8. DataSet.Row 50
+
+15.1.9. DataSet.DataSetValue 50
+
+15.1.10. Template 50
+
+15.1.11. Template.Parameter 51
+
+15.2. Sparkplug™ Bv1.0 Payload Datatypes 51
+
+15.2.1. Metric Datatypes 51
+
+15.2.2. PropertyValue Datatypes 53
+
+15.2.3. DataSetValue DataTypes 55
+
+15.2.4. Template.Parameter DataTypes 56
+
+{empty}16. Payloads by Message Type 58
+
+16.1. NBIRTH 58
+
+16.2. DBIRTH 59
+
+16.3. NDATA 59
+
+16.4. DDATA 59
+
+16.5. NCMD 60
+
+16.6. DCMD 60
+
+16.7. DDEATH 60
+
+16.8. NDEATH 60
+
+16.9. STATE 60
+
+{empty}17. Payload Representation on Backend Applications 61
+
+17.1. NBIRTH 61
+
+17.2. DBIRTH 62
+
+17.3. NDATA 64
+
+17.4. DDATA 65
+
+17.5. NCMD 66
+
+17.6. DCMD 66
+
+17.7. NDEATH 67
+
+17.8. DDEATH 67
+
+17.9. STATE 68
+
+== Table of Figures
+
+Figure 1 – Payload Metric Folder Structure 45
+
+Figure 2 – Sparkplug™ B Metric Structure 1 62
+
+Figure 3 – Sparkplug™ B Metric Structure 2 64

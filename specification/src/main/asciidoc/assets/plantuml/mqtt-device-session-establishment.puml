@@ -1,0 +1,72 @@
+@startuml
+participant "Primary Host Application" as PrimApp #lightblue
+database "MQTT Server" as Server #lightblue
+participant "Sparkplug Edge Node" as EdgeNode #lightblue
+participant "Sparkplug Device" as Device #lightblue
+
+activate PrimApp
+activate Server
+activate EdgeNode
+
+
+autonumber 1 "<b>(#)"
+PrimApp <--> Server
+autonumber 1 "<b>(#)"
+Server <--> EdgeNode
+
+PrimApp <-> Server
+Server <-> EdgeNode
+
+|||
+
+autonumber stop
+EdgeNode <- Device
+note right
+Device metrics are available
+and ready to publish.
+end note
+
+autonumber 4 "<b>(#)"
+Server <- EdgeNode : PUBLISH( **DBIRTH** )
+activate Device
+note left
+Create/update Device folder
+and metrics. Set Device
+to 'ONLINE' and metrics
+to quality 'GOOD'
+end note
+
+|||
+
+autonumber stop
+EdgeNode <- Device
+note right
+Any device process variable
+or metric change.
+end note
+
+autonumber 5 "<b>(#)"
+Server <- EdgeNode : PUBLISH ( **DDATA** )
+note left
+Update only metrics that
+change.
+end note
+
+autonumber stop
+EdgeNode <- Device
+note right
+Device data becomes
+unavailable or stale.
+end note
+
+autonumber 6 "<b>(#)"
+Server <- EdgeNode : PUBLISH ( **DDEATH** )
+note left
+All associated Device
+metrics are set to 'STALE'
+end note
+
+deactivate Device
+
+|||
+@enduml
