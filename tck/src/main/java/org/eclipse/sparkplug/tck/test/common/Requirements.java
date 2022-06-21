@@ -318,11 +318,50 @@ public class Requirements {
     public final static String D = "All metric data associated with any Sparkplug Edge Node that was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data quality if the Host Application loses connection to the MQTT Server.";
 
     // 5.2 Edge Node Session Establishment
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "message-flow-edge-node-ncmd-subscribe";
+    public final static String MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "The MQTT client associated with the Edge Node MUST subscribe to a topic of the form 'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of 1.";
+
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT = "message-flow-edge-node-birth-publish-connect";
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT = "Any Edge Node in the MQTT infrastructure MUST establish an MQTT Session prior to publishing NBIRTH and DBIRTH messages.";
 
-    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE = "message-flow-edge-node-birth-publish-subscribe";
-    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_SUBSCRIBE = "Any Edge Node in the MQTT infrastructure MUST verify the Primary Host Application is ONLINE via the STATE topic if a Primary Host Application is configured for the Edge Node before publishing NBIRTH and DBIRTH messages.";
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE = "message-flow-edge-node-birth-publish-will-message";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE = "When a Sparkplug Edge Node sends its MQTT CONNECT packet, it MUST include a Will Message.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC = "message-flow-edge-node-birth-publish-will-message-topic";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC = "The Edge Node's MQTT Will Message's topic MUST be of the form 'spBv1.0/group_id/NDEATH/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD = "message-flow-edge-node-birth-publish-will-message-payload";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD = "The Edge Node's MQTT Will Message's payload MUST be a Sparkplug Google Protobuf encoded payload.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ = "message-flow-edge-node-birth-publish-will-message-payload-bdSeq";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ = "The Edge Node's MQTT Will Message's payload MUST include a metric with the name of 'bdSeq', the datatype of INT64, and the value MUST be incremented by one from the value in the previous MQTT CONNECT packet unless the value would be greater than 255. If in the previous NBIRTH a value of 255 was sent, the next MQTT Connect packet Will Message payload bdSeq number value MUST have a value of 0.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS = "message-flow-edge-node-birth-publish-will-message-qos";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS = "The Edge Node's MQTT Will Message's MQTT QoS MUST be 0.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED = "message-flow-edge-node-birth-publish-will-message-will-retained";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED = "The Edge Node's MQTT Will Message's retained flag MUST be set to false.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "message-flow-edge-node-birth-publish-phid-wait";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "If the Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host Application is ONLINE via the STATE topic before publishing NBIRTH and DBIRTH messages.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC = "message-flow-edge-node-birth-publish-nbirth-topic";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC = "The Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD = "message-flow-edge-node-birth-publish-nbirth-payload";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD = "The Edge Node's NBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ = "message-flow-edge-node-birth-publish-nbirth-payload-bdSeq";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ = "The Edge Node's NBIRTH payload MUST include a metric with the name of 'bdSeq' the datatype of INT64 and the value MUST be the same as the previous MQTT CONNECT packet.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS = "message-flow-edge-node-birth-publish-nbirth-qos";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS = "The Edge Node's NBIRTH MQTT QoS MUST be 0.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED = "message-flow-edge-node-birth-publish-nbirth-retained";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED = "The Edge Node's NBIRTH retained flag MUST be set to false.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ = "message-flow-edge-node-birth-publish-nbirth-payload-seq";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ = "The Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive).";
 
     // 5.3 Edge Node Session Termination
     public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH = "operational-behavior-edge-node-intentional-disconnect-ndeath";
@@ -332,6 +371,30 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET = "Immediately following the NDEATH publish, a DISCONNECT packet MUST be sent to the MQTT Server.";
 
     // 5.4 Device Session Establishment
+    public final static String ID_MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE = "message-flow-device-dcmd-subscribe";
+    public final static String MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE = "If the Device supports writing to outputs, the MQTT client associated with the Device MUST subscribe to a topic of the form 'spBv1.0/group_id/DCMD/edge_node_id/device_id' where group_id is the Sparkplug Group ID the edge_node_id is the Sparkplug Edge Node ID and the device_id is the Sparkplug Device ID for this Device. It MUST subscribe on this topic with a QoS of 1.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT = "message-flow-device-birth-publish-nbirth-wait";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT = "The NBIRTH message must have been sent within the current MQTT session prior to a DBIRTH being published.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC = "message-flow-device-birth-publish-dbirth-topic";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC = "The Device's DBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/DBIRTH/edge_node_id/device_id' where group_id is the Sparkplug Group ID the edge_node_id is the Sparkplug Edge Node ID and the device_id is the Sparkplug Device ID for this Device.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC = "message-flow-device-birth-publish-dbirth-match-edge-node-topic";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC = "The Device's DBIRTH MQTT topic group_id and edge_node_id MUST match the group_id and edge_node_id that were sent in the prior NBIRTH message for the Edge Node this Device is associated with.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD = "message-flow-device-birth-publish-dbirth-payload";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD = "The Device's DBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS = "message-flow-device-birth-publish-dbirth-qos";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS = "The Device's DBIRTH MQTT QoS MUST be 0.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED = "message-flow-device-birth-publish-dbirth-retained";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED = "The Device's DBIRTH retained flag MUST be set to false.";
+
+    public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ = "message-flow-device-birth-publish-dbirth-payload-seq";
+    public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ = "The Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive) and be one more than was included in the prior Sparkplug message sent from the Edge Node associated with this Device.";
+
     // 5.5 Device Session Termination
     public final static String ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH = "operational-behavior-device-ddeath";
     public final static String OPERATIONAL_BEHAVIOR_DEVICE_DDEATH = "If a Sparkplug Edge Node loses connection with an attached Sparkplug Device, it MUST publish a DDEATH message on behalf of the device.";
@@ -423,7 +486,7 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES = "NBIRTH messages MUST include current values for all metrics.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE = "operational-behavior-data-publish-nbirth-change";
-    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE = "NDATA messages MUST only be published when Edge Node level metrics change.";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE = "NDATA messages SHOULD only be published when Edge Node level metrics change.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER = "operational-behavior-data-publish-nbirth-order";
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER = "For all metrics where is_historical=false, NBIRTH and NDATA messages MUST keep metric values in chronological order in the list of metrics in the payload.";
@@ -435,7 +498,7 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES = "DBIRTH messages MUST include current values for all metrics.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE = "operational-behavior-data-publish-dbirth-change";
-    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE = "DDATA messages MUST only be published when Device level metrics change.";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE = "DDATA messages SHOULD only be published when Device level metrics change.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER = "operational-behavior-data-publish-dbirth-order";
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER = "For all metrics where is_historical=false, DBIRTH and DDATA messages MUST keep metric values in chronological order in the list of metrics in the payload.";
@@ -472,7 +535,7 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB = "An Edge Node level command MUST use the NCMD Sparkplug verb.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME = "operational-behavior-data-commands-ncmd-metric-name";
-    public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME = "An NCMD message MUST include a metric name that was included in the associated NBIRTH message for the Edge Node.";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME = "An NCMD message SHOULD include a metric name that was included in the associated NBIRTH message for the Edge Node.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE = "operational-behavior-data-commands-ncmd-metric-value";
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE = "An NCMD message MUST include a compatible metric value for the metric name that it is writing to.";
@@ -481,7 +544,7 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB = "A Device level command MUST use the DCMD Sparkplug verb.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME = "operational-behavior-data-commands-dcmd-metric-name";
-    public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME = "A DCMD message MUST include a metric name that was included in the associated DBIRTH message for the Device.";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME = "A DCMD message SHOULD include a metric name that was included in the associated DBIRTH message for the Device.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE = "operational-behavior-data-commands-dcmd-metric-value";
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE = "A DCMD message MUST include a compatible metric value for the metric name that it is writing to.";
@@ -656,13 +719,13 @@ public class Requirements {
     public final static String PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR = "Every Edge Node Descriptor in any Sparkplug infrastructure MUST be unique in the system.";
 
     public final static String ID_PAYLOADS_NBIRTH_SEQ = "payloads-nbirth-seq";
-    public final static String PAYLOADS_NBIRTH_SEQ = "Every NBIRTH message MUST include a sequence number and it MUST have a value of 0.";
+    public final static String PAYLOADS_NBIRTH_SEQ = "Every NBIRTH message MUST include a sequence number and it MUST have a value between 0 and 255 (inclusive).";
 
     public final static String ID_PAYLOADS_NBIRTH_BDSEQ = "payloads-nbirth-bdseq";
     public final static String PAYLOADS_NBIRTH_BDSEQ = "Every NBIRTH message MUST include a bdSeq number metric.";
 
-    public final static String ID_PAYLOADS_NBIRTH_BDSEQ_INC = "payloads-nbirth-bdseq-inc";
-    public final static String PAYLOADS_NBIRTH_BDSEQ_INC = "Every NBIRTH message in a new Sparkplug MQTT session SHOULD include a bdSeq number value that is one greater than the previous NBIRTH's bdSeq number. This value MUST never exceed 255. If in the previous NBIRTH a value of 255 was sent, the next NBIRTH MUST have a value of 0.";
+    public final static String ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT = "payloads-nbirth-bdseq-repeat";
+    public final static String PAYLOADS_NBIRTH_BDSEQ_REPEAT = "The bdSeq number value MUST match the bdSeq number value that was sent in the prior MQTT CONNECT packet WILL Message.";
 
     public final static String ID_PAYLOADS_NBIRTH_REBIRTH_REQ = "payloads-nbirth-rebirth-req";
     public final static String PAYLOADS_NBIRTH_REBIRTH_REQ = "Every NBIRTH MUST include a metric with the name 'Node Control/Rebirth' and have a boolean value of false.";
@@ -873,4 +936,4 @@ public class Requirements {
     // 11.6 Raspberry Pi Hardware
     // 12 Appendix B: List of Normative Statements (non-normative)
 }
-// no of assertions 231
+// no of assertions 252

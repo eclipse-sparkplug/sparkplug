@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -21,13 +21,21 @@ import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.events.client.parameters.*;
 
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.nio.ByteBuffer;
 
 import org.eclipse.sparkplug.tck.test.Monitor;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
 /**
  * @author Ian Craggs
@@ -39,6 +47,16 @@ public class TCK {
 	private @Nullable TCKTest current = null;
 	private final Monitor monitor = new Monitor();
 	private final MQTTListener listener = new MQTTListener();
+	private final Results results = new Results();
+
+	public void MQTTLog(String message) {
+		final PublishService publishService = Services.publishService();
+		final Publish payload = Builders.publish().topic(TCK_RESULTS_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(message.getBytes())).build();
+		publishService.publish(payload);
+	}
+
+	private boolean listenerRunning = false;
 
 	public void newTest(final @NotNull String profile, final @NotNull String test, final @NotNull String[] parms) {
 
@@ -52,9 +70,18 @@ public class TCK {
 			final Object[] parameters = { this, parms };
 			current = (TCKTest) constructor.newInstance(parameters);
 			monitor.startTest();
-			listener.run(new String[0]);
+			if (!listenerRunning) {
+				listener.run(new String[0]);
+				results.run(new String[0]);
+				listenerRunning = true;
+			}
+			listener.clearResults();
 		} catch (java.lang.reflect.InvocationTargetException e) {
-			logger.error(e.getMessage());
+			logger.error("Error starting test " + profile + "." + test);
+			if (e.getMessage() != null) {
+				logger.error(e.getMessage());
+			}
+			MQTTLog("OVERALL: NOT EXECUTED"); // Ensure the test ends
 		} catch (final Exception e) {
 			logger.error("Could not find or set test class " + profile + "." + test, e);
 		}
@@ -75,18 +102,14 @@ public class TCK {
 	}
 
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
-		logger.info("Client {} connects.", connectionStartInput.getConnectPacket().getClientId());
 		monitor.onMqttConnectionStart(connectionStartInput);
 	}
 
 	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
-		logger.info("Client {} authenticated successfully.",
-				authenticationSuccessfulInput.getClientInformation().getClientId());
 		monitor.onAuthenticationSuccessful(authenticationSuccessfulInput);
 	}
 
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
-		logger.info("Client {} disconnected.", disconnectEventInput.getClientInformation().getClientId());
 		monitor.onDisconnect(disconnectEventInput);
 	}
 

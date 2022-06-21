@@ -3,7 +3,7 @@
 <template>
   <b-modal
     scrollable
-    ok-title="Pass"
+    ok-title="OK"
     ok-variant="success"
     cancel-title="Fail"
     cancel-variant="danger"

@@ -87,14 +87,16 @@ The tests are grouped into two sections, Host and Edge.
 
 Host:
 - session establishment
+- session termination
 - send command
 - receive data
-- session termination
 
 Edge:
 - session establishment
+- session termination
 - receive command
 - send data
+- complex payloads
 
 ## Usage
 
@@ -112,8 +114,9 @@ If any test does not finish automatically, you can press the "Abort Test" button
 
 The "Reset Test" button will clear the results for that test.
 
-# To-do list
+The results of running the tests are collected in a file named "SparkplugTCKresults.txt" in the HiveMQ execution directory.
 
+# To-do list
 
 * Ensure all code adheres to the Sparkplug coding format (as implemented in the Eclipse editor plugin)
 
@@ -122,13 +125,11 @@ The "Reset Test" button will clear the results for that test.
   reaction of the Host Application should be?
   ** The host EdgeNodeDeathTest also currently contains no assertions. Should the host be setting the state of each
   device attached to the disconnecting node proactively, or taking any other action?
-  ** Add edge SessionTerminationTest
   ** Review previously experienced Sparkplug issues as gathered by Inductive Automation/Cirrus link. Add any extra tests
   needed to ensure these scenarios are tested in the TCK.
 
 * Finish off web console
   ** Ensure all tests can be run from it and results reported
-  ** Incorporate results from the separately running Monitor class, and possibly MQTT client listener
   ** Get feedback from trial users to improve its usability
 
 * Ensure all tests can be run on a system with other MQTT/Sparkplug traffic. This means identifying the Sparkplug
@@ -136,14 +137,7 @@ The "Reset Test" button will clear the results for that test.
   many cases (all?) this can be done by looking at the id used in the death message (the will messge) in the MQTT
   connect packet.
 
-* Move/copy all current assertion tests from the MQTT client listener to the Sparkplug Monitor in the HiveMQ plugin for
-  standard TCK testing
-
 * Add all possible assertion tests to the MQTT client listener. This can then be run on a live Sparkplug system with any
   MQTT broker, not just HiveMQ. As it's communicating over MQTT, it can't inspect any packets other than publications.
 
 * Documentation - I imagine this could be mostly incorporated into the web console, so that the separate "Getting started" could be quite short.  We'll see.
-
-* Develop TCK profile for Sparkplug compliant MQTT server (the HiveMQ command line MQTT server capability test could be used as a starting point)
-
-* Develop TCK profile for Sparkplug aware MQTT server

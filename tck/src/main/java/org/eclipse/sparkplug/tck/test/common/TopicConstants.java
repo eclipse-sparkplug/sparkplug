@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Anja Helmbrecht-Schaar
+ * Copyright (c) 2022 Anja Helmbrecht-Schaar and others
  * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -36,6 +36,7 @@ public class TopicConstants {
     public static final String TCK_DEVICE_CONTROL_TOPIC = "SPARKPLUG_TCK/DEVICE_CONTROL";
     public static final String TCK_CONSOLE_PROMPT_TOPIC = "SPARKPLUG_TCK/CONSOLE_PROMPT";
     public static final String TCK_CONSOLE_TEST_CONTROL_TOPIC = "SPARKPLUG_TCK/TEST_CONTROL";
+    public static final String TCK_RESULTS_TOPIC = "SPARKPLUG_TCK/RESULT";
 
     public static final String TCK_HOST_CONTROL = "SPARKPLUG_TCK/HOST_CONTROL";
     public static final String SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC = "spBv1.0/SparkplugTCK/NCMD/";

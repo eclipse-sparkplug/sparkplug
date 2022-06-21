@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 The Eclipse Foundation, Cirrus Link Solutions, and others
+ * Copyright © 2021, 2022 The Eclipse Foundation, Cirrus Link Solutions, and others
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -38,7 +38,7 @@ public class DisconnectInterceptor implements DisconnectInboundInterceptor {
         try {
             final String clientId = disconnectInboundInput.getClientInformation().getClientId();
 
-            logger.info("Inbound disconnect from '{}'", clientId);
+            logger.debug("Inbound disconnect from '{}'", clientId);
 
             final DisconnectPacket packet = disconnectInboundInput.getDisconnectPacket();
             theTCK.disconnect(clientId, packet);

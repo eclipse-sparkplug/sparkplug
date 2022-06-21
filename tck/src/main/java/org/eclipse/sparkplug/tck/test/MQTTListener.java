@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
 
@@ -48,7 +49,7 @@ public class MQTTListener implements MqttCallbackExtended {
 	private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
 	// Configuration
 	private String serverUrl = "tcp://localhost:1883";
-	private String clientId = "Sparkplug MQTT Listener";
+	private String clientId = "Sparkplug MQTT Listener " + UUID.randomUUID();
 	private String username = "admin";
 	private String password = "changeme";
 
@@ -110,7 +111,7 @@ public class MQTTListener implements MqttCallbackExtended {
 			// options.setUserName(username);
 			// options.setPassword(password.toCharArray());
 			client = new MqttClient(serverUrl, clientId);
-			client.setTimeToWait(10000); // short timeout on failure to connect
+			//client.setTimeToWait(10000); // short timeout on failure to connect
 			client.setCallback(this);
 			log_topic = client.getTopic(TCK_LOG_TOPIC);
 			client.connect(options);
@@ -122,13 +123,13 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
-		System.out.println("Connected!");
+		System.out.println("Sparkplug TCK MQTT listener: Connected");
 
 		try {
 			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
 			client.subscribe(
-					new String[] { "spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#", TCK_LOG_TOPIC },
-					new int[] { 2, 2, 2, 2 });
+					new String[] { "spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#", TCK_LOG_TOPIC, TCK_RESULTS_TOPIC},
+					new int[] { 2, 2, 2, 2, 2});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -136,7 +137,7 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	@Override
 	public void connectionLost(Throwable cause) {
-		System.out.println("The MQTT Connection was lost! - will auto-reconnect");
+		System.out.println("Sparkplug TCK MQTT listener: connection lost - will auto-reconnect");
 	}
 
 	@SpecAssertion(
@@ -151,7 +152,9 @@ public class MQTTListener implements MqttCallbackExtended {
 			if (topic.startsWith(TOPIC_ROOT_STATE+"/")) {
 				System.out.println("Sparkplug message: " + topic + " " + new String(message.getPayload()));
 			} else if (topic.equals(TCK_LOG_TOPIC)) {
-				System.out.println("TCK log: " + new String(message.getPayload()));
+				//System.out.println("TCK log: " + new String(message.getPayload()));
+			} else if (topic.equals(TCK_RESULTS_TOPIC)) {
+				//System.out.println("TCK results: " + new String(message.getPayload()));
 			} else {
 				if (topic.startsWith("spAv1.0/")) {
 					log("Warning - non-standard Sparkplug A message received");
@@ -164,11 +167,12 @@ public class MQTTListener implements MqttCallbackExtended {
 					//System.out.println(inboundPayload.toString());
 
 					if (inboundPayload.hasTimestamp()) {
+						int timestamp_max_diff = 60000; // milliseconds difference allowed
 						Date now = new Date();
 						long diff = now.getTime() - inboundPayload.getTimestamp();
 						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC, setResult(
-								diff >= 0 && diff <= 20000, PAYLOADS_TIMESTAMP_IN_UTC));
-						if (diff < 0 || diff > 20000) {
+								diff >= 0 && diff <= timestamp_max_diff, PAYLOADS_TIMESTAMP_IN_UTC));
+						if (diff < 0 || diff > timestamp_max_diff) {
 							System.out.println("Timestamp diff " + diff);
 						}
 					}

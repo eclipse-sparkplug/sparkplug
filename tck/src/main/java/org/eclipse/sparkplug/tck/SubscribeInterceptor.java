@@ -42,11 +42,11 @@ public class SubscribeInterceptor implements SubscribeInboundInterceptor {
 			@NotNull SubscribeInboundOutput subscribeInboundOutput) {
 		try {
 			String clientId = subscribeInboundInput.getClientInformation().getClientId();
-			logger.info("Inbound subscribe from '{}'", clientId);
 			
 			SubscribePacket packet = subscribeInboundInput.getSubscribePacket();
 			
-			logger.info("\tTopic {}", packet.getSubscriptions().get(0).getTopicFilter());
+			logger.debug("Inbound subscribe from '{}' topic {}", clientId,
+					packet.getSubscriptions().get(0).getTopicFilter());
 			
 			theTCK.subscribe(clientId, packet);
 		} catch (Exception e) {

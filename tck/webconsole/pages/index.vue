@@ -287,6 +287,13 @@ export default {
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_ids"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "SessionTerminationTest") {
+                    const testParameters =
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + this.sparkplugClient.eonNode.groupId +
+                        " " + this.sparkplugClient.eonNode.edgeNodeId +
+                        " " + testParameter.parameters["device_ids"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
                 } else if (testType === "SendDataTest" || testType === "PayloadTest") {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
@@ -365,15 +372,16 @@ export default {
             console.log("index: createLogback");
 
             const resultTopic = "SPARKPLUG_TCK/RESULT";
+            const logTopic = "SPARKPLUG_TCK/LOG";
 
-            this.mqttClient.subscribe(resultTopic, (error) => {
+            this.mqttClient.subscribe([resultTopic, logTopic], (error) => {
                 if (error) {
                     console.log("Subscribe error", error);
                 }
             });
 
             this.mqttClient.on("message", (topic, message) => {
-                if (topic === resultTopic) {
+                if (topic === resultTopic || topic === logTopic ) {
                     const logMessage = {
                         id: this.logging.length,
                         logLevel: "INFO",

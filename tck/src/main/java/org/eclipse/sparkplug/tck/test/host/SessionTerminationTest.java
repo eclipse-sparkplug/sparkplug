@@ -30,10 +30,11 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.TestStatus.DEATH_MESSAGE_RECEIVED;
@@ -52,168 +53,157 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
  * @author Ian Craggs, Anja Helmbrecht-Schaar
  */
 @SpecVersion(
-        spec = "sparkplug",
-        version = "3.0.0-SNAPSHOT")
+		spec = "sparkplug",
+		version = "3.0.0-SNAPSHOT")
 public class SessionTerminationTest extends TCKTest {
-    private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
-    private final @NotNull Map<String, String> testResults = new HashMap<>();
-    private final @NotNull ArrayList<String> testIds = new ArrayList<>();
-    private final @NotNull TCK theTCK;
-    private @NotNull String hostApplicationId;
-    private Utils.TestStatus state = Utils.TestStatus.NONE;
+	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
+	private final @NotNull Map<String, String> testResults = new HashMap<>();
 
-    private @Nullable String hostClientId = null;
+	private final @NotNull List<String> testIds = List.of(
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED);
 
-    public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
-        logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
-        theTCK = aTCK;
+	private final @NotNull TCK theTCK;
+	private @NotNull String hostApplicationId;
+	private Utils.TestStatus state = Utils.TestStatus.NONE;
 
-        if (params.length != 2) {
-            logger.error("Parameters to edge receive command test must be: hostApplicationId, hostClientId ");
-            return;
-        }
-        hostApplicationId = params[0];
-        hostClientId = params[1];
+	private @Nullable String hostClientId = null;
 
-        logger.info("Parameters are HostApplicationId: {}, HostClientId: {}", hostApplicationId, hostClientId);
+	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
+		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
+		theTCK = aTCK;
 
-    }
+		if (params.length != 2) {
+			String errmsg = "Parameters to host session termination test must be: hostApplicationId hostClientId";
+			logger.error(errmsg);
+			prompt(errmsg);
+			throw new IllegalArgumentException(errmsg);
+		}
+		hostApplicationId = params[0];
+		hostClientId = params[1];
 
-    @Override
-    public void endTest(Map<String, String> results) {
-    	testResults.putAll(results);
-        Utils.setEndTest(getName(), testIds, testResults);
-        reportResults(testResults);
-    }
+		logger.info("Parameters are HostApplicationId: {}, HostClientId: {}", hostApplicationId, hostClientId);
 
-    public String getName() {
-        return "Sparkplug Host Session Termination Test";
-    }
+	}
 
-    public String[] getTestIds() {
-        return testIds.toArray(new String[0]);
-    }
+	@Override
+	public void endTest(Map<String, String> results) {
+		testResults.putAll(results);
+		Utils.setEndTest(getName(), testIds, testResults);
+		reportResults(testResults);
+	}
 
-    public Map<String, String> getResults() {
-        return testResults;
-    }
+	public String getName() {
+		return "Host SessionTermination";
+	}
 
-    @Override
-    public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
-    }
+	public String[] getTestIds() {
+		return testIds.toArray(new String[0]);
+	}
 
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-            id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL)
-    @Override
-    public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
-        logger.info("Host - {} test - DISCONNECT - clientId: {}, state: {} ", getName(), clientId, state);
+	public Map<String, String> getResults() {
+		return testResults;
+	}
 
-        if (clientId.equals(hostClientId)) {
-            logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
-                    OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-            testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-            testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL, setResult(state == DEATH_MESSAGE_RECEIVED,
-                    OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
-            theTCK.endTest();
-        }
-    }
+	@Override
+	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
+	}
 
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-            id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL)
-    @Override
-    public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
-        logger.info("Host - {} test - SUBSCRIBE - topicFilter: {}, clientId: {} ", getName(), packet.getSubscriptions(), clientId);
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL)
+	@Override
+	public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
+		logger.info("Host - {} test - DISCONNECT - clientId: {}, state: {} ", getName(), clientId, state);
 
-        if (clientId.equals(hostClientId)) {
-            logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
-                    OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-            testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-            testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL, setResult((state != DEATH_MESSAGE_RECEIVED),
-                    OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
-            theTCK.endTest();
-        }
-    }
+		if (clientId.equals(hostClientId)) {
+			logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
+					OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
+			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL, setResult(
+					state == DEATH_MESSAGE_RECEIVED, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
+			theTCK.endTest();
+		}
+	}
 
-    @Override
-    public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
-        logger.info("Host - {} test - PUBLISH - topic: {}, clientId: {} ", getName(), packet.getTopic(), clientId);
+	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
+	}
 
-        if (clientId.equals(hostClientId)) {
-            if (state == DEATH_MESSAGE_RECEIVED) {
-                logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-                testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-                testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL, setResult(false, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
-                theTCK.endTest();
-            } else if (checkDeathMessage(packet)) {
-                state = DEATH_MESSAGE_RECEIVED;
-            }
-        }
-    }
+	@Override
+	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
+		logger.info("{} test - PUBLISH - topic: {}, clientId: {} ", getName(), packet.getTopic(), clientId);
 
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-            id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC)
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-            id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD)
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-            id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS)
-    @SpecAssertion(
-            section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-            id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED)
-    private boolean checkDeathMessage(final @NotNull PublishPacket packet) {
-        logger.info("Host - {} test - PUBLISH - topic: {}, checkDeathMessage state: {} ", getName(), packet.getTopic(), state);
-        boolean overallResult = true;
+		if (clientId.equals(hostClientId)) {
+			if (checkDeathMessage(packet)) {
+				state = DEATH_MESSAGE_RECEIVED;
+			}
+		}
+	}
 
-        // Topic is STATE/{host_application_id}
-        final boolean isStateTopic = (packet.getTopic().equals(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
-        overallResult &= isStateTopic;
-        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC);
-        testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC);
-        testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC, setResult(isStateTopic,
-                OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC));
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED)
+	private boolean checkDeathMessage(final @NotNull PublishPacket packet) {
+		logger.info("Host - {} test - PUBLISH - topic: {}, checkDeathMessage state: {} ", getName(), packet.getTopic(),
+				state);
+		boolean overallResult = true;
 
-        // Payload exists
-        final boolean isPayloadPresent = (packet.getPayload().isPresent());
-        overallResult &= isPayloadPresent;
-        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD);
-        testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD);
-        testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD, setResult(isPayloadPresent,
-                OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC));
+		// Topic is STATE/{host_application_id}
+		final boolean isStateTopic =
+				(packet.getTopic().equals(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
+		overallResult &= isStateTopic;
+		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
+				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC);
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
+				setResult(isStateTopic, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC));
 
-        // Payload message exists
-        boolean payloadIsOffline = (isPayloadPresent && "OFFLINE".equals(Utils.decode(packet.getPayload().get())));
-        overallResult &= payloadIsOffline;
+		// Payload exists
+		final boolean isPayloadPresent = (packet.getPayload().isPresent());
+		overallResult &= isPayloadPresent;
+		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD,
+				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD);
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD,
+				setResult(isPayloadPresent, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC));
 
-        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD);
-        testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD);
-        testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD, setResult(payloadIsOffline,
-                OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD));
+		// Payload message exists
+		boolean payloadIsOffline = isPayloadPresent
+				&& "OFFLINE".equals(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
+		overallResult &= payloadIsOffline;
 
+		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD,
+				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD);
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD,
+				setResult(payloadIsOffline, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD));
 
-        // Will publish is QoS 1
-        final boolean isWillQoS1 = (packet.getQos() == Qos.AT_LEAST_ONCE);
-        overallResult &= isWillQoS1;
+		// Will publish is QoS 1
+		final boolean isWillQoS1 = (packet.getQos() == Qos.AT_LEAST_ONCE);
+		overallResult &= isWillQoS1;
 
-        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS);
-        testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS);
-        testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS, setResult(isStateTopic,
-                OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS));
+		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS,
+				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS);
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS,
+				setResult(isStateTopic, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS));
 
+		// Retain flag is set
+		final boolean isRetain = (packet.getRetain());
+		overallResult &= isRetain;
 
-        // Retain flag is set
-        final boolean isRetain = (packet.getRetain());
-        overallResult &= isRetain;
+		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED,
+				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED);
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED,
+				setResult(isRetain, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED));
 
-        logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED);
-        testIds.add(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED);
-        testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED, setResult(isRetain,
-                OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED));
-
-        return overallResult;
-    }
+		return overallResult;
+	}
 
 }
