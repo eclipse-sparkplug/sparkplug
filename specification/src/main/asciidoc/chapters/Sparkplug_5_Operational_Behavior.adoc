@@ -609,6 +609,37 @@ Sparkplug Host Application's Death retained flag MUST be set to true.*#
 the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after
 the Death message is sent.*#
 
+[[operational_behavior_sparkplug_host_application_receive_data]]
+=== Sparkplug Host Application Receive Data
+
+Sparkplug Host Applications are typically designed to receive data from Sparkplug Edge Nodes and
+optionally write commands back to them. What they do with that data is not specified by the
+Sparkplug specification. It is left to the implementor of a Sparkplug Host Application to define
+what they do with the data and what (if anything) they potentially write back to the Edge Nodes via
+CMD messages. Example Host Applications may use graphical interfaces or dashboards to display Edge
+Node data. Other Host Applications may insert data into a historical database for later querying.
+Other Host Applications may perform real-time analytics on the data as it flows from the Sparkplug
+Edge Nodes.
+
+Because there is so much flexibility in what a Sparkplug Host Application may do with the data it
+receives there aren't hard requirements on what it does with it once it receives it. However, there
+are some things to consider:
+
+* A Sparkplug Host Application MAY send Node Control/Rebirth NCMD messages if messages arrive out of
+sequence order and can not be reordered within the sequence reordering timeout. It is often
+reasonable for whether or not a Host Application sends Rebirths to be a configuration option as this
+can have an impact on the overall Sparkplug system.
+* A Sparkplug Host Application MAY send Node Control/Rebirth NCMD messages if malformed payloads
+arrive. Because this can have an impact on the overall system this should be configurable by the
+Host Application.
+* There are other reasons a Host Application may send out Node Control/Rebirth NCMD messages. These
+include but are not limited to:
+** Receiving any DBIRTH, NDATA, DDATA, or DDEATH before receiving an NBIRTH from a Sparkplug Edge
+Node
+** Receiving a metric in an NDATA message that was not included in the previous NBIRTH message
+** Receiving a metric in a DDATA message that was not included in the previous DBIRTH message
+** Recieving an alias value that was not included in the corresponding NBIRTH or DBIRTH
+
 [[operational_behavior_data_publish]]
 === Data Publish
 
