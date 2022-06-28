@@ -37,6 +37,16 @@ is connected to an MQTT Server that the Primary Host Application is *NOT* connec
 Edge Node should connect to the next available MQTT Server where STATE for the Primary Host
 Application is ‘ONLINE’.
 
+[[operational_behavior_timestamps]]
+=== Timestamps in Sparkplug
+
+An important aspect of Sparkplug is its use of time. All timestamps must be in Coordinated
+Universal Time (UTC). In order to ensure this is the case, all Sparkplug Edge Nodes and Sparkplug
+Host Applications must have an accurate mechanism for ensuring their clocks remain accurate. This is
+typically left to the system operating system using technologies such as Network Time Protocol
+(NTP). Regardless of the mechanism used, ensuring all timestamps are accurate and in UTC is
+critical to all timestamps in Sparkplug.
+
 [[operational_behavior_primary_host_application_session_establishment]]
 === Host Application Session Establishment
 
@@ -220,9 +230,36 @@ following the NDEATH publish, a DISCONNECT packet MUST be sent to the MQTT Serve
 This allows the MQTT Server to be notified that the Edge Node is offline and as a result the MQTT
 Will Message of the Edge Node will not be delivered by the MQTT Server to subscribed MQTT clients.
 
-When an Edge Node goes offline by sending its NDEATH, it is implied that all of the Edge Node's
-associated Devices are also offline. This means that a Host Application needs to stale the tags for
-all Sparkplug Device's associated with this Edge Node.
+When an Edge Node goes offline by sending its NDEATH or if an MQTT Server delivers an NDEATH on
+behalf of an Edge Node, it is implied that all of the Edge Node's associated Devices are also
+offline. In addition, it is also implied that all metrics in the previous associated NBIRTH and all
+DBIRTHs in this Sparkplug session under that Edge Node are now STALE.
+
+For the following normative statements it is up to the designers of the Sparkplug Host Application
+with regard to how they 'mark' the Sparkplug Edge Node or Sparkplug Device as 'offline'. It is also
+up to the designers of the Sparkplug Host Application on how they 'mark' a metric as STALE. This is
+an important aspect of Sparkplug in that an NDEATH means the data was accurate at a time, but now
+that the MQTT session has been lost can no longer be considered current or up to date.
+
+Because an NDEATH may be sent on behalf of an Edge Node by an MQTT Server in the MQTT Will Message,
+the Sparkplug payload timestamp does not represent the time that the Edge Node actually went
+offline. As a result, the timestamp associated with NDEATH events must use the timestamp of receipt
+on the Sparkplug Host Application. This is in part why Sparkplug Edge Nodes and Host Applications
+must have synced system clocks and all Sparkplug timestamps must be in UTC time.
+
+[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-node-offline]#[yellow-background]*Immediately
+after receiving an NDEATH from an Edge Node, Host Applications MUST mark the Edge Node as offline
+using the current Host Application's system UTC time*#
+[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-node-tags-stale]#[yellow-background]*Immediately
+after receiving an NDEATH from an Edge Node, Host Applications MUST mark all metrics that were
+included in the previous NBIRTH as STALE using the current Host Application's system UTC time*#
+[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-devices-offline]#[yellow-background]*Immediately
+after receiving an NDEATH from an Edge Node, Host Applications MUST mark all Sparkplug Devices
+associated with the Edge Node as offline using the current Host Application's system UTC time*#
+[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-devices-tags-stale]#[yellow-background]*Immediately
+after receiving an NDEATH from an Edge Node, Host Applications MUST mark all of the metrics that
+were included with associated Sparkplug Device DBIRTH messages as STALEusing the current Host
+Application's system UTC time*#
 
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
@@ -323,9 +360,34 @@ that all metric information associated with that Sparkplug Device be set to a ST
 
 [tck-testable tck-id-operational-behavior-device-ddeath]#[yellow-background]*If a Sparkplug Edge
 Node loses connection with an attached Sparkplug Device, it MUST publish a DDEATH message on behalf
-of the device.*# This allows Sparkplug Host Applications to know that the Device is no longer
-connected and therefore the Edge Node is not able to report live/accurate data values. In turn, the
-Sparkplug Host Applications MUST mark the Device offline and denote that Device's tags as stale.
+of the device.*#
+
+When a Sparkplug Device goes offline by having its DDEATH published by an Edge Node, it allows
+Sparkplug Host Applications to know that the Sparkplug Device is no longer reporting current and
+accurate values to the Edge Node. Therefore the Edge Node is not able to report live/accurate data
+values on behalf of the Sparkplug Device to the MQTT Server or in turn to Sparkplug Host
+Applications. As a result the Sparkplug Host Applications must mark the Device offline and denote
+the Sparkplug Device's tags as stale.
+
+For the following normative statements it is up to the designers of the Sparkplug Host Application
+with regard to how they 'mark' the Sparkplug Device as 'offline'. It is also up to the designers of
+the Sparkplug Host Application on how they 'mark' a metric as STALE. This is an important aspect of
+Sparkplug in that an DDEATH means the data was accurate at a time, but now that the connection
+between the Sparkplug Edge Node and the Sparkplug Device has been lost can no longer be considered
+current or up to date.
+
+The DDEATH is sent on behalf of a Sparkplug Device by a Sparkplug Edge Node. Because of this, the
+Sparkplug payload timestamp associated with a DDEATH is considered accurate and must be used as the
+timestamp for a Sparkplug Device being marked as offline and for its associated metrics being set to
+STALE.
+
+[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ddeath-devices-offline]#[yellow-background]*Immediately
+after receiving an DDEATH from an Edge Node, Host Applications MUST mark the Sparkplug Device
+associated with the Edge Node as offline using the timestamp in the DDEATH payload*#
+[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ddeath-devices-tags-stale]#[yellow-background]*Immediately
+after receiving an DDEATH from an Edge Node, Host Applications MUST mark all of the metrics that
+were included with the associated Sparkplug Device DBIRTH messages as STALE using the timestamp in
+the DDEATH payload*#
 
 [[operational_behavior_sparkplug_host_applications]]
 === Sparkplug Host Applications
