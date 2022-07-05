@@ -31,11 +31,11 @@ there are two main reasons for this "designation" of a Primary Host Application:
 [arabic]
 . Only the Primary Host Application should have the permission to issue commands to Edge Nodes.
 . In high availability and redundancy use cases where multiple MQTT Servers are used, Sparkplug Edge
-Nodes need to be aware of whether the Primary Host Application has network connectivity to each
-MQTT Server in the infrastructure. If the Primary Host Application STATE shows that an Edge Node
-is connected to an MQTT Server that the Primary Host Application is *NOT* connected to, then the
-Edge Node should connect to the next available MQTT Server where STATE for the Primary Host
-Application is ‘ONLINE’.
+Nodes need to be aware of whether the Primary Host Application is connected to each MQTT Server in
+the infrastructure. If the Primary Host Application STATE shows that an Edge Node is connected to an
+MQTT Server that the Primary Host Application is *NOT* connected to, then the Edge Node should
+connect to the next available MQTT Server where STATE for the Primary Host Application shows
+'online=true'.
 
 [[operational_behavior_timestamps]]
 === Timestamps in Sparkplug
@@ -89,17 +89,26 @@ establishing the MQTT session and before publishing its own STATE message.*#
 . [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#[yellow-background]*Once an MQTT
 Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic
 Namespace have been established, and the STATE topic subscription has been been established, the
-Sparkplug Host Application MUST publish a new STATE message with a Payload of a UTF-8 string of
-'ONLINE'.*#
+Sparkplug Host Application MUST publish a new STATE message.*#
+* [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload]#[yellow-background]*The
+Host Application Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value
+pairs where the one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be
+'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp'
+and the value MUST be a numeric value representing the current UTC time in milliseconds since
+Epoch.*#
+* [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload-bdseq]#[yellow-background]*The
+bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will
+Message payload.*#
+
 The Host Application is now ready to start receiving MQTT messages from any connected Edge Node
 within the infrastructure. At this point, the Host Application can update the MQTT Client metrics in
-the Host Application with a current state of ONLINE once each Edge Node publishes its Sparkplug
+the Host Application with a current state of 'online' once each Edge Node publishes its Sparkplug
 NBIRTH and DBIRTH messages. Since the Sparkplug Host Application is also relying on the MQTT Session
 to the MQTT Server(s), the availability of MQTT Servers to the Host Application is also being
 monitored and reflected in the MQTT Client metrics in the Host Application.
 
 . If at any point in time Host Application loses connectivity with the defined MQTT Server(s), the
-ONLINE state of the Server is immediately reflected in the MQTT Client metrics in the Host
+online=true state of the Server is immediately reflected in the MQTT Client metrics in the Host
 Application.
 [tck-not-testable]#[yellow-background]*All metric data associated with any Sparkplug Edge Node that
 was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data
@@ -141,12 +150,12 @@ Edge Node's MQTT Will Message's MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]#[yellow-background]*The
 Edge Node's MQTT Will Message's retained flag MUST be set to false.*#
 
-Once the Sparkplug Host Application has successfully connected to the MQTT Server, it must publish a
+Once the Sparkplug Edge Node has successfully connected to the MQTT Server, it must publish a
 NBIRTH message. The NBIRTH message must follow the following rules.
 
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait]#[yellow-background]*If the
 Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host
-Application is ONLINE via the STATE topic before publishing NBIRTH and DBIRTH messages.*#
+Application is online via the STATE topic before publishing NBIRTH and DBIRTH messages.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-topic]#[yellow-background]*The
 Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where
 group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge
@@ -200,14 +209,14 @@ required for establishing a valid MQTT Session with the Primary Host Application
 . Once an MQTT Session has been established, the Edge Node MQTT client MUST publish an application
 level NBIRTH as defined link:#topics_birth_message_nbirth[here]. At this point, the Primary Host
 Application will have all the information required to build out the Edge Node metric structure and
-show the Edge Node in an "ONLINE" state once it publishes its NBIRTH and DBIRTH messages.
+show the Edge Node in an 'online' state once it publishes its NBIRTH and DBIRTH messages.
 
 . If at any point in time the Edge Node MQTT Client loses connectivity to the defined MQTT
 Server(s), a Death Certificate (NDEATH) is issued by the MQTT Server on behalf of the Edge Node.
 Upon receipt of the Death Certificate with a bdSeq number metric that matches the preceding bdSeq
 number in the NBIRTH messages, the Primary Host Application should set the state of the Edge Node
-to ‘OFFLINE’ and update all metric timestamps related to this Edge Node. Any defined metrics will be
-set to a STALE data quality.
+to ‘online=false’ and update all metric timestamps related to this Edge Node. Any defined metrics
+will be set to a STALE data quality.
 
 .. The bdSeq number is used to correlate an NBIRTH with a NDEATH. Because the NDEATH is included in
 the MQTT CONNECT packet, its timestamp (if included) is not useful to Sparkplug Host Applications.
@@ -480,18 +489,18 @@ Edge Nodes MUST not connected to more than one server at any point in time.*#
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
 published by Primary Host Application. Since the STATE message is published with the RETAIN message
 flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
-examine the payload of this message to ensure that it is a value of "ONLINE". If the value is
-"OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT
-Server.
+examine the JSON payload of this message to ensure that it is a value of the 'online' key is true.
+If the value is false, this indicates the Primary Application has lost its MQTT Session to this
+particular MQTT Server.
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*If
-the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST
+the Primary Host Application is offline as denoted via the STATE MQTT Message, the Edge Node MUST
 terminate its session with this MQTT Server and move to the next available MQTT Server that is
 available.*#
 
 [tck-testable tck-id-operational-behavior-edge-node-birth-sequence-wait]#[yellow-background]*The
-Edge Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received
-by the Edge Node.*#
+Edge Node MUST also wait to publish its BIRTH sequence until an online=true STATE message is
+received by the Edge Node.*#
 This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
 to the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
 because of network issues. The following message flow diagram outlines how the STATE message is
@@ -506,32 +515,36 @@ Figure 7 – Primary Host Application STATE flow diagram
 . When an Edge Node is configured with multiple available MQTT Servers in the infrastructure it
 should issue a subscription to the Primary Host Application STATE message. The Edge Nodes are free
 to establish an MQTT Session to any of the available servers over any available network at any time
-and examine the current STATE value. If the STATE message payload is ‘OFFLINE’ then the Edge Node
+and examine the current STATE value. If the STATE message payload is online=false then the Edge Node
 should disconnect and walk to the next available server.
 
 . Upon startup, the configured Primary Host Application's MQTT Client MUST include the Primary Host
-Application DEATH Certificate that indicates STATE is ‘OFFLINE’ with the message RETAIN flag set to
-true in the MQTT Will Message. Then the Primary Host Application BIRTH Certificate MUST be published
-with a STATE payload of ‘ONLINE’.
+Application DEATH Certificate that indicates STATE is online=false with the message RETAIN flag set
+to true in the MQTT Will Message. Then the Primary Host Application BIRTH Certificate must be
+published with a STATE payload of online=true. In both of these messages the bdSeq number value must
+match and be one more than the bdSeq number value used in the previous connection establishment.
+Both of these payloads must also include a numeric timestamp value in UTC milliseconds since Epoch.
 
 . As the Edge Node walks its available MQTT Server list, it will establish an MQTT Session with a
-server that has a STATE message with a payload of ‘ONLINE’. The Edge Node can stay connected to
-this server if its MQTT Session stays intact and it does not receive the Primary Host Application
-DEATH Certificate.
+server that has a STATE message with a JSON payload that has online=true. The Edge Node can stay
+connected to this server if its MQTT Session stays intact and it does not receive the Primary Host
+Application DEATH Certificate.
 
 . Having a subscription registered to the MQTT Server on the STATE topic will result in any change
 to the current Primary Host Application STATE being received immediately. In this case, a
 network disruption causes the Primary Host Application MQTT Session to server #2 to be terminated.
 This will cause the MQTT Server, on behalf of the now terminated the Primary Host Application MQTT
-Client to publish the Death Certificate to anyone that is currently subscribed to it. Upon receipt
+Client, to deliver the Death Certificate to anyone that is currently subscribed to it. Upon receipt
 of the Primary Host Application Death Certificate this Edge Node will move to the next MQTT Server
-in its list.
+in its list. Before the Edge Node disconnects and walks to the next MQTT Server it must validate
+that the JSON payload denotes online=false and the bdSeq number matches the prior STATE message
+bdSeq number from that Host Application's BIRTH message.
 
 . The Edge Node connected to the next available MQTT Server and since the current STATE on this
-server is ‘ONLINE’, it can stay connected. In the meantime, the network disruption between Primary
-Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a new MQTT
-Session established to server #2 with an update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is
-ready to accept new Edge Node session requests.
+server is online=true, it can stay connected. In the meantime, the network disruption between
+Primary Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a
+new MQTT Session established to server #2 with an updated Birth Certificate of online=true. Now MQTT
+Server #2 is ready to accept new Edge Node session requests.
 
 [[operational_behavior_edge_node_ndata_and_ncmd_messages]]
 === Edge Node NDATA and NCMD Messages
@@ -628,7 +641,14 @@ a Sparkplug Host Application sends its MQTT CONNECT packet, it MUST include a Wi
 MQTT Will Message's topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
 of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-payload]#[yellow-background]*The
-MQTT Will Message's payload MUST be the UTF-8 String of 'OFFLINE'.*#
+Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
+one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a
+numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
+a numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-will-payload-bdseq]#[yellow-background]*The
+Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value
+sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255.
+In this case the new bdSeq number value MUST be 0.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-qos]#[yellow-background]*The
 MQTT Will Message's MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-retained]#[yellow-background]*The
@@ -644,7 +664,13 @@ after successfully connecting to the MQTT Server.*#
 Host Application's Birth topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
 of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-payload]#[yellow-background]*The
-Host Application's Birth payload MUST be the UTF-8 String of 'ONLINE'.*#
+Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
+one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a
+numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
+a numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-operational-behavior-host-application-connect-birth-payload-bdseq]#[yellow-background]*The
+bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will
+Message payload.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-qos]#[yellow-background]*The
 Host Application's Birth MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-retained]#[yellow-background]*The
@@ -661,7 +687,14 @@ following characteristics.
 Sparkplug Host Application's Death topic MUST be of the form 'STATE/host_id' where host_id is the
 unique identifier of the Sparkplug Host Application.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-payload]#[yellow-background]*The
-Sparkplug Host Application's Death payload MUST be the UTF-8 String of 'OFFLINE'.*#
+Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
+one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a
+numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
+a numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-operational-behavior-host-application-death-payload-bdseq]#[yellow-background]*The
+Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value
+sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255.
+In this case the new bdSeq number value MUST be 0.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-qos]#[yellow-background]*The
 Sparkplug Host Application's Death MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-death-retained]#[yellow-background]*The

@@ -1591,8 +1591,15 @@ UTF-8 string.
 Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*The Sparkplug Host
 Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-will-message-payload]#[yellow-background]*The Sparkplug Host
-Application MUST set the Will Payload to the UTF-8 string of 'OFFLINE' in the MQTT CONNECT packet.*#
+* [tck-testable tck-id-payloads-state-will-message-payload]#[yellow-background]*The Death
+Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key
+MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a numeric
+value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a
+numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-payloads-state-will-message-payload-bdseq]#[yellow-background]*The Death
+Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value sent in
+the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this
+case the new bdSeq number value MUST be 0.*#
 * [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*After establishing an MQTT
 connection, the Sparkplug Host Application MUST subscribe on it's own 'STATE/[sparkplug_host_id]'
 topic.*#
@@ -1601,6 +1608,14 @@ STATE 'OFFLINE' messages being published on it's behalf by the MQTT Server when 
 online.
 * [tck-testable tck-id-payloads-state-birth]#[yellow-background]*After subscribing on it's own
 STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message on the
-topic 'STATE/[sparkplug_host_id]' with a payload of the UTF-8 string of 'ONLINE', a QoS of 1, and
-the retain flag set to true.*# The [sparkplug_host_id] should be replaced with the Sparkplug Host
-Application's ID. This can be any UTF-8 string.
+topic 'STATE/[sparkplug_host_id]' with a QoS of 1, and the retain flag set to true.*# The
+[sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
+UTF-8 string.
+* [tck-testable tck-id-payloads-state-birth-payload]#[yellow-background]*The Birth Certificate
+Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be
+'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value
+between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric
+value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-payloads-state-birth-payload-bdseq]#[yellow-background]*The bdSeq metric
+value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message
+payload.*#

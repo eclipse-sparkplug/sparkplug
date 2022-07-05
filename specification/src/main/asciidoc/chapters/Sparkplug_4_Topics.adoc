@@ -168,10 +168,11 @@ The Birth Certificate topic for an Sparkplug Edge Node is:
 
 The Sparkplug Edge Node Birth Certificate payload contains everything required to build out a data
 structure for all metrics for this Edge Node. At the time any Host Application receives an NBIRTH,
-the ONLINE state of this Edge Node should be set to TRUE along with the associated ONLINE Date/Time
-parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself is online
-and in an MQTT Session, but any devices that have previously published a DBIRTH will still have
-STALE metric quality until the Host Application receives the associated DBIRTH messages.
+the 'online' state of this Edge Node should be set to 'true' along with the associated 'online'
+Date/Time parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself
+is online and in an MQTT Session, but any devices that have previously published a DBIRTH will still
+have STALE metric quality until the Host Application receives the new DBIRTH messages associated with
+the new Sparkplug session..
 
 The NBIRTH message requires the following payload components.
 
@@ -337,14 +338,14 @@ that need to be written to on the Edge Node.*#
 
 The Sparkplug Edge Node is responsible for the management of all attached physical and/or logical
 devices. Once the Edge Node has published its NBIRTH, any Sparkplug Host Application ensures that
-the metric structure has the Edge Node in an ONLINE state. But each physical and/or logical device
+the metric structure has the Edge Node in an 'online' state. But each physical and/or logical device
 connected to this node will still need to provide this DBIRTH before Host Applications
 create/update the metric structure (if this is the first time this device has been seen) and set any
 associated metrics in the application to a “*GOOD*” state.
 
 The DBIRTH payload contains everything required to build out a data structure for all metrics for
-this device. The ONLINE state of this device should be set to TRUE along with the associated ONLINE
-Date/Time this message was received.
+this device. The 'online' state of this device should be set to TRUE along with the associated
+'online' Date/Time this message was received.
 
 [[topics_birth_message_dbirth]]
 ====== Topic (DBIRTH)
@@ -499,7 +500,12 @@ and is published as a part of the native MQTT transport if the MQTT session term
 reason.
 
 The Birth Certificate that is defined here is an MQTT application level message published by the
-Sparkplug Host Application MQTT Client applications.
+Sparkplug Host Application MQTT Client application.
+
+* [tck-testable tck-id-host-topic-phid-birth-qos]#[yellow-background]*The MQTT Quality of Service
+(QoS) MUST be set to 1*#
+* [tck-testable tck-id-host-topic-phid-birth-retain]#[yellow-background]*The MQTT retain flag for
+the Birth Certificate MUST be set to TRUE*#
 
 [[topics_birth_message_state]]
 ====== Birth Certificate Topic (STATE)
@@ -509,22 +515,21 @@ Certificate:
 [subs="quotes"]
   [tck-testable tck-id-host-topic-phid-birth-topic]#*STATE*/sparkplug_host_application_id#
 
-* [tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
-Payload MUST be the UTF-8 string “ONLINE”*#
-* [tck-testable tck-id-host-topic-phid-birth-qos]#[yellow-background]*The MQTT Quality of Service
-(QoS) MUST be set to 1*#
-* [tck-testable tck-id-host-topic-phid-birth-retain]#[yellow-background]*The MQTT retain flag for
-the Birth Certificate MUST be set to TRUE*#
+* [tck-testable tck-id-host-topic-phid-birth-required]#[yellow-background]*The Sparkplug Host
+Application MUST publish a Sparkplug Host Application BIRTH message immediately after connecting
+to an MQTT Server*#
 
 [[payloads_desc_state_birth]]
 ====== Birth Certificate Payload (STATE)
 
-* [tck-testable tck-id-host-topic-phid-birth-payload-on-off]#[yellow-background]*The STATE message
-from the Sparkplug Host Application Birth Certificate message MUST include a payload that is a UTF-8
-string that is the following*#
-----
-ONLINE
-----
+* [tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*The Birth Certificate
+Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be
+'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value
+between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric
+value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-host-topic-phid-birth-payload-bdseq]#[yellow-background]*The bdSeq metric
+value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message
+payload.*#
 
 Sparkplug B payloads are not used for encoding in this payload. This allows Host Applications to
 work across Sparkplug payload types.
@@ -536,31 +541,31 @@ When the Sparkplug Host Application MQTT client establishes an MQTT session to t
 the Death Certificate will be part of the Will Topic and Will Payload registered in the MQTT CONNECT
 packet.
 
+* [tck-testable tck-id-host-topic-phid-death-qos]#[yellow-background]*The MQTT Quality of Service
+(QoS) MUST be set to 1*#
+* [tck-testable tck-id-host-topic-phid-death-retain]#[yellow-background]*The MQTT retain flag for
+the Birth Certificate MUST be set to TRUE*#
+
 [[topics_death_message_state]]
 ====== Death Certificate Topic (STATE)
 
-The *Will Topic* as defined above will be:
+The Will Topic as defined above will be:
 [subs="quotes"]
   [tck-testable tck-id-host-topic-phid-death-topic]#*STATE*/sparkplug_host_application_id#
 
-* [tck-testable tck-id-host-topic-phid-required]#[yellow-background]*The Sparkplug Host Application
-MUST provide a Will message in the MQTT CONNECT packet*#
-* [tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*The MQTT Will Payload MUST
-be the UTF-8 string “OFFLINE”*#
-* [tck-testable tck-id-host-topic-phid-death-qos]#[yellow-background]*The MQTT Will QoS MUST be set
-to 1*#
-* [tck-testable tck-id-host-topic-phid-death-retain]#[yellow-background]*The MQTT Will retain flag
-MUST be set to TRUE*#
+* [tck-testable tck-id-host-topic-phid-death-required]#[yellow-background]*The Sparkplug Host
+Application MUST provide a Will message in the MQTT CONNECT packet*#
+** This is the Sparkplug Host Application DEATH certificate
 
 [[payloads_desc_state_death]]
 ====== Death Certificate Payload (STATE)
 
-* [tck-testable tck-id-host-topic-phid-death-payload-off]#[yellow-background]*The STATE messages
-from the Sparkplug Host Application Death Certificate message MUST include a payload that is a UTF-8
-string that is the following:*#
-----
-OFFLINE
-----
-
-Sparkplug B payloads are not used for encoding in this payload. This allows Host Applications to
-work across Sparkplug payload types.
+* [tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*The Death Certificate
+Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be
+'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a numeric value
+between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric
+value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-host-topic-phid-death-payload-bdseq]#[yellow-background]*The Death
+Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value sent in
+the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this
+case the new bdSeq number value MUST be 0.*#
