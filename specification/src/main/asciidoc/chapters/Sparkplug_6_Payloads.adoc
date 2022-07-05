@@ -478,7 +478,8 @@ captured.
 ** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*The datatype MUST be an
 unsigned 32-bit integer representing the datatype.*#
 ** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*The datatype MUST be one
-of the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
+of the enumerated values as shown in the
+link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
 ** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*The datatype MUST be included with
 each metric definition in NBIRTH and DBIRTH messages.*#
 ** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*The datatype SHOULD NOT be
@@ -505,8 +506,8 @@ metadata associated with a metric. This is covered in the
 link:#payloads_b_propertyset[property set section].
 * *value*
 ** The value of a metric utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
-supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
-to true the value can be omitted altogether.
+supplied with a metric MUST be one of the following protobuf types. Note if the metrics is_null flag
+is set to true the value can be omitted altogether.
 *** _uint32_
 **** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
 *** _uint64_
@@ -586,7 +587,8 @@ property in a PropertySet. It includes the following components.
 unsigned 32-bit integer representing the datatype.*#
 [tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*This value MUST
 be one of the enumerated values as shown in the
-link:#payloads_b_datatype_basic[Sparkplug Basic Data Types] or the
+link:#payloads_b_datatype_basic[Sparkplug Basic Data Types]
+or the
 link:#payloads_b_datatype_propertyvalue[Sparkplug Property Value Data Types].*#
 [tck-testable tck-id-payloads-metric-propertyvalue-type-req]#[yellow-background]*This MUST be
 included in Property Value Definitions in NBIRTH and DBIRTH messages.*#
@@ -668,10 +670,9 @@ the same number of elements that the columns array contains.*#
 MUST be a unsigned 32-bit integer representing the datatype.*#
 [tck-testable tck-id-payloads-dataset-types-value]#[yellow-background]*This values in the types
 array MUST be one of the enumerated values as shown in the
-link:#payloads_b_datatypes_basic[Sparkplug Basic Data Types].*#
-// FIXME: Is this correct?
-[tck-testable tck-id-payloads-dataset-parameter-type-req]#[yellow-background]*This MUST be included
-in DataSet Definitions in NBIRTH and DBIRTH messages.*#
+link:#payloads_b_datatype_basic[Sparkplug Basic Data Types].*#
+[tck-testable tck-id-payloads-dataset-parameter-type-req]#[yellow-background]*The types array MUST
+be included in all DataSets.*#
 * *rows*
 ** This is an array of DataSet.Row objects. It contains the data that makes up the data rows of this 
 DataSet.
@@ -771,14 +772,15 @@ string representing the name of the Template parameter.*#
 unsigned 32-bit integer representing the datatype.*#
 [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*This value MUST be
 one of the enumerated values as shown in the
-link:#payloads_b_datatypes_basic[Sparkplug Basic Data Types].*#
+link:#payloads_b_datatype_basic[Sparkplug Basic Data Types].*#
 // FIXME: Is this correct?
 [tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*This MUST be included
 in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
 [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*The value supplied MUST
-be one of the following types: _uint32_, _uint64_, _float_, _double_, _bool_, or _string_.*#
+be one of the following protobuf types: _uint32_, _uint64_, _float_, _double_, _bool_, or
+_string_.*#
 For a template definition, this is the default value of the parameter. For a template instance, this
 is the value unique to that instance. More information on these types can be found below.
 *** _uint32_
