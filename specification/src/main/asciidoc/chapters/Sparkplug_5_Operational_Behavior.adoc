@@ -47,6 +47,25 @@ typically left to the system operating system using technologies such as Network
 (NTP). Regardless of the mechanism used, ensuring all timestamps are accurate and in UTC is
 critical to all timestamps in Sparkplug.
 
+[[operational_behavior_case_sensitivity]]
+=== Case Sensitivity in Sparkplug
+
+The MQTT specification states that MQTT topics are case sensitive. For example, the topic a/b is
+different than A/b. Sparkplug in turn is also case sensitive with regard to both topics as well as
+metric names. So, a metric 'temperature' is not the same as the metric 'Temperature'. However, this
+generally should be avoided. Many Host Applications may not be able to differentiate the two metric
+names as unique. Many databases are case-insensitive and would not be able to handle this situation
+well.
+
+* [tck-testable tck-id-case-sensitivity-sparkplug-ids]#[yellow-background]*Edge Nodes in a Sparkplug
+environment SHOULD NOT have Sparkplug IDs (Group, Edge Node, or Device IDs) that when converted to
+lower case match*#
+** For example there should not be two different Edge Nodes publishing NBIRTH messages on these two
+topics spBv1.0/Group1/NBIRTH/EdgeNode1 and spBv1.0/group1/NBIRTH/edgenode1
+* [tck-testable tck-id-case-sensitivity-metric-names]#[yellow-background]*An Edge Node SHOULD NOT
+publish metric names that when converted to all lower case match.*#
+** For example a DBIRTH should not contain a metric 'a' and another metric 'A'.
+
 [[operational_behavior_primary_host_application_session_establishment]]
 === Host Application Session Establishment
 
