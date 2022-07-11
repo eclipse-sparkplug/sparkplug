@@ -169,8 +169,18 @@ Edge Node's MQTT Will Message's MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]#[yellow-background]*The
 Edge Node's MQTT Will Message's retained flag MUST be set to false.*#
 
-Once the Sparkplug Edge Node has successfully connected to the MQTT Server, it must publish a
-NBIRTH message. The NBIRTH message must follow the following rules.
+Edge Nodes can be configured to support the concept of a 'Primary Host Application'. In this case,
+the Edge Node must wait until the Primary Host Application is online and subscribed to Sparkplug
+messages before the Edge Node publishes its NBIRTH and DBIRTH messages. Specifying a Primary Host is
+not required for an Edge Node. But, it is often desired. For example say an Edge Node is in a
+Sparkplug environment and there is a single consuming Host Application that historizes the data. It
+would not be beneficial for the Sparkplug Edge Node to publish data if the Host Application is not
+connected and subscribed to messages. Instead, it would be better for the Edge Node to store data
+while the Host Application is offline. Once the Host Application is properly connected, it could
+then send all of its stored data and continue publishing normally. Once the Sparkplug Edge Node has
+successfully connected to the MQTT Server, it must publish a NBIRTH message. The NBIRTH message must
+follow the following rules. Note if Primary Host is configured for the Edge Node, it must also wait
+until the Primary Host denotes it is online before the Edge Node publishes its NBIRTH message.
 
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait]#[yellow-background]*If the
 Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host
@@ -275,19 +285,36 @@ offline. As a result, the timestamp associated with NDEATH events must use the t
 on the Sparkplug Host Application. This is in part why Sparkplug Edge Nodes and Host Applications
 must have synced system clocks and all Sparkplug timestamps must be in UTC time.
 
-[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-node-offline]#[yellow-background]*Immediately
+* [tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-node-offline]#[yellow-background]*Immediately
 after receiving an NDEATH from an Edge Node, Host Applications MUST mark the Edge Node as offline
 using the current Host Application's system UTC time*#
-[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-node-tags-stale]#[yellow-background]*Immediately
+* [tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-node-tags-stale]#[yellow-background]*Immediately
 after receiving an NDEATH from an Edge Node, Host Applications MUST mark all metrics that were
 included in the previous NBIRTH as STALE using the current Host Application's system UTC time*#
-[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-devices-offline]#[yellow-background]*Immediately
+* [tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-devices-offline]#[yellow-background]*Immediately
 after receiving an NDEATH from an Edge Node, Host Applications MUST mark all Sparkplug Devices
 associated with the Edge Node as offline using the current Host Application's system UTC time*#
-[tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-devices-tags-stale]#[yellow-background]*Immediately
+* [tck-testable tck-id-operational-behavior-edge-node-termination-host-action-ndeath-devices-tags-stale]#[yellow-background]*Immediately
 after receiving an NDEATH from an Edge Node, Host Applications MUST mark all of the metrics that
 were included with associated Sparkplug Device DBIRTH messages as STALEusing the current Host
 Application's system UTC time*#
+
+For the following normative statements an 'online STATE message' is one where a Host Application's
+JSON payload has the 'online' key's value set to true. An 'offline STATE message' is one where the
+Host Application's JSON payload has the 'online' key's value set to false.
+
+If the Edge Node is configured to use a Primary Host Application, it must also watch for 'STATE'
+messages from the Primary Host Application. If the Primary Host Application denotes it is offline,
+the Edge Node must disconnect from the current MQTT server following these rules:
+
+* [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline]#[yellow-background]*If
+the Edge Node is configured to use a Primary Host Application, it MUST disconnect from the current
+MQTT Server if a the online JSON value is false and if the bdSeq number matches the bdSeq number
+from the previous 'online STATE message'.*#
+* [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline-bdSeq]#[yellow-background]*Consider
+an Edge Node that is configured to use a Primary Host Application and the Edge Node is connected and
+publishing. Then it receives an 'offline STATE message'. It MUST NOT disconnect if the bdSeq number
+does not match the bdSeq number value from the previous 'online STATE message'.*#
 
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
@@ -308,6 +335,7 @@ the implementation of the Sparkplug Specification between the native device and 
 Prior to sending a DBIRTH message, if the Device supports 'writing to outputs' the MQTT client
 associated with the Sparkplug Device must subscribe to receive DCMD messages with the following
 rules.
+
 * [tck-testable tck-id-message-flow-device-dcmd-subscribe]#[yellow-background]*If the Device
 supports writing to outputs, the MQTT client associated with the Device MUST subscribe to a topic of
 the form 'spBv1.0/group_id/DCMD/edge_node_id/device_id' where group_id is the Sparkplug Group ID the
