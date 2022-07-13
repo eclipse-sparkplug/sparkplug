@@ -165,7 +165,7 @@ of INT64, and the value MUST be incremented by one from the value in the previou
 packet unless the value would be greater than 255. If in the previous NBIRTH a value of 255 was
 sent, the next MQTT Connect packet Will Message payload bdSeq number value MUST have a value of 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-qos]#[yellow-background]*The
-Edge Node's MQTT Will Message's MQTT QoS MUST be 0.*#
+Edge Node's MQTT Will Message's MQTT QoS MUST be 1.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]#[yellow-background]*The
 Edge Node's MQTT Will Message's retained flag MUST be set to false.*#
 

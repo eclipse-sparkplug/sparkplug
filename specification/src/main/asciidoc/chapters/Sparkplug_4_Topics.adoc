@@ -185,10 +185,7 @@ timestamp denoting the Date/Time the message was sent from the Edge Node.*#
 * [tck-testable tck-id-topics-nbirth-metric-reqs]#[yellow-background]*The NBIRTH MUST include every
 metric the Edge Node will ever report on.*#
 * [tck-testable tck-id-topics-nbirth-metrics]#[yellow-background]*At a minimum each metric MUST
-include the following:*#
-** The metric name
-** The metric datatype
-** The current value
+include the metric name, datatype, and current value.*#
 * [tck-testable tck-id-topics-nbirth-templates]#[yellow-background]*If Template instances will be
 published by this Edge Node or any devices, all Template definitions MUST be published in the
 NBIRTH.*#

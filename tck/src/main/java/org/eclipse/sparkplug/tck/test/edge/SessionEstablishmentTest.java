@@ -14,13 +14,30 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
@@ -34,12 +51,13 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 
 /**
  * This is the edge node Sparkplug session establishment.
@@ -108,7 +126,8 @@ public class SessionEstablishmentTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (parms.length < 3) {
-			String errmsg = "Parameters to edge session establishment test must be: hostApplicationId groupId edgeNodeId [deviceIds]"; 
+			String errmsg =
+					"Parameters to edge session establishment test must be: hostApplicationId groupId edgeNodeId [deviceIds]";
 			logger.error(errmsg);
 			prompt(errmsg);
 			throw new IllegalArgumentException(errmsg);
@@ -363,10 +382,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
 			boolean bValid = (willPublishPacket.getQos().getQosNumber() == 1);
 			testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, setResult(bValid, PAYLOADS_NDEATH_WILL_MESSAGE_QOS));
-
-			// TODO: conflicts with above
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS,
-					setResult((willPublishPacket.getQos().getQosNumber() == 0),
+					setResult((willPublishPacket.getQos().getQosNumber() == 1),
 							MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS));
 
 			PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(willPublishPacket);
@@ -387,7 +404,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
 
 				logger.debug("Check Req: NDEATH must not include a sequence number");
-				bValid = sparkplugPayload.hasSeq();
+				bValid = !sparkplugPayload.hasSeq();
 				testResults.put(ID_PAYLOADS_NDEATH_SEQ, setResult(bValid, PAYLOADS_NDEATH_SEQ));
 				testResults.put(ID_TOPICS_NDEATH_SEQ, setResult(bValid, TOPICS_NDEATH_SEQ));
 				testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
