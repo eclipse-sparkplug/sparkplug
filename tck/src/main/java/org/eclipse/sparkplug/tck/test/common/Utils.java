@@ -13,28 +13,32 @@
 
 package org.eclipse.sparkplug.tck.test.common;
 
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.services.Services;
-import com.hivemq.extension.sdk.api.services.publish.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.*;
-import java.util.Optional;
-
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
 
 public class Utils {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
@@ -78,12 +82,24 @@ public class Utils {
 	}
 
 	public static boolean hasValue(Metric m) {
+		if (m.hasIsNull() && m.getIsNull()) {
+			// A null value is valid
+			return true;
+		}
+
 		switch (DataType.valueOf(m.getDatatype())) {
 			case Unknown:
 				return false;
+			case Int8:
+			case Int16:
 			case Int32:
+			case UInt8:
+			case UInt16:
 				return m.hasIntValue();
 			case Int64:
+			case UInt32:
+			case UInt64:
+			case DateTime:
 				return m.hasLongValue();
 			case Float:
 				return m.hasFloatValue();
@@ -92,15 +108,37 @@ public class Utils {
 			case Boolean:
 				return m.hasBooleanValue();
 			case String:
+			case Text:
+			case UUID:
 				return m.hasStringValue();
-			// case : return m.hasExtensionValue();
+			case Bytes:
+			case File:
+			case Int8Array:
+			case Int16Array:
+			case Int32Array:
+			case Int64Array:
+			case UInt8Array:
+			case UInt16Array:
+			case UInt32Array:
+			case UInt64Array:
+			case FloatArray:
+			case DoubleArray:
+			case BooleanArray:
+			case StringArray:
+			case DateTimeArray:
+				return m.hasBytesValue();
+			case DataSet:
+				return m.hasDatasetValue();
+			case Template:
+				return m.hasTemplateValue();
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
 		// Check that the host application status is ONLINE
-		
+
 		AtomicBoolean hostOnline = new AtomicBoolean(false);
 		String topic = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
 		final CompletableFuture<Optional<RetainedPublish>> getFuture =

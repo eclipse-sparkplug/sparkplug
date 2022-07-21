@@ -152,7 +152,7 @@ public class Requirements {
     public final static String TOPICS_NBIRTH_METRIC_REQS = "The NBIRTH MUST include every metric the Edge Node will ever report on.";
 
     public final static String ID_TOPICS_NBIRTH_METRICS = "topics-nbirth-metrics";
-    public final static String TOPICS_NBIRTH_METRICS = "At a minimum each metric MUST include the following";
+    public final static String TOPICS_NBIRTH_METRICS = "At a minimum each metric MUST include the metric name, datatype, and current value.";
 
     public final static String ID_TOPICS_NBIRTH_TEMPLATES = "topics-nbirth-templates";
     public final static String TOPICS_NBIRTH_TEMPLATES = "If Template instances will be published by this Edge Node or any devices, all Template definitions MUST be published in the NBIRTH.";
@@ -265,46 +265,57 @@ public class Requirements {
     public final static String ID_HOST_TOPIC_PHID_BIRTH_MESSAGE = "host-topic-phid-birth-message";
     public final static String HOST_TOPIC_PHID_BIRTH_MESSAGE = "The first MQTT message a Host Application MUST publish is a Birth Certificate.";
 
-    // 4.2.3.1.1 Birth Certificate Topic (STATE)
-    public final static String ID_HOST_TOPIC_PHID_BIRTH_TOPIC = "host-topic-phid-birth-topic";
-    public final static String HOST_TOPIC_PHID_BIRTH_TOPIC = "STATE/sparkplug_host_application_id";
-
-    public final static String ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD = "host-topic-phid-birth-payload";
-    public final static String HOST_TOPIC_PHID_BIRTH_PAYLOAD = "The Birth Certificate Payload MUST be the UTF-8 string “ONLINE”";
-
     public final static String ID_HOST_TOPIC_PHID_BIRTH_QOS = "host-topic-phid-birth-qos";
     public final static String HOST_TOPIC_PHID_BIRTH_QOS = "The MQTT Quality of Service (QoS) MUST be set to 1";
 
     public final static String ID_HOST_TOPIC_PHID_BIRTH_RETAIN = "host-topic-phid-birth-retain";
     public final static String HOST_TOPIC_PHID_BIRTH_RETAIN = "The MQTT retain flag for the Birth Certificate MUST be set to TRUE";
 
+    // 4.2.3.1.1 Birth Certificate Topic (STATE)
+    public final static String ID_HOST_TOPIC_PHID_BIRTH_TOPIC = "host-topic-phid-birth-topic";
+    public final static String HOST_TOPIC_PHID_BIRTH_TOPIC = "STATE/sparkplug_host_application_id";
+
+    public final static String ID_HOST_TOPIC_PHID_BIRTH_REQUIRED = "host-topic-phid-birth-required";
+    public final static String HOST_TOPIC_PHID_BIRTH_REQUIRED = "The Sparkplug Host Application MUST publish a Sparkplug Host Application BIRTH message immediately after connecting to an MQTT Server";
+
     // 4.2.3.1.2 Birth Certificate Payload (STATE)
-    public final static String ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_ON_OFF = "host-topic-phid-birth-payload-on-off";
-    public final static String HOST_TOPIC_PHID_BIRTH_PAYLOAD_ON_OFF = "The STATE message from the Sparkplug Host Application Birth Certificate message MUST include a payload that is a UTF-8 string that is the following";
+    public final static String ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD = "host-topic-phid-birth-payload";
+    public final static String HOST_TOPIC_PHID_BIRTH_PAYLOAD = "The Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ = "host-topic-phid-birth-payload-bdseq";
+    public final static String HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ = "The bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message payload.";
 
     // 4.2.3.2 Death Certificate Message (STATE)
+    public final static String ID_HOST_TOPIC_PHID_DEATH_QOS = "host-topic-phid-death-qos";
+    public final static String HOST_TOPIC_PHID_DEATH_QOS = "The MQTT Quality of Service (QoS) MUST be set to 1";
+
+    public final static String ID_HOST_TOPIC_PHID_DEATH_RETAIN = "host-topic-phid-death-retain";
+    public final static String HOST_TOPIC_PHID_DEATH_RETAIN = "The MQTT retain flag for the Birth Certificate MUST be set to TRUE";
+
     // 4.2.3.2.1 Death Certificate Topic (STATE)
     public final static String ID_HOST_TOPIC_PHID_DEATH_TOPIC = "host-topic-phid-death-topic";
     public final static String HOST_TOPIC_PHID_DEATH_TOPIC = "STATE/sparkplug_host_application_id";
 
-    public final static String ID_HOST_TOPIC_PHID_REQUIRED = "host-topic-phid-required";
-    public final static String HOST_TOPIC_PHID_REQUIRED = "The Sparkplug Host Application MUST provide a Will message in the MQTT CONNECT packet";
-
-    public final static String ID_HOST_TOPIC_PHID_DEATH_PAYLOAD = "host-topic-phid-death-payload";
-    public final static String HOST_TOPIC_PHID_DEATH_PAYLOAD = "The MQTT Will Payload MUST be the UTF-8 string “OFFLINE”";
-
-    public final static String ID_HOST_TOPIC_PHID_DEATH_QOS = "host-topic-phid-death-qos";
-    public final static String HOST_TOPIC_PHID_DEATH_QOS = "The MQTT Will QoS MUST be set to 1";
-
-    public final static String ID_HOST_TOPIC_PHID_DEATH_RETAIN = "host-topic-phid-death-retain";
-    public final static String HOST_TOPIC_PHID_DEATH_RETAIN = "The MQTT Will retain flag MUST be set to TRUE";
+    public final static String ID_HOST_TOPIC_PHID_DEATH_REQUIRED = "host-topic-phid-death-required";
+    public final static String HOST_TOPIC_PHID_DEATH_REQUIRED = "The Sparkplug Host Application MUST provide a Will message in the MQTT CONNECT packet";
 
     // 4.2.3.2.2 Death Certificate Payload (STATE)
-    public final static String ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_OFF = "host-topic-phid-death-payload-off";
-    public final static String HOST_TOPIC_PHID_DEATH_PAYLOAD_OFF = "The STATE messages from the Sparkplug Host Application Death Certificate message MUST include a payload that is a UTF-8 string that is the following";
+    public final static String ID_HOST_TOPIC_PHID_DEATH_PAYLOAD = "host-topic-phid-death-payload";
+    public final static String HOST_TOPIC_PHID_DEATH_PAYLOAD = "The Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ = "host-topic-phid-death-payload-bdseq";
+    public final static String HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ = "The Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this case the new bdSeq number value MUST be 0.";
 
     // 5 Operational Behavior
-    // 5.1 Host Application Session Establishment
+    // 5.1 Timestamps in Sparkplug
+    // 5.2 Case Sensitivity in Sparkplug
+    public final static String ID_CASE_SENSITIVITY_SPARKPLUG_IDS = "case-sensitivity-sparkplug-ids";
+    public final static String CASE_SENSITIVITY_SPARKPLUG_IDS = "Edge Nodes in a Sparkplug environment SHOULD NOT have Sparkplug IDs (Group, Edge Node, or Device IDs) that when converted to lower case match";
+
+    public final static String ID_CASE_SENSITIVITY_METRIC_NAMES = "case-sensitivity-metric-names";
+    public final static String CASE_SENSITIVITY_METRIC_NAMES = "An Edge Node SHOULD NOT publish metric names that when converted to all lower case match.";
+
+    // 5.3 Host Application Session Establishment
     public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION = "message-flow-phid-sparkplug-clean-session";
     public final static String MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION = "The CONNECT Control Packet for all Sparkplug Host Applications MUST set the MQTT 'Clean Session' flag to true.";
 
@@ -312,12 +323,18 @@ public class Requirements {
     public final static String MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION = "The subscription on the Sparkplug Topic Namespace and the STATE topic MUST be done immediately after successfully establishing the MQTT session and before publishing its own STATE message.";
 
     public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH = "message-flow-phid-sparkplug-state-publish";
-    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH = "Once an MQTT Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic Namespace have been established, and the STATE topic subscription has been been established, the Sparkplug Host Application MUST publish a new STATE message with a Payload of a UTF-8 string of 'ONLINE'.";
+    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH = "Once an MQTT Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic Namespace have been established, and the STATE topic subscription has been been established, the Sparkplug Host Application MUST publish a new STATE message.";
 
-    public final static String ID_D = "d";
-    public final static String D = "All metric data associated with any Sparkplug Edge Node that was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data quality if the Host Application loses connection to the MQTT Server.";
+    public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD = "message-flow-phid-sparkplug-state-publish-payload";
+    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD = "The Host Application Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
 
-    // 5.2 Edge Node Session Establishment
+    public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ = "message-flow-phid-sparkplug-state-publish-payload-bdseq";
+    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ = "The bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message payload.";
+
+    public final static String ID_F = "f";
+    public final static String F = "All metric data associated with any Sparkplug Edge Node that was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data quality if the Host Application loses connection to the MQTT Server.";
+
+    // 5.4 Edge Node Session Establishment
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "message-flow-edge-node-ncmd-subscribe";
     public final static String MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "The MQTT client associated with the Edge Node MUST subscribe to a topic of the form 'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of 1.";
 
@@ -337,13 +354,13 @@ public class Requirements {
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ = "The Edge Node's MQTT Will Message's payload MUST include a metric with the name of 'bdSeq', the datatype of INT64, and the value MUST be incremented by one from the value in the previous MQTT CONNECT packet unless the value would be greater than 255. If in the previous NBIRTH a value of 255 was sent, the next MQTT Connect packet Will Message payload bdSeq number value MUST have a value of 0.";
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS = "message-flow-edge-node-birth-publish-will-message-qos";
-    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS = "The Edge Node's MQTT Will Message's MQTT QoS MUST be 0.";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS = "The Edge Node's MQTT Will Message's MQTT QoS MUST be 1.";
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED = "message-flow-edge-node-birth-publish-will-message-will-retained";
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED = "The Edge Node's MQTT Will Message's retained flag MUST be set to false.";
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "message-flow-edge-node-birth-publish-phid-wait";
-    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "If the Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host Application is ONLINE via the STATE topic before publishing NBIRTH and DBIRTH messages.";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "If the Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host Application is online via the STATE topic before publishing NBIRTH and DBIRTH messages.";
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC = "message-flow-edge-node-birth-publish-nbirth-topic";
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC = "The Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node";
@@ -363,14 +380,32 @@ public class Requirements {
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ = "message-flow-edge-node-birth-publish-nbirth-payload-seq";
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ = "The Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive).";
 
-    // 5.3 Edge Node Session Termination
+    // 5.5 Edge Node Session Termination
     public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH = "operational-behavior-edge-node-intentional-disconnect-ndeath";
     public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH = "An Edge Node MUST publish an NDEATH before terminating the connection.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET = "operational-behavior-edge-node-intentional-disconnect-packet";
     public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET = "Immediately following the NDEATH publish, a DISCONNECT packet MUST be sent to the MQTT Server.";
 
-    // 5.4 Device Session Establishment
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_OFFLINE = "operational-behavior-edge-node-termination-host-action-ndeath-node-offline";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_OFFLINE = "Immediately after receiving an NDEATH from an Edge Node, Host Applications MUST mark the Edge Node as offline using the current Host Application's system UTC time";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_TAGS_STALE = "operational-behavior-edge-node-termination-host-action-ndeath-node-tags-stale";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_TAGS_STALE = "Immediately after receiving an NDEATH from an Edge Node, Host Applications MUST mark all metrics that were included in the previous NBIRTH as STALE using the current Host Application's system UTC time";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_DEVICES_OFFLINE = "operational-behavior-edge-node-termination-host-action-ndeath-devices-offline";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_DEVICES_OFFLINE = "Immediately after receiving an NDEATH from an Edge Node, Host Applications MUST mark all Sparkplug Devices associated with the Edge Node as offline using the current Host Application's system UTC time";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_DEVICES_TAGS_STALE = "operational-behavior-edge-node-termination-host-action-ndeath-devices-tags-stale";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_DEVICES_TAGS_STALE = "Immediately after receiving an NDEATH from an Edge Node, Host Applications MUST mark all of the metrics that were included with associated Sparkplug Device DBIRTH messages as STALEusing the current Host Application's system UTC time";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE = "operational-behavior-edge-node-termination-host-offline";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE = "If the Edge Node is configured to use a Primary Host Application, it MUST disconnect from the current MQTT Server if a the online JSON value is false and if the bdSeq number matches the bdSeq number from the previous 'online STATE message'.";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_BDSEQ = "operational-behavior-edge-node-termination-host-offline-bdSeq";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_BDSEQ = "Consider an Edge Node that is configured to use a Primary Host Application and the Edge Node is connected and publishing. Then it receives an 'offline STATE message'. It MUST NOT disconnect if the bdSeq number does not match the bdSeq number value from the previous 'online STATE message'.";
+
+    // 5.6 Device Session Establishment
     public final static String ID_MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE = "message-flow-device-dcmd-subscribe";
     public final static String MESSAGE_FLOW_DEVICE_DCMD_SUBSCRIBE = "If the Device supports writing to outputs, the MQTT client associated with the Device MUST subscribe to a topic of the form 'spBv1.0/group_id/DCMD/edge_node_id/device_id' where group_id is the Sparkplug Group ID the edge_node_id is the Sparkplug Edge Node ID and the device_id is the Sparkplug Device ID for this Device. It MUST subscribe on this topic with a QoS of 1.";
 
@@ -395,12 +430,18 @@ public class Requirements {
     public final static String ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ = "message-flow-device-birth-publish-dbirth-payload-seq";
     public final static String MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ = "The Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive) and be one more than was included in the prior Sparkplug message sent from the Edge Node associated with this Device.";
 
-    // 5.5 Device Session Termination
+    // 5.7 Device Session Termination
     public final static String ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH = "operational-behavior-device-ddeath";
     public final static String OPERATIONAL_BEHAVIOR_DEVICE_DDEATH = "If a Sparkplug Edge Node loses connection with an attached Sparkplug Device, it MUST publish a DDEATH message on behalf of the device.";
 
-    // 5.6 Sparkplug Host Applications
-    // 5.7 Sparkplug Host Application Message Ordering
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_DDEATH_DEVICES_OFFLINE = "operational-behavior-edge-node-termination-host-action-ddeath-devices-offline";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_DDEATH_DEVICES_OFFLINE = "Immediately after receiving an DDEATH from an Edge Node, Host Applications MUST mark the Sparkplug Device associated with the Edge Node as offline using the timestamp in the DDEATH payload";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_DDEATH_DEVICES_TAGS_STALE = "operational-behavior-edge-node-termination-host-action-ddeath-devices-tags-stale";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_DDEATH_DEVICES_TAGS_STALE = "Immediately after receiving an DDEATH from an Edge Node, Host Applications MUST mark all of the metrics that were included with the associated Sparkplug Device DBIRTH messages as STALE using the timestamp in the DDEATH payload";
+
+    // 5.8 Sparkplug Host Applications
+    // 5.9 Sparkplug Host Application Message Ordering
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM = "operational-behavior-host-reordering-param";
     public final static String OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM = "Sparkplug Host Applications SHOULD provide a configurable 'Reorder Timeout' parameter";
 
@@ -413,7 +454,7 @@ public class Requirements {
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS = "operational-behavior-host-reordering-success";
     public final static String OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS = "If the missing messages that triggered the start of the Reorder Timeout timer arrive before the reordering timer elapses, the timer can be terminated and normal operation in the Host Application can continue";
 
-    // 5.8 Primary Host Application STATE in Multiple MQTT Server Topologies
+    // 5.10 Primary Host Application STATE in Multiple MQTT Server Topologies
     public final static String ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE = "operational-behavior-primary-application-state-with-multiple-servers-state";
     public final static String OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE = "Regardless of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application establishes a new MQTT Session with an MQTT Server, the STATE Birth Certificate defined in the STATE description section MUST be the first message that is published after a successful MQTT Session is established with each MQTT Server.";
 
@@ -421,14 +462,14 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_SINGLE_SERVER = "The Edge Nodes MUST not connected to more than one server at any point in time.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK = "operational-behavior-primary-application-state-with-multiple-servers-walk";
-    public final static String OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK = "If the Primary Host Application is OFFLINE as denoted via the STATE MQTT Message, the Edge Node MUST terminate its session with this MQTT Server and move to the next available MQTT Server that is available.";
+    public final static String OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK = "If the Primary Host Application is offline as denoted via the STATE MQTT Message, the Edge Node MUST terminate its session with this MQTT Server and move to the next available MQTT Server that is available.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT = "operational-behavior-edge-node-birth-sequence-wait";
-    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT = "The Edge Node MUST also wait to publish its BIRTH sequence until an 'ONLINE' STATE message is received by the Edge Node.";
+    public final static String OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT = "The Edge Node MUST also wait to publish its BIRTH sequence until an online=true STATE message is received by the Edge Node.";
 
-    // 5.9 Edge Node NDATA and NCMD Messages
-    // 5.10 MQTT Enabled Device Session Establishment
-    // 5.11 Sparkplug Host Application Session Establishment
+    // 5.11 Edge Node NDATA and NCMD Messages
+    // 5.12 MQTT Enabled Device Session Establishment
+    // 5.13 Sparkplug Host Application Session Establishment
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID = "operational-behavior-host-application-host-id";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID = "The host_id MUST be unique to all other Sparkplug Host IDs in the infrastructure.";
 
@@ -439,7 +480,10 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC = "The MQTT Will Message's topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier of the Sparkplug Host Application";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD = "operational-behavior-host-application-connect-will-payload";
-    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD = "The MQTT Will Message's payload MUST be the UTF-8 String of 'OFFLINE'.";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD = "The Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ = "operational-behavior-host-application-connect-will-payload-bdseq";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ = "The Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this case the new bdSeq number value MUST be 0.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_QOS = "operational-behavior-host-application-connect-will-qos";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_QOS = "The MQTT Will Message's MQTT QoS MUST be 1 (at least once).";
@@ -454,7 +498,10 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_TOPIC = "The Host Application's Birth topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier of the Sparkplug Host Application";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD = "operational-behavior-host-application-connect-birth-payload";
-    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD = "The Host Application's Birth payload MUST be the UTF-8 String of 'ONLINE'.";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD = "The Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ = "operational-behavior-host-application-connect-birth-payload-bdseq";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ = "The bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message payload.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS = "operational-behavior-host-application-connect-birth-qos";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS = "The Host Application's Birth MQTT QoS MUST be 1 (at least once).";
@@ -462,12 +509,15 @@ public class Requirements {
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED = "operational-behavior-host-application-connect-birth-retained";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED = "The Host Application's Birth retained flag MUST be set to true.";
 
-    // 5.12 Sparkplug Host Application Session Termination
+    // 5.14 Sparkplug Host Application Session Termination
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC = "operational-behavior-host-application-death-topic";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC = "The Sparkplug Host Application's Death topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier of the Sparkplug Host Application.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD = "operational-behavior-host-application-death-payload";
-    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD = "The Sparkplug Host Application's Death payload MUST be the UTF-8 String of 'OFFLINE'.";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD = "The Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ = "operational-behavior-host-application-death-payload-bdseq";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ = "The Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this case the new bdSeq number value MUST be 0.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS = "operational-behavior-host-application-death-qos";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS = "The Sparkplug Host Application's Death MQTT QoS MUST be 1 (at least once).";
@@ -478,12 +528,13 @@ public class Requirements {
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL = "operational-behavior-host-application-disconnect-intentional";
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL = "In the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after the Death message is sent.";
 
-    // 5.13 Data Publish
+    // 5.15 Sparkplug Host Application Receive Data
+    // 5.16 Data Publish
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH = "operational-behavior-data-publish-nbirth";
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH = "NBIRTH messages MUST include all metrics for the specified Edge Node that will ever be published for that Edge Node within the established Sparkplug session.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES = "operational-behavior-data-publish-nbirth-values";
-    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES = "NBIRTH messages MUST include current values for all metrics.";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES = "For each metric in the NBIRTH, the value must be set to the current value or if the current value is null, have the is_null flag set to true and no value specified.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE = "operational-behavior-data-publish-nbirth-change";
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE = "NDATA messages SHOULD only be published when Edge Node level metrics change.";
@@ -495,7 +546,7 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH = "DBIRTH messages MUST include all metrics for the specified Device that will ever be published for that Device within the established Sparkplug session.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES = "operational-behavior-data-publish-dbirth-values";
-    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES = "DBIRTH messages MUST include current values for all metrics.";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES = "For each metric in the DBIRTH, the value must be set to the current value or if the current value is null, have the is_null flag set to true and no value specified.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE = "operational-behavior-data-publish-dbirth-change";
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE = "DDATA messages SHOULD only be published when Device level metrics change.";
@@ -503,7 +554,7 @@ public class Requirements {
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER = "operational-behavior-data-publish-dbirth-order";
     public final static String OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER = "For all metrics where is_historical=false, DBIRTH and DDATA messages MUST keep metric values in chronological order in the list of metrics in the payload.";
 
-    // 5.14 Commands
+    // 5.17 Commands
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME = "operational-behavior-data-commands-rebirth-name";
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME = "An NBIRTH message MUST include a metric with a name of 'Node Control/Rebirth'.";
 
@@ -651,7 +702,7 @@ public class Requirements {
     public final static String PAYLOADS_DATASET_TYPES_VALUE = "This values in the types array MUST be one of the enumerated values as shown in the Sparkplug Basic Data Types.";
 
     public final static String ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ = "payloads-dataset-parameter-type-req";
-    public final static String PAYLOADS_DATASET_PARAMETER_TYPE_REQ = "This MUST be included in DataSet Definitions in NBIRTH and DBIRTH messages.";
+    public final static String PAYLOADS_DATASET_PARAMETER_TYPE_REQ = "The types array MUST be included in all DataSets.";
 
     // 6.4.12 DataSet.Row
     // 6.4.13 DataSet.DataSetValue
@@ -706,7 +757,7 @@ public class Requirements {
     public final static String PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ = "This MUST be included in Template Parameter Definitions in NBIRTH and DBIRTH messages.";
 
     public final static String ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE = "payloads-template-parameter-value";
-    public final static String PAYLOADS_TEMPLATE_PARAMETER_VALUE = "The value supplied MUST be one of the following types: uint32, uint64, float, double, bool, or string.";
+    public final static String PAYLOADS_TEMPLATE_PARAMETER_VALUE = "The value supplied MUST be one of the following protobuf types: uint32, uint64, float, double, bool, or string.";
 
     // 6.4.16 Data Types
     // 6.4.17 Datatype Details
@@ -862,13 +913,22 @@ public class Requirements {
     public final static String PAYLOADS_STATE_WILL_MESSAGE_RETAIN = "The Sparkplug Host Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.";
 
     public final static String ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD = "payloads-state-will-message-payload";
-    public final static String PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD = "The Sparkplug Host Application MUST set the Will Payload to the UTF-8 string of 'OFFLINE' in the MQTT CONNECT packet.";
+    public final static String PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD = "The Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ = "payloads-state-will-message-payload-bdseq";
+    public final static String PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ = "The Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this case the new bdSeq number value MUST be 0.";
 
     public final static String ID_PAYLOADS_STATE_SUBSCRIBE = "payloads-state-subscribe";
     public final static String PAYLOADS_STATE_SUBSCRIBE = "After establishing an MQTT connection, the Sparkplug Host Application MUST subscribe on it's own 'STATE/[sparkplug_host_id]' topic.";
 
     public final static String ID_PAYLOADS_STATE_BIRTH = "payloads-state-birth";
-    public final static String PAYLOADS_STATE_BIRTH = "After subscribing on it's own STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message on the topic 'STATE/[sparkplug_host_id]' with a payload of the UTF-8 string of 'ONLINE', a QoS of 1, and the retain flag set to true.";
+    public final static String PAYLOADS_STATE_BIRTH = "After subscribing on it's own STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message on the topic 'STATE/[sparkplug_host_id]' with a QoS of 1, and the retain flag set to true.";
+
+    public final static String ID_PAYLOADS_STATE_BIRTH_PAYLOAD = "payloads-state-birth-payload";
+    public final static String PAYLOADS_STATE_BIRTH_PAYLOAD = "The Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
+
+    public final static String ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ = "payloads-state-birth-payload-bdseq";
+    public final static String PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ = "The bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message payload.";
 
     // 7 Security
     // 7.1 TLS
@@ -936,4 +996,4 @@ public class Requirements {
     // 11.6 Raspberry Pi Hardware
     // 12 Appendix B: List of Normative Statements (non-normative)
 }
-// no of assertions 252
+// no of assertions 271
