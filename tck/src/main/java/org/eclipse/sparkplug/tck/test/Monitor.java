@@ -378,7 +378,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DBIRTH,
+			section = Sections.PAYLOADS_B_DDEATH,
 			id = ID_PAYLOADS_DDEATH_SEQ_INC)
 	private void handleDDEATH(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DDEATH *** {}/{}/{}", group_id, edge_node_id, device_id);

@@ -74,21 +74,22 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
 			ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
 			ID_COMPONENTS_PH_STATE, ID_INTRO_SPARKPLUG_HOST_STATE, ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL,
-			ID_PAYLOADS_STATE_WILL_MESSAGE, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC,
-			ID_HOST_TOPIC_PHID_DEATH_TOPIC, ID_HOST_TOPIC_PHID_DEATH_PAYLOAD, 
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD, ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD,
-			ID_HOST_TOPIC_PHID_DEATH_QOS, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_QOS,
-			ID_PAYLOADS_STATE_WILL_MESSAGE_QOS, ID_HOST_TOPIC_PHID_DEATH_RETAIN,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_RETAINED, ID_PAYLOADS_STATE_WILL_MESSAGE_RETAIN,
-			ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION, ID_PAYLOADS_STATE_SUBSCRIBE, ID_HOST_TOPIC_PHID_BIRTH_TOPIC,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL, ID_PAYLOADS_STATE_WILL_MESSAGE,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC, ID_HOST_TOPIC_PHID_DEATH_TOPIC,
+			ID_HOST_TOPIC_PHID_DEATH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD,
+			ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD, ID_HOST_TOPIC_PHID_DEATH_QOS,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_QOS, ID_PAYLOADS_STATE_WILL_MESSAGE_QOS,
+			ID_HOST_TOPIC_PHID_DEATH_RETAIN, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_RETAINED,
+			ID_PAYLOADS_STATE_WILL_MESSAGE_RETAIN, ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION,
+			ID_PAYLOADS_STATE_SUBSCRIBE, ID_HOST_TOPIC_PHID_BIRTH_TOPIC,
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_TOPIC, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD,
-			ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, 
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD, ID_HOST_TOPIC_PHID_BIRTH_QOS,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS, ID_HOST_TOPIC_PHID_BIRTH_RETAIN,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED, ID_PAYLOADS_STATE_BIRTH,
-			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
-			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD);
+			ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD,
+			ID_HOST_TOPIC_PHID_BIRTH_QOS, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS,
+			ID_HOST_TOPIC_PHID_BIRTH_RETAIN, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED,
+			ID_PAYLOADS_STATE_BIRTH, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
+			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
+			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
+			ID_HOST_TOPIC_PHID_DEATH_REQUIRED);
 
 	private @NotNull String hostApplicationId;
 
@@ -96,7 +97,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private @NotNull HostState state = HostState.DISCONNECTED;
 	private @Nullable String hostClientId = null;
 	private TCK theTCK = null;
-	
+
 	private short deathBdSeq = -1;
 
 	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
@@ -104,7 +105,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length != 1) {
-			String errmsg = "Parameters to Host Session Establishment test must be: hostId"; 
+			String errmsg = "Parameters to Host Session Establishment test must be: hostId";
 			logger.error(errmsg);
 			prompt(errmsg);
 			throw new IllegalArgumentException(errmsg);
@@ -157,7 +158,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 			if (overallPass) {
 				hostClientId = clientId;
-				log(getName() +": host clientId is "+hostClientId);
+				log(getName() + ": host clientId is " + hostClientId);
 				state = HostState.CONNECTED;
 			} else {
 				logger.error("Test failed on connect.");
@@ -218,6 +219,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.CONFORMANCE_SPARKPLUG_HOST_APPLICATION,
 			id = ID_CONFORMANCE_PRIMARY_HOST)
+	@SpecAssertion(
+			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
+			id = ID_HOST_TOPIC_PHID_BIRTH_REQUIRED)
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		// ignore messages before connect
 		if (hostClientId == null) {
@@ -251,6 +255,9 @@ public class SessionEstablishmentTest extends TCKTest {
 					OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH);
 			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
 					setResult(overallPass, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH));
+
+			testResults.put(ID_HOST_TOPIC_PHID_BIRTH_REQUIRED,
+					setResult(overallPass, HOST_TOPIC_PHID_BIRTH_REQUIRED));
 
 			if (overallPass) {
 				state = HostState.PUBLISHED;
@@ -292,6 +299,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_STATE,
 			id = ID_PAYLOADS_STATE_WILL_MESSAGE)
+	@SpecAssertion(
+			section = Sections.TOPICS_DEATH_MESSAGE_STATE,
+			id = ID_HOST_TOPIC_PHID_DEATH_REQUIRED)
 	private boolean checkConnectMessage(final @NotNull ConnectPacket packet) {
 		logger.info("Primary - {} test - CONNECT - state: {}, checkConnectMessage  ", getName(), state);
 
@@ -313,6 +323,9 @@ public class SessionEstablishmentTest extends TCKTest {
 				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL);
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL,
 				setResult(willExists, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL));
+		
+		testResults.put(ID_HOST_TOPIC_PHID_DEATH_REQUIRED,
+				setResult(willExists, HOST_TOPIC_PHID_DEATH_REQUIRED));		
 
 		logger.debug("Check Req: {}:{}.", ID_PAYLOADS_STATE_WILL_MESSAGE, PAYLOADS_STATE_WILL_MESSAGE);
 		testResults.put(ID_PAYLOADS_STATE_WILL_MESSAGE, setResult(willExists, PAYLOADS_STATE_WILL_MESSAGE));
@@ -381,15 +394,15 @@ public class SessionEstablishmentTest extends TCKTest {
 			final boolean payloadExists = willPublishPacket.getPayload().isPresent();
 			overallResult &= payloadExists;
 
-			if (payloadExists) {			
-				ObjectMapper mapper = new ObjectMapper();			
+			if (payloadExists) {
+				ObjectMapper mapper = new ObjectMapper();
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
-								
+
 				JsonNode json = null;
 				try {
-					json = mapper.readTree(payloadString);	
+					json = mapper.readTree(payloadString);
 				} catch (Exception e) {
-					
+
 				}
 
 				boolean isValidPayload = false;
@@ -415,7 +428,7 @@ public class SessionEstablishmentTest extends TCKTest {
 							// valid - don't set isValidPayload as it might be false
 							deathBdSeq = bdseq.shortValue();
 						} else {
-							isValidPayload = false;	
+							isValidPayload = false;
 						}
 					} else {
 						isValidPayload = false;
@@ -432,9 +445,10 @@ public class SessionEstablishmentTest extends TCKTest {
 						isValidPayload = false;
 					}
 				}
-				
+
 				logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_DEATH_PAYLOAD, HOST_TOPIC_PHID_DEATH_PAYLOAD);
-				testResults.put(ID_HOST_TOPIC_PHID_DEATH_PAYLOAD, setResult(isValidPayload, HOST_TOPIC_PHID_DEATH_PAYLOAD));
+				testResults.put(ID_HOST_TOPIC_PHID_DEATH_PAYLOAD,
+						setResult(isValidPayload, HOST_TOPIC_PHID_DEATH_PAYLOAD));
 
 				logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD,
 						OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD);
@@ -562,6 +576,16 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_STATE,
 			id = ID_PAYLOADS_STATE_BIRTH)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_STATE,
+			id = ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_STATE,
+			id = ID_PAYLOADS_STATE_BIRTH_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_STATE_BIRTH,
+			id = ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ)
+
 	private boolean checkBirthMessage(final @NotNull PublishPacket packet) {
 
 		boolean overallResult = false;
@@ -589,18 +613,18 @@ public class SessionEstablishmentTest extends TCKTest {
 		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, HOST_TOPIC_PHID_BIRTH_MESSAGE);
 		testResults.put(ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, setResult(payloadExists, HOST_TOPIC_PHID_BIRTH_MESSAGE));
 
-		if (payloadExists) {		
-			ObjectMapper mapper = new ObjectMapper();			
+		if (payloadExists) {
+			ObjectMapper mapper = new ObjectMapper();
 			String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
-							
+
+			boolean isValidPayload = true;
+
 			JsonNode json = null;
 			try {
-				json = mapper.readTree(payloadString);	
+				json = mapper.readTree(payloadString);
 			} catch (Exception e) {
-				
+				isValidPayload = false;
 			}
-
-			boolean isValidPayload = false;
 
 			if (json != null) {
 				if (json.has("timestamp")) {
@@ -610,20 +634,32 @@ public class SessionEstablishmentTest extends TCKTest {
 						Date now = new Date();
 						long diff = now.getTime() - timestamp.longValue();
 						if (diff >= 0 && diff <= timestamp_max_diff) {
-							isValidPayload = true;
+							// valid - don't set isValidPayload as it might be false
 						} else {
 							logger.info("Timestamp diff " + diff);
+							isValidPayload = false;
 						}
+					} else {
+						isValidPayload = false;
 					}
+				} else {
+					isValidPayload = false;
 				}
 
 				if (json.has("bdSeq")) {
 					JsonNode bdseq = json.get("bdSeq");
-					if (bdseq.isShort() && bdseq.shortValue() >= 0 || bdseq.shortValue() <= 255) {					
+					if (bdseq.isShort() && bdseq.shortValue() >= 0 || bdseq.shortValue() <= 255) {
 						testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
-								setResult(bdseq.shortValue() == deathBdSeq, MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ));
+								setResult(bdseq.shortValue() == deathBdSeq,
+										MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ));
+
+						testResults.put(ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
+								setResult(bdseq.shortValue() == deathBdSeq, PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ));
+						
+						testResults.put(ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
+								setResult(bdseq.shortValue() == deathBdSeq, HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ));
 					} else {
-						isValidPayload = false;	
+						isValidPayload = false;
 					}
 				} else {
 					isValidPayload = false;
@@ -640,10 +676,12 @@ public class SessionEstablishmentTest extends TCKTest {
 					isValidPayload = false;
 				}
 			}
-			
+
+			testResults.put(ID_PAYLOADS_STATE_BIRTH_PAYLOAD, setResult(isValidPayload, PAYLOADS_STATE_BIRTH_PAYLOAD));
+
 			testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD,
 					setResult(isValidPayload, MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD));
-			
+
 			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD,
 					setResult(isValidPayload, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD));
 
