@@ -101,7 +101,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
-			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC);
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC, ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
+			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER);
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -265,6 +266,13 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_BIRTH_AND_DEATH_CERTIFICATES,
 			id = ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDATA,
+			id = ID_PAYLOADS_NDATA_ORDER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_ORDER)
+	
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		if (testClientId != null && testClientId.equals(clientId)) {
 			logger.info("Edge session establishment test - publish -  to topic: {} ", packet.getTopic());
@@ -284,6 +292,13 @@ public class SessionEstablishmentTest extends TCKTest {
 					boolean bValid = !(ndataFound || ddataFound);
 					testResults.put(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
 							setResult(bValid, PRINCIPLES_BIRTH_CERTIFICATES_ORDER));
+					
+					testResults.put(ID_PAYLOADS_NDATA_ORDER,
+							setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
+					
+					testResults.put(ID_PAYLOADS_DDATA_ORDER,
+							setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
+					
 					nbirthFound = true;
 				}
 			}
@@ -511,6 +526,10 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH,
+			id = ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT)
+	
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -604,8 +623,12 @@ public class SessionEstablishmentTest extends TCKTest {
 
 			testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ, setResult(birthBdSeq != -1, PAYLOADS_NBIRTH_BDSEQ));
 			testResults.put(ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, setResult(birthBdSeq != -1, TOPICS_NBIRTH_BDSEQ_INCLUDED));
+			
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ,
 					setResult(birthBdSeq == deathBdSeq, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ));
+			
+			testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
+					setResult(birthBdSeq == deathBdSeq, PAYLOADS_NBIRTH_BDSEQ_REPEAT));
 
 			if (testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ) == null
 					|| testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(TopicConstants.PASS)) {
@@ -699,6 +722,12 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDATA,
+			id = ID_PAYLOADS_NDATA_ORDER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_ORDER)
 	public void checkDBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -849,6 +878,13 @@ public class SessionEstablishmentTest extends TCKTest {
 					"Check Req: DBIRTH must be sent before any NDATA/DDATA messages are published by the edge node");
 			boolean bValid = !(ndataFound || ddataFound);
 			testResults.put(ID_PAYLOADS_DBIRTH_ORDER, setResult(bValid, PAYLOADS_DBIRTH_ORDER));
+			
+			testResults.put(ID_PAYLOADS_NDATA_ORDER,
+					setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
+			
+			testResults.put(ID_PAYLOADS_DDATA_ORDER,
+					setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
+			
 			checkSubscribeTopics();
 			theTCK.endTest();
 		}
