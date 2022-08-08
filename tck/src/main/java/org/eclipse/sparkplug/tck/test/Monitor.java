@@ -28,6 +28,8 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DBIRTH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
@@ -43,13 +45,6 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 
-/*
- * A utility to check MQTT Sparkplug messages at any time for conformance to
- * the spec. It runs in parallel to any Sparkplug SDK test, providing checks
- * for additional assertions which apply at all times.
- * 
- */
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +58,13 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 
+/*
+ * A utility to check MQTT Sparkplug messages at any time for conformance to
+ * the spec. It runs in parallel to any Sparkplug SDK test, providing checks
+ * for additional assertions which apply at all times.
+ *
+ */
+
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
@@ -71,10 +73,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private HashMap<String, String> testResults = new HashMap<>();
-	String[] testIds =
-			{ ID_INTRO_EDGE_NODE_ID_UNIQUENESS, ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
-					ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR,
-					ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID, ID_PAYLOADS_DBIRTH_SEQ_INC };
+	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
+			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
+			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
+			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -229,6 +231,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_SEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH,
+			id = ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR)
+
 	private void handleNBIRTH(String group_id, String edge_node_id, String clientId, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NBIRTH *** {}/{} {}", group_id, edge_node_id, clientId);
 		String client_id = (String) edge_nodes.get(edge_node_id);
@@ -237,6 +243,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					edge_node_id);
 			testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR,
 					setResult(false, TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR));
+
+			testResults.put(ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR,
+					setResult(false, PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR));
 		} else {
 			logger.info("Monitor: adding edge node {} for client id {} on NBIRTH", edge_node_id, clientId);
 			edge_nodes.put(edge_node_id, clientId);
@@ -260,6 +269,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.TOPICS_EDGE_NODE_ID_ELEMENT,
 			id = ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH,
+			id = ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR)
+
 	private void handleNDEATH(String group_id, String edge_node_id, String clientId) {
 		logger.info("Monitor: *** NDEATH *** {}/{} {}", group_id, edge_node_id, clientId);
 		String found_client_id = (String) edge_nodes.get(edge_node_id);
@@ -269,6 +282,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					clientId, edge_node_id);
 			testResults.put(ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR,
 					setResult(false, TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR));
+
+			testResults.put(ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR,
+					setResult(false, PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR));
 		} else {
 			logger.info("Monitor: removing edge node {} for client id {} on NDEATH", edge_node_id, clientId);
 			if (clientids.remove(clientId) == null) {
@@ -378,7 +394,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_B_DBIRTH,
+			section = Sections.PAYLOADS_B_DDEATH,
 			id = ID_PAYLOADS_DDEATH_SEQ_INC)
 	private void handleDDEATH(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DDEATH *** {}/{}/{}", group_id, edge_node_id, device_id);
