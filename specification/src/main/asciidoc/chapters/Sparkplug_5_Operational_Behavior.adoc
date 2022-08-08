@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[operational_behavior]]
 == Operational Behavior
 
@@ -79,10 +82,9 @@ Certificates. Any Edge Node that has specified this Sparkplug Host Application a
 Application will will wait to publish their Birth Certificates until after they receive the STATE
 message denoting that the Primary Host application is online.
 
-// suppress inspection "AsciiDocLinkResolve"
-plantuml::assets/plantuml/host-session-establishment.puml[format=png, alt="Host Session Establishment"]
+.Figure 3 - Host Session Establishment
+plantuml::{assetsdir}assets/plantuml/host-session-establishment.puml[format=svg, alt="Host Session Establishment"]
 //image:extracted-media/media/image7.png[image,width=660,height=492]
-Figure 3 - Host Session Establishment
 
 The session diagram in Figure 3 - Host Session Establishment shows a very simple topology with a
 single MQTT Server. The steps outlined in the session diagram are defined as follows:
@@ -213,11 +215,9 @@ Session' flag. All types of MQTT clients (both Host and Edge Nodes) in a Sparkpl
 always set the 'Clean Session' flag in the MQTT CONNECT packet to true.
 
 
-// suppress inspection "AsciiDocLinkResolve"
-plantuml::assets/plantuml/edge-node-mqtt-session-establishment.puml[format=png, alt="Edge Node MQTT Session Establishment"]
+.Figure 4 - Edge Node MQTT Session Establishment
+plantuml::{assetsdir}assets/plantuml/edge-node-mqtt-session-establishment.puml[format=svg, alt="Edge Node MQTT Session Establishment"]
 //image:extracted-media/media/image8.png[image,width=660,height=508]
-
-Figure 4 - Edge Node MQTT Session Establishment
 
 The session diagram in Figure 4 - Edge Node MQTT Session Establishment shows a very simple topology
 with a single MQTT Server. The steps outlined in the session diagram are defined as follows:
@@ -368,10 +368,9 @@ Device.*#
 In order to expose and populate the metrics from any intelligent device, the following simple
 session diagram outlines the requirements:
 
-// suppress inspection "AsciiDocLinkResolve"
-plantuml::assets/plantuml/mqtt-device-session-establishment.puml[format=png, alt="MQTT Device Session Establishment"]
+.Figure 5 - MQTT Device Session Establishment
+plantuml::{assetsdir}assets/plantuml/mqtt-device-session-establishment.puml[format=svg, alt="MQTT Device Session Establishment"]
 //image:extracted-media/media/image9.png[image,width=660,height=309]
-Figure 5 - MQTT Device Session Establishment
 
 The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with
 all the Sparkplug elements in place i.e. Host Application, MQTT Server(s), Sparkplug Edge Node and
@@ -554,9 +553,9 @@ because of network issues. The following message flow diagram outlines how the S
 used when three (3) MQTT Servers are available in the infrastructure:
 
 // suppress inspection "AsciiDocLinkResolve"
-plantuml::assets/plantuml/primary-host-application-state-flow-diagram.puml[format=png, alt="Primary Host Application STATE flow diagram"]
+.Figure 7 – Primary Host Application STATE flow diagram
+plantuml::{assetsdir}assets/plantuml/primary-host-application-state-flow-diagram.puml[format=svg, alt="Primary Host Application STATE flow diagram"]
 //image:extracted-media/media/image11.png[image,width=660,height=304]
-Figure 7 – Primary Host Application STATE flow diagram
 
 [arabic]
 . When an Edge Node is configured with multiple available MQTT Servers in the infrastructure it
@@ -643,10 +642,9 @@ The following simple message flow diagram demonstrates the messages used to upda
 cellular RSSI value in the Primary Host Application and sending a command from the Primary Host
 Application to the Edge Node to use a different primary network path.
 
-// suppress inspection "AsciiDocLinkResolve"
-plantuml::assets/plantuml/edge-node-ndata-and-ncmd-message-flow.puml[format=png, alt="Edge Node NDATA and NCMD Message Flow"]
+.Figure 6 - Edge Node NDATA and NCMD Message Flow
+plantuml::{assetsdir}assets/plantuml/edge-node-ndata-and-ncmd-message-flow.puml[format=svg, alt="Edge Node NDATA and NCMD Message Flow"]
 //image:extracted-media/media/image10.png[image,width=660,height=303]
-Figure 6 - Edge Node NDATA and NCMD Message Flow
 
 [arabic]
 . Assuming MQTT Server is available.

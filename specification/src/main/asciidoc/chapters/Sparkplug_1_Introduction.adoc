@@ -188,7 +188,7 @@ This specification is split into the following chapters and appendices:
 * link:#acknowledgements[Chapter 9 - Acknowledgements]
 * link:#conformance[Chapter 10 - Conformance]
 * link:#appendix_a[Appendix A - Open Source Software]
-* link:#appendix_c[Appendix B - List of Normative Statements]
+* link:#appendix_b[Appendix B - List of Normative Statements]
 
 [[introduction_terminology]]
 === Terminology
@@ -198,8 +198,8 @@ This specification is split into the following chapters and appendices:
 
 This section details the infrastructure components implemented.
 
+.Figure 1 - MQTT SCADA Infrastructure
 image:extracted-media/media/image5.png[image,width=660,height=314]
-Figure 1 - MQTT SCADA Infrastructure
 
 [[introduction_mqtt_servers]]
 ===== MQTT Server(s)
