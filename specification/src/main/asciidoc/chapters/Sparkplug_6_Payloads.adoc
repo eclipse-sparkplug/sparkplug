@@ -733,8 +733,8 @@ A Sparkplug Template includes the following components.
 
 * *version*
 ** This is an optional field and can be included in a Template Definition or Template Instance.
-[tck-testable tck-id-payloads-template-version]#[yellow-background]*If included, the version MUST be
-a UTF-8 string representing the version of the Template.*#
+** [tck-testable tck-id-payloads-template-version]#[yellow-background]*If included, the version MUST
+be a UTF-8 string representing the version of the Template.*#
 * *metrics*
 ** This is an array of metrics representing the members of the Template. These can be primitive
 datatypes or other Templates as required.
@@ -744,16 +744,16 @@ with the Template.
 * *template_ref*
 ** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*This MUST be omitted
 if this is a Template Definition.*#
-[tck-testable tck-id-payloads-template-ref-instance]#[yellow-background]*This MUST be a UTF-8 string
-representing a reference to a Template Definition name if this is a Template Instance.*#
+** [tck-testable tck-id-payloads-template-ref-instance]#[yellow-background]*This MUST be a UTF-8
+string representing a reference to a Template Definition name if this is a Template Instance.*#
 * *is_definition*
 ** This is a Boolean representing whether this is a Template definition or a Template instance.
-[tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*This MUST be included in
-every Template Definition and Template Instance.*#
-[tck-testable tck-id-payloads-template-is-definition-definition]#[yellow-background]*This MUST be
+** [tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*This MUST be included
+in every Template Definition and Template Instance.*#
+** [tck-testable tck-id-payloads-template-is-definition-definition]#[yellow-background]*This MUST be
 set to true if this is a Template Definition.*#
-[tck-testable tck-id-payloads-template-is-definition-instance]#[yellow-background]*This MUST be set
-to false if this is a Template Instance.*#
+** [tck-testable tck-id-payloads-template-is-definition-instance]#[yellow-background]*This MUST be
+set to false if this is a Template Instance.*#
 
 [[payloads_b_template_parameter]]
 ==== Template.Parameter
@@ -765,24 +765,23 @@ instances. It includes the following components.
 * *name*
 ** [tck-testable tck-id-payloads-template-parameter-name-required]#[yellow-background]*This MUST be
 included in every Template Parameter definition.*#
-[tck-testable tck-id-payloads-template-parameter-name-type]#[yellow-background]*This MUST be a UTF-8
-string representing the name of the Template parameter.*#
+** [tck-testable tck-id-payloads-template-parameter-name-type]#[yellow-background]*This MUST be a
+UTF-8 string representing the name of the Template parameter.*#
 * *type*
 ** [tck-testable tck-id-payloads-template-parameter-value-type]#[yellow-background]*This MUST be an
 unsigned 32-bit integer representing the datatype.*#
-[tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*This value MUST be
-one of the enumerated values as shown in the
+** [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*This value MUST
+be one of the enumerated values as shown in the
 link:#payloads_b_datatype_basic[Sparkplug Basic Data Types].*#
-// FIXME: Is this correct?
-[tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*This MUST be included
-in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*This MUST be
+included in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
-[tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*The value supplied MUST
-be one of the following protobuf types: _uint32_, _uint64_, _float_, _double_, _bool_, or
+** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*The value supplied
+MUST be one of the following protobuf types: _uint32_, _uint64_, _float_, _double_, _bool_, or
 _string_.*#
-For a template definition, this is the default value of the parameter. For a template instance, this
-is the value unique to that instance. More information on these types can be found below.
+** For a template definition, this is the default value of the parameter. For a template instance,
+this is the value unique to that instance. More information on these types can be found below.
 *** _uint32_
 **** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
 *** _uint64_
