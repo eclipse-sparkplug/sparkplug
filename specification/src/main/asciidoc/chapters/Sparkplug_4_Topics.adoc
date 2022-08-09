@@ -512,9 +512,17 @@ Certificate:
 [subs="quotes"]
   [tck-testable tck-id-host-topic-phid-birth-topic]#*STATE*/sparkplug_host_application_id#
 
+* [tck-testable tck-id-host-topic-phid-birth-sub-required]#[yellow-background]*The Sparkplug Host
+Application MUST subscribe to its own STATE/sparkplug_host_application_id and the appropriate
+spBv1.0 topic(s) immediately after successfully connecting to the MQTT Server.*#
+** An 'appropriate' spBv1.0 topic could simply be 'spBv1.0/#'. However, it may also make sense for
+a Host Application to subscribe only to a specific Sparkplug Group. For example subscribing to
+spBv1.0/Group1/# is also valid. A Host Application could even issue a subscription to subscribe to
+only a single Sparkplug Edge Node using this: spBv1.0/Group1/+/EdgeNode1/#. A Sparkplug Host
+Application could subscribe to a combination of specific Sparkplug Groups and/or Edge Nodes as well.
 * [tck-testable tck-id-host-topic-phid-birth-required]#[yellow-background]*The Sparkplug Host
-Application MUST publish a Sparkplug Host Application BIRTH message immediately after connecting
-to an MQTT Server*#
+Application MUST publish a Sparkplug Host Application BIRTH message to the MQTT Server immediately
+after successfully subscribing its own STATE/sparkplug_host_application_id topic.*#
 
 [[payloads_desc_state_birth]]
 ====== Birth Certificate Payload (STATE)
