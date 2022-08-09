@@ -36,7 +36,7 @@ Figure 2 - Simple MQTT Infrastructure
 The Sparkplug Specification uses the concept of Report by Exception (RBE). Because Sparkplug
 utilizes the built in functions of MQTT to maintain session awareness, messages only need to be sent
 by an Edge Node when values at the edge change. In the initial BIRTH messages, all of the current
-metric values are published in the payload. Because the MQTT session is stateful, after the initial
+metric values are published in the payload. Because the MQTT session is stateful [MQTTV5-4.1], after the initial
 BIRTH messages are sent, new metric values only need to be published when the values change.
 
 Sparkplug does not require that RBE be used in all cases. This is to account for special
@@ -70,7 +70,7 @@ real-time SCADA, the “state” of the end device needs to be always known. In 
 host could only rely on RBE data arriving reliably if it could be assured of the state of the MQTT
 session.
 
-The Eclipse Sparkplug specification defines the use of the MQTT “Will Message” feature to provide
+The Eclipse Sparkplug specification defines the use of the MQTT “Will Message” feature [MQTTV5-3.1.2.5] to provide
 MQTT session state information to any other interested MQTT client in the infrastructure. The
 session state awareness is implemented around a set of defined BIRTH and DEATH topic namespace and
 payload definitions in conjunction with the MQTT connection “Keep Alive” timer.
@@ -99,7 +99,7 @@ link:#payloads_b_state[Host Application Birth Certificates]
 === Persistent vs Non-Persistent Connections for Edge Nodes
 
 Persistent connections are intended to remain connected to the MQTT infrastructure at all times.
-They never send an MQTT DISCONNECT control packet during normal operation. This fact lets the
+They never send an MQTT DISCONNECT control packet [MQTTV5-3.14] during normal operation. This fact lets the
 Host Applications provide the real-time state of every persistent node in the infrastructure within
 the configured MQTT Keep Alive period using the BIRTH/DEATH mechanisms defined above.
 
