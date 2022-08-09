@@ -95,7 +95,9 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
                 "pdf-theme" to "sparkplug"
         ))
     }
-
+    asciidoctorj {
+        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    }
 }
 
 val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
@@ -135,6 +137,9 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
                 "imagesdir" to "assets/images"
         ))
     }
+    asciidoctorj {
+        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    }
 }
 
 val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
@@ -172,6 +177,9 @@ val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::c
                 "project-version" to version,
                 "imagesdir" to "assets/images"
         ))
+    }
+    asciidoctorj {
+        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
     }
 }
 
