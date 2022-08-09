@@ -27,8 +27,8 @@ publishing any message containing data that it has. This is one of the principal
 that is the decoupling of intelligent devices from any direct connection to any one consumer
 application.
 
+.Figure 2 - Simple MQTT Infrastructure
 image:extracted-media/media/image6.png[image,width=311,height=116]
-Figure 2 - Simple MQTT Infrastructure
 
 [[principles_report_by_exception]]
 === Report by Exception
