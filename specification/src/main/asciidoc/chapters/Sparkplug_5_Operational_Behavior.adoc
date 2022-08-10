@@ -93,9 +93,12 @@ single MQTT Server. The steps outlined in the session diagram are defined as fol
 . Sparkplug Host Applications will try to create an MQTT Session using the MQTT CONNECT Control
 Packet. A Death Certificate is constructed into the MQTT Will Topic and Will Payload of the
 CONNECT Control Packet with a Will QoS set to 1 and Will Retain flag set to true.
-[tck-testable tck-id-message-flow-phid-sparkplug-clean-session]#[yellow-background]*The CONNECT
-Control Packet for all Sparkplug Host Applications MUST set the MQTT 'Clean Session' flag to
-true.*#
+[tck-testable tck-id-message-flow-phid-sparkplug-clean-session-311]#[yellow-background]*The CONNECT
+Control Packet for all Sparkplug Host Applications when using MQTT 3.1.1 MUST set the MQTT 'Clean
+Session' flag to true.*#
+[tck-testable tck-id-message-flow-phid-sparkplug-clean-session-50]#[yellow-background]*The CONNECT
+Control Packet for all Sparkplug Host Applications when using MQTT 5.0 MUST set the the MQTT 'Clean
+Start' flag to true and the 'Session Expiry Interval' to 0.*#
 The MQTT CONNECT Control Packet is acknowledged as successful with a valid MQTT CONNACK Control
 Packet from the MQTT Server. From this point forward in time, the MQTT Server is ready to deliver a
 Host Death Certificate any time the Sparkplug Host Application MQTT Client loses connectivity to the
@@ -109,7 +112,7 @@ establishing the MQTT session and before publishing its own STATE message.*#
 
 . [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#[yellow-background]*Once an MQTT
 Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic
-Namespace have been established, and the STATE topic subscription has been been established, the
+Namespace have been established and the STATE topic subscription has been been established, the
 Sparkplug Host Application MUST publish a new STATE message.*#
 * [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload]#[yellow-background]*The
 Host Application Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value
@@ -211,9 +214,10 @@ MQTT Session does not need to be persistent. In either case, an Edge Node can tr
 MQTT Session at any time and is completely asynchronous from any other MQTT Client in the
 infrastructure. The only exception to this rule is the use case where there are multiple MQTT
 Servers and a Primary Host Application. Note this does not refer to the use of the MQTT 'Clean
-Session' flag. All types of MQTT clients (both Host and Edge Nodes) in a Sparkplug system MUST
-always set the 'Clean Session' flag in the MQTT CONNECT packet to true.
-
+Session' flag in MQTT 3.1.1 or the 'Clean Start' flag in MQTT 5.0. All types of MQTT clients (both
+Host and Edge Nodes) in a Sparkplug system MUST always set the 'Clean Session' flag in the MQTT
+3.1.1 CONNECT packet to true. When using MQTT 5.0 the 'Clean Start' flag must be set to true and the
+MQTT 'Session Expiry Interval' to zero.
 
 .Figure 4 - Edge Node MQTT Session Establishment
 plantuml::{assetsdir}assets/plantuml/edge-node-mqtt-session-establishment.puml[format=svg, alt="Edge Node MQTT Session Establishment"]
@@ -533,7 +537,7 @@ session to any one of the MQTT Servers.
 Edge Nodes MUST not connected to more than one server at any point in time.*#
 
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
-published by Primary Host Application. Since the STATE message is published with the RETAIN message
+published by Primary Host Application. Since the STATE message is published with the MQTT RETAIN
 flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
 examine the JSON payload of this message to ensure that it is a value of the 'online' key is true.
 If the value is false, this indicates the Primary Application has lost its MQTT Session to this

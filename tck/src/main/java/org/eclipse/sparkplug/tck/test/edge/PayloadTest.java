@@ -657,14 +657,15 @@ public class PayloadTest extends TCKTest {
 							
 							if (p.hasType()) {
 								int curtype = p.getType();
-								boolean uint32types = true;
-								if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
-									uint32types = false;
+								boolean isBasicType = true;
+								if (curtype < 0 || curtype > DataType.Text.getNumber()) {
+									logger.info("FOR {} the TYPE is: {} AND {}", p.getName(), curtype, p);
+									isBasicType = false;
 								}
 								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
-									setResult(uint32types, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
+									setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
 								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
-										setResult(uint32types, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
+										setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
 								
 							}
 							
