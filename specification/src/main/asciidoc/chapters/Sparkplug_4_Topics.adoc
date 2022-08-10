@@ -171,8 +171,8 @@ structure for all metrics for this Edge Node. At the time any Host Application r
 the 'online' state of this Edge Node should be set to 'true' along with the associated 'online'
 Date/Time parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself
 is online and in an MQTT Session, but any devices that have previously published a DBIRTH will still
-have STALE metric quality until the Host Application receives the new DBIRTH messages associated with
-the new Sparkplug session..
+have STALE metric quality until the Host Application receives the new DBIRTH messages associated
+with the new Sparkplug session..
 
 The NBIRTH message requires the following payload components.
 

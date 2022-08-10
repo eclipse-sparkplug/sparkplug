@@ -66,12 +66,13 @@ public class Requirements {
 
     // 1.4.1.9 Sparkplug Metric
     // 1.5 Normative References
-    // 1.6 Security
-    // 1.6.1 Authentication
-    // 1.6.2 Authorization
-    // 1.6.3 Encryption
-    // 1.7 Editing Convention
-    // 1.8 Leveraging Standards and Open Source
+    // 1.6 Consolidated List of Normative Statements
+    // 1.7 Security
+    // 1.7.1 Authentication
+    // 1.7.2 Authorization
+    // 1.7.3 Encryption
+    // 1.8 Editing Convention
+    // 1.9 Leveraging Standards and Open Source
     // 2 Principles
     // 2.1 Pub/Sub
     // 2.2 Report by Exception
@@ -84,8 +85,11 @@ public class Requirements {
     public final static String PRINCIPLES_BIRTH_CERTIFICATES_ORDER = "Birth Certificates MUST be the first MQTT messages published by any Edge Node or any Host Application.";
 
     // 2.5 Persistent vs Non-Persistent Connections for Edge Nodes
-    public final static String ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION = "principles-persistence-clean-session";
-    public final static String PRINCIPLES_PERSISTENCE_CLEAN_SESSION = "Edge Node MQTT CONNECT packets MUST set the 'Clean Session' flag to true.";
+    public final static String ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311 = "principles-persistence-clean-session-311";
+    public final static String PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311 = "If the MQTT client is using MQTT v3.1.1, the Edge Node's MQTT CONNECT packet MUST set the 'Clean Session' flag to true.";
+
+    public final static String ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50 = "principles-persistence-clean-session-50";
+    public final static String PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50 = "If the MQTT client is using MQTT v5.0, the Edge Node's MQTT CONNECT packet MUST set the 'Clean Start' flag to true and the 'Session Expiry Interval' to 0.";
 
     // 3 Sparkplug Architecture and Infrastructure Components
     // 3.1 MQTT Server(s)
@@ -275,8 +279,11 @@ public class Requirements {
     public final static String ID_HOST_TOPIC_PHID_BIRTH_TOPIC = "host-topic-phid-birth-topic";
     public final static String HOST_TOPIC_PHID_BIRTH_TOPIC = "STATE/sparkplug_host_application_id";
 
+    public final static String ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED = "host-topic-phid-birth-sub-required";
+    public final static String HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED = "The Sparkplug Host Application MUST subscribe to its own STATE/sparkplug_host_application_id and the appropriate spBv1.0 topic(s) immediately after successfully connecting to the MQTT Server.";
+
     public final static String ID_HOST_TOPIC_PHID_BIRTH_REQUIRED = "host-topic-phid-birth-required";
-    public final static String HOST_TOPIC_PHID_BIRTH_REQUIRED = "The Sparkplug Host Application MUST publish a Sparkplug Host Application BIRTH message immediately after connecting to an MQTT Server";
+    public final static String HOST_TOPIC_PHID_BIRTH_REQUIRED = "The Sparkplug Host Application MUST publish a Sparkplug Host Application BIRTH message to the MQTT Server immediately after successfully subscribing its own STATE/sparkplug_host_application_id topic.";
 
     // 4.2.3.1.2 Birth Certificate Payload (STATE)
     public final static String ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD = "host-topic-phid-birth-payload";
@@ -316,14 +323,17 @@ public class Requirements {
     public final static String CASE_SENSITIVITY_METRIC_NAMES = "An Edge Node SHOULD NOT publish metric names that when converted to all lower case match.";
 
     // 5.3 Host Application Session Establishment
-    public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION = "message-flow-phid-sparkplug-clean-session";
-    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION = "The CONNECT Control Packet for all Sparkplug Host Applications MUST set the MQTT 'Clean Session' flag to true.";
+    public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311 = "message-flow-phid-sparkplug-clean-session-311";
+    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311 = "The CONNECT Control Packet for all Sparkplug Host Applications when using MQTT 3.1.1 MUST set the MQTT 'Clean Session' flag to true.";
+
+    public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50 = "message-flow-phid-sparkplug-clean-session-50";
+    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50 = "The CONNECT Control Packet for all Sparkplug Host Applications when using MQTT 5.0 MUST set the the MQTT 'Clean Start' flag to true and the 'Session Expiry Interval' to 0.";
 
     public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION = "message-flow-phid-sparkplug-subscription";
     public final static String MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION = "The subscription on the Sparkplug Topic Namespace and the STATE topic MUST be done immediately after successfully establishing the MQTT session and before publishing its own STATE message.";
 
     public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH = "message-flow-phid-sparkplug-state-publish";
-    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH = "Once an MQTT Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic Namespace have been established, and the STATE topic subscription has been been established, the Sparkplug Host Application MUST publish a new STATE message.";
+    public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH = "Once an MQTT Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug Topic Namespace have been established and the STATE topic subscription has been been established, the Sparkplug Host Application MUST publish a new STATE message.";
 
     public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD = "message-flow-phid-sparkplug-state-publish-payload";
     public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD = "The Host Application Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.";
@@ -331,8 +341,8 @@ public class Requirements {
     public final static String ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ = "message-flow-phid-sparkplug-state-publish-payload-bdseq";
     public final static String MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ = "The bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will Message payload.";
 
-    public final static String ID_F = "f";
-    public final static String F = "All metric data associated with any Sparkplug Edge Node that was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data quality if the Host Application loses connection to the MQTT Server.";
+    public final static String ID_G = "g";
+    public final static String G = "All metric data associated with any Sparkplug Edge Node that was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data quality if the Host Application loses connection to the MQTT Server.";
 
     // 5.4 Edge Node Session Establishment
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "message-flow-edge-node-ncmd-subscribe";
@@ -557,6 +567,9 @@ public class Requirements {
     // 5.17 Commands
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME = "operational-behavior-data-commands-rebirth-name";
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME = "An NBIRTH message MUST include a metric with a name of 'Node Control/Rebirth'.";
+
+    public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES = "operational-behavior-data-commands-rebirth-name-aliases";
+    public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES = "When aliases are being used by an Edge Node an NBIRTH message MUST NOT include an alias for the 'Node Control/Rebirth' metric.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE = "operational-behavior-data-commands-rebirth-datatype";
     public final static String OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE = "The 'Node Control/Rebirth' metric in the NBIRTH message MUST have a datatype of 'Boolean'.";
@@ -996,4 +1009,4 @@ public class Requirements {
     // 11.6 Raspberry Pi Hardware
     // 12 Appendix B: List of Normative Statements (non-normative)
 }
-// no of assertions 271
+// no of assertions 275
