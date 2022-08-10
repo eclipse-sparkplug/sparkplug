@@ -199,7 +199,9 @@ This specification is split into the following chapters and appendices:
 This section details the infrastructure components implemented.
 
 .Figure 1 - MQTT SCADA Infrastructure
-image:extracted-media/media/image5.png[image,width=660,height=314]
+plantuml::{assetsdir}assets/plantuml/infrastructure-components.puml[format=svg, alt="Edge Node MQTT Session Establishment"]
+//image:extracted-media/media/image5.png[image,width=660,height=600]
+
 
 [[introduction_mqtt_servers]]
 ===== MQTT Server(s)
