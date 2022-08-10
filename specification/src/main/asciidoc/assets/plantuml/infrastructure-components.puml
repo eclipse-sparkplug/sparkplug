@@ -1,0 +1,157 @@
+@startuml
+/'
+ ' The "left to right direction" directive below changes how the engine renders the diagram. 
+ '  
+ ' Since the default layout is "top to bottom", we need to specify directions that take into account
+ ' the global change in orientation. So, below, "right" means "up" and "up" means "left".
+ '
+ ' The order of the associations also influences the rendering order.
+ '/
+
+!include <archimate/Archimate>
+left to right direction 
+hide stereotype
+skinparam linetype polyline
+skinparam nodesep 30
+skinparam ranksep 40
+skinparam defaultTextAlignment center
+
+skinparam rectangle {
+	BackgroundColor #white
+}
+
+skinparam rectangle<<standby>> {
+	BackgroundColor #lightgrey
+}
+
+skinparam rectangle<<textBlock>> {
+	BackgroundColor #white
+	BorderThickness 0
+	BorderColor transparent
+	FontSize 36
+	Shadowing false
+}
+
+skinparam rectangle<<spacer>> {
+	BackgroundColor #white
+	FontColor #white
+	BorderThickness 0
+	BorderColor transparent
+	FontSize 36
+	Shadowing 0.0
+}
+
+
+skinparam card {
+	BackgroundColor #white
+    FontSize 12
+    BorderThickness 1
+    Padding 0
+}
+
+skinparam package {
+    Style rectangle
+}
+
+' We need to do this in order to use a monospace font.
+!procedure $sparkplugnode($alias, $label, $stereotype="none") 
+	rectangle $alias <<$stereotype>> [
+		===""$label""
+		!if $stereotype == "standby"
+		""Standby""
+		!else
+		"" ""
+		!endif
+		""(Sparkplug)""
+	]
+!endprocedure
+
+' We need to do this in order to use a monospace font.
+!procedure $leafnode($alias, $label) 
+	card $alias [
+		""$label""
+	]
+!endprocedure
+ 
+
+sprite $double-arrow jar:archimate/physical-distribution-network
+
+package "Security" {
+
+	together {
+		$sparkplugnode("SCADA", "Primary Application")
+		$sparkplugnode("SCADAStandby", "Primary Application", "standby")
+		rectangle MQTTServer [
+			<$double-arrow>
+			==""MQTT Server""
+		] 
+	}
+	
+	together {
+		$sparkplugnode("MES", "MES")
+		$sparkplugnode("Historian", "Historian")
+		$sparkplugnode("Analytics", "Analytics")
+	}
+	
+	together {
+		$sparkplugnode("Node1", "MQTT EoN Node")
+		$leafnode("Node1Device1", "    Device     ")
+		$leafnode("Node1Sensor1", "    Sensor     ")
+		$leafnode("Node1Device2", "    Device     ")
+	}
+	
+	together {
+		$sparkplugnode("Node2", "MQTT EoN Node")
+		$leafnode("Node2Device", "    Device     ")
+	}
+	
+	together {
+		$sparkplugnode("Node3", "MQTT EoN Node")
+		$leafnode("Node3Device", "    Device     ")
+	}
+	
+	together {
+		$sparkplugnode("Node4", "MQTT EoN Node")
+		$leafnode("Node420maInput1"," 4-20ma Input ")
+		$leafnode("Node420maInput2", " 4-20ma Input ")
+		$leafnode("Node4DigitalInput", "Digital Input ")
+		$leafnode("Node4DigitalOutput", "Digital Output")
+	}
+	
+	together {
+		rectangle "OT" <<textBlock>> as OT
+     	rectangle "IT" <<textBlock>> as IT
+		
+	 }
+	
+	'[SCADA] -[hidden]- [SCADAStandby]
+	
+	[MQTTServer] <-left--> [SCADAStandby]
+	[MQTTServer] <-right--> [SCADA]
+	
+	[MQTTServer] -up--> [Analytics]
+	[MQTTServer] -up--> [Historian]
+	[MQTTServer] -up--> [MES]
+	
+	[MQTTServer] <-down---> [Node1]
+	[MQTTServer] <-down---> [Node2]
+	[MQTTServer] <-down---> [Node3]
+	[MQTTServer] <-down---> [Node4]
+	
+	[Node1] -down-- [Node1Device1]
+	[Node1] -down-- [Node1Sensor1]
+	[Node1] -down-- [Node1Device2]
+	
+	[Node2] -down-- [Node2Device]
+	
+	[Node3] -down-- [Node3Device]
+	
+	[Node4] -down-- [Node420maInput1]
+	[Node4] -down-- [Node420maInput2]
+	[Node4] -down-- [Node4DigitalInput]
+	[Node4] -down-- [Node4DigitalOutput]
+	
+	[OT] -[hidden]up----- [IT]
+}
+
+@enduml
