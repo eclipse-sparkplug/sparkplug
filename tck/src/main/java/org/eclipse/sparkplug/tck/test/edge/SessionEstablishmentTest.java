@@ -74,7 +74,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
 
 	private final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
-			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION, ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ,
+			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311, ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ,
 			ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD, ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS, ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ,
 			ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH, ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP,
@@ -182,7 +182,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_PERSISTENT_VS_NON_PERSISTENT_CONNECTIONS,
-			id = ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION)
+			id = ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
@@ -218,8 +218,8 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		if (testClientId != null) {
 			logger.debug("Check Req: Clean session should be set to true.");
-			testResults.put(ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION,
-					setResult(packet.getCleanStart(), PRINCIPLES_PERSISTENCE_CLEAN_SESSION));
+			testResults.put(ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311,
+					setResult(packet.getCleanStart(), PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311));
 
 			try {
 				willPublishPacketOptional = checkWillMessage(packet);
@@ -272,7 +272,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DDATA,
 			id = ID_PAYLOADS_DDATA_ORDER)
-	
+
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		if (testClientId != null && testClientId.equals(clientId)) {
 			logger.info("Edge session establishment test - publish -  to topic: {} ", packet.getTopic());
@@ -292,13 +292,11 @@ public class SessionEstablishmentTest extends TCKTest {
 					boolean bValid = !(ndataFound || ddataFound);
 					testResults.put(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
 							setResult(bValid, PRINCIPLES_BIRTH_CERTIFICATES_ORDER));
-					
-					testResults.put(ID_PAYLOADS_NDATA_ORDER,
-							setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
-					
-					testResults.put(ID_PAYLOADS_DDATA_ORDER,
-							setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
-					
+
+					testResults.put(ID_PAYLOADS_NDATA_ORDER, setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
+
+					testResults.put(ID_PAYLOADS_DDATA_ORDER, setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
+
 					nbirthFound = true;
 				}
 			}
@@ -529,7 +527,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT)
-	
+
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -623,10 +621,10 @@ public class SessionEstablishmentTest extends TCKTest {
 
 			testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ, setResult(birthBdSeq != -1, PAYLOADS_NBIRTH_BDSEQ));
 			testResults.put(ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, setResult(birthBdSeq != -1, TOPICS_NBIRTH_BDSEQ_INCLUDED));
-			
+
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ,
 					setResult(birthBdSeq == deathBdSeq, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ));
-			
+
 			testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
 					setResult(birthBdSeq == deathBdSeq, PAYLOADS_NBIRTH_BDSEQ_REPEAT));
 
@@ -878,13 +876,11 @@ public class SessionEstablishmentTest extends TCKTest {
 					"Check Req: DBIRTH must be sent before any NDATA/DDATA messages are published by the edge node");
 			boolean bValid = !(ndataFound || ddataFound);
 			testResults.put(ID_PAYLOADS_DBIRTH_ORDER, setResult(bValid, PAYLOADS_DBIRTH_ORDER));
-			
-			testResults.put(ID_PAYLOADS_NDATA_ORDER,
-					setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
-			
-			testResults.put(ID_PAYLOADS_DDATA_ORDER,
-					setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
-			
+
+			testResults.put(ID_PAYLOADS_NDATA_ORDER, setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
+
+			testResults.put(ID_PAYLOADS_DDATA_ORDER, setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
+
 			checkSubscribeTopics();
 			theTCK.endTest();
 		}

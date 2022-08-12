@@ -36,8 +36,9 @@ image:extracted-media/media/image6.png[image,width=311,height=116]
 The Sparkplug Specification uses the concept of Report by Exception (RBE). Because Sparkplug
 utilizes the built in functions of MQTT to maintain session awareness, messages only need to be sent
 by an Edge Node when values at the edge change. In the initial BIRTH messages, all of the current
-metric values are published in the payload. Because the MQTT session is stateful [MQTTV5-4.1], after the initial
-BIRTH messages are sent, new metric values only need to be published when the values change.
+metric values are published in the payload. Because the MQTT session is stateful [MQTTV5-4.1], after
+the initial BIRTH messages are sent, new metric values only need to be published when the values
+change.
 
 Sparkplug does not require that RBE be used in all cases. This is to account for special
 circumstances that may require periodic reporting. However, as a general rule periodic publishing
@@ -52,10 +53,12 @@ SHOULD be published using a RBE based approach.*#
 
 In any network architecture, network connection "State" is important. In SCADA/IIoT, connection
 State is extremely important. State is the session awareness of the MQTT Edge Node and the MQTT
-Server. The very reason that most SCADA Host systems in this market sector are still using legacy
-poll/response protocols to maintain a notion of the State of the connection between the SCADA
-application and the connected devices. “_I poll, I get a response, I know the State of all the I/O
-points, but now I must poll again because that State may have changed._”
+Server. Note the uses of the term 'session' here should not be confused with MQTT's 'clean session'
+concept/flags. That is covered later in this specification. The very reason that most SCADA Host
+systems in this market sector are still using legacy poll/response protocols to maintain a notion of
+the State of the connection between the SCADA application and the connected devices. “_I poll, I get
+a response, I know the State of all the I/O points, but now I must poll again because that State may
+have changed._”
 
 Many implementations of solutions using MQTT treat it as a simple, stateless, pub/sub state machine.
 This is quite viable for IoT and some IIoT applications, however it is not taking advantage of the
@@ -70,10 +73,11 @@ real-time SCADA, the “state” of the end device needs to be always known. In 
 host could only rely on RBE data arriving reliably if it could be assured of the state of the MQTT
 session.
 
-The Eclipse Sparkplug specification defines the use of the MQTT “Will Message” feature [MQTTV5-3.1.2.5] to provide
-MQTT session state information to any other interested MQTT client in the infrastructure. The
-session state awareness is implemented around a set of defined BIRTH and DEATH topic namespace and
-payload definitions in conjunction with the MQTT connection “Keep Alive” timer.
+The Eclipse Sparkplug specification defines the use of the MQTT “Will Message” feature
+[MQTTV5-3.1.2.5] to provide MQTT session state information to any other interested MQTT client in
+the infrastructure. The session state awareness is implemented around a set of defined BIRTH and
+DEATH topic namespace and payload definitions in conjunction with the MQTT connection “Keep Alive”
+timer.
 
 [[principles_birth_and_death_certificates]]
 === Birth and Death Certificates
@@ -118,6 +122,11 @@ establishment of an MQTT session. In this manner, the Host Application can still
 representation of last known good process variable versus the fact that the MQTT session was
 terminated prior to the Edge Node being able to complete its transaction.
 
-Regardless of a persistent or non-persistent connection,
-[tck-testable tck-id-principles-persistence-clean-session]#[yellow-background]*Edge Node MQTT
-CONNECT packets MUST set the 'Clean Session' flag to true.*#
+Regardless of a persistent or non-persistent connection, the following rules must be followed:
+
+* [tck-testable tck-id-principles-persistence-clean-session-311]#[yellow-background]*If the MQTT
+client is using MQTT v3.1.1, the Edge Node's MQTT CONNECT packet MUST set the 'Clean Session' flag
+to true.*#
+* [tck-testable tck-id-principles-persistence-clean-session-50]#[yellow-background]*If the MQTT
+client is using MQTT v5.0, the Edge Node's MQTT CONNECT packet MUST set the 'Clean Start' flag
+to true and the 'Session Expiry Interval' to 0.*#
