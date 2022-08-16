@@ -474,15 +474,15 @@ MUST be in UTC.*#
 *** Non-normative comment: This timestamp represents the time at which the value of a metric was
 captured.
 * *datatype*
-** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*The datatype MUST be an
-unsigned 32-bit integer representing the datatype.*#
-** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*The datatype MUST be one
-of the enumerated values as shown in the
+** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*The datatype MUST
+be an unsigned 32-bit integer representing the datatype.*#
+** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*The datatype MUST be
+one of the enumerated values as shown in the
 link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
-** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*The datatype MUST be included with
-each metric definition in NBIRTH and DBIRTH messages.*#
-** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*The datatype SHOULD NOT be
-included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*The datatype MUST be
+included with each metric definition in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*The datatype SHOULD
+NOT be included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some
 cases, it may be desirable to send metrics after they were acquired from a device or Edge Node. This
@@ -716,17 +716,48 @@ referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 
 * *Template Definition*
 ** This is the definition of a Sparkplug Template.
-[tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
+*** [tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
 Definition MUST have is_definition set to true.*#
-[tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
+*** [tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
 MUST omit the template_ref field.*#
+*** [tck-testable tck-id-payloads-template-definition-members]#[yellow-background]*A Template
+Definition MUST include all member metrics that will ever be included in corresponding template
+instances.*#
+*** [tck-testable tck-id-payloads-template-definition-nbirth]#[yellow-background]*A Template
+Definition MUST be included in the NBIRTH for all Template Instances that are included in the NBIRTH
+and DBIRTH messages.*#
+**** A Template Instance can not reference a Template Definition that was not included in the
+NBIRTH.
+*** [tck-testable tck-id-payloads-template-definition-parameters]#[yellow-background]*A Template
+Definition MUST include all parameters that will be included in the corresponding Template
+Instances.*#
+*** [tck-testable tck-id-payloads-template-definition-parameters-default]#[yellow-background]*A
+Template Definition MAY include values for parameters in the Template Definition parameters.*#
+**** These act as the defaults for any template instances that don't include parameter values in the
+NBIRTH or DBIRTH messages.
+
 * *Template Instance*
 ** This is an instance of a Sparkplug Template.
-[tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*A Template
+*** [tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*A Template
 Instance MUST have is_definition set to false.*#
-[tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*A Template Instance MUST
+*** [tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*A Template Instance MUST
 have template_ref set to the type of template definition it is.*#
-In other words, it must be set to the name of the metric that represents the template definition.
+**** It must be set to the name of the metric that represents the template definition.
+*** [tck-testable tck-id-payloads-template-instance-members]#[yellow-background]*A Template Instance
+MUST include only members that were included in the corresponding template definition.*#
+*** [tck-testable tck-id-payloads-template-instance-members-birth]#[yellow-background]*A Template
+Instance MUST include all members that were included in the corresponding Template Definition in a
+NBIRTH or DBIRTH message.*#
+*** [tck-testable tck-id-payloads-template-instance-members-data]#[yellow-background]*A Template
+Instance MAY include only a subset of the members that were included in the corresponding template
+definition in a NDATA or DDATA message.*#
+**** A Template Instance does not need to be a complete set of all member metrics that were included
+in the Template Definition.
+*** [tck-testable tck-id-payloads-template-instance-parameters]#[yellow-background]*A Template
+Instance MAY include parameter values for any parameters that were included in the corresponding
+Template Definition.*#
+**** If a parameter value was included in the Template Definition but not in the Template Instance
+the value of that parameter is implicitly the default value from the Template Definition.
 
 A Sparkplug Template includes the following components.
 

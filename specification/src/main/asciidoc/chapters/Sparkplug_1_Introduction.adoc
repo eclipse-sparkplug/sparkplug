@@ -8,6 +8,9 @@ https://www.eclipse.org/legal/epl-2.0.
 SPDX-License-Identifier: EPL-2.0
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 _Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation._
 
 [[introduction]]
