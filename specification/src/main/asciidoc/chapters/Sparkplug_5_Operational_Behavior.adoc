@@ -123,20 +123,25 @@ Epoch.*#
 * [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload-bdseq]#[yellow-background]*The
 bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will
 Message payload.*#
-
 The Host Application is now ready to start receiving MQTT messages from any connected Edge Node
 within the infrastructure. At this point, the Host Application can update the MQTT Client metrics in
 the Host Application with a current state of 'online' once each Edge Node publishes its Sparkplug
 NBIRTH and DBIRTH messages. Since the Sparkplug Host Application is also relying on the MQTT Session
 to the MQTT Server(s), the availability of MQTT Servers to the Host Application is also being
 monitored and reflected in the MQTT Client metrics in the Host Application.
-
 . If at any point in time Host Application loses connectivity with the defined MQTT Server(s), the
 online=true state of the Server is immediately reflected in the MQTT Client metrics in the Host
 Application.
 [tck-not-testable]#[yellow-background]*All metric data associated with any Sparkplug Edge Node that
 was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data
 quality if the Host Application loses connection to the MQTT Server.*#
+
+[tck-testable tck-id-message-flow-hid-sparkplug-state-message-delivered]#[yellow-background]*After
+publishing its own Host Application STATE message, if at any point the Host Application is delivered
+a STATE message on its own Host Application ID with a 'online' value of false, it MUST immediately
+republish its STATE message to the same MQTT Server with a 'online' value of true, 'bdSeq' number
+value that matches the value in the prior MQTT CONNECT packet Will Message, and the 'timestamp' set
+to the current UTC time in milliseconds since Epoch.*#
 
 [[operational_behavior_edge_node_session_establishment]]
 === Edge Node Session Establishment
@@ -190,6 +195,21 @@ until the Primary Host denotes it is online before the Edge Node publishes its N
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait]#[yellow-background]*If the
 Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host
 Application is online via the STATE topic before publishing NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait-id]#[yellow-background]*If
+the Edge Node is configured to wait for a Primary Host Application if MUST validate the Host
+Application ID as the last token in the STATE message topic string matches the configured Primary
+Host Application ID for this Edge Node.*#
+** [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait-online]#[yellow-background]*If
+the Edge Node is configured to wait for a Primary Host Application if MUST validate the 'online'
+boolean flag is true in the STATE message payload before considering the Primary Host Application to
+be online and active.*#
+** [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait-bdSeq]#[yellow-background]*If
+the Edge Node is configured to wait for a Primary Host Application if MUST validate the 'bdseq'
+number is greater than the previous STATE message bdSeq number in the STATE message payload before
+considering the Primary Host Application to be online and active. If no previous bdSeq number was
+received by this Edge Node it MUST consider the incoming bdSeq number the latest/valid.*#
+*** Note for the bdSeq number 0 is considered greater than 255 because this value is only between 0
+and 255 (inclusive).
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-topic]#[yellow-background]*The
 Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where
 group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge
@@ -207,6 +227,17 @@ Edge Node's NBIRTH retained flag MUST be set to false.*#
 Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive).*#
 ** This will become the starting sequence number which all following messages will include a
 sequence number that is one more than the previous up to 255 where it wraps back to zero.
+* [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-offline]#[yellow-background]*If the
+Edge Node is configured to wait for a Primary Host Application, it is connected to the MQTT Server,
+and receives a STATE message on its configured Primary Host, the bdSeq number in the payload is
+greater than the previous bdSeq number, and the 'online' value is false, it MUST immediately publish
+and NDEATH message and disconnect from the MQTT Server and start the connection establishment
+process over.*#
+** Note for the bdSeq number 0 is considered greater than 255 because this value is only between 0
+and 255 (inclusive).
+** If the Edge Node did not previously receive a STATE message from this Primary Host Application,
+it MUST NOT check the bdSeq number against the previous value because it is unable to do so. It MUST
+honor the 'online' boolean status flag as denoted in the payload.
 
 Most implementations of a Sparkplug Edge Node for real time SCADA systems will try to maintain a
 persistent MQTT Session with the MQTT Server Infrastructure. But there are use cases where the
