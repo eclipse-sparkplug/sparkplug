@@ -84,7 +84,6 @@ message denoting that the Primary Host application is online.
 
 .Figure 3 - Host Session Establishment
 plantuml::{assetsdir}assets/plantuml/host-session-establishment.puml[format=svg, alt="Host Session Establishment"]
-//image:extracted-media/media/image7.png[image,width=660,height=492]
 
 The session diagram in Figure 3 - Host Session Establishment shows a very simple topology with a
 single MQTT Server. The steps outlined in the session diagram are defined as follows:
@@ -221,7 +220,6 @@ MQTT 'Session Expiry Interval' to zero.
 
 .Figure 4 - Edge Node MQTT Session Establishment
 plantuml::{assetsdir}assets/plantuml/edge-node-mqtt-session-establishment.puml[format=svg, alt="Edge Node MQTT Session Establishment"]
-//image:extracted-media/media/image8.png[image,width=660,height=508]
 
 The session diagram in Figure 4 - Edge Node MQTT Session Establishment shows a very simple topology
 with a single MQTT Server. The steps outlined in the session diagram are defined as follows:
@@ -374,7 +372,6 @@ session diagram outlines the requirements:
 
 .Figure 5 - MQTT Device Session Establishment
 plantuml::{assetsdir}assets/plantuml/mqtt-device-session-establishment.puml[format=svg, alt="MQTT Device Session Establishment"]
-//image:extracted-media/media/image9.png[image,width=660,height=309]
 
 The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with
 all the Sparkplug elements in place i.e. Host Application, MQTT Server(s), Sparkplug Edge Node and
@@ -559,7 +556,6 @@ used when three (3) MQTT Servers are available in the infrastructure:
 // suppress inspection "AsciiDocLinkResolve"
 .Figure 7 – Primary Host Application STATE flow diagram
 plantuml::{assetsdir}assets/plantuml/primary-host-application-state-flow-diagram.puml[format=svg, alt="Primary Host Application STATE flow diagram"]
-//image:extracted-media/media/image11.png[image,width=660,height=304]
 
 [arabic]
 . When an Edge Node is configured with multiple available MQTT Servers in the infrastructure it
@@ -648,7 +644,6 @@ Application to the Edge Node to use a different primary network path.
 
 .Figure 6 - Edge Node NDATA and NCMD Message Flow
 plantuml::{assetsdir}assets/plantuml/edge-node-ndata-and-ncmd-message-flow.puml[format=svg, alt="Edge Node NDATA and NCMD Message Flow"]
-//image:extracted-media/media/image10.png[image,width=660,height=303]
 
 [arabic]
 . Assuming MQTT Server is available.
