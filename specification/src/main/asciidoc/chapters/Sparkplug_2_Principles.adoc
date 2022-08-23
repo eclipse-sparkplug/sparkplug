@@ -28,7 +28,7 @@ that is the decoupling of intelligent devices from any direct connection to any 
 application.
 
 .Figure 2 - Simple MQTT Infrastructure
-image:extracted-media/media/image6.png[image,width=311,height=116]
+plantuml::{assetsdir}assets/plantuml/simple-mqtt-infrastructure.puml[format=svg, alt="Simple MQTT Infrastructure"]
 
 [[principles_report_by_exception]]
 === Report by Exception
