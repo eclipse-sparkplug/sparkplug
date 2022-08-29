@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -77,7 +77,7 @@ public class EdgeNodeDeathTest extends TCKTest {
         if (params.length < 3) {
 			log("Not enough parameters: "+Arrays.toString(params));
             log("Parameters to host edge node death test must be: host_application_id edge_node_id device_id");
-            return;
+            throw new IllegalArgumentException();
         }
         hostApplicationId = params[0];
         edgeNodeId = params[1];
