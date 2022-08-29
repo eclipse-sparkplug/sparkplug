@@ -76,7 +76,7 @@ public class SendDataTest extends TCKTest {
 		testIds.addAll(Arrays.asList(testId));
 
 		if (params.length < 3) {
-			log("Not enough parameters: "+Arrays.toString(params));
+			log("Not enough parameters: " + Arrays.toString(params));
 			log("Parameters to send data test must be: groupId edgeNodeId deviceId");
 			throw new IllegalArgumentException();
 		}

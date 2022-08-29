@@ -72,40 +72,40 @@ public class ReceiveDataTest extends TCKTest {
 
     private PublishService publishService = Services.publishService();
 
-    public ReceiveDataTest(TCK aTCK, String[] params) {
-        logger.info("Primary host receive data test: {} Parameters: {} ", getName(), Arrays.asList(params));
-        theTCK = aTCK;
+	public ReceiveDataTest(TCK aTCK, String[] params) {
+		logger.info("Primary host receive data test: {} Parameters: {} ", getName(), Arrays.asList(params));
+		theTCK = aTCK;
 
-        if (params.length < 4) {
-			log("Not enough parameters: "+Arrays.toString(params));
-            log("Parameters to Host receive data test must be: groupId edgeNodeId deviceId");
-            throw new IllegalArgumentException();
-        }
-        hostApplicationId = params[0];
-        groupId = params[1];
-        edgeNodeId = params[2];
-        deviceId = params[3];
-        logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId, edgeNodeId, deviceId);
+		if (params.length < 4) {
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to Host receive data test must be: groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
+		}
+		hostApplicationId = params[0];
+		groupId = params[1];
+		edgeNodeId = params[2];
+		deviceId = params[3];
+		logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}",
+				hostApplicationId, groupId, edgeNodeId, deviceId);
 
-        final AtomicBoolean hostOnline = Utils.checkHostApplicationIsOnline(hostApplicationId);
+		final AtomicBoolean hostOnline = Utils.checkHostApplicationIsOnline(hostApplicationId);
 
-        if (!hostOnline.get()) {
-            logger.info("HostApplication {} not online - test not started.", hostApplicationId);
-            return;
-        }
+		if (!hostOnline.get()) {
+			logger.info("HostApplication {} not online - test not started.", hostApplicationId);
+			return;
+		}
 
-        // First we have to connect an edge node and device.
-        // We do this by sending an MQTT control message to the TCK device utility.
-        // ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
-        state = TestStatus.CONNECTING_DEVICE;
-        String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
-        Publish message = Builders.publish()
-                .topic(TopicConstants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
-                .payload(ByteBuffer.wrap(payload.getBytes()))
-                .build();
-        logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
-        publishService.publish(message);
-    }
+		// First we have to connect an edge node and device.
+		// We do this by sending an MQTT control message to the TCK device utility.
+		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
+		state = TestStatus.CONNECTING_DEVICE;
+		String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
+		Publish message = Builders.publish().topic(TopicConstants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(payload.getBytes())).build();
+		logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
+				deviceId);
+		publishService.publish(message);
+	}
 
     @Override
     public void endTest(Map<String, String> results) {

@@ -127,7 +127,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (parms.length < 3) {
-			log("Not enough parameters: "+Arrays.toString(parms));
+			log("Not enough parameters: " + Arrays.toString(parms));
 			log("Parameters to edge session establishment test must be: hostApplicationId groupId edgeNodeId [deviceIds]");
 			throw new IllegalArgumentException();
 		}
