@@ -77,8 +77,9 @@ public class ReceiveDataTest extends TCKTest {
         theTCK = aTCK;
 
         if (params.length < 4) {
-            logger.error("Parameters to Host receive data test must be: groupId edgeNodeId deviceId");
-            return;
+			log("Not enough parameters: "+Arrays.toString(params));
+            log("Parameters to Host receive data test must be: groupId edgeNodeId deviceId");
+            throw new IllegalArgumentException();
         }
         hostApplicationId = params[0];
         groupId = params[1];

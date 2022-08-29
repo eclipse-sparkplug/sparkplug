@@ -89,8 +89,8 @@ public class SessionTerminationTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (parms.length < 4) {
-			logger.error(
-					"Parameters to edge session termination test must be: hostApplicationId groupId edgeNodeId deviceId");
+			log("Not enough parameters: " + Arrays.toString(parms));
+			log("Parameters to edge session termination test must be: hostApplicationId groupId edgeNodeId deviceId");
 			throw new IllegalArgumentException();
 		}
 

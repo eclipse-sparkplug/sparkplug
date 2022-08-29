@@ -96,10 +96,9 @@ public class ReceiveCommandTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length < 3) {
-			String errmsg = "Parameters to edge receive command test must be: groupId edgeNodeId deviceId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
 		}
 		state = status.START;
 		deathBdSeq = -1;

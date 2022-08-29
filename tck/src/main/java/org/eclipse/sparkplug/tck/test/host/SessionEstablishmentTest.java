@@ -182,10 +182,9 @@ public class SessionEstablishmentTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length != 1) {
-			String errmsg = "Parameters to Host Session Establishment test must be: hostId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: "+Arrays.toString(params));
+			log("Parameters to Host Session Establishment test must be: hostId");
+			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
 		logger.info("{} Parameters are HostApplicationId: {}", getName(), hostApplicationId);
