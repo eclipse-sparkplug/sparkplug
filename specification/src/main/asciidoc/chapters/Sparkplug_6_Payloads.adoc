@@ -505,25 +505,19 @@ metadata associated with a metric. This is covered in the
 link:#payloads_b_propertyset[property set section].
 * *value*
 ** The value of a metric utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
-supplied with a metric MUST be one of the following protobuf types. Note if the metrics is_null flag
-is set to true the value can be omitted altogether.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bytes_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _DataSet_
+supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
+to true the value can be omitted altogether. More information on the Google Protocol Buffer types
+can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+*** Google Protocol Buffer Type: _uint32_
+*** Google Protocol Buffer Type: _uint64_
+*** Google Protocol Buffer Type: _float_
+*** Google Protocol Buffer Type: _double_
+*** Google Protocol Buffer Type: _bool_
+*** Google Protocol Buffer Type: _string_
+*** Google Protocol Buffer Type: _bytes_
+*** Sparkplug _DataSet_
 **** Defined link:#payloads_b_dataset[here].
-*** _Template_
+*** Sparkplug _Template_
 **** Defined link:#payloads_b_template[here].
 
 [[payloads_b_metadata]]
@@ -597,22 +591,17 @@ B’s mechanism of explicitly denoting a property’s value is actually null.
 * *value*
 ** The value of a property utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
 supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
-to true the value can be omitted altogether.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _PropertySet_
+to true the value can be omitted altogether. More information on the Google Protocol Buffer types
+can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+*** Google Protocol Buffer Type: _uint32_
+*** Google Protocol Buffer Type: _uint64_
+*** Google Protocol Buffer Type: _float_
+*** Google Protocol Buffer Type: _double_
+*** Google Protocol Buffer Type: _bool_
+*** Google Protocol Buffer Type: _string_
+*** Sparkplug _PropertySet_
 **** Defined link:#payloads_b_propertyset[here].
-*** _PropertySetList_
+*** Sparkplug _PropertySetList_
 **** Defined link:#payloads_b_propertysetlist[here].
 
 [[payloads_b_quality_codes]]
@@ -691,21 +680,12 @@ of a DataSet.
 
 * *value*
 ** The value of a DataSet.DataSetValue utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
-[tck-testable tck-id-payloads-template-dataset-value]#[yellow-background]*The value supplied MUST be
-one of the following types: _uint32_, _uint64_, _float_, _double_, _bool_, or _string_.*#
-More information on these types can be found below.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+** [tck-testable tck-id-payloads-template-dataset-value]#[yellow-background]*The value supplied MUST be
+one of the following Google Protobuf types: _uint32_, _uint64_, _float_, _double_, _bool_, or
+_string_.*#
+
+More information on the types above can be found here:
+https://developers.google.com/protocol-buffers/docs/proto#scalar
 
 [[payloads_b_template]]
 ==== Template
@@ -808,22 +788,12 @@ included in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
 ** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*The value supplied
-MUST be one of the following protobuf types: _uint32_, _uint64_, _float_, _double_, _bool_, or
-_string_.*#
+MUST be one of the following Google Protocol Buffer types: _uint32_, _uint64_, _float_, _double_,
+_bool_, or _string_.*#
+More information on these types can be found here:
+https://developers.google.com/protocol-buffers/docs/proto#scalar
 ** For a template definition, this is the default value of the parameter. For a template instance,
-this is the value unique to that instance. More information on these types can be found below.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+this is the value unique to that instance.
 
 [[payloads_b_datatypes]]
 ==== Data Types

@@ -344,6 +344,26 @@ Sparkplug Device. A Sparkplug Metric typically includes a name, value, and times
 Metrics are also used in NCMD and DCMD messages to send messages to Edge Nodes and Devices to
 change values at the Edge.
 
+[[introduction_datatypes]]
+===== Data Types
+
+There are different uses of the term 'datatype' in the specification. Sparkplug encodes the
+payloads using Google Protocol Buffers. Google Protocol Buffers has its own scalar value types here:
+https://developers.google.com/protocol-buffers/docs/proto#scalar
+
+The Google Protocol Buffer datatypes define what actually travels over the TCP/IP socket in the MQTT
+payload. For ease of programming, Google Protobuf includes a compiler tool that generates code in
+multiple different languages. These Protobuf datatypes are then represented by their proper native
+programming language datatypes. This is done on a per language basis after the Google Protobuf file
+is used to generate the code for each specific language.
+
+In addition to Protobuf datatypes and native programming language datatypes there are also
+'Sparkplug datatypes'. These are defined in the
+link:#payloads_b_google_protocol_buffer_schema[Sparkplug Protobuf Schema]. These datatypes are those
+that are used for Sparkplug Metrics. Every Metric must include a Sparkplug Datatype in the NBIRTH or
+DBIRTH message depending on whether the Metric is a 'Node level' or 'Device level' metric. Each of
+the Sparkplug Datatypes is then represented by a Google Protobuf datatype.
+
 [[introduction_normative_references]]
 === Normative References
 
