@@ -192,18 +192,18 @@ follow the following rules. Note if Primary Host is configured for the Edge Node
 until the Primary Host denotes it is online before the Edge Node publishes its NBIRTH message.
 
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait]#[yellow-background]*If the
-Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host
+Edge Node is configured to wait for a Primary Host Application it MUST verify the Primary Host
 Application is online via the STATE topic before publishing NBIRTH and DBIRTH messages.*#
 ** [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait-id]#[yellow-background]*If
-the Edge Node is configured to wait for a Primary Host Application if MUST validate the Host
+the Edge Node is configured to wait for a Primary Host Application it MUST validate the Host
 Application ID as the last token in the STATE message topic string matches the configured Primary
 Host Application ID for this Edge Node.*#
 ** [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait-online]#[yellow-background]*If
-the Edge Node is configured to wait for a Primary Host Application if MUST validate the 'online'
+the Edge Node is configured to wait for a Primary Host Application it MUST validate the 'online'
 boolean flag is true in the STATE message payload before considering the Primary Host Application to
 be online and active.*#
 ** [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-wait-bdSeq]#[yellow-background]*If
-the Edge Node is configured to wait for a Primary Host Application if MUST validate the 'bdseq'
+the Edge Node is configured to wait for a Primary Host Application it MUST validate the 'bdseq'
 number is greater than the previous STATE message bdSeq number in the STATE message payload before
 considering the Primary Host Application to be online and active. If no previous bdSeq number was
 received by this Edge Node it MUST consider the incoming bdSeq number the latest/valid.*#
@@ -230,7 +230,7 @@ sequence number that is one more than the previous up to 255 where it wraps back
 Edge Node is configured to wait for a Primary Host Application, it is connected to the MQTT Server,
 and receives a STATE message on its configured Primary Host, the bdSeq number in the payload is
 greater than the previous bdSeq number, and the 'online' value is false, it MUST immediately publish
-and NDEATH message and disconnect from the MQTT Server and start the connection establishment
+an NDEATH message and disconnect from the MQTT Server and start the connection establishment
 process over.*#
 ** Note for the bdSeq number 0 is considered greater than 255 because this value is only between 0
 and 255 (inclusive).

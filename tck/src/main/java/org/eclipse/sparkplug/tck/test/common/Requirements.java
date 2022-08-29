@@ -65,6 +65,7 @@ public class Requirements {
     public final static String INTRO_EDGE_NODE_ID_UNIQUENESS = "The Edge Node Descriptor MUST be unique within the context of all of other Edge Nodes within the Sparkplug infrastructure.";
 
     // 1.4.1.9 Sparkplug Metric
+    // 1.4.1.10 Data Types
     // 1.5 Normative References
     // 1.6 Consolidated List of Normative Statements
     // 1.7 Security
@@ -344,6 +345,9 @@ public class Requirements {
     public final static String ID_G = "g";
     public final static String G = "All metric data associated with any Sparkplug Edge Node that was connected to that MQTT Server and known by the Host Application MUST be updated to a STALE data quality if the Host Application loses connection to the MQTT Server.";
 
+    public final static String ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED = "message-flow-hid-sparkplug-state-message-delivered";
+    public final static String MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED = "After publishing its own Host Application STATE message, if at any point the Host Application is delivered a STATE message on its own Host Application ID with a 'online' value of false, it MUST immediately republish its STATE message to the same MQTT Server with a 'online' value of true, 'bdSeq' number value that matches the value in the prior MQTT CONNECT packet Will Message, and the 'timestamp' set to the current UTC time in milliseconds since Epoch.";
+
     // 5.4 Edge Node Session Establishment
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "message-flow-edge-node-ncmd-subscribe";
     public final static String MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE = "The MQTT client associated with the Edge Node MUST subscribe to a topic of the form 'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of 1.";
@@ -370,7 +374,16 @@ public class Requirements {
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED = "The Edge Node's MQTT Will Message's retained flag MUST be set to false.";
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "message-flow-edge-node-birth-publish-phid-wait";
-    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "If the Edge Node is configured to wait for a Primary Host Application if MUST verify the Primary Host Application is online via the STATE topic before publishing NBIRTH and DBIRTH messages.";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT = "If the Edge Node is configured to wait for a Primary Host Application it MUST verify the Primary Host Application is online via the STATE topic before publishing NBIRTH and DBIRTH messages.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID = "message-flow-edge-node-birth-publish-phid-wait-id";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID = "If the Edge Node is configured to wait for a Primary Host Application it MUST validate the Host Application ID as the last token in the STATE message topic string matches the configured Primary Host Application ID for this Edge Node.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE = "message-flow-edge-node-birth-publish-phid-wait-online";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE = "If the Edge Node is configured to wait for a Primary Host Application it MUST validate the 'online' boolean flag is true in the STATE message payload before considering the Primary Host Application to be online and active.";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ = "message-flow-edge-node-birth-publish-phid-wait-bdSeq";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ = "If the Edge Node is configured to wait for a Primary Host Application it MUST validate the 'bdseq' number is greater than the previous STATE message bdSeq number in the STATE message payload before considering the Primary Host Application to be online and active. If no previous bdSeq number was received by this Edge Node it MUST consider the incoming bdSeq number the latest/valid.";
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC = "message-flow-edge-node-birth-publish-nbirth-topic";
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC = "The Edge Node's NBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/NBIRTH/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node";
@@ -389,6 +402,9 @@ public class Requirements {
 
     public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ = "message-flow-edge-node-birth-publish-nbirth-payload-seq";
     public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ = "The Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 255 (inclusive).";
+
+    public final static String ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE = "message-flow-edge-node-birth-publish-phid-offline";
+    public final static String MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE = "If the Edge Node is configured to wait for a Primary Host Application, it is connected to the MQTT Server, and receives a STATE message on its configured Primary Host, the bdSeq number in the payload is greater than the previous bdSeq number, and the 'online' value is false, it MUST immediately publish an NDEATH message and disconnect from the MQTT Server and start the connection establishment process over.";
 
     // 5.5 Edge Node Session Termination
     public final static String ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH = "operational-behavior-edge-node-intentional-disconnect-ndeath";
@@ -720,7 +736,7 @@ public class Requirements {
     // 6.4.12 DataSet.Row
     // 6.4.13 DataSet.DataSetValue
     public final static String ID_PAYLOADS_TEMPLATE_DATASET_VALUE = "payloads-template-dataset-value";
-    public final static String PAYLOADS_TEMPLATE_DATASET_VALUE = "The value supplied MUST be one of the following types: uint32, uint64, float, double, bool, or string.";
+    public final static String PAYLOADS_TEMPLATE_DATASET_VALUE = "The value supplied MUST be one of the following Google Protobuf types: uint32, uint64, float, double, bool, or string.";
 
     // 6.4.14 Template
     public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION = "payloads-template-definition-is-definition";
@@ -729,11 +745,35 @@ public class Requirements {
     public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_REF = "payloads-template-definition-ref";
     public final static String PAYLOADS_TEMPLATE_DEFINITION_REF = "A Template Definition MUST omit the template_ref field.";
 
+    public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS = "payloads-template-definition-members";
+    public final static String PAYLOADS_TEMPLATE_DEFINITION_MEMBERS = "A Template Definition MUST include all member metrics that will ever be included in corresponding template instances.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH = "payloads-template-definition-nbirth";
+    public final static String PAYLOADS_TEMPLATE_DEFINITION_NBIRTH = "A Template Definition MUST be included in the NBIRTH for all Template Instances that are included in the NBIRTH and DBIRTH messages.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS = "payloads-template-definition-parameters";
+    public final static String PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS = "A Template Definition MUST include all parameters that will be included in the corresponding Template Instances.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT = "payloads-template-definition-parameters-default";
+    public final static String PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT = "A Template Definition MAY include values for parameters in the Template Definition parameters.";
+
     public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION = "payloads-template-instance-is-definition";
     public final static String PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION = "A Template Instance MUST have is_definition set to false.";
 
     public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_REF = "payloads-template-instance-ref";
     public final static String PAYLOADS_TEMPLATE_INSTANCE_REF = "A Template Instance MUST have template_ref set to the type of template definition it is.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS = "payloads-template-instance-members";
+    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS = "A Template Instance MUST include only members that were included in the corresponding template definition.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH = "payloads-template-instance-members-birth";
+    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH = "A Template Instance MUST include all members that were included in the corresponding Template Definition in a NBIRTH or DBIRTH message.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA = "payloads-template-instance-members-data";
+    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA = "A Template Instance MAY include only a subset of the members that were included in the corresponding template definition in a NDATA or DDATA message.";
+
+    public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS = "payloads-template-instance-parameters";
+    public final static String PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS = "A Template Instance MAY include parameter values for any parameters that were included in the corresponding Template Definition.";
 
     public final static String ID_PAYLOADS_TEMPLATE_VERSION = "payloads-template-version";
     public final static String PAYLOADS_TEMPLATE_VERSION = "If included, the version MUST be a UTF-8 string representing the version of the Template.";
@@ -770,7 +810,7 @@ public class Requirements {
     public final static String PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ = "This MUST be included in Template Parameter Definitions in NBIRTH and DBIRTH messages.";
 
     public final static String ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE = "payloads-template-parameter-value";
-    public final static String PAYLOADS_TEMPLATE_PARAMETER_VALUE = "The value supplied MUST be one of the following protobuf types: uint32, uint64, float, double, bool, or string.";
+    public final static String PAYLOADS_TEMPLATE_PARAMETER_VALUE = "The value supplied MUST be one of the following Google Protocol Buffer types: uint32, uint64, float, double, bool, or string.";
 
     // 6.4.16 Data Types
     // 6.4.17 Datatype Details
@@ -1009,4 +1049,4 @@ public class Requirements {
     // 11.6 Raspberry Pi Hardware
     // 12 Appendix B: List of Normative Statements (non-normative)
 }
-// no of assertions 275
+// no of assertions 288
