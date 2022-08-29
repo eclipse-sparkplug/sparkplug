@@ -75,7 +75,8 @@ public class EdgeNodeDeathTest extends TCKTest {
         theTCK = aTCK;
 
         if (params.length < 3) {
-            logger.error("Parameters to host edge node death test must be: host_application_id edge_node_id device_id");
+			log("Not enough parameters: "+Arrays.toString(params));
+            log("Parameters to host edge node death test must be: host_application_id edge_node_id device_id");
             return;
         }
         hostApplicationId = params[0];
