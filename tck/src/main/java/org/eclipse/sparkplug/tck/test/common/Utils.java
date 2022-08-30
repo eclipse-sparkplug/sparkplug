@@ -14,6 +14,7 @@
 package org.eclipse.sparkplug.tck.test.common;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.MAYBE;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
@@ -61,6 +62,10 @@ public class Utils {
 	public static @NotNull String setResult(boolean bValid, String requirement) {
 		return bValid ? PASS : FAIL + " " + requirement;
 	}
+	
+	public static @NotNull String setShouldResult(boolean bValid, String requirement) {
+		return bValid ? PASS : MAYBE + " " + requirement;
+	}
 
 	public static PayloadOrBuilder decode(ByteBuffer payload) {
 		byte[] array = new byte[payload.remaining()];
@@ -87,7 +92,7 @@ public class Utils {
 			return true;
 		}
 
-		switch (DataType.valueOf(m.getDatatype())) {
+		switch (DataType.forNumber(m.getDatatype())) {
 			case Unknown:
 				return false;
 			case Int8:

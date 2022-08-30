@@ -28,6 +28,7 @@ public class TopicConstants {
 
     public static final @NotNull String PASS = "PASS";
     public static final @NotNull String FAIL = "FAIL";
+    public static final @NotNull String MAYBE = "MAYBE";
     public static final @NotNull String NOT_EXECUTED = "NOT EXECUTED";
     public static final @NotNull String NOT_YET_IMPLEMENTED = "NOT YET IMPLEMENTED";
     public static final @NotNull String EMPTY = "EMPTY";
