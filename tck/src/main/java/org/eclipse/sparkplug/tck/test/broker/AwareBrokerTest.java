@@ -72,35 +72,37 @@ public class AwareBrokerTest extends TCKTest {
     private long willTimestamp;
     private BrokerAwareFeatureTester brokerAwareFeatureTester;
 
-    public AwareBrokerTest(TCK aTCK, String[] params) {
-        logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
-        theTCK = aTCK;
-        testResults = new HashMap<String, String>();
-        testIds.addAll(Arrays.asList(testId));
-        if (params.length < 4) {
-            logger.error("Parameters must be: host and port, groupId and egdeNodeId ");
-            return;
-        }
-        host = params[0];
-        port = params[1];
-        groupId = params[2];
-        edgeNodeId = params[3];
+	public AwareBrokerTest(TCK aTCK, String[] params) {
+		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
+		theTCK = aTCK;
+		testResults = new HashMap<String, String>();
+		testIds.addAll(Arrays.asList(testId));
+		if (params.length < 4) {
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters must be: host and port, groupId and egdeNodeId ");
+			throw new IllegalArgumentException();
+		}
+		host = params[0];
+		port = params[1];
+		groupId = params[2];
+		edgeNodeId = params[3];
 
-        bBasicAwareChecked = true;
-        Services.extensionExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                //create subscriber client
-                brokerAwareFeatureTester = new BrokerAwareFeatureTester(host, Integer.parseInt(port), null, null, null, 60);
-                subscriber = brokerAwareFeatureTester.getClientBuilder("AwareTestSubscriber").build();
-                try {
-                    subscriber.toAsync().connect().get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error(e.getMessage());
-                }
-            }
-        });
-    }
+		bBasicAwareChecked = true;
+		Services.extensionExecutorService().submit(new Runnable() {
+			@Override
+			public void run() {
+				// create subscriber client
+				brokerAwareFeatureTester =
+						new BrokerAwareFeatureTester(host, Integer.parseInt(port), null, null, null, 60);
+				subscriber = brokerAwareFeatureTester.getClientBuilder("AwareTestSubscriber").build();
+				try {
+					subscriber.toAsync().connect().get();
+				} catch (InterruptedException | ExecutionException e) {
+					logger.error(e.getMessage());
+				}
+			}
+		});
+	}
 
     @Override
     public void endTest(Map<String, String> results) {

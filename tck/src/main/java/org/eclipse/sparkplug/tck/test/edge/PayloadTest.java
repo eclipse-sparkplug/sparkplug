@@ -83,20 +83,22 @@ public class PayloadTest extends TCKTest {
     private @NotNull String hostApplicationId;
     private @NotNull long seqUnassigned = -1;
 
-    public PayloadTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
-        logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
-        theTCK = aTCK;
+	public PayloadTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+		logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
+		theTCK = aTCK;
 
-        if (parms.length < 4) {
-            logger.error("Parameters to edge payload test must be: {hostId}, groupId edgeNodeId deviceId");
-            throw new IllegalArgumentException("Parameters to edge payload test must be: {hostId}, groupId edgeNodeId deviceId");
-        }
-        hostApplicationId = parms[0];
-        groupId = parms[1];
-        edgeNodeId = parms[2];
-        deviceId = parms[3];
-        logger.info("Parameters are HostId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId, edgeNodeId, deviceId);
-    }
+		if (parms.length < 4) {
+			log("Not enough parameters: " + Arrays.toString(parms));
+			log("Parameters to edge payload test must be: hostId groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
+		}
+		hostApplicationId = parms[0];
+		groupId = parms[1];
+		edgeNodeId = parms[2];
+		deviceId = parms[3];
+		logger.info("Parameters are HostId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId,
+				edgeNodeId, deviceId);
+	}
 
     @Override
     public void endTest(Map<String, String> results) {

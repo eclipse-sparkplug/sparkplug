@@ -100,10 +100,9 @@ public class SendCommandTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length < 4) {
-			String errmsg = "Parameters to host send command test must be: hostApplicationId, groupId edgeNodeId deviceId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to host send command test must be: hostApplicationId, groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
 		groupId = params[1];
@@ -113,7 +112,7 @@ public class SendCommandTest extends TCKTest {
 				hostApplicationId, groupId, edgeNodeId, deviceId);
 
 		final AtomicBoolean hostOnline = checkHostApplicationIsOnline(hostApplicationId);
-		
+
 		if (!hostOnline.get()) {
 			logger.info("HostApplication {} not online - test not started.", hostApplicationId);
 			return;

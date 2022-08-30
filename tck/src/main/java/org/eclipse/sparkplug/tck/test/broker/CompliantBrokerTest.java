@@ -66,30 +66,31 @@ public class CompliantBrokerTest extends TCKTest {
     private @NotNull String host;
     private @NotNull String port;
 
-    public CompliantBrokerTest(TCK aTCK, String[] params) {
-        logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
-        theTCK = aTCK;
-        testIds.addAll(Arrays.asList(testId));
-        if (params.length < 2) {
-            logger.error("Parameters must be: host and port, (already set during mqtt connection establishment)");
-            return;
-        }
-        host = params[0];
-        port = params[1];
-        logger.info("Parameters are Broker host: {}, port: {}, ", host, port);
+	public CompliantBrokerTest(TCK aTCK, String[] params) {
+		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
+		theTCK = aTCK;
+		testIds.addAll(Arrays.asList(testId));
+		if (params.length < 2) {
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters must be: host and port, (already set during mqtt connection establishment)");
+			throw new IllegalArgumentException();
+		}
+		host = params[0];
+		port = params[1];
+		logger.info("Parameters are Broker host: {}, port: {}, ", host, port);
 
-        Services.extensionExecutorService().schedule(new Runnable() {
-            @Override
-            public void run() {
-                logger.info("Broker - Sparkplug Broker compliant Test - execute test");
-                try {
-                    checkCompliance(host, Integer.parseInt(port), testResults);
-                } finally {
-                    theTCK.endTest();
-                }
-            }
-        }, 5, TimeUnit.SECONDS);
-    }
+		Services.extensionExecutorService().schedule(new Runnable() {
+			@Override
+			public void run() {
+				logger.info("Broker - Sparkplug Broker compliant Test - execute test");
+				try {
+					checkCompliance(host, Integer.parseInt(port), testResults);
+				} finally {
+					theTCK.endTest();
+				}
+			}
+		}, 5, TimeUnit.SECONDS);
+	}
 
     @SpecAssertion(
             section = Sections.CONFORMANCE_MQTT_SERVER,

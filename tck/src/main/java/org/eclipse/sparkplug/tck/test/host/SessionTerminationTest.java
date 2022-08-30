@@ -76,10 +76,9 @@ public class SessionTerminationTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length != 2) {
-			String errmsg = "Parameters to host session termination test must be: hostApplicationId hostClientId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to host session termination test must be: hostApplicationId hostClientId");
+			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
 		hostClientId = params[1];
