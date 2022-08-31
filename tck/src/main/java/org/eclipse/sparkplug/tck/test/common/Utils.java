@@ -13,11 +13,14 @@
 
 package org.eclipse.sparkplug.tck.test.common;
 
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.MAYBE;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -65,6 +68,16 @@ public class Utils {
 	
 	public static @NotNull String setShouldResult(boolean bValid, String requirement) {
 		return bValid ? PASS : MAYBE + " " + requirement;
+	}
+	
+	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result,
+			String req_id, String req_desc) {	
+		boolean isSet = false;
+		if (!results.get(req_id).equals(FAIL)) {
+			results.put(req_id,	setResult(result, req_desc));
+			isSet = true;
+		}
+		return isSet;
 	}
 
 	public static PayloadOrBuilder decode(ByteBuffer payload) {

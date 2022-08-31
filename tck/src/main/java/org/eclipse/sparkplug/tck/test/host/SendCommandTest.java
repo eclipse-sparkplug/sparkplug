@@ -20,7 +20,6 @@ package org.eclipse.sparkplug.tck.test.host;
  * edge node (NCMD) and a device (DCMD).
  *
  * There will be a prompt to the person executing the test to send a command to
- * a device and edge node we will connect.
  *
  * The host application under test must be connected and online prior to starting this test.
  * The id of the host application must be passed as the first parameter to this test.
@@ -486,10 +485,9 @@ public class SendCommandTest extends TCKTest {
 					if (birth.getName().equals(current.getName())) {
 						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
 								setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME));
-						if (current.getDatatype() == birth.getDatatype() && Utils.hasValue(current)) {
-							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
-									setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
-						}
+						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
+								setResult(current.getDatatype() == birth.getDatatype() && Utils.hasValue(current),
+										OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
 						break;
 					}
 				}
