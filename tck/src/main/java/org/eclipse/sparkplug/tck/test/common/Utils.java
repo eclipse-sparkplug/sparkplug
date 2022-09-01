@@ -65,16 +65,16 @@ public class Utils {
 	public static @NotNull String setResult(boolean bValid, String requirement) {
 		return bValid ? PASS : FAIL + " " + requirement;
 	}
-	
+
 	public static @NotNull String setShouldResult(boolean bValid, String requirement) {
 		return bValid ? PASS : MAYBE + " " + requirement;
 	}
-	
-	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result,
-			String req_id, String req_desc) {	
+
+	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
 		boolean isSet = false;
 		if (!results.get(req_id).equals(FAIL)) {
-			results.put(req_id,	setResult(result, req_desc));
+			results.put(req_id, setResult(result, req_desc));
 			isSet = true;
 		}
 		return isSet;
@@ -97,6 +97,11 @@ public class Utils {
 			return decode(payload);
 		}
 		return null;
+	}
+
+	public static long getNextSeq(long seq) {
+		assert seq >= 0 && seq <= 255;
+		return (seq == 255) ? 0 : seq + 1;
 	}
 
 	public static boolean hasValue(Metric m) {

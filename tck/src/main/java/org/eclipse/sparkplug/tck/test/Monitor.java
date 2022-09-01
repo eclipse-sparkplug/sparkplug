@@ -50,6 +50,16 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRT
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_TEMPLATES;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_BDSEQ_INCREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_BDSEQ_INCREMENT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
@@ -65,6 +75,7 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
+import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
@@ -117,7 +128,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
 			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,
-			ID_TOPICS_NBIRTH_METRIC_REQS, ID_TOPICS_NBIRTH_TEMPLATES, ID_TOPICS_NBIRTH_BDSEQ_INCREMENT };
+			ID_TOPICS_NBIRTH_METRIC_REQS, ID_TOPICS_NBIRTH_TEMPLATES, ID_TOPICS_NBIRTH_BDSEQ_INCREMENT,
+			ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ, ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -136,6 +151,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private HashMap<String, List<Metric>> edgeMetrics = new HashMap<String, List<Metric>>();
 	private HashMap<String, List<Metric>> deviceMetrics = new HashMap<String, List<Metric>>();
+
+	// host application id to sequence number
+	private HashMap<String, Long> hostBdSeqs = new HashMap<String, Long>();
 
 	public Monitor() {
 		logger.info("Sparkplug TCK message monitor 1.0");
@@ -214,6 +232,21 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NBIRTH,
 			id = ID_TOPICS_NBIRTH_BDSEQ_INCREMENT)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_STATE,
+			id = ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_STATE_DEATH,
+			id = ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 
@@ -235,13 +268,68 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					if (current.getName().equals("bdSeq") && current.hasLongValue()) {
 						long bdseq = current.getLongValue();
 						if (edgeBdSeqs.get(id) != null) {
-							if (!setResultIfNotFail(testResults, bdseq == edgeBdSeqs.get(id) + 1,
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
 									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
 								log("Test failed for assertion " + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: "
 										+ id);
 							}
 						}
 						edgeBdSeqs.put(id, bdseq);
+					}
+				}
+			} else if (levels[0].equals(TOPIC_ROOT_STATE)) {
+				String hostid = levels[1];
+				PayloadOrBuilder payload = getSparkplugPayload(willPublishPacket);
+				List<Metric> metrics = payload.getMetricsList();
+				ListIterator<Metric> metricIterator = metrics.listIterator();
+				while (metricIterator.hasNext()) {
+					Metric current = metricIterator.next();
+					if (current.getName().equals("bdSeq")) {
+						if (current.getDatatype() == DataType.UInt64.getNumber() && current.hasLongValue()) {
+							long bdseq = current.getLongValue();
+							if (hostBdSeqs.get(hostid) != null) {
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
+										PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion " + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ, HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion " + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+										MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion "
+											+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
+										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion "
+											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ,
+										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion "
+											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+							}
+							hostBdSeqs.put(hostid, bdseq);
+						} else {
+							setResultIfNotFail(testResults, false,
+									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ);
+							log("Test failed for assertion "
+									+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ + ": host id: "
+									+ hostid);
+						}
 					}
 				}
 			}
@@ -403,7 +491,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_NDATA_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(true, PAYLOADS_NDATA_SEQ_INC));
@@ -513,7 +601,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DBIRTH_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(true, PAYLOADS_DBIRTH_SEQ_INC));
@@ -562,7 +650,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DDEATH_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(true, PAYLOADS_DDEATH_SEQ_INC));
@@ -592,7 +680,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DDATA_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(true, PAYLOADS_DDATA_SEQ_INC));
@@ -660,14 +748,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					}
 				}
 			}
-		}
-	}
-
-	private long getExpectedSeq(long lastSeq) {
-		if (lastSeq == 255) {
-			return 0;
-		} else {
-			return lastSeq + 1;
 		}
 	}
 }
