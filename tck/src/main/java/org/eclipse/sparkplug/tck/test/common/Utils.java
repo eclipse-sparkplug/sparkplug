@@ -79,6 +79,16 @@ public class Utils {
 		}
 		return isSet;
 	}
+	
+	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
+		boolean isSet = false;
+		if (!results.get(req_id).equals(MAYBE)) {
+			results.put(req_id, setShouldResult(result, req_desc));
+			isSet = true;
+		}
+		return isSet;
+	}
 
 	public static PayloadOrBuilder decode(ByteBuffer payload) {
 		byte[] array = new byte[payload.remaining()];
