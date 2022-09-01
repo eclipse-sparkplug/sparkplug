@@ -72,6 +72,8 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
@@ -148,7 +150,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
-			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE };
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -532,6 +534,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
+			id = ID_PRINCIPLES_RBE_RECOMMENDED)
 	private void handleNDATA(String group_id, String edge_node_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NDATA *** {}/{}", group_id, edge_node_id);
 		if (payload.hasSeq()) {
@@ -632,6 +637,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
 							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE + ": metric name: "
+									+ current.getName());
+						}
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
+								ID_PRINCIPLES_RBE_RECOMMENDED, ID_PRINCIPLES_RBE_RECOMMENDED)) {
+							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ current.getName());
 						}
 						break;
@@ -785,6 +795,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE) 
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
+			id = ID_PRINCIPLES_RBE_RECOMMENDED)
 	private void handleDDATA(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DDATA *** {}/{}/{}", group_id, edge_node_id, device_id);
 		if (payload.hasSeq()) {
@@ -886,6 +899,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
 							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE + ": metric name: "
+									+ current.getName());
+						}
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
+								ID_PRINCIPLES_RBE_RECOMMENDED, ID_PRINCIPLES_RBE_RECOMMENDED)) {
+							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ current.getName());
 						}
 						break;
