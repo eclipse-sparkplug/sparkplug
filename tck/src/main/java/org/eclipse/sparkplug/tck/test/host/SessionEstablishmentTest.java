@@ -94,6 +94,8 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.charset.StandardCharsets;
@@ -169,7 +171,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_PAYLOADS_STATE_BIRTH, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
 			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
-			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ);
+			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
+			ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED);
 
 	private @NotNull String hostApplicationId;
 
@@ -587,6 +590,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_STATE,
 			id = ID_PAYLOADS_STATE_SUBSCRIBE)
+	@SpecAssertion(
+			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
+			id = ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED)
 	private void checkSubscribes(final boolean shouldBeSubscribed) {
 		final List<String> namespaceTopicFilter = List.of("spBv1.0/#");
 		final List<String> stateTopicFilter = List.of(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId,
@@ -618,6 +624,11 @@ public class SessionEstablishmentTest extends TCKTest {
 		logger.debug("Check Req: {}:{}.", ID_PAYLOADS_STATE_SUBSCRIBE, PAYLOADS_STATE_SUBSCRIBE + addInformation);
 		testResults.put(ID_PAYLOADS_STATE_SUBSCRIBE,
 				setResult(isSubscribed, PAYLOADS_STATE_SUBSCRIBE + addInformation));
+
+		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED,
+				HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED + addInformation);
+		testResults.put(ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED,
+				setResult(isSubscribed, HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED + addInformation));
 
 		if (shouldBeSubscribed) {
 			theTCK.endTest();
