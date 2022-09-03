@@ -82,7 +82,7 @@ Certificates. Any Edge Node that has specified this Sparkplug Host Application a
 Application will will wait to publish their Birth Certificates until after they receive the STATE
 message denoting that the Primary Host application is online.
 
-.Figure 3 - Host Session Establishment
+.Figure 4 - Host Session Establishment
 plantuml::{assetsdir}assets/plantuml/host-session-establishment.puml[format=svg, alt="Host Session Establishment"]
 
 The session diagram in Figure 3 - Host Session Establishment shows a very simple topology with a
@@ -249,7 +249,7 @@ Host and Edge Nodes) in a Sparkplug system MUST always set the 'Clean Session' f
 3.1.1 CONNECT packet to true. When using MQTT 5.0 the 'Clean Start' flag must be set to true and the
 MQTT 'Session Expiry Interval' to zero.
 
-.Figure 4 - Edge Node MQTT Session Establishment
+.Figure 5 - Edge Node MQTT Session Establishment
 plantuml::{assetsdir}assets/plantuml/edge-node-mqtt-session-establishment.puml[format=svg, alt="Edge Node MQTT Session Establishment"]
 
 The session diagram in Figure 4 - Edge Node MQTT Session Establishment shows a very simple topology
@@ -401,7 +401,7 @@ Device.*#
 In order to expose and populate the metrics from any intelligent device, the following simple
 session diagram outlines the requirements:
 
-.Figure 5 - MQTT Device Session Establishment
+.Figure 6 - MQTT Device Session Establishment
 plantuml::{assetsdir}assets/plantuml/mqtt-device-session-establishment.puml[format=svg, alt="MQTT Device Session Establishment"]
 
 The session diagram in Figure 5 - MQTT Device Session Establishment shows a simple topology with
@@ -673,7 +673,7 @@ The following simple message flow diagram demonstrates the messages used to upda
 cellular RSSI value in the Primary Host Application and sending a command from the Primary Host
 Application to the Edge Node to use a different primary network path.
 
-.Figure 6 - Edge Node NDATA and NCMD Message Flow
+.Figure 8 - Edge Node NDATA and NCMD Message Flow
 plantuml::{assetsdir}assets/plantuml/edge-node-ndata-and-ncmd-message-flow.puml[format=svg, alt="Edge Node NDATA and NCMD Message Flow"]
 
 [arabic]

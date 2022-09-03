@@ -380,7 +380,7 @@ Using this convention in conjunction with the *group_id*, *edge_node_id* and *de
 defined in the Topic Namespace, consuming applications can organize metrics in the same hierarchical
 fashion:
 
-.Figure 8 – Payload Metric Folder Structure
+.Figure 9 – Payload Metric Folder Structure
 image:extracted-media/media/image12.png[image,width=638,height=139]
 
 [[payloads_b_sparkplug_bv1_0_payload_components]]
@@ -1148,7 +1148,7 @@ Consider the following Sparkplug B payload in the NBIRTH message shown above:
 
 This would result in a structure as follows on the Host Application.
 
-.Figure 9 – Sparkplug B Metric Structure 1
+.Figure 10 – Sparkplug B Metric Structure 1
 image:extracted-media/media/image13.png[image,width=752,height=332]
 
 [[payloads_b_dbirth]]
@@ -1268,7 +1268,7 @@ Consider the following Sparkplug B payload in the DBIRTH message shown above:
 
 This would result in a structure as follows on the Host Application.
 
-.Figure 10 – Sparkplug B Metric Structure 2
+.Figure 11 – Sparkplug B Metric Structure 2
 image:extracted-media/media/image14.png[image,width=721,height=341]
 
 [[payloads_b_ndata]]

@@ -65,7 +65,7 @@ Sparkplug Host Applications, and MQTT enabled Devices. Each component can connec
 MQTT Server. A message sent to any MQTT Server will be distributed to all available MQTT Servers in
 the cluster (which will distribute the message to all subscribing Sparkplug components).
 
-.Figure X – High Availability MQTT Server Cluster
+.Figure 12 – High Availability MQTT Server Cluster
 image:extracted-media/media/image15.png[image,width=660,height=314]
 
 If any MQTT Server would fail, the MQTT connection for components connected to the broker will break
@@ -80,7 +80,7 @@ beforehand (like in cloud native deployment environments such as Kubernetes) or 
 not desired that all IP addresses (or DNS lookup names) are configured on the Sparkplug components,
 a load balancer might be used.
 
-.Figure X – High Availability MQTT Server Cluster with Load Balancer
+.Figure 13 – High Availability MQTT Server Cluster with Load Balancer
 image:extracted-media/media/image16.png[image,width=660,height=314]
 
 A load balancer acts as the single point of contact for Sparkplug components, so only a single IP
@@ -126,7 +126,7 @@ Primary Host Application does not result in Edge Nodes being “stranded” on a
 network issues. The following message flow diagram outlines how the STATE message is used when three
 (3) MQTT Servers are available in the infrastructure:
 
-.Figure 7 – Primary Application STATE flow diagram
+.Figure 14 – Primary Application STATE flow diagram
 image:extracted-media/media/image11.png[image,width=660,height=304]
 
 [arabic]
