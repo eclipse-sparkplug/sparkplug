@@ -302,7 +302,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
 								log("Test failed for assertion " + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: "
 										+ id);
-								log("Actual bdseq: "+bdseq+" expected bdseq: "+getNextSeq(edgeBdSeqs.get(id)));
+								log("Actual bdseq: " + bdseq + " expected bdseq: " + getNextSeq(edgeBdSeqs.get(id)));
 							}
 						}
 						edgeBdSeqs.put(id, bdseq);
@@ -322,7 +322,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 				if (!isValidPayload) {
 					setResultIfNotFail(testResults, isValidPayload, ID_PAYLOADS_STATE_BIRTH_PAYLOAD,
-						PAYLOADS_STATE_BIRTH_PAYLOAD);
+							PAYLOADS_STATE_BIRTH_PAYLOAD);
 				} else {
 					if (json.has("bdSeq")) {
 						JsonNode bdseqnode = json.get("bdSeq");
