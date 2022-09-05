@@ -696,6 +696,8 @@ referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 
 * *Template Definition*
 ** This is the definition of a Sparkplug Template.
+*** [tck-testable tck-id-payloads-template-definition-nbirth-only]#[yellow-background]*Template
+Definitions MUST only be included in NBIRTH messages.*#
 *** [tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
 Definition MUST have is_definition set to true.*#
 *** [tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
@@ -726,11 +728,11 @@ have template_ref set to the type of template definition it is.*#
 *** [tck-testable tck-id-payloads-template-instance-members]#[yellow-background]*A Template Instance
 MUST include only members that were included in the corresponding template definition.*#
 *** [tck-testable tck-id-payloads-template-instance-members-birth]#[yellow-background]*A Template
-Instance MUST include all members that were included in the corresponding Template Definition in a
-NBIRTH or DBIRTH message.*#
+Instance in a NBIRTH or DBIRTH message MUST include all members that were included in the
+corresponding Template Definition.*#
 *** [tck-testable tck-id-payloads-template-instance-members-data]#[yellow-background]*A Template
-Instance MAY include only a subset of the members that were included in the corresponding template
-definition in a NDATA or DDATA message.*#
+Instance in a NDATA or DDATA message MAY include only a subset of the members that were included in
+the corresponding template definition.*#
 **** A Template Instance does not need to be a complete set of all member metrics that were included
 in the Template Definition.
 *** [tck-testable tck-id-payloads-template-instance-parameters]#[yellow-background]*A Template
