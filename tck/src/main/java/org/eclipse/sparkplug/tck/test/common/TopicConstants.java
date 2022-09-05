@@ -23,11 +23,13 @@ public class TopicConstants {
     public static final @NotNull String TOPIC_PATH_NCMD = "NCMD";
     public static final @NotNull String TOPIC_PATH_DCMD = "DCMD";
     public static final @NotNull String TOPIC_PATH_DBIRTH = "DBIRTH";
+    public static final @NotNull String TOPIC_PATH_DDEATH = "DDEATH";
     public static final @NotNull String TOPIC_PATH_NDATA = "NDATA";
     public static final @NotNull String TOPIC_PATH_DDATA = "DDATA";
 
     public static final @NotNull String PASS = "PASS";
     public static final @NotNull String FAIL = "FAIL";
+    public static final @NotNull String MAYBE = "MAYBE";
     public static final @NotNull String NOT_EXECUTED = "NOT EXECUTED";
     public static final @NotNull String NOT_YET_IMPLEMENTED = "NOT YET IMPLEMENTED";
     public static final @NotNull String EMPTY = "EMPTY";

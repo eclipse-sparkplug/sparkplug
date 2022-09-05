@@ -477,7 +477,7 @@ public class PayloadTest extends TCKTest {
         final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
-				DataType datatype = DataType.valueOf(m.getDatatype());
+				DataType datatype = DataType.forNumber(m.getDatatype());
 
 				if (datatype == DataType.DataSet && m.hasDatasetValue()) {
 					Payload.DataSet d = m.getDatasetValue();
@@ -502,7 +502,7 @@ public class PayloadTest extends TCKTest {
 							if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
 								uint32types = false;
 							}
-							if (!valueTypes.contains(DataType.valueOf(curtype))) {
+							if (!valueTypes.contains(DataType.forNumber(curtype))) {
 								validtypes = false;
 							}
 						}
@@ -598,7 +598,7 @@ public class PayloadTest extends TCKTest {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
-				DataType datatype = DataType.valueOf(m.getDatatype());
+				DataType datatype = DataType.forNumber(m.getDatatype());
 
 				if (datatype == DataType.Template && m.hasTemplateValue()) {
 					Payload.Template t = m.getTemplateValue();

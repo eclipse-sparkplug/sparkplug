@@ -14,33 +14,98 @@
 package org.eclipse.sparkplug.tck.test;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_NODE_ID_UNIQUENESS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_UNIQUENESS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DBIRTH_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DBIRTH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDEATH_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_UNIQUENESS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DBIRTH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_TEMPLATES;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_TEMPLATES;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_BDSEQ_INCREMENT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_BDSEQ_INCREMENT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDEATH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
+import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
+
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.List;
+import java.util.ListIterator;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -54,6 +119,7 @@ import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSucce
 import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
 import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
@@ -76,7 +142,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
-			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR };
+			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,
+			ID_TOPICS_NBIRTH_METRIC_REQS, ID_TOPICS_NBIRTH_TEMPLATES, ID_TOPICS_NBIRTH_BDSEQ_INCREMENT,
+			ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ, ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -87,11 +161,20 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	// edge_node_id to device_id
 	private HashMap<String, HashSet<String>> edge_to_devices = new HashMap<>();
 
-	// edge_node_id to last messsage (NBIRTH/NDEATH) + sequence number
-	private HashMap edgeBdSeqs = new HashMap<String, ArrayList<Object>>();
+	// edge_node_id to sequence number
+	private HashMap<String, Long> edgeBdSeqs = new HashMap<String, Long>();
 
 	// edge_node_id to last sequence number
 	private HashMap<String, Long> edgeSeqs = new HashMap<>();
+
+	private HashMap<String, List<Metric>> edgeBirthMetrics = new HashMap<String, List<Metric>>();
+	private HashMap<String, List<Metric>> deviceBirthMetrics = new HashMap<String, List<Metric>>();
+	
+	private HashMap<String, List<Metric>> edgeLastMetrics = new HashMap<String, List<Metric>>();
+	private HashMap<String, List<Metric>> deviceLastMetrics = new HashMap<String, List<Metric>>();
+
+	// host application id to sequence number
+	private HashMap<String, Long> hostBdSeqs = new HashMap<String, Long>();
 
 	public Monitor() {
 		logger.info("Sparkplug TCK message monitor 1.0");
@@ -167,9 +250,111 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		}
 	}
 
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH,
+			id = ID_TOPICS_NBIRTH_BDSEQ_INCREMENT)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_STATE,
+			id = ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_STATE_DEATH,
+			id = ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 
+		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String willTopic = willPublishPacket.getTopic();
+			String[] levels = willTopic.split("/");
+			if (levels[2].equals(TOPIC_PATH_NDEATH)) {
+
+				// this is an edge node connect
+				PayloadOrBuilder payload = getSparkplugPayload(willPublishPacket);
+
+				List<Metric> metrics = payload.getMetricsList();
+				String id = levels[1] + "/" + levels[3]; // group_id + edge_node_id
+				ListIterator<Metric> metricIterator = metrics.listIterator();
+				while (metricIterator.hasNext()) {
+					Metric current = metricIterator.next();
+					if (current.getName().equals("bdSeq") && current.hasLongValue()) {
+						long bdseq = current.getLongValue();
+						if (edgeBdSeqs.get(id) != null) {
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
+									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
+								log("Test failed for assertion " + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: "
+										+ id);
+							}
+						}
+						edgeBdSeqs.put(id, bdseq);
+					}
+				}
+			} else if (levels[0].equals(TOPIC_ROOT_STATE)) {
+				String hostid = levels[1];
+				PayloadOrBuilder payload = getSparkplugPayload(willPublishPacket);
+				List<Metric> metrics = payload.getMetricsList();
+				ListIterator<Metric> metricIterator = metrics.listIterator();
+				while (metricIterator.hasNext()) {
+					Metric current = metricIterator.next();
+					if (current.getName().equals("bdSeq")) {
+						if (current.getDatatype() == DataType.UInt64.getNumber() && current.hasLongValue()) {
+							long bdseq = current.getLongValue();
+							if (hostBdSeqs.get(hostid) != null) {
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
+										PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion " + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ, HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion " + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+										MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion "
+											+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
+										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion "
+											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ,
+										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)) {
+									log("Test failed for assertion "
+											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ
+											+ ": host id: " + hostid);
+								}
+							}
+							hostBdSeqs.put(hostid, bdseq);
+						} else {
+							setResultIfNotFail(testResults, false,
+									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ);
+							log("Test failed for assertion "
+									+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ + ": host id: "
+									+ hostid);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// disconnect is only called for the receipt of an MQTT disconnect packet
@@ -209,20 +394,23 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			PayloadOrBuilder payload = getSparkplugPayload(packet);
 
 			// if we have more than one MQTT client id with the same edge node id then it's an error
-			if (message_type.equals("NBIRTH")) {
+			if (message_type.equals(TOPIC_PATH_NBIRTH)) {
 				handleNBIRTH(group_id, edge_node_id, clientId, payload);
-			} else if (message_type.equals("NDEATH")) {
+			} else if (message_type.equals(TOPIC_PATH_NDEATH)) {
 				handleNDEATH(group_id, edge_node_id, clientId);
-			} else if (message_type.equals("NDATA")) {
+			} else if (message_type.equals(TOPIC_PATH_NDATA)) {
 				handleNDATA(group_id, edge_node_id, payload);
-			} else if (message_type.equals("DBIRTH")) {
+			} else if (message_type.equals(TOPIC_PATH_DBIRTH)) {
 				handleDBIRTH(group_id, edge_node_id, device_id, payload);
-			} else if (message_type.equals("DDEATH")) {
+			} else if (message_type.equals(TOPIC_PATH_DDEATH)) {
 				handleDDEATH(group_id, edge_node_id, device_id, payload);
-			} else if (message_type.equals("DDATA")) {
+			} else if (message_type.equals(TOPIC_PATH_DDATA)) {
 				handleDDATA(group_id, edge_node_id, device_id, payload);
 			}
+		} else if (topic.startsWith(TOPIC_ROOT_STATE)) {
+
 		}
+
 	}
 
 	@SpecAssertion(
@@ -234,7 +422,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR)
-
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)
 	private void handleNBIRTH(String group_id, String edge_node_id, String clientId, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NBIRTH *** {}/{} {}", group_id, edge_node_id, clientId);
 		String client_id = (String) edge_nodes.get(edge_node_id);
@@ -253,16 +443,36 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			edge_to_devices.put(edge_node_id, new HashSet<String>());
 		}
 
+		String id = group_id + "/" + edge_node_id;
 		if (payload.hasSeq()) {
 			if (payload.getSeq() > 255 || payload.getSeq() < 0) {
-				testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, ID_PAYLOADS_NBIRTH_SEQ));
+				testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, PAYLOADS_NBIRTH_SEQ));
 			}
-
-			String id = group_id + "/" + edge_node_id;
 			edgeSeqs.put(id, payload.getSeq());
-			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(true, ID_PAYLOADS_NBIRTH_SEQ));
+			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(true, PAYLOADS_NBIRTH_SEQ));
 		} else {
-			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, ID_PAYLOADS_NBIRTH_SEQ));
+			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, PAYLOADS_NBIRTH_SEQ));
+		}
+
+		if (payload != null) {
+			edgeBirthMetrics.put(id, payload.getMetricsList());
+			
+			long lastHistoricalTimestamp = 0L;
+			List<Metric> metrics = payload.getMetricsList();
+			ListIterator<Metric> metricIterator = metrics.listIterator();
+			while (metricIterator.hasNext()) {
+				Metric current = metricIterator.next();
+
+				if (current.hasIsHistorical() && current.getIsHistorical() == false) {
+					if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
+							ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
+							OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)) {
+						log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
+								+ ": metric name: " + current.getName());
+					}
+					lastHistoricalTimestamp = current.getTimestamp();
+				}
+			}
 		}
 	}
 
@@ -309,25 +519,137 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDATA,
 			id = ID_PAYLOADS_NDATA_SEQ_INC)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH,
+			id = ID_TOPICS_NBIRTH_METRIC_REQS)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH,
+			id = ID_TOPICS_NBIRTH_TEMPLATES)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
+			id = ID_PRINCIPLES_RBE_RECOMMENDED)
 	private void handleNDATA(String group_id, String edge_node_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NDATA *** {}/{}", group_id, edge_node_id);
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_NDATA_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(true, ID_PAYLOADS_NDATA_SEQ_INC));
+						testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(true, PAYLOADS_NDATA_SEQ_INC));
 					}
 				} else {
-					testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, ID_PAYLOADS_NDATA_SEQ_INC));
+					testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, PAYLOADS_NDATA_SEQ_INC));
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
 		} else {
-			testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, ID_PAYLOADS_NDATA_SEQ_INC));
+			testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, PAYLOADS_NDATA_SEQ_INC));
 		}
+
+		long lastHistoricalTimestamp = 0L;
+		List<Metric> metrics = payload.getMetricsList();
+		String id = group_id + "/" + edge_node_id;
+		ListIterator<Metric> metricIterator = metrics.listIterator();
+		while (metricIterator.hasNext()) {
+			Metric current = metricIterator.next();
+
+			List<Metric> birthMetrics = edgeBirthMetrics.get(id);
+			if (birthMetrics != null) {
+				boolean found = false;
+				// look for the current metric name in the birth metrics
+				for (Metric birth : birthMetrics) {
+					if (birth.getName().equals(current.getName())) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_METRIC_REQS, TOPICS_NBIRTH_METRIC_REQS)) {
+					log("Test failed for assertion " + ID_TOPICS_NBIRTH_METRIC_REQS + ": metric name: "
+							+ current.getName());
+				}
+				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
+						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH)) {
+					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH + ": metric name: "
+							+ current.getName());
+				}
+			}
+
+			if (current.getDatatype() == DataType.Template.getNumber()) {
+				if (current.hasTemplateValue()) {
+					Template template = current.getTemplateValue();
+					// instances must have a reference
+					if (template.hasTemplateRef()) {
+						boolean found = false;
+						String templateName = template.getTemplateRef();
+						// look for the template in the birth metrics
+						for (Metric birth : birthMetrics) {
+							if (birth.getName().equals(templateName)) {
+
+								if (birth.hasTemplateValue()) {
+									Template templatedef = birth.getTemplateValue();
+									if (templatedef.hasIsDefinition() && templatedef.hasIsDefinition()
+											&& !templatedef.hasTemplateRef()) {
+										found = true;
+										break;
+									}
+								}
+
+							}
+						}
+						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
+								TOPICS_NBIRTH_TEMPLATES)) {
+							log("Test failed for assertion " + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
+									+ current.getName());
+						}
+					}
+				}
+			}
+			
+			if (current.hasIsHistorical() && current.getIsHistorical() == false) {
+				if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
+						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
+						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)) {
+					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER + ": metric name: "
+							+ current.getName());
+				}
+				lastHistoricalTimestamp = current.getTimestamp();
+			}
+			
+			List<Metric> lastMetrics = edgeLastMetrics.get(id);
+			if (lastMetrics != null) {
+				boolean found = false;
+				// look for the current metric name in the last metrics
+				for (Metric last : lastMetrics) {
+					if (last.getName().equals(current.getName())) {
+						found = true;
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
+								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
+							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE + ": metric name: "
+									+ current.getName());
+						}
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
+								ID_PRINCIPLES_RBE_RECOMMENDED, ID_PRINCIPLES_RBE_RECOMMENDED)) {
+							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+									+ current.getName());
+						}
+						break;
+					}
+				}
+			}
+		}
+		edgeLastMetrics.put(id, metrics);
 	}
 
 	@SpecAssertion(
@@ -345,6 +667,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER) 
 	private void handleDBIRTH(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DBIRTH *** {}/{}/{}", group_id, edge_node_id, device_id);
 		if (!edge_to_devices.keySet().contains(edge_node_id)) {
@@ -370,26 +695,49 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DBIRTH_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(true, PAYLOADS_DBIRTH_SEQ_INC));
 					}
 					if (testResults.get(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ) == null) {
 						testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ,
-								setResult(true, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
+								setResult(true, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
 					}
 				} else {
 					testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(false, PAYLOADS_DBIRTH_SEQ_INC));
 					testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ,
-							setResult(false, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
+							setResult(false, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
 		} else {
 			testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(false, PAYLOADS_DBIRTH_SEQ_INC));
 			testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ,
-					setResult(false, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
+					setResult(false, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
+		}
+
+		if (payload != null) {
+			String id = group_id + "/" + edge_node_id + "/" + device_id;
+			deviceBirthMetrics.put(id, payload.getMetricsList());
+			deviceLastMetrics.put(id, payload.getMetricsList());
+
+			long lastHistoricalTimestamp = 0L;
+			List<Metric> metrics = payload.getMetricsList();
+			ListIterator<Metric> metricIterator = metrics.listIterator();
+			while (metricIterator.hasNext()) {
+				Metric current = metricIterator.next();
+
+				if (current.hasIsHistorical() && current.getIsHistorical() == false) {
+					if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
+							ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER,
+							OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)) {
+						log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
+								+ ": metric name: " + current.getName());
+					}
+					lastHistoricalTimestamp = current.getTimestamp();
+				}
+			}
 		}
 	}
 
@@ -414,50 +762,155 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DDEATH_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(true, ID_PAYLOADS_DDEATH_SEQ_INC));
+						testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(true, PAYLOADS_DDEATH_SEQ_INC));
 					}
 				} else {
-					testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(false, ID_PAYLOADS_DDEATH_SEQ_INC));
+					testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(false, PAYLOADS_DDEATH_SEQ_INC));
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
 		} else {
-			testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(false, ID_PAYLOADS_DDEATH_SEQ_INC));
+			testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(false, PAYLOADS_DDEATH_SEQ_INC));
 		}
 	}
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DDATA,
 			id = ID_PAYLOADS_DDATA_SEQ_INC)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_DBIRTH,
+			id = ID_TOPICS_DBIRTH_METRIC_REQS)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_NBIRTH,
+			id = ID_TOPICS_NBIRTH_TEMPLATES)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE) 
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
+			id = ID_PRINCIPLES_RBE_RECOMMENDED)
 	private void handleDDATA(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DDATA *** {}/{}/{}", group_id, edge_node_id, device_id);
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
-				long expectedSeq = getExpectedSeq((Long) edgeSeqs.get(id));
+				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DDATA_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(true, ID_PAYLOADS_DDATA_SEQ_INC));
+						testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(true, PAYLOADS_DDATA_SEQ_INC));
 					}
 				} else {
-					testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, ID_PAYLOADS_DDATA_SEQ_INC));
+					testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, PAYLOADS_DDATA_SEQ_INC));
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
 		} else {
-			testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, ID_PAYLOADS_DDATA_SEQ_INC));
+			testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, PAYLOADS_DDATA_SEQ_INC));
 		}
-	}
 
-	private long getExpectedSeq(long lastSeq) {
-		if (lastSeq == 255) {
-			return 0;
-		} else {
-			return lastSeq + 1;
+		long lastHistoricalTimestamp = 0L;
+		List<Metric> metrics = payload.getMetricsList();
+		String id = group_id + "/" + edge_node_id + "/" + device_id;
+		ListIterator<Metric> metricIterator = metrics.listIterator();
+		while (metricIterator.hasNext()) {
+			Metric current = metricIterator.next();
+
+			List<Metric> birthMetrics = deviceBirthMetrics.get(id);
+			if (birthMetrics != null) {
+				boolean found = false;
+				// look for the current metric name in the birth metrics
+				for (Metric birth : birthMetrics) {
+					if (birth.getName().equals(current.getName())) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!setResultIfNotFail(testResults, found, ID_TOPICS_DBIRTH_METRIC_REQS, TOPICS_DBIRTH_METRIC_REQS)) {
+					log("Test failed for assertion " + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
+							+ current.getName());
+				}
+				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH,
+						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH)) {
+					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
+							+ current.getName());
+				}
+			}
+
+			List<Metric> eBirthMetrics = edgeBirthMetrics.get(id);
+			if (current.getDatatype() == DataType.Template.getNumber()) {
+				if (current.hasTemplateValue()) {
+					Template template = current.getTemplateValue();
+					// instances must have a reference
+					if (template.hasTemplateRef()) {
+						boolean found = false;
+						String templateName = template.getTemplateRef();
+						// look for the template in the birth metrics
+						for (Metric birth : eBirthMetrics) {
+							if (birth.getName().equals(templateName)) {
+
+								if (birth.hasTemplateValue()) {
+									Template templatedef = birth.getTemplateValue();
+									if (templatedef.hasIsDefinition() && templatedef.hasIsDefinition()
+											&& !templatedef.hasTemplateRef()) {
+										found = true;
+										break;
+									}
+								}
+
+							}
+						}
+						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
+								TOPICS_NBIRTH_TEMPLATES)) {
+							log("Test failed for assertion " + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
+									+ current.getName());
+						}
+					}
+				}
+			}
+			
+			if (current.hasIsHistorical() && current.getIsHistorical() == false) {
+				if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
+						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER,
+						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)) {
+					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER + ": metric name: "
+							+ current.getName());
+				}
+				lastHistoricalTimestamp = current.getTimestamp();
+			}
+			
+			List<Metric> lastMetrics = deviceLastMetrics.get(id);
+			if (lastMetrics != null) {
+				boolean found = false;
+				// look for the current metric name in the last metrics
+				for (Metric last : lastMetrics) {
+					if (last.getName().equals(current.getName())) {
+						found = true;
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
+								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
+							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE + ": metric name: "
+									+ current.getName());
+						}
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
+								ID_PRINCIPLES_RBE_RECOMMENDED, ID_PRINCIPLES_RBE_RECOMMENDED)) {
+							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+									+ current.getName());
+						}
+						break;
+					}
+				}
+			}
 		}
+		deviceLastMetrics.put(id, metrics);
 	}
 }

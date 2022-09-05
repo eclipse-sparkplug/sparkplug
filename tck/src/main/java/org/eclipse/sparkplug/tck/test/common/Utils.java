@@ -13,10 +13,14 @@
 
 package org.eclipse.sparkplug.tck.test.common;
 
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.MAYBE;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -62,6 +66,30 @@ public class Utils {
 		return bValid ? PASS : FAIL + " " + requirement;
 	}
 
+	public static @NotNull String setShouldResult(boolean bValid, String requirement) {
+		return bValid ? PASS : MAYBE + " " + requirement;
+	}
+
+	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
+		boolean isSet = false;
+		if (!results.get(req_id).equals(FAIL)) {
+			results.put(req_id, setResult(result, req_desc));
+			isSet = true;
+		}
+		return isSet;
+	}
+	
+	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
+		boolean isSet = false;
+		if (!results.get(req_id).equals(MAYBE)) {
+			results.put(req_id, setShouldResult(result, req_desc));
+			isSet = true;
+		}
+		return isSet;
+	}
+
 	public static PayloadOrBuilder decode(ByteBuffer payload) {
 		byte[] array = new byte[payload.remaining()];
 		payload.get(array);
@@ -81,13 +109,18 @@ public class Utils {
 		return null;
 	}
 
+	public static long getNextSeq(long seq) {
+		assert seq >= 0 && seq <= 255;
+		return (seq == 255) ? 0 : seq + 1;
+	}
+
 	public static boolean hasValue(Metric m) {
 		if (m.hasIsNull() && m.getIsNull()) {
 			// A null value is valid
 			return true;
 		}
 
-		switch (DataType.valueOf(m.getDatatype())) {
+		switch (DataType.forNumber(m.getDatatype())) {
 			case Unknown:
 				return false;
 			case Int8:
