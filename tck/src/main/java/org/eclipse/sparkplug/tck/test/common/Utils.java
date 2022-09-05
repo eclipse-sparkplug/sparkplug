@@ -72,22 +72,18 @@ public class Utils {
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		boolean isSet = false;
 		if (!results.get(req_id).equals(FAIL)) {
 			results.put(req_id, setResult(result, req_desc));
-			isSet = true;
 		}
-		return isSet;
+		return result;
 	}
 	
 	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		boolean isSet = false;
 		if (!results.get(req_id).equals(MAYBE)) {
 			results.put(req_id, setShouldResult(result, req_desc));
-			isSet = true;
 		}
-		return isSet;
+		return result;
 	}
 
 	public static PayloadOrBuilder decode(ByteBuffer payload) {
