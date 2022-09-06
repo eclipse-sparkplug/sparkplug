@@ -13,7 +13,7 @@ scale 2
 +++ Properties                  | Node Properties | ""                              "" | ""               ""
 ++++ Hardware Make              | ""          ""  | ""                 Raspberry Pi "" | ""        String ""
 ++++ Mardware Model             | ""          ""  | ""                 Pi 3 Model B "" | ""        String ""
-++++ OS Version                 | ""          ""  | ""                     Raspbian "" | ""        String ""
+++++ OS Name                    | ""          ""  | ""                     Raspbian "" | ""        String ""
 ++++ OS Version                 | ""          ""  | "" Jessie with PIXEL/11.01.2017 "" | ""        String ""
 ++++ Supply Voltage             | ""          ""  | ""                         12.1 "" | ""         Float ""
 
