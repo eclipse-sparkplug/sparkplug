@@ -1,0 +1,36 @@
+@startsalt
+scale 2
+{
+{T!
++**__Metric__**                 | ""           "" | **__Value__**      | **__Data Type__**
++**Sparkplug B Devices**        | /group_id       | ""              "" | ""           "" 
+++ Raspberry Pi                 | /edge_node_id   | ""              "" | ""           ""
++++ Pibrella                    | /device_id      | ""              "" | ""           ""
+++++ Inputs                     | ""           "" | ""              "" | ""           ""
++++++ A                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ B                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ C                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ D                         | ""           "" | ""        FALSE "" | ""   Boolean ""
+++++ Outputs                    | ""           "" | ""              "" | ""           ""
++++++ LEDs                      | ""           "" | ""              "" | ""           ""
+++++++ Green                    | ""           "" | ""        FALSE "" | ""   Boolean ""
+++++++ Red                      | ""           "" | ""        FALSE "" | ""   Boolean ""
+++++++ Yellow                   | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ E                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ F                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ G                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ H                         | ""           "" | ""        FALSE "" | ""   Boolean ""
++++++ Buzzer                    | ""           "" | ""        FALSE "" | ""   Boolean ""
+++++ Properties                 | ""           "" | ""              "" | ""           ""
++++++ Hardware Make             | ""           "" | ""     Pibrella "" | ""    String ""
+}
+.
+{+
+   Everything under the Pibrella node is 
+   Device Process Variables and Metric Tags
+}
+
+
+}
+
+@endsalt

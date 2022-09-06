@@ -381,7 +381,7 @@ defined in the Topic Namespace, consuming applications can organize metrics in t
 fashion:
 
 .Figure 9 – Payload Metric Folder Structure
-image:extracted-media/media/image12.png[image,width=638,height=139]
+plantuml::{assetsdir}assets/plantuml/payload-metric-folder-structure.puml[format=svg, alt="Payload Metric Folder Structure"]
 
 [[payloads_b_sparkplug_bv1_0_payload_components]]
 ==== Sparkplug B v1.0 Payload Components
@@ -1149,7 +1149,7 @@ Consider the following Sparkplug B payload in the NBIRTH message shown above:
 This would result in a structure as follows on the Host Application.
 
 .Figure 10 – Sparkplug B Metric Structure 1
-image:extracted-media/media/image13.png[image,width=752,height=332]
+plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-1.puml[format=svg, alt="Sparkplug B Metric Structure 1"]
 
 [[payloads_b_dbirth]]
 ==== DBIRTH
@@ -1269,7 +1269,7 @@ Consider the following Sparkplug B payload in the DBIRTH message shown above:
 This would result in a structure as follows on the Host Application.
 
 .Figure 11 – Sparkplug B Metric Structure 2
-image:extracted-media/media/image14.png[image,width=721,height=341]
+plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-2.puml[format=svg, alt="Sparkplug B Metric Structure 2"]
 
 [[payloads_b_ndata]]
 ==== NDATA
