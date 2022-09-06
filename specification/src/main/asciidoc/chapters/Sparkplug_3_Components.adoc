@@ -15,7 +15,7 @@ Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the 
 
 This section details the infrastructure components implemented.
 
-.Figure 1 - MQTT SCADA Infrastructure
+.Figure 3 - MQTT SCADA Infrastructure
 plantuml::{assetsdir}assets/plantuml/infrastructure-components.puml[format=svg, alt="MQTT Scada Infrastructure"]
 
 
