@@ -66,7 +66,7 @@ MQTT Server. A message sent to any MQTT Server will be distributed to all availa
 the cluster (which will distribute the message to all subscribing Sparkplug components).
 
 .Figure 12 – High Availability MQTT Server Cluster
-image:extracted-media/media/image15.png[image,width=660,height=314]
+plantuml::{assetsdir}assets/plantuml/HA-mqtt-server-cluster.puml[format=svg, alt="High Availability MQTT Server Cluster"]
 
 If any MQTT Server would fail, the MQTT connection for components connected to the broker will break
 and the component can connect to any other MQTT Server to resume operations.
@@ -81,8 +81,8 @@ not desired that all IP addresses (or DNS lookup names) are configured on the Sp
 a load balancer might be used.
 
 .Figure 13 – High Availability MQTT Server Cluster with Load Balancer
-image:extracted-media/media/image16.png[image,width=660,height=314]
-
+plantuml::{assetsdir}assets/plantuml/HA-mqtt-server-cluster-with-load-balancer.puml[format=svg, alt="High Availability MQTT Server Cluster with Load Balancer"]
+//
 A load balancer acts as the single point of contact for Sparkplug components, so only a single IP
 address or DNS name needs to be configured on the components. The load balancer will proxy the MQTT
 connections of the components and route to one available MQTT Server. In case of a MQTT Server
