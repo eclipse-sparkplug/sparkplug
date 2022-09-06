@@ -25,7 +25,7 @@ Edge Node/Device. Additional Sparkplug Host Application MQTT clients can connect
 any of the real time data without impacting the Primary Host Application.
 
 Due to the nature of real time SCADA solutions, it is very important for the Primary Host
-Application and all connected Eclipse Sparkplug Edge Nodes to have the MQTT Session STATE
+Application and all connected Eclipse Sparkplug Edge Nodes to have the MQTT Session state
 information for each other. In order to accomplish this the Sparkplug Topic Namespace definitions
 for Birth/Death Certificates along with the defined payloads provide both state and context between
 the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios
@@ -548,9 +548,11 @@ of "stranding" an Edge Node if the Primary command/control of the Primary Host A
 network connectivity to one of the MQTT Servers. In this instance the Edge Node would stay properly
 connected to the MQTT Server publishing information not knowing that Primary Host Application was
 not able to receive the messages.
-// TODO: This is a normative statement - but it is testable?
-When using multiple MQTT Servers, the Primary Host Application instance must be configured to
-publish a STATE Birth Certificate and all Edge Nodes need to subscribe to this STATE message.
+
+[tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-state-subs]#[yellow-background]*When
+using multiple MQTT Servers and Edge Nodes are configured with a Primary Host Application, the
+Primary Host Application instance must be configured to publish a STATE Birth Certificate and all
+Edge Nodes need to subscribe to this STATE message.
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-state]#[yellow-background]*Regardless
 of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application
@@ -713,8 +715,8 @@ host_id MUST be unique to all other Sparkplug Host IDs in the infrastructure.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will]#[yellow-background]*When
 a Sparkplug Host Application sends its MQTT CONNECT packet, it MUST include a Will Message.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-topic]#[yellow-background]*The
-MQTT Will Message's topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
-of the Sparkplug Host Application*#
+MQTT Will Message's topic MUST be of the form 'spBv1.0/STATE/host_id' where host_id is the unique
+identifier of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-payload]#[yellow-background]*The
 Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
 one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a
@@ -736,8 +738,8 @@ birth with the following rules.
 MQTT Client associated with the Sparkplug Host Application MUST send a birth message immediately
 after successfully connecting to the MQTT Server.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-topic]#[yellow-background]*The
-Host Application's Birth topic MUST be of the form 'STATE/host_id' where host_id is the unique identifier
-of the Sparkplug Host Application*#
+Host Application's Birth topic MUST be of the form 'spBv1.0/STATE/host_id' where host_id is the
+unique identifier of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-payload]#[yellow-background]*The
 Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
 one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a
@@ -759,7 +761,7 @@ Sparkplug Host Application ever disconnects intentionally, it must publish a Dea
 following characteristics.
 
 * [tck-testable tck-id-operational-behavior-host-application-death-topic]#[yellow-background]*The
-Sparkplug Host Application's Death topic MUST be of the form 'STATE/host_id' where host_id is the
+Sparkplug Host Application's Death topic MUST be of the form 'spBv1.0/STATE/host_id' where host_id is the
 unique identifier of the Sparkplug Host Application.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-payload]#[yellow-background]*The
 Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the

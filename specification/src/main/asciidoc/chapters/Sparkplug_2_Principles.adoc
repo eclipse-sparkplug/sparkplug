@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[principles]]
 == Principles
 
@@ -86,16 +89,17 @@ Birth and Death Certificates are used by both Edge Nodes and Host Applications. 
 for both are always registered in the MQTT CONNECT packet as the MQTT Will Message. By using the
 MQTT Will message, the Death Certificates will be delivered to subscribers even if the MQTT client
 connection is lost ungracefully. For Edge Nodes, the Death Certificate uses the NDEATH Sparkplug
-verb in the topic. For Host Applications, the STATE/host_id topic is used. More information on Death
-certificates can be found in
+verb in the topic. For Host Applications, the spBv1.0/STATE/host_id topic is used. More information
+on Death certificates can be found in
 link:#payloads_b_ndeath[Edge Node Death Certificates] and
 link:#payloads_b_state[Host Application Death Certificates]
 
 [tck-testable tck-id-principles-birth-certificates-order]#[yellow-background]*Birth Certificates
 MUST be the first MQTT messages published by any Edge Node or any Host Application.*#
 They denote to any subscribing MQTT clients that they are now online. For Edge Nodes, the Birth
-Certificate uses the NBIRTH Sparkplug verb in the topic. For Host Applications, the STATE/host_id
-topic is used. More details and requirements on Birth certificates can be found in
+Certificate uses the NBIRTH Sparkplug verb in the topic. For Host Applications, the
+spBv1.0/STATE/host_id topic is used. More details and requirements on Birth certificates can be
+found in
 link:#payloads_b_nbirth[Edge Node Birth Certificates] and
 link:#payloads_b_state[Host Application Birth Certificates]
 
