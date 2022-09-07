@@ -47,9 +47,9 @@ Sparkplug does not require that RBE be used in all cases. This is to account for
 circumstances that may require periodic reporting. However, as a general rule periodic publishing
 should not be used.
 
-[tck-testable tck-id-principles-rbe-recommended]#[yellow-background]*[tck-id-principles-rbe-recommended]
-Because of the stateful nature of Sparkplug sessions, data SHOULD NOT be published from Edge Nodes
-on a periodic basis and instead SHOULD be published using a RBE based approach.*#
+[tck-testable tck-id-principles-rbe-recommended]#[yellow-background]*[tck-id-principles-rbe-recommended] Because
+of the stateful nature of Sparkplug sessions, data SHOULD NOT be published from Edge Nodes on a
+periodic basis and instead SHOULD be published using a RBE based approach.*#
 
 [[principles_continuous_session_awareness]]
 === Continuous Session Awareness
