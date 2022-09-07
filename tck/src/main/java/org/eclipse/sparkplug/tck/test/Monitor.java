@@ -32,7 +32,9 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
@@ -96,6 +98,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,6 +113,8 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +155,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
-			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED };
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED,
+			ID_PAYLOADS_STATE_BIRTH_PAYLOAD };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -169,7 +175,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private HashMap<String, List<Metric>> edgeBirthMetrics = new HashMap<String, List<Metric>>();
 	private HashMap<String, List<Metric>> deviceBirthMetrics = new HashMap<String, List<Metric>>();
-	
+
 	private HashMap<String, List<Metric>> edgeLastMetrics = new HashMap<String, List<Metric>>();
 	private HashMap<String, List<Metric>> deviceLastMetrics = new HashMap<String, List<Metric>>();
 
@@ -251,6 +257,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	@SpecAssertion(
+			section = Sections.PAYLOADS_B_STATE,
+			id = ID_PAYLOADS_STATE_BIRTH_PAYLOAD)
+	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NBIRTH,
 			id = ID_TOPICS_NBIRTH_BDSEQ_INCREMENT)
 	@SpecAssertion(
@@ -276,7 +285,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
 			String willTopic = willPublishPacket.getTopic();
 			String[] levels = willTopic.split("/");
-			if (levels[2].equals(TOPIC_PATH_NDEATH)) {
+			if (levels.length >= 3 && levels[2].equals(TOPIC_PATH_NDEATH)) {
 
 				// this is an edge node connect
 				PayloadOrBuilder payload = getSparkplugPayload(willPublishPacket);
@@ -293,6 +302,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
 								log("Test failed for assertion " + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: "
 										+ id);
+								log("Actual bdseq: " + bdseq + " expected bdseq: " + getNextSeq(edgeBdSeqs.get(id)));
 							}
 						}
 						edgeBdSeqs.put(id, bdseq);
@@ -300,14 +310,24 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				}
 			} else if (levels[0].equals(TOPIC_ROOT_STATE)) {
 				String hostid = levels[1];
-				PayloadOrBuilder payload = getSparkplugPayload(willPublishPacket);
-				List<Metric> metrics = payload.getMetricsList();
-				ListIterator<Metric> metricIterator = metrics.listIterator();
-				while (metricIterator.hasNext()) {
-					Metric current = metricIterator.next();
-					if (current.getName().equals("bdSeq")) {
-						if (current.getDatatype() == DataType.UInt64.getNumber() && current.hasLongValue()) {
-							long bdseq = current.getLongValue();
+				ObjectMapper mapper = new ObjectMapper();
+				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
+				boolean isValidPayload = true;
+				JsonNode json = null;
+				try {
+					json = mapper.readTree(payloadString);
+				} catch (Exception e) {
+					isValidPayload = false;
+				}
+
+				if (!isValidPayload) {
+					setResultIfNotFail(testResults, isValidPayload, ID_PAYLOADS_STATE_BIRTH_PAYLOAD,
+							PAYLOADS_STATE_BIRTH_PAYLOAD);
+				} else {
+					if (json.has("bdSeq")) {
+						JsonNode bdseqnode = json.get("bdSeq");
+						if (bdseqnode.isShort()) {
+							short bdseq = bdseqnode.shortValue();
 							if (hostBdSeqs.get(hostid) != null) {
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
 										ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
@@ -342,7 +362,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 											+ ": host id: " + hostid);
 								}
 							}
-							hostBdSeqs.put(hostid, bdseq);
+							hostBdSeqs.put(hostid, (long) bdseq);
 						} else {
 							setResultIfNotFail(testResults, false,
 									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
@@ -456,7 +476,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 		if (payload != null) {
 			edgeBirthMetrics.put(id, payload.getMetricsList());
-			
+
 			long lastHistoricalTimestamp = 0L;
 			List<Metric> metrics = payload.getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
@@ -616,17 +636,17 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					}
 				}
 			}
-			
+
 			if (current.hasIsHistorical() && current.getIsHistorical() == false) {
 				if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
 						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)) {
-					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER + ": metric name: "
-							+ current.getName());
+					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
+							+ ": metric name: " + current.getName());
 				}
 				lastHistoricalTimestamp = current.getTimestamp();
 			}
-			
+
 			List<Metric> lastMetrics = edgeLastMetrics.get(id);
 			if (lastMetrics != null) {
 				boolean found = false;
@@ -634,13 +654,14 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				for (Metric last : lastMetrics) {
 					if (last.getName().equals(current.getName())) {
 						found = true;
-						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
-								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
-							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE + ": metric name: "
-									+ current.getName());
+						if (!setShouldResultIfNotFail(testResults, current.equals(last),
+								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
+								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
+							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
+									+ ": metric name: " + current.getName());
 						}
-						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
-								ID_PRINCIPLES_RBE_RECOMMENDED, ID_PRINCIPLES_RBE_RECOMMENDED)) {
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
+								ID_PRINCIPLES_RBE_RECOMMENDED)) {
 							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ current.getName());
 						}
@@ -669,7 +690,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER) 
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)
 	private void handleDBIRTH(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DBIRTH *** {}/{}/{}", group_id, edge_node_id, device_id);
 		if (!edge_to_devices.keySet().contains(edge_node_id)) {
@@ -794,7 +815,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE) 
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
 			id = ID_PRINCIPLES_RBE_RECOMMENDED)
@@ -878,17 +899,17 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					}
 				}
 			}
-			
+
 			if (current.hasIsHistorical() && current.getIsHistorical() == false) {
 				if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
 						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)) {
-					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER + ": metric name: "
-							+ current.getName());
+					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
+							+ ": metric name: " + current.getName());
 				}
 				lastHistoricalTimestamp = current.getTimestamp();
 			}
-			
+
 			List<Metric> lastMetrics = deviceLastMetrics.get(id);
 			if (lastMetrics != null) {
 				boolean found = false;
@@ -896,13 +917,14 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				for (Metric last : lastMetrics) {
 					if (last.getName().equals(current.getName())) {
 						found = true;
-						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
-								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
-							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE + ": metric name: "
-									+ current.getName());
+						if (!setShouldResultIfNotFail(testResults, current.equals(last),
+								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE,
+								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
+							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
+									+ ": metric name: " + current.getName());
 						}
-						if (!setShouldResultIfNotFail(testResults, current.equals(last), 
-								ID_PRINCIPLES_RBE_RECOMMENDED, ID_PRINCIPLES_RBE_RECOMMENDED)) {
+						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
+								ID_PRINCIPLES_RBE_RECOMMENDED)) {
 							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ current.getName());
 						}

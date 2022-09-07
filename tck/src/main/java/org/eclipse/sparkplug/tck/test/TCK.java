@@ -114,7 +114,6 @@ public class TCK {
 	}
 
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
-		monitor.connect(clientId, packet);
 		if (current != null) {
 			current.connect(clientId, packet);
 		}

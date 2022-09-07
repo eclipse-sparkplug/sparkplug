@@ -13,6 +13,7 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET;
@@ -22,19 +23,27 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDEATH_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_SEQ_NUM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_NUMBER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
+
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_SEQ_NUM;
+
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
@@ -48,10 +57,12 @@ import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.events.client.parameters.*;
 
 /**
  * This is the edge node Sparkplug session termination test
@@ -70,7 +81,8 @@ public class SessionTerminationTest extends TCKTest {
 	private final @NotNull List<String> testIds = List.of(ID_TOPICS_DDEATH_MQTT, ID_TOPICS_DDEATH_SEQ_NUM,
 			ID_PAYLOADS_DDEATH_TIMESTAMP, ID_PAYLOADS_DDEATH_SEQ, ID_PAYLOADS_DDEATH_SEQ_INC,
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
-			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH);
+			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH,
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER);
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -110,6 +122,12 @@ public class SessionTerminationTest extends TCKTest {
 	public String[] getTestIds() {
 		return testIds.toArray(new String[0]);
 	}
+	
+	public void clearResults() {
+		testResults.clear();
+		testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER, FAIL);
+		testResults.put(ID_TOPICS_DDEATH_MQTT, FAIL);
+	}
 
 	public Map<String, String> getResults() {
 		return testResults;
@@ -124,15 +142,44 @@ public class SessionTerminationTest extends TCKTest {
 	}
 
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
+		/* Determine if this the connect packet for the Edge node under test.
+		 * Set the clientid if so. */
+		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String willTopic = willPublishPacket.getTopic();
+			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
+				testClientId = clientId;
+				logger.info("Edge session termination test - connect - client id is " + clientId);
+				testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC,
+						setResult(true, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC));
+			}
+		}
+	}
 
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH,
+			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER)
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		if (testClientId == null || !clientId.equals(testClientId)) {
+			// ignore messages we're not asked to look at
+			return;
+		}
+		
+		// An NDEATH must be received - whether by publish or retained message
+		// If we get a disconnect packet, the NDEATH should already have been received
+
+		testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER,
+				setResult(ndeathFound, PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER));		
 	}
 
 	@Override
-	public void disconnect(String clientId, DisconnectPacket packet) {
-		// TODO Auto-generated method stub
-
+	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
+		// on disconnecting the TCP connection, the NDEATH might not have been received
 	}
-
+	
+	@Override
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 
 	}
@@ -166,7 +213,7 @@ public class SessionTerminationTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_TERMINATION,
 			id = ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH)
-	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
+	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {		
 		// topics namespace/group_id/NDEATH/edge_node_id
 		// namespace/group_id/DDEATH/edge_node_id/device_id
 
@@ -213,6 +260,10 @@ public class SessionTerminationTest extends TCKTest {
 
 			testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
 
+		}
+		
+		if (ndeathFound && ddeathFound) {
+			endTest(testResults);
 		}
 
 	}

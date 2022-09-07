@@ -19,6 +19,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.events.client.parameters.*;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
@@ -42,6 +43,18 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 public abstract class TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	
+	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+		
+	}
+
+	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+
+	}
+
+	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
+
+	}
 
 	public abstract void connect(String clientId, ConnectPacket packet);
 
