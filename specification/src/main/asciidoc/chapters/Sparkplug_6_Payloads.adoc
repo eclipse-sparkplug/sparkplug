@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[payloads]]
 == Payloads
 
@@ -1600,8 +1603,9 @@ Sparkplug B payloads. State messages are used by Sparkplug Host Applications to 
 whether or not the Sparkplug Host Application is online and operational or not.
 
 * [tck-testable tck-id-payloads-state-will-message]#[yellow-background]*Sparkplug Host Applications
-MUST register a Will Message in the MQTT CONNECT packet on the topic 'STATE/[sparkplug_host_id]'.*#
-The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
+MUST register a Will Message in the MQTT CONNECT packet on the topic
+'spBv1.0/STATE/[sparkplug_host_id]'.*#
+** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
 UTF-8 string.
 * [tck-testable tck-id-payloads-state-will-message-qos]#[yellow-background]*The Sparkplug Host
 Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
@@ -1617,16 +1621,18 @@ Certificate's bdSeq number value MUST have a value of one more than the bdSeq nu
 the prior MQTT CONNECT packet from the Host Application unless the previous value was 255. In this
 case the new bdSeq number value MUST be 0.*#
 * [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*After establishing an MQTT
-connection, the Sparkplug Host Application MUST subscribe on it's own 'STATE/[sparkplug_host_id]'
-topic.*#
+connection, the Sparkplug Host Application MUST subscribe on it's own
+'spBv1.0/STATE/[sparkplug_host_id]' topic.*#
+** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
+any UTF-8 string.
 ** Non-normative comment: This allows the Sparkplug Host Application handle timing issues around
-STATE 'OFFLINE' messages being published on it's behalf by the MQTT Server when it is in fact
+STATE 'offline' messages being published on it's behalf by the MQTT Server when it is in fact
 online.
 * [tck-testable tck-id-payloads-state-birth]#[yellow-background]*After subscribing on it's own
-STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message on the
-topic 'STATE/[sparkplug_host_id]' with a QoS of 1, and the retain flag set to true.*# The
-[sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
-UTF-8 string.
+spBv1.0/STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message
+on the topic 'spBv1.0/STATE/[sparkplug_host_id]' with a QoS of 1, and the retain flag set to true.*#
+** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
+any UTF-8 string.
 * [tck-testable tck-id-payloads-state-birth-payload]#[yellow-background]*The Birth Certificate
 Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the one key MUST be
 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a numeric value

@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[topics]]
 == Topics and Messages
 
@@ -234,7 +237,7 @@ examples of Property metrics.
 
 Once an Sparkplug Edge Node is online with a proper NBIRTH it is in a mode of quiescent Report by
 Exception (RBE) or time based reporting of metric information that changes. This enables the
-advantages of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
+advantages of the native Continuous Session Awareness of MQTT to monitor the state of all connected
 Sparkplug Edge Nodes and to rely on Report by Exception (RBE) messages for metric state changes over
 the MQTT session connection. Time based reporting is not explicitly disallowed by the Sparkplug
 Specification but it is discouraged. Due to the session awareness provided by MQTT and Sparkplug it
@@ -398,7 +401,7 @@ Property metrics.
 
 Once a Sparkplug Edge Node and associated Devices are all online with proper Birth Certificates it
 is in a mode of quiescent Report by Exception (RBE) reporting of any metric that changes. This takes
-advantage of the native Continuous Session Awareness of MQTT to monitor the STATE of all connected
+advantage of the native Continuous Session Awareness of MQTT to monitor the state of all connected
 devices and can rely on Report by Exception (RBE) messages for any metric value change over the MQTT
 session connection. Again, time based reporting can be used instead of RBE but is discouraged and
 typically unnecessary.
@@ -510,11 +513,11 @@ the Birth Certificate MUST be set to TRUE*#
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
 Certificate:
 [subs="quotes"]
-  [tck-testable tck-id-host-topic-phid-birth-topic]#*STATE*/sparkplug_host_application_id#
+  [tck-testable tck-id-host-topic-phid-birth-topic]#spBv1.0/*STATE*/sparkplug_host_application_id#
 
 * [tck-testable tck-id-host-topic-phid-birth-sub-required]#[yellow-background]*The Sparkplug Host
-Application MUST subscribe to its own STATE/sparkplug_host_application_id and the appropriate
-spBv1.0 topic(s) immediately after successfully connecting to the MQTT Server.*#
+Application MUST subscribe to its own spBv1.0/STATE/sparkplug_host_application_id and the
+appropriate spBv1.0 topic(s) immediately after successfully connecting to the MQTT Server.*#
 ** An 'appropriate' spBv1.0 topic could simply be 'spBv1.0/#'. However, it may also make sense for
 a Host Application to subscribe only to a specific Sparkplug Group. For example subscribing to
 spBv1.0/Group1/# is also valid. A Host Application could even issue a subscription to subscribe to
@@ -522,7 +525,7 @@ only a single Sparkplug Edge Node using this: spBv1.0/Group1/+/EdgeNode1/#. A Sp
 Application could subscribe to a combination of specific Sparkplug Groups and/or Edge Nodes as well.
 * [tck-testable tck-id-host-topic-phid-birth-required]#[yellow-background]*The Sparkplug Host
 Application MUST publish a Sparkplug Host Application BIRTH message to the MQTT Server immediately
-after successfully subscribing its own STATE/sparkplug_host_application_id topic.*#
+after successfully subscribing its own spBv1.0/STATE/sparkplug_host_application_id topic.*#
 
 [[payloads_desc_state_birth]]
 ====== Birth Certificate Payload (STATE)
@@ -556,7 +559,7 @@ the Birth Certificate MUST be set to TRUE*#
 
 The Will Topic as defined above will be:
 [subs="quotes"]
-  [tck-testable tck-id-host-topic-phid-death-topic]#*STATE*/sparkplug_host_application_id#
+  [tck-testable tck-id-host-topic-phid-death-topic]#spBv1.0/*STATE*/sparkplug_host_application_id#
 
 * [tck-testable tck-id-host-topic-phid-death-required]#[yellow-background]*The Sparkplug Host
 Application MUST provide a Will message in the MQTT CONNECT packet*#
