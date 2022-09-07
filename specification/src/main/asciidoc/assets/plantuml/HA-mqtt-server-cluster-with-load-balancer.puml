@@ -1,0 +1,99 @@
+@startuml
+/'
+ ' Unfortunately, the AsciiDoctor PlantUML plugin dfoes not invoke the PlantUMP pre-processor.
+ ' The consequence is that we have lots of redundant markup instead of clean procedures below.
+ '/
+hide stereotype
+skinparam linetype polyline
+skinparam nodesep 70
+skinparam ranksep 50
+skinparam defaultTextAlignment center
+skinparam monochrome true
+
+skinparam rectangle {
+	BackgroundColor #white
+}
+
+skinparam rectangle<<mqttserver>> {
+	BackgroundColor #lightgrey
+}
+
+skinparam rectangle<<loadbalancer>> {
+	BackgroundColor #darkgrey
+	Roundcorner 50
+}
+
+
+skinparam rectangle<<textBlock>> {
+	BackgroundColor #white
+	BorderThickness 0
+	BorderColor transparent
+	FontSize 28
+	Shadowing false
+}
+
+
+together {
+	rectangle EdgeNode [
+		"" ""
+		===""MQTT Edge""
+		===""    Node    ""
+    	"" ""
+	]
+	rectangle Device [
+		"" ""
+		===""MQTT Enabled""
+		===""Device""
+    	"" ""
+	]
+	rectangle PrimaryHost [
+		"" ""
+		===""Primary Host""
+		===""Application""
+	   	"" ""
+	]	
+}
+
+'together {
+	'rectangle "Load Balancer" <<textBlock>> as LoadBalancerLabel
+	rectangle LoadBalancer<<loadbalancer>> [
+		===""      ""
+		==="" Load Balancer ""
+		===""      ""
+	]
+'}
+
+together {
+	rectangle "MQTT Server" <<textBlock>> as MQTTServerLabel
+	rectangle MQTTNode1<<mqttserver>> [
+		===""  ""
+	]
+	rectangle MQTTNode2<<mqttserver>> [
+		===""  ""
+	]
+	rectangle MQTTNode3<<mqttserver>> [
+		===""  ""
+	]
+}
+
+'[LoadBalancer] -[hidden]down- [LoadBalancerLabel]
+
+[Device] -[hidden]up- [PrimaryHost]
+[Device] -[hidden]down- [EdgeNode]
+
+[Device] <-left-> [LoadBalancer]
+[EdgeNode] <-up-> [LoadBalancer]
+[PrimaryHost] <-down-> [LoadBalancer]
+
+[MQTTNode3] -[hidden]right- [MQTTServerLabel]
+[MQTTNode1] -down- [MQTTNode2]
+[MQTTNode1] -right- [MQTTNode3]
+[MQTTNode2] -down- [MQTTNode3]
+
+[MQTTNode1] <-left--> [LoadBalancer] 
+[MQTTNode2] <-right-> [LoadBalancer]
+[MQTTNode3] <-right-> [LoadBalancer]
+
+	
+
+@enduml

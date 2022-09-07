@@ -777,7 +777,7 @@ Sparkplug Host Application's Death retained flag MUST be set to true.*#
 
 [tck-testable tck-id-operational-behavior-host-application-disconnect-intentional]#[yellow-background]*In
 the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after
-the Death message is sent.*#
+the Death message is published.*#
 
 [[operational_behavior_sparkplug_host_application_receive_data]]
 === Sparkplug Host Application Receive Data
