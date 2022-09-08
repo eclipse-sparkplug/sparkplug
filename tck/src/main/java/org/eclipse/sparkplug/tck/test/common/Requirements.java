@@ -552,7 +552,7 @@ public class Requirements {
     public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED = "The Sparkplug Host Application's Death retained flag MUST be set to true.";
 
     public final static String ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL = "operational-behavior-host-application-disconnect-intentional";
-    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL = "In the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after the Death message is sent.";
+    public final static String OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL = "In the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after the Death message is published.";
 
     // 5.15 Sparkplug Host Application Receive Data
     // 5.16 Data Publish
@@ -739,6 +739,9 @@ public class Requirements {
     public final static String PAYLOADS_TEMPLATE_DATASET_VALUE = "The value supplied MUST be one of the following Google Protobuf types: uint32, uint64, float, double, bool, or string.";
 
     // 6.4.14 Template
+    public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY = "payloads-template-definition-nbirth-only";
+    public final static String PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY = "Template Definitions MUST only be included in NBIRTH messages.";
+
     public final static String ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION = "payloads-template-definition-is-definition";
     public final static String PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION = "A Template Definition MUST have is_definition set to true.";
 
@@ -767,10 +770,10 @@ public class Requirements {
     public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS = "A Template Instance MUST include only members that were included in the corresponding template definition.";
 
     public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH = "payloads-template-instance-members-birth";
-    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH = "A Template Instance MUST include all members that were included in the corresponding Template Definition in a NBIRTH or DBIRTH message.";
+    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH = "A Template Instance in a NBIRTH or DBIRTH message MUST include all members that were included in the corresponding Template Definition.";
 
     public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA = "payloads-template-instance-members-data";
-    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA = "A Template Instance MAY include only a subset of the members that were included in the corresponding template definition in a NDATA or DDATA message.";
+    public final static String PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA = "A Template Instance in a NDATA or DDATA message MAY include only a subset of the members that were included in the corresponding template definition.";
 
     public final static String ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS = "payloads-template-instance-parameters";
     public final static String PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS = "A Template Instance MAY include parameter values for any parameters that were included in the corresponding Template Definition.";
@@ -942,6 +945,12 @@ public class Requirements {
     public final static String ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER = "payloads-ndeath-will-message-publisher";
     public final static String PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER = "An NDEATH message SHOULD be published by the Edge Node before it intentionally disconnects from the MQTT Server.";
 
+    public final static String ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311 = "payloads-ndeath-will-message-publisher-disconnect-mqtt311";
+    public final static String PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311 = "If the Edge Node is using MQTT 3.1.1 and it sends an MQTT DISCONNECT packet, the Edge Node MUST publish an NDEATH message to the MQTT Server before it sends the MQTT DISCONNECT packet.";
+
+    public final static String ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50 = "payloads-ndeath-will-message-publisher-disconnect-mqtt50";
+    public final static String PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50 = "If the Edge Node is using MQTT 5.0 and it sends an MQTT DISCONNECT packet, the MQTT v5.0 'Disconnect with Will Message' reason code MUST be set in the DISCONNECT packet.";
+
     // 6.4.26 DDEATH
     public final static String ID_PAYLOADS_DDEATH_TIMESTAMP = "payloads-ddeath-timestamp";
     public final static String PAYLOADS_DDEATH_TIMESTAMP = "DDEATH messages MUST include a payload timestamp that denotes the time at which the message was published.";
@@ -1049,4 +1058,4 @@ public class Requirements {
     // 11.6 Raspberry Pi Hardware
     // 12 Appendix B: List of Normative Statements (non-normative)
 }
-// no of assertions 288
+// no of assertions 291
