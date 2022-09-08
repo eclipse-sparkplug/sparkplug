@@ -95,12 +95,15 @@ The specification for each of these _message_type_ elements are detailed later i
 
 The edge_node_id element of the Sparkplug topic namespace uniquely identifies the Sparkplug Edge
 Node within the infrastructure.
+
 [tck-testable tck-id-topic-structure-namespace-unique-edge-node-descriptor]#[yellow-background]*[tck-id-topic-structure-namespace-unique-edge-node-descriptor] The
 group_id combined with the _edge_node_id_ element MUST be unique from any other
 group_id/edge_node_id assigned in the MQTT infrastructure.*#
+
 [tck-testable tck-id-topic-structure-namespace-valid-edge-node-id]#[yellow-background]*[tck-id-topic-structure-namespace-valid-edge-node-id] The
 format of the _edge_node_id_ MUST be a valid UTF-8 string with the exception of the reserved
 characters of + (plus), / (forward slash), and # (number sign).*#
+
 The topic element edge_node_id travels with every message published and should be as short as
  possible.
 
@@ -168,9 +171,11 @@ This section defines the payload contents and how each of the associated message
 [[topics_birth_message_nbirth]]
 ====== Topic (NBIRTH)
 
-The Birth Certificate topic for an Sparkplug Edge Node is:
-[subs="quotes"]
-  namespace/group_id/*NBIRTH*/edge_node_id
+* [tck-testable tck-id-topics-nbirth-topic]#[yellow-background]*[tck-id-topics-nbirth-topic] The
+Birth Certificate topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NBIRTH/edge_node_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
+Node.*#
 
 [[payloads_desc_nbirth]]
 ====== Payload (NBIRTH)
@@ -202,17 +207,17 @@ be published in the NBIRTH.*#
 bdSeq number as a metric MUST be included in the payload.*#
 * [tck-testable tck-id-topics-nbirth-bdseq-matching]#[yellow-background]*[tck-id-topics-nbirth-bdseq-matching] This
 MUST match the bdSeq number provided in the MQTT CONNECT packet’s Will Message payload.*#
-This allows Host Applications to correlate NBIRTHs to NDEATHs.
+** This allows Host Applications to correlate NBIRTHs to NDEATHs.
 * [tck-testable tck-id-topics-nbirth-bdseq-increment]#[yellow-background]*[tck-id-topics-nbirth-bdseq-increment] The
 bdSeq number MUST start at zero and increment by one on every new MQTT CONNECT packet.*#
 
 [tck-testable tck-id-topics-nbirth-rebirth-metric]#[yellow-background]*[tck-id-topics-nbirth-rebirth-metric] The
 NBIRTH message MUST include the following metric:*#
-
-* Metric name: ‘Node Control/Rebirth’
-** Used by Host Application(s) to request a new NBIRTH and DBIRTH(s) from an Edge Node.
-** Datatype: boolean
-** Value: false
+[yellow-background]
+ * Metric name: ‘Node Control/Rebirth’
+ ** Used by Host Application(s) to request a new NBIRTH and DBIRTH(s) from an Edge Node.
+ ** Datatype: boolean
+ ** Value: false
 
 The NBIRTH message can also include additional Node Control payload components. These are used by a
 Sparkplug Host Application to control aspects of the Edge Node. The following are examples of Node
@@ -252,9 +257,11 @@ is not necessary to send the same data again on a periodic basis.
 [[topics_data_message_ndata]]
 ====== Topic (NDATA)
 
-The Data Topic for an Sparkplug Edge Node is:
-[subs="quotes"]
-  namespace/group_id/*NDATA*/edge_node_id
+* [tck-testable tck-id-topics-ndata-topic]#[yellow-background]*[tck-id-topics-ndata-topic] The
+Edge Node data topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NDATA/edge_node_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
+Node.*#
 
 The payload of NDATA messages will contain any RBE or time based metric Edge Node values that need
 to be reported to any subscribing MQTT clients.
@@ -291,9 +298,11 @@ NDEATH message was received.
 [[topics_death_message_ndeath]]
 ====== Topic (NDEATH)
 
-The Death Certificate topic for an Sparkplug Edge Node is:
-[subs="quotes"]
-  namespace/group_id/*NDEATH*/edge_node_id
+* [tck-testable tck-id-topics-ndeath-topic]#[yellow-background]*[tck-id-topics-ndeath-topic] The
+Edge Node Death Certificate topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NDEATH/edge_node_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
+Node.*#
   
 [[payloads_desc_ndeath]]
 ====== Payload (NDEATH)
@@ -321,8 +330,12 @@ into the payload.
 The NCMD command topic provides the topic namespace used to send commands to any connected Edge
 Nodes. This means sending an updated metric value to an associated metric included in the NBIRTH
 metric list.
-[subs="quotes"]
-  namespace/group_id/*NCMD*/edge_node_id
+
+* [tck-testable tck-id-topics-ncmd-topic]#[yellow-background]*[tck-id-topics-ncmd-topic] The
+Edge Node command topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NCMD/edge_node_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
+Node.*#
   
 [[payloads_desc_ncmd]]
 ====== Payload (NCMD)
@@ -358,9 +371,11 @@ this device. The 'online' state of this device should be set to TRUE along with 
 [[topics_birth_message_dbirth]]
 ====== Topic (DBIRTH)
 
-The topic namespace for a Birth Certificate for a device is:
-[subs="quotes"]
-  namespace/group_id/*DBIRTH*/edge_node_id/device_id
+* [tck-testable tck-id-topics-dbirth-topic]#[yellow-background]*[tck-id-topics-dbirth-topic] The
+Device Birth topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DBIRTH/edge_node_id/device_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
+specific Device.*#
 
 [[payloads_desc_dbirth]]
 ====== Payload (DBIRTH)
@@ -378,10 +393,7 @@ DBIRTH MUST include a timestamp denoting the Date/Time the message was sent from
 * [tck-testable tck-id-topics-dbirth-metric-reqs]#[yellow-background]*[tck-id-topics-dbirth-metric-reqs] The
 DBIRTH MUST include every metric the Edge Node will ever report on.*#
 * [tck-testable tck-id-topics-dbirth-metrics]#[yellow-background]*[tck-id-topics-dbirth-metrics] At
-a minimum each metric MUST include the following:*#
-** The metric name
-** The metric datatype
-** The current value
+a minimum each metric MUST include the metric name, metric datatype, and current value.*#
 
 The DBIRTH message can also include optional ‘Device Control’ payload components. These are used by
 a Host Application to control aspects of a device. The following are examples of Device Control
@@ -417,9 +429,11 @@ typically unnecessary.
 [[topics_data_message_ddata]]
 ====== Topic (DDATA)
 
-As defined above, the Data Topic for an MQTT device is:
-[subs="quotes"]
-  namespace/group_id/*DDATA*/edge_node_id/device_id
+* [tck-testable tck-id-topics-ddata-topic]#[yellow-background]*[tck-id-topics-ddata-topic] The
+Device command topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DDATA/edge_node_id/device_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
+specific Device.*#
 
 The payload of DDATA messages can contain one or more metric values that need to be reported.
 
@@ -454,9 +468,11 @@ DDEATH message was received.
 [[topics_death_message_ddeath]]
 ====== Topic (DDEATH)
 
-The Sparkplug topic namespace for a device Death Certificate is:
-[subs="quotes"]
-  namespace/group_id/*DDEATH*/edge_node_id/device_id
+* [tck-testable tck-id-topics-ddeath-topic]#[yellow-background]*[tck-id-topics-ddeath-topic] The
+Device Death Certificate topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DDEATH/edge_node_id/device_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
+specific Device.*#
   
 [[payloads_desc_ddeath]]
 ====== Payload (DDEATH)
@@ -479,8 +495,11 @@ means sending a new metric value to an associated metric included in the DBIRTH 
 [[topics_command_dcmd]]
 ====== Topic DCMD)
 
-[subs="quotes"]
-  namespace/group_id/*DCMD*/edge_node_id/device_id
+* [tck-testable tck-id-topics-dcmd-topic]#[yellow-background]*[tck-id-topics-dcmd-topic] The
+Device command topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DCMD/edge_node_id/device_id'
+where the namespace is replaced with the specific namespace for this version of Sparkplug and the
+group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
+specific Device.*#
   
 [[payloads_desc_dcmd]]
 ====== Payload (DCMD)
@@ -520,9 +539,11 @@ MQTT retain flag for the Birth Certificate MUST be set to TRUE*#
 ====== Birth Certificate Topic (STATE)
 
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
-Certificate [tck-id-host-topic-phid-birth-topic]:
-[subs="quotes"]
-  [tck-testable tck-id-host-topic-phid-birth-topic]#spBv1.0/*STATE*/sparkplug_host_id#
+Certificate.
+[tck-testable tck-id-host-topic-phid-birth-topic]#[yellow-background]*[tck-id-host-topic-phid-birth-topic] The
+Sparkplug Host Application Birth topic MUST be of the form spBv1.0/STATE/sparkplug_host_id where the
+sparkplug_host_id must be replaced with the specific Spakrplug Host ID of this Sparkplug Host
+Application.*#
 
 * [tck-testable tck-id-host-topic-phid-birth-sub-required]#[yellow-background]*[tck-id-host-topic-phid-birth-sub-required] The
 Sparkplug Host Application MUST subscribe to its own spBv1.0/STATE/sparkplug_host_id and the
@@ -566,9 +587,10 @@ MQTT retain flag for the Birth Certificate MUST be set to TRUE*#
 [[topics_death_message_state]]
 ====== Death Certificate Topic (STATE)
 
-The Will Topic as defined above MUST be [tck-id-host-topic-phid-death-topic]:
-[subs="quotes"]
-  [tck-testable tck-id-host-topic-phid-death-topic]#spBv1.0/*STATE*/sparkplug_host_id#
+[tck-testable tck-id-host-topic-phid-death-topic]#[yellow-background]*[tck-id-host-topic-phid-death-topic] The
+Sparkplug Host Application Death topic MUST be of the form spBv1.0/STATE/sparkplug_host_id where the
+sparkplug_host_id must be replaced with the specific Spakrplug Host ID of this Sparkplug Host
+Application.*#
 
 * [tck-testable tck-id-host-topic-phid-death-required]#[yellow-background]*[tck-id-host-topic-phid-death-required] The
 Sparkplug Host Application MUST provide a Will message in the MQTT CONNECT packet*#

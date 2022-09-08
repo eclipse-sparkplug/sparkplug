@@ -58,7 +58,7 @@ v3.1.1 or v5.0 MQTT Server will meet the requirements of Sparkplug infrastructur
 of the features of the MQTT Specification are required. The following are the required portions of
 the MQTT Specification that a Sparkplug Compliant MQTT Server must meet.
 
-* [tck-testable tck-id-conformance-mqtt-qos0]#[yellow-background]*[tck-id-conformance-mqtt-qos0]#[yellow-background] A
+* [tck-testable tck-id-conformance-mqtt-qos0]#[yellow-background]*[tck-id-conformance-mqtt-qos0] A
 Sparkplug conformant MQTT Server MUST support publish and subscribe on QoS 0*#
 * [tck-testable tck-id-conformance-mqtt-qos1]#[yellow-background]*[tck-id-conformance-mqtt-qos1] A
 Sparkplug conformant MQTT Server MUST support publish and subscribe on QoS 1*#
@@ -89,7 +89,7 @@ after the NBIRTH and DBIRTH messages denoting metric values that had changed at 
 its associated Sparkplug Devices. Consumers of the stored NBIRTH and DBIRTH messages should take
 this into consideration when using the information in the stored NBIRTH and DBIRTH payloads.
 
-* [tck-testable tck-id-conformance-mqtt-aware-basic]#[yellow-background]*[tck-id-conformance-mqtt-aware-basic]#[yellow-background] A
+* [tck-testable tck-id-conformance-mqtt-aware-basic]#[yellow-background]*[tck-id-conformance-mqtt-aware-basic] A
 Sparkplug Aware MQTT Server MUST support all aspects of a Sparkplug Compliant MQTT Server*#
 * [tck-testable tck-id-conformance-mqtt-aware-store]#[yellow-background]*[tck-id-conformance-mqtt-aware-store] A
 Sparkplug Aware MQTT Server MUST store NBIRTH and DBIRTH messages as they pass through the MQTT
