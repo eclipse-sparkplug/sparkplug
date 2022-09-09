@@ -54,7 +54,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private HashMap testResults = new HashMap<String, String>();
 	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
 	String[] testId = { ID_TOPICS_NDATA_MQTT, ID_TOPICS_NDATA_SEQ_NUM, ID_TOPICS_NDATA_TIMESTAMP,
 			ID_TOPICS_NDATA_PAYLOAD, ID_TOPICS_DDATA_MQTT, ID_TOPICS_DDATA_SEQ_NUM, ID_TOPICS_DDATA_TIMESTAMP,
@@ -72,7 +71,6 @@ public class SendDataTest extends TCKTest {
 	public SendDataTest(TCK aTCK, String[] params) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-		testResults = new HashMap<String, String>();
 		testIds.addAll(Arrays.asList(testId));
 
 		if (params.length < 3) {
@@ -92,27 +90,27 @@ public class SendDataTest extends TCKTest {
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
-	}
+    }
 
-	public String getName() {
-		return "Edge SendData";
-	}
+    public String getName() {
+        return "Edge SendData";
+    }
 
-	public String[] getTestIds() {
-		return testIds.toArray(new String[0]);
-	}
+    public String[] getTestIds() {
+        return testIds.toArray(new String[0]);
+    }
 
-	public HashMap<String, String> getResults() {
-		return testResults;
-	}
+    public Map<String, String> getResults() {
+        return testResults;
+    }
 
-	@Override
-	public void connect(String clientId, ConnectPacket packet) {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void connect(String clientId, ConnectPacket packet) {
+        // TODO Auto-generated method stub
+    }
 
-	@Override
-	public void disconnect(String clientId, DisconnectPacket packet) {
+    @Override
+    public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
 	}
 

@@ -39,10 +39,7 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Optional;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
@@ -77,7 +74,6 @@ import com.hivemq.extension.sdk.api.events.client.parameters.*;
 public class SessionTerminationTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
 	private final @NotNull List<String> testIds = List.of(ID_TOPICS_DDEATH_MQTT, ID_TOPICS_DDEATH_SEQ_NUM,
 			ID_PAYLOADS_DDEATH_TIMESTAMP, ID_PAYLOADS_DDEATH_SEQ, ID_PAYLOADS_DDEATH_SEQ_INC,
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,

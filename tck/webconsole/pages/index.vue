@@ -39,7 +39,7 @@
                             :title-link-class="
                   (sparkplugClient.hostApplication.complete && sparkplugClient.testType === 'HOSTAPPLICATION') ||
                   (sparkplugClient.eonNode.complete && sparkplugClient.testType === 'EONNODE')||
-                  (sparkplugClient.broker.complete && sparkplugClient.testType === 'BROKER')
+                  (sparkplugClient.testType === 'BROKER' && sparkplugClient.broker.host.length>0 && sparkplugClient.broker.port >0)
                     ? 'bg-success text-white'
                     : 'bg-danger text-white'
                 "

@@ -36,9 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
 
@@ -48,26 +46,27 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC
 public class MQTTListener implements MqttCallbackExtended {
 	private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
 	// Configuration
-	private String serverUrl = "tcp://localhost:1883";
-	private String clientId = "Sparkplug MQTT Listener " + UUID.randomUUID();
-	private String username = "admin";
-	private String password = "changeme";
+    private String serverUrl = "tcp://localhost:1883";
+    private String clientId = "Sparkplug MQTT Listener " + UUID.randomUUID();
+    private String username = "admin";
+    private String password = "changeme";
 
-	private MqttTopic log_topic = null;
-	private MqttClient client = null;
+    private MqttTopic log_topic = null;
+    private MqttClient client = null;
 
-	private String primary_host_application_id = null;
+    private String primary_host_application_id = null;
 
-	private HashMap testResults = new HashMap<String, String>();
-	String[] testIds = { ID_INTRO_GROUP_ID_STRING, ID_INTRO_GROUP_ID_CHARS, ID_INTRO_EDGE_NODE_ID_STRING,
-			ID_INTRO_EDGE_NODE_ID_CHARS, ID_INTRO_DEVICE_ID_STRING, ID_INTRO_DEVICE_ID_CHARS, ID_TOPIC_STRUCTURE,
-			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
-			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
-			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
-			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_PAYLOADS_TIMESTAMP_IN_UTC };
+    private TreeMap<String, String> testResults = new TreeMap<>();
 
-	public void log(String message) {
-		try {
+    String[] testIds = {ID_INTRO_GROUP_ID_STRING, ID_INTRO_GROUP_ID_CHARS, ID_INTRO_EDGE_NODE_ID_STRING,
+            ID_INTRO_EDGE_NODE_ID_CHARS, ID_INTRO_DEVICE_ID_STRING, ID_INTRO_DEVICE_ID_CHARS, ID_TOPIC_STRUCTURE,
+            ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
+            ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
+            ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
+            ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_PAYLOADS_TIMESTAMP_IN_UTC};
+
+    public void log(String message) {
+        try {
 			MqttMessage mqttmessage = new MqttMessage(("MQTTListener: " + message).getBytes());
 			log_topic.publish(mqttmessage);
 		} catch (Exception e) {
@@ -88,9 +87,11 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	public HashMap<String, String> getResults() {
 		HashMap labelledResults = new HashMap<String, String>();
-		for (int i = 0; i < testIds.length; ++i) {
-			labelledResults.put("MQTTListener:" + testIds[i], testResults.get(testIds[i]));
-		}
+        for (int i = 0; i < testIds.length; ++i) {
+            if (testResults.containsKey(testIds[i])) {
+                labelledResults.put("MQTTListener:" + testIds[i], testResults.get(testIds[i]));
+            }
+        }
 		return labelledResults;
 	}
 
