@@ -76,6 +76,9 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
+
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
@@ -156,7 +159,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED,
-			ID_PAYLOADS_STATE_BIRTH_PAYLOAD };
+			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -181,6 +184,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	// host application id to sequence number
 	private HashMap<String, Long> hostBdSeqs = new HashMap<String, Long>();
+	
+	// host application id to MQTT client id
+	HashMap<String, String> hostClientids = new HashMap<String, String>();
 
 	public Monitor() {
 		logger.info("Sparkplug TCK message monitor 1.0");
@@ -428,9 +434,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				handleDDATA(group_id, edge_node_id, device_id, payload);
 			}
 		} else if (topic.startsWith(TOPIC_ROOT_STATE)) {
-
+			if (packet.getPayload().isPresent()) {
+				String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
+				handleSTATE(clientId, topic, payloadString);
+			}
 		}
-
 	}
 
 	@SpecAssertion(
@@ -924,7 +932,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 									+ ": metric name: " + current.getName());
 						}
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
-								ID_PRINCIPLES_RBE_RECOMMENDED)) {
+								PRINCIPLES_RBE_RECOMMENDED)) {
 							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ current.getName());
 						}
@@ -934,5 +942,55 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 		}
 		deviceLastMetrics.put(id, metrics);
+	}
+
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID)
+	private void handleSTATE(String clientId, String topic, String payload) {
+		String hostid = null;
+		String[] topicParts = topic.split("/");
+		if (topicParts.length > 1) {
+			hostid = topicParts[1];
+		} else {
+			return;
+		}
+
+		ObjectMapper mapper = new ObjectMapper();
+		boolean isValidPayload = true;
+
+		JsonNode json = null;
+		try {
+			json = mapper.readTree(payload);
+		} catch (Exception e) {
+			isValidPayload = false;
+		}
+
+		if (isValidPayload && json != null) {
+			if (json.has("online")) {
+				JsonNode online = json.get("online");
+				if (online.isBoolean()) {
+					boolean check = true;
+					boolean state = online.booleanValue();
+					String hostClientid = hostClientids.get(hostid);
+					if (state) {
+						if (hostClientid != null) {
+							if (hostClientid.equals(clientId)) {
+								check = false; // two different clientids with the same hostid online
+							}
+						}
+						hostClientids.put(hostid, clientId);
+					} else {
+						if (hostClientid != null) {
+							hostClientids.remove(hostid);
+						} else {
+							// didn't find host online but it might not be an error
+						}
+					}
+					setShouldResultIfNotFail(testResults, check, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID,
+							OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID);
+				}
+			}
+		}
 	}
 }
