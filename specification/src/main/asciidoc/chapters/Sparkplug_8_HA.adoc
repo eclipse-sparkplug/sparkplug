@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[high_availability]]
 == High Availability
 
@@ -151,8 +154,8 @@ This will cause the MQTT Server, on behalf of the now terminated the Primary Hos
 Client to publish the DEATH certificate to anyone that is currently subscribed to it. Upon receipt
 of the Primary Host Application DEATH Certificate this Edge Node will move to the next MQTT Server
 in its table.
-. The Edge Node moved to the next available MQTT Server and since the current STATE on this server is
-‘online=true’, it can stay connected.
+. The Edge Node moved to the next available MQTT Server and since the current STATE on this server
+is ‘online=true’, it can stay connected.
 . In the meantime, the network disruption between Primary Host Application and MQTT Server #2 has
 been corrected. The Primary Host Application has a new MQTT Session established to server #2 with an
 update Birth Certificate with 'online=true’. Now MQTT Server #2 is ready to accept new Edge Node

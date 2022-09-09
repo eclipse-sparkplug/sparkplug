@@ -275,8 +275,8 @@ any number of additional Host Applications participating in the infrastructure t
 pure monitoring mode, or in the role of a hot standby should the Edge Node's Primary Host
 Application go offline or become unavailable within the infrastructure.
 
-[tck-testable tck-id-intro-sparkplug-host-state]#[yellow-background]*Sparkplug Host Applications
-MUST publish STATE messages denoting their online and offline status.*#
+[tck-testable tck-id-intro-sparkplug-host-state]#[yellow-background]*[tck-id-intro-sparkplug-host-state] Sparkplug
+Host Applications MUST publish STATE messages denoting their online and offline status.*#
 
 [[introduction_primary_host_application]]
 ===== Primary Host Application
@@ -301,37 +301,40 @@ infrastructure. There are three primary IDs and one that is a composite ID. Thes
 the following.
 
 * Group ID
-** [tck-testable tck-id-intro-group-id-string]#[yellow-background]*The Group ID MUST be a UTF-8 string
-and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
-** [tck-testable tck-id-intro-group-id-chars]#[yellow-background]*Because the Group ID is used in
-MQTT topic strings the Group ID MUST only contain characters allowed for MQTT topics per the MQTT
-Specification.*#
-** Non-normative comment: The Group ID represents a general grouping of Edge Nodes that makes sense
+** [tck-testable tck-id-intro-group-id-string]#[yellow-background]*[tck-id-intro-group-id-string]
+The Group ID MUST be a UTF-8 string and used as part of the Sparkplug topics as defined in the
+link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-group-id-chars]#[yellow-background]*[tck-id-intro-group-id-chars]
+Because the Group ID is used in MQTT topic strings the Group ID MUST only contain characters allowed
+for MQTT topics per the MQTT Specification.*#
+*** Non-normative comment: The Group ID represents a general grouping of Edge Nodes that makes sense
 within the context of the Sparkplug application and use-case.
 * Edge Node ID
-** [tck-testable tck-id-intro-edge-node-id-string]#[yellow-background]*The Edge Node ID MUST be a 
-UTF-8 string and used as part of the Sparkplug topics as defined in the
+** [tck-testable tck-id-intro-edge-node-id-string]#[yellow-background]*[tck-id-intro-edge-node-id-string]
+The Edge Node ID MUST be a  UTF-8 string and used as part of the Sparkplug topics as defined in the
 link:#topics[Topics Section].*#
-** [tck-testable tck-id-intro-edge-node-id-chars]#[yellow-background]*Because the Edge Node ID is
-used in MQTT topic strings the Edge Node ID MUST only contain characters allowed for MQTT topics per the
-MQTT Specification.*#
-** Non-normative comment: The Edge Node ID represents a unique identifier for an Edge Node within
+** [tck-testable tck-id-intro-edge-node-id-chars]#[yellow-background]*[tck-id-intro-edge-node-id-chars]
+Because the Edge Node ID is used in MQTT topic strings the Edge Node ID MUST only contain characters
+allowed for MQTT topics per the MQTT Specification.*#
+*** Non-normative comment: The Edge Node ID represents a unique identifier for an Edge Node within
 the context of the Group ID under which it exists.
 * Device ID
-** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*The Device ID MUST be a UTF-8
-string and used as part of the Sparkplug topics as defined in the link:#topics[Topics Section].*#
-** [tck-testable tck-id-intro-device-id-chars]#[yellow-background]*Because the Device ID is used in
-MQTT topic strings the Device ID MUST only contain characters allowed for MQTT topics per the MQTT
-Specification.*#
-** Non-normative comment: The Device ID represents a unique identifier for a Device within the
+** [tck-testable tck-id-intro-device-id-string]#[yellow-background]*[tck-id-intro-device-id-string]
+The Device ID MUST be a UTF-8 string and used as part of the Sparkplug topics as defined in the
+link:#topics[Topics Section].*#
+** [tck-testable tck-id-intro-device-id-chars]#[yellow-background]*[tck-id-intro-device-id-chars]
+Because the Device ID is used in MQTT topic strings the Device ID MUST only contain characters
+allowed for MQTT topics per the MQTT Specification.*#
+*** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
 * Edge Node Descriptor (composite ID)
 ** The Edge Node Descriptor is the combination of the Group ID and Edge Node ID.
-** [tck-testable tck-id-intro-edge-node-id-uniqueness]#[yellow-background]*The Edge Node Descriptor MUST be
-unique within the context of all of other Edge Nodes within the Sparkplug infrastructure.*# In other
-words, no two Edge Nodes within a Sparkplug environment can have the same Group ID and same Edge
-Node ID.
-** Non-normative comment: The Device ID represents a unique identifier for a Device within the
+** [tck-testable tck-id-intro-edge-node-id-uniqueness]#[yellow-background]*[tck-id-intro-edge-node-id-uniqueness]
+The Edge Node Descriptor MUST be unique within the context of all of other Edge Nodes within the
+Sparkplug infrastructure.*#
+*** In other words, no two Edge Nodes within a Sparkplug environment can have the same Group ID and
+same Edge Node ID.
+*** Non-normative comment: The Device ID represents a unique identifier for a Device within the
 context of the Edge Node ID under which it exists.
 
 [[introduction_sparkplug_metrics]]
