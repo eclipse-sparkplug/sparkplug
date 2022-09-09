@@ -34,7 +34,10 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
-
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_SEQ_NUM;
 
@@ -89,7 +92,8 @@ public class SessionTerminationTest extends TCKTest {
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
 			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER, ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311,
-			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50);
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50,
+			ID_TOPICS_NDEATH_TOPIC, ID_TOPICS_DDEATH_TOPIC );
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -209,6 +213,12 @@ public class SessionTerminationTest extends TCKTest {
 	}
 
 	@SpecAssertion(
+			section = Sections.TOPICS_DEATH_MESSAGE_NDEATH,
+			id = ID_TOPICS_NDEATH_TOPIC)
+	@SpecAssertion(
+			section = Sections.TOPICS_DEATH_MESSAGE_DDEATH,
+			id = ID_TOPICS_DDEATH_TOPIC)
+	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_DDEATH,
 			id = ID_TOPICS_DDEATH_MQTT)
 	@SpecAssertion(
@@ -250,12 +260,16 @@ public class SessionTerminationTest extends TCKTest {
 				&& topicLevels[2].equals("NDEATH") && topicLevels[3].equals(edgeNodeId)) {
 			ndeathFound = true;
 			logger.info("Edge session termination test - publish - to topic: {} ", packet.getTopic());
+			
+			testResults.put(ID_TOPICS_NDEATH_TOPIC, setResult(ndeathFound, TOPICS_NDEATH_TOPIC));	
 		}
 
 		if (topicLevels.length == 5 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
 				&& topicLevels[2].equals("DDEATH") && topicLevels[3].equals(edgeNodeId)
 				&& topicLevels[4].equals(deviceId)) {
 			ddeathFound = true;
+			
+			testResults.put(ID_TOPICS_DDEATH_TOPIC, setResult(ddeathFound, TOPICS_DDEATH_TOPIC));			
 
 			// DDEATH messages MUST be published with MQTT QoS equal to 0 and retain equal to false.
 			boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
