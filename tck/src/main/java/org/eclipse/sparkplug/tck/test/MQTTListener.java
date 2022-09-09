@@ -41,13 +41,14 @@ import java.util.*;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
 
 @SpecVersion(
-		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+        spec = "sparkplug",
+        version = "3.0.0-SNAPSHOT")
 public class MQTTListener implements MqttCallbackExtended {
-	private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
-	// Configuration
+    private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
+    protected static final String SPARKPLUG_TCK_MQTT_LISTENER = "Sparkplug TCK MQTT listener";
+    // Configuration
     private String serverUrl = "tcp://localhost:1883";
-    private String clientId = "Sparkplug MQTT Listener " + UUID.randomUUID();
+    private String clientId = SPARKPLUG_TCK_MQTT_LISTENER + UUID.randomUUID();
     private String username = "admin";
     private String password = "changeme";
 
@@ -96,21 +97,20 @@ public class MQTTListener implements MqttCallbackExtended {
 	}
 
 	public void run(String[] args) {
-		if (client != null) {
-			return;
-		}
-
-		logger.info("*** Sparkplug TCK MQTT Listener ***");
-		clearResults();
-		try {
-			// Connect to the MQTT Server
-			MqttConnectOptions options = new MqttConnectOptions();
-			options.setAutomaticReconnect(true);
-			options.setCleanSession(true);
-			options.setConnectionTimeout(30);
-			options.setKeepAliveInterval(30);
-			// options.setUserName(username);
-			// options.setPassword(password.toCharArray());
+        if (client != null) {
+            return;
+        }
+        logger.info("Initialize {} ", clientId);
+        clearResults();
+        try {
+            // Connect to the MQTT Server
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setAutomaticReconnect(true);
+            options.setCleanSession(true);
+            options.setConnectionTimeout(30);
+            options.setKeepAliveInterval(30);
+            // options.setUserName(username);
+            // options.setPassword(password.toCharArray());
 			client = new MqttClient(serverUrl, clientId);
 			//client.setTimeToWait(10000); // short timeout on failure to connect
 			client.setCallback(this);
@@ -124,22 +124,22 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
-		System.out.println("Sparkplug TCK MQTT listener: Connected");
+        System.out.println(SPARKPLUG_TCK_MQTT_LISTENER + ": Connected");
 
-		try {
-			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
-			client.subscribe(
-					new String[] { "spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#", TCK_LOG_TOPIC, TCK_RESULTS_TOPIC},
-					new int[] { 2, 2, 2, 2, 2});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            // Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
+            client.subscribe(
+                    new String[]{"spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#", TCK_LOG_TOPIC, TCK_RESULTS_TOPIC},
+                    new int[]{2, 2, 2, 2, 2});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 	@Override
 	public void connectionLost(Throwable cause) {
-		System.out.println("Sparkplug TCK MQTT listener: connection lost - will auto-reconnect");
-	}
+        System.out.println(SPARKPLUG_TCK_MQTT_LISTENER + ": connection lost - will auto-reconnect");
+    }
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_PAYLOAD,

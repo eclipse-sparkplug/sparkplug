@@ -261,6 +261,7 @@ public class Utils {
 				//skip
 				continue;
 			}
+
 			summary.append(reportResult.getKey()).append(": ").append(reportResult.getValue()).append(";")
 					.append(System.lineSeparator());
 
