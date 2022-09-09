@@ -61,7 +61,6 @@ public class CompliantBrokerTest extends TCKTest {
     private final @NotNull String[] testId = {ID_CONFORMANCE_MQTT_QOS0,
             ID_CONFORMANCE_MQTT_QOS1, ID_CONFORMANCE_MQTT_WILL_MESSAGES, ID_CONFORMANCE_MQTT_RETAINED};
     private final @NotNull ArrayList<String> testIds = new ArrayList<>();
-    private final HashMap<String, String> testResults = new HashMap<String, String>();
     private TCK theTCK = null;
     private @NotNull String host;
     private @NotNull String port;
@@ -104,7 +103,7 @@ public class CompliantBrokerTest extends TCKTest {
     @SpecAssertion(
             section = Sections.CONFORMANCE_MQTT_SERVER,
             id = ID_CONFORMANCE_MQTT_RETAINED)
-    public static void checkCompliance(final String host, final int port, HashMap<String, String> testResults) {
+    public static void checkCompliance(final String host, final int port, final Map<String, String> testResults) {
         logger.info("{} - Start", Sections.CONFORMANCE_MQTT_SERVER);
 
         logger.debug("Check Req: {} ", ID_CONFORMANCE_MQTT_QOS0);
@@ -143,7 +142,7 @@ public class CompliantBrokerTest extends TCKTest {
         return testIds.toArray(new String[0]);
     }
 
-    public HashMap<String, String> getResults() {
+    public Map<String, String> getResults() {
         return testResults;
     }
 

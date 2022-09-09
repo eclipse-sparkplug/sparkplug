@@ -57,7 +57,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 		version = "3.0.0-SNAPSHOT")
 public class SessionTerminationTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
 
 	private final @NotNull List<String> testIds = List.of(
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,

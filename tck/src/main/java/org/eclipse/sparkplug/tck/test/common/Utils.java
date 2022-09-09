@@ -64,7 +64,21 @@ public class Utils {
 	}
 
 	public static @NotNull String setResult(boolean bValid, String requirement) {
-		return bValid ? PASS : FAIL + " " + requirement;
+		return setResultWithStackTrace(bValid, requirement, 1);
+	}
+
+	private static @NotNull String setResultWithStackTrace(boolean bValid, String requirement, int element) {
+		if (!bValid) {
+			StackTraceElement[] elements = (new Exception()).getStackTrace();
+			if (elements != null && elements.length > element) {
+				final String result = FAIL + " " + requirement + " (" + elements[element] + ")";
+				logger.debug(result);
+				return result;
+			} else {
+				return FAIL + " " + requirement;
+			}
+		}
+		return PASS;
 	}
 
 	public static @NotNull String setShouldResult(boolean bValid, String requirement) {
@@ -72,9 +86,9 @@ public class Utils {
 	}
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
-			String req_desc) {
+													  String req_desc) {
 		if (!results.get(req_id).equals(FAIL)) {
-			results.put(req_id, setResult(result, req_desc));
+			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
 		}
 		return result;
 	}
@@ -243,6 +257,10 @@ public class Utils {
 		String overall = results.entrySet().isEmpty() ? TopicConstants.EMPTY : TopicConstants.NOT_EXECUTED;
 
 		for (final Map.Entry<String, String> reportResult : results.entrySet()) {
+			if (reportResult.getValue().equals(NOT_EXECUTED)) {
+				//skip
+				continue;
+			}
 			summary.append(reportResult.getKey()).append(": ").append(reportResult.getValue()).append(";")
 					.append(System.lineSeparator());
 

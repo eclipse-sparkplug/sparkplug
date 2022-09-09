@@ -27,14 +27,18 @@ import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 
+import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.test.Monitor;
+
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
 /**
@@ -90,7 +94,7 @@ public class TCK {
 	public void endTest() {
 		if (current != null) {
 			logger.info("Test end requested for " + current.getName());
-			HashMap<String, String> testResults = monitor.getResults();
+			TreeMap<String, String> testResults = monitor.getResults();
 			testResults.putAll(listener.getResults());
 			current.endTest(testResults);
 			current = null;

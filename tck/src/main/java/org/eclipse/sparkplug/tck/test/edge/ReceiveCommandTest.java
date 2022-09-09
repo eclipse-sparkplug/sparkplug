@@ -75,7 +75,6 @@ public class ReceiveCommandTest extends TCKTest {
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull TCK theTCK;
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
 
 	private final @NotNull List<String> testIds = List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,

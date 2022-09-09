@@ -56,7 +56,6 @@ public class AwareBrokerTest extends TCKTest {
             ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
             ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP};
     private final @NotNull ArrayList<String> testIds = new ArrayList<>();
-    private final HashMap<String, String> testResults;
     private TCK theTCK = null;
     private @NotNull String host;
     private @NotNull String port;
@@ -66,6 +65,7 @@ public class AwareBrokerTest extends TCKTest {
     private boolean bDBirthChecked = false;
     private boolean bNDeathChecked = false;
     private boolean bBasicAwareChecked = false;
+    private boolean bStoreAwareChecked = false;
     private AwareTestResult createSubscriptionResult = AwareTestResult.NOT_SUBSCRIBED;
     private Mqtt3Client subscriber;
 
@@ -75,7 +75,6 @@ public class AwareBrokerTest extends TCKTest {
 	public AwareBrokerTest(TCK aTCK, String[] params) {
 		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-		testResults = new HashMap<String, String>();
 		testIds.addAll(Arrays.asList(testId));
 		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -120,7 +119,7 @@ public class AwareBrokerTest extends TCKTest {
         return testIds.toArray(new String[0]);
     }
 
-    public HashMap<String, String> getResults() {
+    public Map<String, String> getResults() {
         return testResults;
     }
 
@@ -208,6 +207,10 @@ public class AwareBrokerTest extends TCKTest {
             checkDBIRTHAware(isRetain);
         }
 
+        if (bNBirthChecked && bNDeathChecked) {
+            checkStoreAware();
+        }
+
         if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
             logger.debug("AWARE:: Broker {}, checkPublishOnSysTopic - end test", getName());
             theTCK.endTest();
@@ -279,6 +282,18 @@ public class AwareBrokerTest extends TCKTest {
                 && testResults.get(ID_CONFORMANCE_MQTT_RETAINED).equals(PASS);
         testResults.put(ID_CONFORMANCE_MQTT_AWARE_BASIC, setResult(isBasicAware, CONFORMANCE_MQTT_AWARE_BASIC));
         bBasicAwareChecked = true;
+    }
+
+    @SpecAssertion(
+            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+            id = ID_CONFORMANCE_MQTT_AWARE_STORE)
+    public void checkStoreAware() {
+        logger.info("AWARE:: Broker - {} - Start", Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER);
+        logger.debug("AWARE:: Broker - Check Req: {} ", CONFORMANCE_MQTT_AWARE_STORE);
+        final String pass1 = testResults.get(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC);
+        final String pass2 = testResults.get(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC);
+
+        testResults.put(ID_CONFORMANCE_MQTT_AWARE_STORE, setResult(pass1.equals(PASS) && pass2.equals(PASS), CONFORMANCE_MQTT_AWARE_STORE));
     }
 
     public void createSubscriptionToSysTopic(String origin) {

@@ -64,7 +64,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.hasValue;
 public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private HashMap testResults = new HashMap<String, String>();
 	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
 
 	private HashMap<String, Payload.Template> definitions = new HashMap<String, Payload.Template>();
@@ -91,7 +90,6 @@ public class SendDataTest extends TCKTest {
 	public SendDataTest(TCK aTCK, String[] params) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-		testResults = new HashMap<String, String>();
 		testIds.addAll(Arrays.asList(testId));
 
 		if (params.length < 3) {
@@ -121,7 +119,7 @@ public class SendDataTest extends TCKTest {
 		return testIds.toArray(new String[0]);
 	}
 
-	public HashMap<String, String> getResults() {
+	public Map<String, String> getResults() {
 		return testResults;
 	}
 
@@ -352,12 +350,13 @@ public class SendDataTest extends TCKTest {
 		logger.info("Send data test payload::check Device data - {} - Finished",
 				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
 		isDeviceChecked = true;
-		
+
 		// Topic check
 		String topic = packet.getTopic();
-		boolean goodTopic = topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DDATA + "/" + edgeNodeId + "/" + deviceId);
+		boolean goodTopic = topic.equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DDATA + "/" + edgeNodeId + "/" + deviceId);
 		testResults.put(ID_TOPICS_DDATA_TOPIC, setResult(goodTopic, TOPICS_DDATA_TOPIC));
-		
+
 		// check templates
 		for (Metric m : inboundPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
@@ -489,10 +488,8 @@ public class SendDataTest extends TCKTest {
 				for (Parameter parm : instance.getParametersList()) {
 					if (parm.hasName()) {
 						String instance_parm_name = parm.getName();
-
 						setResultIfNotFail(testResults, true, ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS,
 								PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS);
-
 						boolean parm_found = false;
 						if (definition.getParametersCount() > 0) {
 							for (Parameter def_parm : definition.getParametersList()) {
