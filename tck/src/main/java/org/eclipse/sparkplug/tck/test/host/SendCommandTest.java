@@ -69,6 +69,8 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DD
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DCMD;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
@@ -85,18 +87,18 @@ public class SendCommandTest extends TCKTest {
 
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
-	private final @NotNull List<String> testIds =
-			List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB, ID_TOPICS_NCMD_MQTT, ID_PAYLOADS_NCMD_QOS,
-					ID_PAYLOADS_NCMD_RETAIN, ID_TOPICS_NCMD_TIMESTAMP, ID_PAYLOADS_NCMD_SEQ, ID_PAYLOADS_NCMD_TIMESTAMP,
-					ID_TOPICS_NCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB, ID_TOPICS_DCMD_MQTT, ID_PAYLOADS_DCMD_QOS,
-					ID_PAYLOADS_DCMD_RETAIN, ID_TOPICS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ,
-					ID_TOPICS_DCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE);
+	private final @NotNull List<String> testIds = List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB,
+			ID_TOPICS_NCMD_MQTT, ID_PAYLOADS_NCMD_QOS, ID_PAYLOADS_NCMD_RETAIN, ID_TOPICS_NCMD_TIMESTAMP,
+			ID_PAYLOADS_NCMD_SEQ, ID_PAYLOADS_NCMD_TIMESTAMP, ID_TOPICS_NCMD_PAYLOAD,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB,
+			ID_TOPICS_DCMD_MQTT, ID_PAYLOADS_DCMD_QOS, ID_PAYLOADS_DCMD_RETAIN, ID_TOPICS_DCMD_TIMESTAMP,
+			ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ, ID_TOPICS_DCMD_PAYLOAD,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE, ID_TOPICS_NCMD_TOPIC, ID_TOPICS_DCMD_TOPIC);
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
@@ -303,6 +305,9 @@ public class SendCommandTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE)
+	@SpecAssertion(
+			section = Sections.TOPICS_COMMAND_NCMD,
+			id = ID_TOPICS_NCMD_TOPIC)
 	public void checkNodeCommand(final String clientId, final @NotNull PublishPacket packet) {
 		logger.info("Host - {}  - PUBLISH - checkNodeCommand {}, {}", getName(), packet.getTopic(), state);
 
@@ -353,6 +358,11 @@ public class SendCommandTest extends TCKTest {
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
 				setResult(bValid[4], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE));
 
+		// Topic check
+		String topic = packet.getTopic();
+		boolean goodTopic =
+				topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId);
+		testResults.put(ID_TOPICS_NCMD_TOPIC, setResult(goodTopic, TOPICS_NCMD_TOPIC));
 	}
 
 	@SpecAssertion(
@@ -379,6 +389,9 @@ public class SendCommandTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB)
+	@SpecAssertion(
+			section = Sections.TOPICS_COMMAND_DCMD,
+			id = ID_TOPICS_DCMD_TOPIC)
 	public void checkDeviceCommand(String clientId, PublishPacket packet) {
 		logger.info("Host - {}  - PUBLISH - checkDeviceCommand {}, {} ", getName(), packet.getTopic(), state);
 
@@ -413,6 +426,12 @@ public class SendCommandTest extends TCKTest {
 
 		logger.debug("Check Req: {}:{}.", ID_TOPICS_DCMD_PAYLOAD, TOPICS_DCMD_PAYLOAD);
 		testResults.put(ID_TOPICS_DCMD_PAYLOAD, setResult(bValid[2], TOPICS_DCMD_PAYLOAD));
+
+		// Topic check
+		String topic = packet.getTopic();
+		boolean goodTopic = topic.equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId);
+		testResults.put(ID_TOPICS_DCMD_TOPIC, setResult(goodTopic, TOPICS_DCMD_TOPIC));
 	}
 
 	@SpecAssertion(

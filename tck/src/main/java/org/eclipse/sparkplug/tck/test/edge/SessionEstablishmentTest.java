@@ -104,7 +104,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC, ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
-			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS);
+			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS,
+			ID_TOPICS_NBIRTH_TOPIC, ID_TOPICS_DBIRTH_TOPIC );
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -551,7 +552,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT)
-
+	@SpecAssertion(
+			section = Sections.TOPICS_BIRTH_MESSAGE_NBIRTH,
+			id = ID_TOPICS_NBIRTH_TOPIC)
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -579,6 +582,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		nbirthTopic = topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NBIRTH + "/" + edgeNodeId);
 		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC,
 				setResult(nbirthTopic, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC));
+		testResults.put(ID_TOPICS_NBIRTH_TOPIC, setResult(nbirthTopic, TOPICS_NBIRTH_TOPIC));
 
 		// Payload checks
 		PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
@@ -752,6 +756,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DDATA,
 			id = ID_PAYLOADS_DDATA_ORDER)
+	@SpecAssertion(
+			section = Sections.TOPICS_BIRTH_MESSAGE_DBIRTH,
+			id = ID_TOPICS_DBIRTH_TOPIC)
 	public void checkDBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -804,6 +811,9 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC,
 				setResult(goodTopic && nbirthTopic, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC));
+		
+		testResults.put(ID_TOPICS_DBIRTH_TOPIC,
+				setResult(goodTopic && nbirthTopic, TOPICS_DBIRTH_TOPIC));
 
 		// Payload checks
 		PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);

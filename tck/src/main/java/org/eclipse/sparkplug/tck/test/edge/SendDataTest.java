@@ -78,15 +78,14 @@ public class SendDataTest extends TCKTest {
 			ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA,
 			ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH, ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS,
 			ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS, ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS,
-			ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS };
+			ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS, ID_TOPICS_NDATA_TOPIC, ID_TOPICS_DDATA_TOPIC };
 	private String testClientId = null;
 	private String state = null;
 	private TCK theTCK = null;
 	private String groupId = null;
 	private String edgeNodeId = null;
 	private String deviceId = null;
-	private boolean isEdgeNodeChecked = false,
-			isDeviceChecked = false;
+	private boolean isEdgeNodeChecked = false, isDeviceChecked = false;
 
 	public SendDataTest(TCK aTCK, String[] params) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
@@ -101,8 +100,7 @@ public class SendDataTest extends TCKTest {
 		groupId = params[0];
 		edgeNodeId = params[1];
 		deviceId = params[2];
-		logger.info("Parameters are GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
-				deviceId);
+		logger.info("Parameters are GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
 	}
 
 	@Override
@@ -113,17 +111,17 @@ public class SendDataTest extends TCKTest {
 		definitions.clear();
 	}
 
-    public String getName() {
-        return "Edge SendData";
-    }
+	public String getName() {
+		return "Edge SendData";
+	}
 
-    public String[] getTestIds() {
-        return testIds.toArray(new String[0]);
-    }
+	public String[] getTestIds() {
+		return testIds.toArray(new String[0]);
+	}
 
-    public Map<String, String> getResults() {
-        return testResults;
-    }
+	public Map<String, String> getResults() {
+		return testResults;
+	}
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
@@ -140,8 +138,8 @@ public class SendDataTest extends TCKTest {
 		}
 	}
 
-    @Override
-    public void disconnect(String clientId, DisconnectPacket packet) {
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
 	}
 
@@ -205,24 +203,24 @@ public class SendDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDATA,
 			id = ID_TOPICS_NDATA_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.TOPICS_DATA_MESSAGE_NDATA,
+			id = ID_TOPICS_NDATA_TOPIC)
 	public void checkNDATA(String clientId, PublishPacket packet) {
 		logger.info("Send data test payload::check Edge Node data - Start");
 		logger.debug(
 				"Check Req: {} NDATA messages MUST be published with MQTT QoS equal to 0 and retain equal to false.",
 				ID_TOPICS_NDATA_MQTT);
-		testIds.add(ID_TOPICS_NDATA_MQTT);
 		boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
 		testResults.put(ID_TOPICS_NDATA_MQTT, setResult(isValidMQTT, TOPICS_NDATA_MQTT));
 
 		logger.debug("Check Req: {} NDATA messages MUST be published with the MQTT QoS set to 0.",
 				ID_PAYLOADS_NDATA_QOS);
-		testIds.add(ID_PAYLOADS_NDATA_QOS);
 		boolean isValidQOS = (packet.getQos() == Qos.AT_MOST_ONCE);
 		testResults.put(ID_PAYLOADS_NDATA_QOS, setResult(isValidQOS, PAYLOADS_NDATA_QOS));
 
 		logger.debug("Check Req: {} NDATA messages MUST be published with the MQTT retain flag set to false.",
 				ID_PAYLOADS_NDATA_RETAIN);
-		testIds.add(ID_PAYLOADS_NDATA_RETAIN);
 		boolean isValidNOTRetain = (packet.getRetain() == false);
 		testResults.put(ID_PAYLOADS_NDATA_RETAIN, setResult(isValidNOTRetain, PAYLOADS_NDATA_RETAIN));
 
@@ -231,37 +229,38 @@ public class SendDataTest extends TCKTest {
 		Boolean[] bValid = checkValidPayload(inboundPayload);
 
 		logger.debug("Check Req: {} Every NDATA message MUST include a sequence number.", ID_PAYLOADS_NDATA_SEQ);
-		testIds.add(ID_PAYLOADS_NDATA_SEQ);
 		testResults.put(ID_PAYLOADS_NDATA_SEQ, setResult(bValid[0], PAYLOADS_NDATA_SEQ));
 
 		logger.debug(
 				"Check Req: {} The NDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node "
 						+ "contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.",
 				ID_TOPICS_NDATA_SEQ_NUM);
-		testIds.add(ID_TOPICS_NDATA_SEQ_NUM);
 		testResults.put(ID_TOPICS_NDATA_SEQ_NUM, setResult(bValid[1], TOPICS_NDATA_SEQ_NUM));
 
 		logger.debug(
 				"Check Req: {} The NDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.",
 				ID_TOPICS_NDATA_TIMESTAMP);
-		testIds.add(ID_TOPICS_NDATA_TIMESTAMP);
 		testResults.put(ID_TOPICS_NDATA_TIMESTAMP, setResult(bValid[2], TOPICS_NDATA_TIMESTAMP));
 
 		logger.debug(
 				"Check Req: {} NDATA messages MUST include a payload timestamp that denotes the time at which the message was published.",
 				ID_PAYLOADS_NDATA_TIMESTAMP);
-		testIds.add(ID_PAYLOADS_NDATA_TIMESTAMP);
 		testResults.put(ID_PAYLOADS_NDATA_TIMESTAMP, setResult(bValid[3], PAYLOADS_NDATA_TIMESTAMP));
 
 		logger.debug(
 				"Check Req: {} The NDATA MUST include the Edge Node's metrics that have changed since the last NBIRTH or NDATA message.",
 				ID_TOPICS_NDATA_PAYLOAD);
-		testIds.add(ID_TOPICS_NDATA_PAYLOAD);
 		testResults.put(ID_TOPICS_NDATA_PAYLOAD, setResult(bValid[4], TOPICS_NDATA_PAYLOAD));
 
 		logger.info("Send data test payload::check Edge Node data - {} - Finished",
 				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
 		isEdgeNodeChecked = true;
+
+		// Topic check
+		String topic = packet.getTopic();
+		boolean goodTopic =
+				topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDATA + "/" + edgeNodeId);
+		testResults.put(ID_TOPICS_NDATA_TOPIC, setResult(goodTopic, TOPICS_NDATA_TOPIC));
 
 		// check templates
 		for (Metric m : inboundPayload.getMetricsList()) {
@@ -298,25 +297,25 @@ public class SendDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_DDATA,
 			id = ID_TOPICS_DDATA_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.TOPICS_DATA_MESSAGE_DDATA,
+			id = ID_TOPICS_DDATA_TOPIC)
 	public void checkDDATA(String clientId, PublishPacket packet) {
 		logger.info("Send data test payload::check Device data - Start");
 
 		logger.debug(
 				"Check Req: {} DDATA messages MUST be published with MQTT QoS equal to 0 and retain equal to false.",
 				ID_TOPICS_NDATA_MQTT);
-		testIds.add(ID_TOPICS_DDATA_MQTT);
 		boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
 		testResults.put(ID_TOPICS_DDATA_MQTT, setResult(isValidMQTT, TOPICS_DDATA_MQTT));
 
 		logger.debug("Check Req: {} DDATA messages MUST be published with the MQTT QoS set to 0.",
 				ID_PAYLOADS_DDATA_QOS);
-		testIds.add(ID_PAYLOADS_DDATA_QOS);
 		boolean isValidQOS = (packet.getQos() == Qos.AT_MOST_ONCE);
 		testResults.put(ID_PAYLOADS_DDATA_QOS, setResult(isValidQOS, PAYLOADS_DDATA_QOS));
 
 		logger.debug("Check Req: {} DDATA messages MUST be published with the MQTT retain flag set to false.",
 				ID_PAYLOADS_DDATA_RETAIN);
-		testIds.add(ID_PAYLOADS_DDATA_RETAIN);
 		boolean isValidNOTRetain = (packet.getRetain() == false);
 		testResults.put(ID_PAYLOADS_DDATA_RETAIN, setResult(isValidNOTRetain, PAYLOADS_DDATA_RETAIN));
 
@@ -325,37 +324,38 @@ public class SendDataTest extends TCKTest {
 		Boolean[] bValid = checkValidPayload(inboundPayload);
 
 		logger.debug("Check Req: {} Every DDATA message MUST include a sequence number.", ID_PAYLOADS_DDATA_SEQ);
-		testIds.add(ID_PAYLOADS_DDATA_SEQ);
 		testResults.put(ID_PAYLOADS_DDATA_SEQ, setResult(bValid[0], PAYLOADS_DDATA_SEQ));
 
 		logger.debug(
 				"Check Req: {} The DDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node "
 						+ "contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.",
 				ID_TOPICS_DDATA_SEQ_NUM);
-		testIds.add(ID_TOPICS_DDATA_SEQ_NUM);
 		testResults.put(ID_TOPICS_DDATA_SEQ_NUM, setResult(bValid[1], TOPICS_DDATA_SEQ_NUM));
 
 		logger.debug(
 				"Check Req: {} The DDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.",
 				ID_TOPICS_DDATA_TIMESTAMP);
-		testIds.add(ID_TOPICS_DDATA_TIMESTAMP);
 		testResults.put(ID_TOPICS_DDATA_TIMESTAMP, setResult(bValid[2], TOPICS_DDATA_TIMESTAMP));
 
 		logger.debug(
 				"Check Req: {} DDATA messages MUST include a payload timestamp that denotes the time at which the message was published.",
 				ID_PAYLOADS_DDATA_TIMESTAMP);
-		testIds.add(ID_PAYLOADS_DDATA_TIMESTAMP);
 		testResults.put(ID_PAYLOADS_DDATA_TIMESTAMP, setResult(bValid[3], PAYLOADS_DDATA_TIMESTAMP));
 
 		logger.debug(
 				"Check Req: {} The DDATA MUST include the Edge Node's metrics that have changed since the last DBIRTH or DDATA message.",
 				ID_TOPICS_DDATA_PAYLOAD);
-		testIds.add(ID_TOPICS_DDATA_PAYLOAD);
 		testResults.put(ID_TOPICS_DDATA_PAYLOAD, setResult(bValid[4], TOPICS_DDATA_PAYLOAD));
 
 		logger.info("Send data test payload::check Device data - {} - Finished",
 				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
 		isDeviceChecked = true;
+
+		// Topic check
+		String topic = packet.getTopic();
+		boolean goodTopic = topic.equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DDATA + "/" + edgeNodeId + "/" + deviceId);
+		testResults.put(ID_TOPICS_DDATA_TOPIC, setResult(goodTopic, TOPICS_DDATA_TOPIC));
 
 		// check templates
 		for (Metric m : inboundPayload.getMetricsList()) {
@@ -488,11 +488,8 @@ public class SendDataTest extends TCKTest {
 				for (Parameter parm : instance.getParametersList()) {
 					if (parm.hasName()) {
 						String instance_parm_name = parm.getName();
-
-						setResultIfNotFail(testResults, true,
-								ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS,
+						setResultIfNotFail(testResults, true, ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS,
 								PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS);
-
 						boolean parm_found = false;
 						if (definition.getParametersCount() > 0) {
 							for (Parameter def_parm : definition.getParametersList()) {
@@ -501,8 +498,8 @@ public class SendDataTest extends TCKTest {
 									break;
 								}
 							}
-							setResultIfNotFail(testResults, parm_found,
-									ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS, PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS);
+							setResultIfNotFail(testResults, parm_found, ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS,
+									PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS);
 						}
 					}
 				}
