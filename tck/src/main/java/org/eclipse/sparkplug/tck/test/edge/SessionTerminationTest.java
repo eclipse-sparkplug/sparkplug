@@ -30,6 +30,10 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_SEQ_NUM;
@@ -59,7 +63,9 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.events.client.parameters.*;
@@ -82,12 +88,14 @@ public class SessionTerminationTest extends TCKTest {
 			ID_PAYLOADS_DDEATH_TIMESTAMP, ID_PAYLOADS_DDEATH_SEQ, ID_PAYLOADS_DDEATH_SEQ_INC,
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
 			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH,
-			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER);
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER, ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311,
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50);
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
 
 	private @NotNull String testClientId = null;
+	private @NotNull MqttVersion testMqttVersion = null;
 	private @NotNull String hostApplicationId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
@@ -122,7 +130,7 @@ public class SessionTerminationTest extends TCKTest {
 	public String[] getTestIds() {
 		return testIds.toArray(new String[0]);
 	}
-	
+
 	public void clearResults() {
 		testResults.clear();
 		testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER, FAIL);
@@ -150,6 +158,7 @@ public class SessionTerminationTest extends TCKTest {
 			String willTopic = willPublishPacket.getTopic();
 			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
 				testClientId = clientId;
+				testMqttVersion = packet.getMqttVersion();
 				logger.info("Edge session termination test - connect - client id is " + clientId);
 				testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC,
 						setResult(true, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC));
@@ -160,25 +169,40 @@ public class SessionTerminationTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH,
+			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDEATH,
+			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50)
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
 		if (testClientId == null || !clientId.equals(testClientId)) {
 			// ignore messages we're not asked to look at
 			return;
 		}
-		
+
 		// An NDEATH must be received - whether by publish or retained message
-		// If we get a disconnect packet, the NDEATH should already have been received
+		// If we get a disconnect packet, the NDEATH should already have been received (MQTT 3.1.1)
 
 		testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER,
-				setResult(ndeathFound, PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER));		
+				setResult(ndeathFound, PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER));
+
+		if (testMqttVersion == MqttVersion.V_5) {
+			testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50,
+					setResult(packet.getReasonCode() == DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE,
+							PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50));
+		} else {
+			testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311,
+					setResult(ndeathFound, PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311));
+		}
 	}
 
 	@Override
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
 		// on disconnecting the TCP connection, the NDEATH might not have been received
 	}
-	
+
 	@Override
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 
@@ -213,7 +237,7 @@ public class SessionTerminationTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_TERMINATION,
 			id = ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH)
-	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {		
+	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		// topics namespace/group_id/NDEATH/edge_node_id
 		// namespace/group_id/DDEATH/edge_node_id/device_id
 
@@ -261,7 +285,7 @@ public class SessionTerminationTest extends TCKTest {
 			testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
 
 		}
-		
+
 		if (ndeathFound && ddeathFound) {
 			endTest(testResults);
 		}

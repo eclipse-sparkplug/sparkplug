@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -105,7 +106,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC, ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
-			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER);
+			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS);
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -124,6 +125,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private @NotNull long seq = -1;
 	private @NotNull long deathBdSeq = -1;
 	private @NotNull long birthBdSeq = -1;
+	private @NotNull HashSet<Long> aliases = new HashSet<Long>();
 
 	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
 		logger.info("Edge Node session establishment test. Parameters: {} ", Arrays.asList(parms));
@@ -354,6 +356,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_METRIC,
 			id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_METRIC,
+			id = ID_PAYLOADS_ALIAS_UNIQUENESS)
 	public void checkPayloadsAliasAndNameRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug("Check Req: "
 				+ "if alias is included, NBIRTH and DBIRTH messages MUST include both a metric name and alias.");
@@ -366,6 +371,12 @@ public class SessionEstablishmentTest extends TCKTest {
 			if (current.hasAlias() && !current.hasName()) {
 				isValid = false;
 				break;
+			}
+			if (current.hasAlias()) {
+				Long alias = current.getAlias();
+				testResults.put(ID_PAYLOADS_ALIAS_UNIQUENESS,
+						setResult(!aliases.contains(alias), PAYLOADS_ALIAS_UNIQUENESS));
+				aliases.add(alias);
 			}
 		}
 		testResults.put(ID_PAYLOADS_NAME_REQUIREMENT, setResult(isValid, PAYLOADS_ALIAS_BIRTH_REQUIREMENT));

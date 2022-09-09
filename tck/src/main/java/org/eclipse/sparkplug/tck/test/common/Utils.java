@@ -35,6 +35,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,6 +161,28 @@ public class Utils {
 				return m.hasDatasetValue();
 			case Template:
 				return m.hasTemplateValue();
+			default:
+				return false;
+		}
+	}
+	
+	public static boolean hasValue(Parameter p) {
+		if (!p.hasType()) {
+			return false;
+		}
+		switch (p.getType()) {
+			case Parameter.INT_VALUE_FIELD_NUMBER:
+				return p.hasIntValue();
+			case Parameter.LONG_VALUE_FIELD_NUMBER:
+				return p.hasLongValue();
+			case Parameter.FLOAT_VALUE_FIELD_NUMBER:
+				return p.hasFloatValue();
+			case Parameter.DOUBLE_VALUE_FIELD_NUMBER:
+				return p.hasDoubleValue();
+			case Parameter.BOOLEAN_VALUE_FIELD_NUMBER:
+				return p.hasBooleanValue();
+			case Parameter.STRING_VALUE_FIELD_NUMBER:
+				return p.hasStringValue();
 			default:
 				return false;
 		}
