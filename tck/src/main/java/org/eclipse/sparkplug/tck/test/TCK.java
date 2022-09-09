@@ -75,10 +75,10 @@ public class TCK {
 			current = (TCKTest) constructor.newInstance(parameters);
 			monitor.startTest();
 			if (!listenerRunning) {
-				listener.run(new String[0]);
-				results.run(new String[0]);
-				listenerRunning = true;
-			}
+                listener.run(new String[0]);
+                results.initialize(new String[0]);
+                listenerRunning = true;
+            }
 			listener.clearResults();
 		} catch (java.lang.reflect.InvocationTargetException e) {
 			logger.error("Error starting test " + profile + "." + test);
