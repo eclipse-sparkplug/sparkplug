@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Date;
 import java.sql.Timestamp;
+import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.sparkplug.tck.test.Monitor;
@@ -42,15 +43,17 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
  */
 public abstract class TCKTest {
 
-	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
-	
-	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
-		
-	}
+    protected final @NotNull Map<String, String> testResults = new TreeMap<>();
 
-	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+    private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-	}
+    public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+
+    }
+
+    public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+
+    }
 
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
 

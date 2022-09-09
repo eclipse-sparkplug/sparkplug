@@ -59,7 +59,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.TestStatus.KILLING_DEV
 public class EdgeNodeDeathTest extends TCKTest {
 
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-    private final @NotNull Map<String, String> testResults = new HashMap<>();
     private final @NotNull ArrayList<String> testIds = new ArrayList<>();
     private @NotNull String deviceId;
     private @NotNull String edgeNodeId;
