@@ -99,13 +99,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.common.Utils;
@@ -143,8 +137,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
-	private HashMap<String, String> testResults = new HashMap<>();
-	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
+	private final TreeMap<String, String> testResults = new TreeMap<>();
+	String[] testIds = {ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
 			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,
@@ -210,10 +204,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		return testIds;
 	}
 
-	public HashMap<String, String> getResults() {
-		HashMap<String, String> labelledResults = new HashMap<>();
+	public TreeMap<String, String> getResults() {
+		TreeMap<String, String> labelledResults = new TreeMap<>();
 		for (int i = 0; i < testIds.length; ++i) {
-			labelledResults.put("Monitor:" + testIds[i], testResults.get(testIds[i]));
+			if (testResults.containsKey(testIds[i])) {
+				labelledResults.put("Monitor:" + testIds[i], testResults.get(testIds[i]));
+			}
 		}
 		return labelledResults;
 	}

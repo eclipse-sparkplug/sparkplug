@@ -64,7 +64,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.hasValue;
 public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private HashMap testResults = new HashMap<String, String>();
 	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
 
 	private HashMap<String, Payload.Template> definitions = new HashMap<String, Payload.Template>();
@@ -86,13 +85,12 @@ public class SendDataTest extends TCKTest {
 	private String groupId = null;
 	private String edgeNodeId = null;
 	private String deviceId = null;
-	private boolean isEdgeNodeChecked = false, 
+	private boolean isEdgeNodeChecked = false,
 			isDeviceChecked = false;
 
 	public SendDataTest(TCK aTCK, String[] params) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-		testResults = new HashMap<String, String>();
 		testIds.addAll(Arrays.asList(testId));
 
 		if (params.length < 3) {
@@ -115,17 +113,17 @@ public class SendDataTest extends TCKTest {
 		definitions.clear();
 	}
 
-	public String getName() {
-		return "Edge SendData";
-	}
+    public String getName() {
+        return "Edge SendData";
+    }
 
-	public String[] getTestIds() {
-		return testIds.toArray(new String[0]);
-	}
+    public String[] getTestIds() {
+        return testIds.toArray(new String[0]);
+    }
 
-	public HashMap<String, String> getResults() {
-		return testResults;
-	}
+    public Map<String, String> getResults() {
+        return testResults;
+    }
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
@@ -142,8 +140,8 @@ public class SendDataTest extends TCKTest {
 		}
 	}
 
-	@Override
-	public void disconnect(String clientId, DisconnectPacket packet) {
+    @Override
+    public void disconnect(String clientId, DisconnectPacket packet) {
 		// TODO Auto-generated method stub
 	}
 
@@ -159,7 +157,7 @@ public class SendDataTest extends TCKTest {
 		if (!clientId.equals(testClientId)) {
 			return;
 		}
-		
+
 		String cmd = "";
 		String[] levels = packet.getTopic().split("/");
 		if (levels.length >= 3) {
@@ -264,7 +262,7 @@ public class SendDataTest extends TCKTest {
 		logger.info("Send data test payload::check Edge Node data - {} - Finished",
 				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
 		isEdgeNodeChecked = true;
-		
+
 		// check templates
 		for (Metric m : inboundPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
@@ -358,7 +356,7 @@ public class SendDataTest extends TCKTest {
 		logger.info("Send data test payload::check Device data - {} - Finished",
 				Arrays.stream(bValid).allMatch(Predicate.isEqual(true)));
 		isDeviceChecked = true;
-		
+
 		// check templates
 		for (Metric m : inboundPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
@@ -417,10 +415,10 @@ public class SendDataTest extends TCKTest {
 			section = Sections.PAYLOADS_B_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_B_TEMPLATE,	
+			section = Sections.PAYLOADS_B_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_B_TEMPLATE,		
+			section = Sections.PAYLOADS_B_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS)
 	private void checkInstance(Payload.Template instance, String msgtype) {
 		Payload.Template definition = null;
@@ -437,7 +435,7 @@ public class SendDataTest extends TCKTest {
 
 				setResultIfNotFail(testResults, defFound, ID_PAYLOADS_TEMPLATE_INSTANCE_REF,
 						PAYLOADS_TEMPLATE_INSTANCE_REF);
-				
+
 				setResultIfNotFail(testResults, defFound, ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH,
 						PAYLOADS_TEMPLATE_DEFINITION_NBIRTH);
 
@@ -478,23 +476,23 @@ public class SendDataTest extends TCKTest {
 					setResultIfNotFail(testResults,
 							found || msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH);
-					
+
 					setResultIfNotFail(testResults,
 							!found && (msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA)),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA);
 				}
 			}
-			
-			// now check parameters 
+
+			// now check parameters
 			if (instance.getParametersCount() > 0) {
 				for (Parameter parm : instance.getParametersList()) {
 					if (parm.hasName()) {
 						String instance_parm_name = parm.getName();
-						
+
 						setResultIfNotFail(testResults, true,
 								ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS,
 								PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS);
-						
+
 						boolean parm_found = false;
 						if (definition.getParametersCount() > 0) {
 							for (Parameter def_parm : definition.getParametersList()) {
@@ -570,7 +568,7 @@ public class SendDataTest extends TCKTest {
 
 	public void checkDBIRTH(String clientId, PublishPacket packet) {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
-		
+
 		// check templates
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {

@@ -382,8 +382,8 @@ val unzipHivemq by tasks.registering(Sync::class) {
 
 tasks.prepareHivemqHome {
     //use your own hivemq professional edition instead of unzip each time
-    //hivemqFolder.set("PATH/TO/hivemq-4.X.X" as Any)
-    hivemqFolder.set(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") } as Any)
+    hivemqFolder.set("/Users/ahelmbre/WorkingGroups/hivemq-4.8.2" as Any)
+    //hivemqFolder.set(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") } as Any)
     from(projectDir.resolve("hivemq-configuration/config.xml")) {
         into("conf")
     }
