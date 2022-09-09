@@ -139,6 +139,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
+	protected static final String TEST_FAILED_FOR_ASSERTION = "Monitor: Test failed for assertion ";
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private final TreeMap<String, String> testResults = new TreeMap<>();
 	String[] testIds = {ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
@@ -302,9 +303,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (edgeBdSeqs.get(id) != null) {
 							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
 									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
-								log("Test failed for assertion " + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: "
-										+ id);
-								log("Actual bdseq: " + bdseq + " expected bdseq: " + getNextSeq(edgeBdSeqs.get(id)));
+								log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: " + id);
+								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: " + getNextSeq(edgeBdSeqs.get(id)));
 							}
 						}
 						edgeBdSeqs.put(id, bdseq);
@@ -334,32 +334,32 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
 										ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
 										PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
-									log("Test failed for assertion " + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
+									log(TEST_FAILED_FOR_ASSERTION + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
 											+ ": host id: " + hostid);
 								}
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
 										ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ, HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)) {
-									log("Test failed for assertion " + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ
+									log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ
 											+ ": host id: " + hostid);
 								}
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
 										ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
 										MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
-									log("Test failed for assertion "
+									log(TEST_FAILED_FOR_ASSERTION
 											+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
 											+ ": host id: " + hostid);
 								}
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
 										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
 										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)) {
-									log("Test failed for assertion "
+									log(TEST_FAILED_FOR_ASSERTION
 											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ
 											+ ": host id: " + hostid);
 								}
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
 										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ,
 										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)) {
-									log("Test failed for assertion "
+									log(TEST_FAILED_FOR_ASSERTION
 											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ
 											+ ": host id: " + hostid);
 								}
