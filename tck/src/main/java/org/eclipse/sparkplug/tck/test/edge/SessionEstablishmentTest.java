@@ -37,6 +37,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
@@ -47,6 +48,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -104,8 +106,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC, ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
-			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS,
-			ID_TOPICS_NBIRTH_TOPIC, ID_TOPICS_DBIRTH_TOPIC );
+			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS, ID_TOPICS_NBIRTH_TOPIC,
+			ID_TOPICS_DBIRTH_TOPIC, ID_CASE_SENSITIVITY_METRIC_NAMES);
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -555,6 +557,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_NBIRTH,
 			id = ID_TOPICS_NBIRTH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
+			id = ID_CASE_SENSITIVITY_METRIC_NAMES)
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -621,6 +626,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			boolean rebirthVal = true;
 			DataType datatype = null;
 			List<Metric> metrics = sparkplugPayload.getMetricsList();
+			Set<String> metric_names = new HashSet<String>();
 			for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
 					bdSeqFound = true;
@@ -631,6 +637,13 @@ public class SessionEstablishmentTest extends TCKTest {
 					rebirthVal = m.getBooleanValue();
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES,
 							setResult(m.hasAlias() == false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES));
+				}
+
+				if (m.hasName()) {
+					String name = m.getName().toLowerCase();
+					setShouldResultIfNotFail(testResults, !metric_names.contains(name),
+							ID_CASE_SENSITIVITY_METRIC_NAMES, CASE_SENSITIVITY_METRIC_NAMES);
+					metric_names.add(name);
 				}
 
 				if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
@@ -759,6 +772,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_DBIRTH,
 			id = ID_TOPICS_DBIRTH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
+			id = ID_CASE_SENSITIVITY_METRIC_NAMES)
 	public void checkDBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -811,9 +827,8 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC,
 				setResult(goodTopic && nbirthTopic, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC));
-		
-		testResults.put(ID_TOPICS_DBIRTH_TOPIC,
-				setResult(goodTopic && nbirthTopic, TOPICS_DBIRTH_TOPIC));
+
+		testResults.put(ID_TOPICS_DBIRTH_TOPIC, setResult(goodTopic && nbirthTopic, TOPICS_DBIRTH_TOPIC));
 
 		// Payload checks
 		PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
@@ -885,12 +900,20 @@ public class SessionEstablishmentTest extends TCKTest {
 			checkPayloadsNameInDataRequirement(sparkplugPayload);
 			checkPayloadsAliasAndNameRequirement(sparkplugPayload);
 
+			Set<String> metric_names = new HashSet<String>();
 			List<Metric> metrics = sparkplugPayload.getMetricsList();
 			for (Metric m : metrics) {
 				if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
 					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(false, TOPICS_DBIRTH_METRICS));
 				} else if (testResults.get(ID_TOPICS_DBIRTH_METRICS) == null) {
 					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(true, TOPICS_DBIRTH_METRICS));
+				}
+				
+				if (m.hasName()) {
+					String name = m.getName().toLowerCase();
+					setShouldResultIfNotFail(testResults, !metric_names.contains(name),
+							ID_CASE_SENSITIVITY_METRIC_NAMES, CASE_SENSITIVITY_METRIC_NAMES);
+					metric_names.add(name);
 				}
 
 				if (!Utils.hasValue(m)) {
