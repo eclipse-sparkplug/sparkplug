@@ -64,7 +64,7 @@ public class Utils {
 	}
 
 	public static @NotNull String setResult(boolean bValid, String requirement) {
-		return setResultWithStackTrace(bValid, requirement, 1);
+		return setResultWithStackTrace(bValid, requirement, 2);
 	}
 
 	private static @NotNull String setResultWithStackTrace(boolean bValid, String requirement, int element) {
