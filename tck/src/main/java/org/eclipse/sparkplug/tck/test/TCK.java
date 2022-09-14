@@ -32,12 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.nio.ByteBuffer;
-import java.util.Map;
+import java.util.Locale;
 import java.util.TreeMap;
-
-import org.eclipse.sparkplug.tck.test.Monitor;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
@@ -68,18 +65,22 @@ public class TCK {
 
 		try {
 			final Class testClass = Class.forName("org.eclipse.sparkplug.tck.test." + profile + "." + test);
-			final Class[] types = { this.getClass(), String[].class };
+			final Class[] types = {this.getClass(), String[].class};
 			final Constructor constructor = testClass.getConstructor(types);
 
-			final Object[] parameters = { this, parms };
+			final Object[] parameters = {this, parms};
 			current = (TCKTest) constructor.newInstance(parameters);
-			monitor.startTest();
-			if (!listenerRunning) {
-                listener.run(new String[0]);
-                results.initialize(new String[0]);
-                listenerRunning = true;
-            }
-			listener.clearResults();
+			current.setProfile(Utils.Profile.valueOf(profile.toUpperCase(Locale.ROOT)));
+			results.initialize(new String[0]);
+
+			if (!current.getProfile().equals(Utils.Profile.BROKER)) {
+				monitor.startTest();
+				if (!listenerRunning) {
+					listener.run(new String[0]);
+					listenerRunning = true;
+				}
+				listener.clearResults();
+			}
 		} catch (java.lang.reflect.InvocationTargetException e) {
 			logger.error("Error starting test " + profile + "." + test);
 			if (e.getMessage() != null) {
@@ -94,12 +95,18 @@ public class TCK {
 	public void endTest() {
 		if (current != null) {
 			logger.info("Test end requested for " + current.getName());
-			TreeMap<String, String> testResults = monitor.getResults();
-			testResults.putAll(listener.getResults());
-			current.endTest(testResults);
+			final TreeMap<String, String> testResults = new TreeMap<>();
+			if (current.getProfile().equals(Utils.Profile.BROKER)) {
+				current.endTest(testResults);
+			} else {
+				testResults.putAll(monitor.getResults());
+				testResults.putAll(listener.getResults());
+				current.endTest(testResults);
+				monitor.endTest(null);
+				listener.clearResults();
+			}
+
 			current = null;
-			monitor.endTest(null);
-			listener.clearResults();
 		} else {
 			logger.info("Test end requested but no test active");
 		}

@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -66,8 +65,8 @@ public class CompliantBrokerTest extends TCKTest {
     private @NotNull String port;
 
 	public CompliantBrokerTest(TCK aTCK, String[] params) {
-		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
-		theTCK = aTCK;
+        logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
+        theTCK = aTCK;
 		testIds.addAll(Arrays.asList(testId));
 		if (params.length < 2) {
 			log("Not enough parameters: " + Arrays.toString(params));

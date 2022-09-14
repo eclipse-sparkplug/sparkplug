@@ -395,14 +395,17 @@ export default {
 
             this.mqttClient.on("message", (topic, message) => {
                 if (topic === resultTopic || topic === logTopic ) {
+                    if (this.logging.length > 100) {
+                        this.logging.shift()
+                    }
                     const logMessage = {
                         logLevel: "INFO",
                         logValue: message.toString(),
                         id: this.logging.length,
                     };
+
                     console.log("logging:", logMessage);
                     this.logging.push(logMessage);
-
                     this.currentTestLogging = logMessage;
                 }
             });
