@@ -319,8 +319,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						edgeBdSeqs.put(id, bdseq);
 					}
 				}
-			} else if (levels[0].equals(TOPIC_ROOT_STATE)) {
-				String hostid = levels[1];
+			} else if (levels[1].equals(TOPIC_ROOT_STATE)) {
+				String hostid = levels[2];
 				ObjectMapper mapper = new ObjectMapper();
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
 				boolean isValidPayload = true;
@@ -406,10 +406,20 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		if (topic.startsWith(NAMESPACE)) {
 			String[] topicParts = topic.split("/");
 			// topic is spBv1.0/group_id/message_type/edge_node_id/[device_id]"
+			// or spBv1.0/STATE/hostid
 
-			if (topicParts.length != 5 && topicParts.length != 4) {
+			if (topicParts.length > 5 || topicParts.length < 3) {
 				return;
 			}
+
+			if (topicParts[1].equals(TOPIC_ROOT_STATE)) {
+				if (packet.getPayload().isPresent()) {
+					String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
+					handleSTATE(clientId, topic, payloadString);
+				}
+				return;
+			}
+
 			String device_id = null;
 			String group_id = topicParts[1];
 			String message_type = topicParts[2];
@@ -437,11 +447,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				handleDDEATH(group_id, edge_node_id, device_id, payload);
 			} else if (message_type.equals(TOPIC_PATH_DDATA)) {
 				handleDDATA(group_id, edge_node_id, device_id, payload);
-			}
-		} else if (topic.startsWith(TOPIC_ROOT_STATE)) {
-			if (packet.getPayload().isPresent()) {
-				String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
-				handleSTATE(clientId, topic, payloadString);
 			}
 		}
 	}

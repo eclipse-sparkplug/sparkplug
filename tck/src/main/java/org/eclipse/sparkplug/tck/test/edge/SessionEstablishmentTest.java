@@ -263,7 +263,8 @@ public class SessionEstablishmentTest extends TCKTest {
 		for (Subscription s : subscriptions) {
 			String[] levels = s.getTopicFilter().split("/");
 
-			if (levels[0].equals(TOPIC_ROOT_STATE) && levels[1].equals(hostApplicationId)) {
+			if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(TOPIC_ROOT_STATE)
+					&& levels[2].equals(hostApplicationId)) {
 				stateFound = true;
 			} else if (testClientId != null && testClientId.equals(clientId)) {
 				if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(groupId)) {
