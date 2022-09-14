@@ -151,8 +151,7 @@ import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 public class SessionEstablishmentTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-
-    private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_PRIMARY_HOST,
+	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_PRIMARY_HOST,
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
 			ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
 			ID_COMPONENTS_PH_STATE, ID_INTRO_SPARKPLUG_HOST_STATE, ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311,
@@ -468,8 +467,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			logger.info("   checkDeathMessage willPublishPacket: topic={}", willPublishPacket.getTopic(), state);
 
 			// Topic is STATE/{host_application_id}
-			final boolean topicIsValid =
-					willPublishPacket.getTopic().equals(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
+			final boolean topicIsValid = willPublishPacket.getTopic().equals(TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/"
+					+ TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 			overallResult = topicIsValid;
 
 			logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC,
@@ -594,10 +593,10 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
 			id = ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED)
 	private void checkSubscribes(final boolean shouldBeSubscribed) {
-		final List<String> namespaceTopicFilter = List.of("spBv1.0/#");
-		final List<String> stateTopicFilter = List.of(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId,
-				TopicConstants.TOPIC_ROOT_STATE + "/+", TopicConstants.TOPIC_ROOT_STATE + "/#");
-
+		final List<String> namespaceTopicFilter = List.of(TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/#");
+		String prefix = TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/" + TopicConstants.TOPIC_ROOT_STATE + "/";
+		final List<String> stateTopicFilter = List.of(prefix + hostApplicationId,
+				prefix + "+", prefix + "#");
 		boolean isSubscribed = false;
 		final boolean nameSpaceMissing = Collections.disjoint(namespaceTopicFilter, subscriptions);
 		final boolean stateFilterMissing = Collections.disjoint(stateTopicFilter, subscriptions);
@@ -692,8 +691,8 @@ public class SessionEstablishmentTest extends TCKTest {
 		boolean overallResult = false;
 
 		// Topic is STATE/{host_application_id}
-		final boolean topicIsValid =
-				packet.getTopic().equals(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
+		final boolean topicIsValid = packet.getTopic().equals(
+				TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/" + TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 		overallResult = topicIsValid;
 
 		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_TOPIC, HOST_TOPIC_PHID_BIRTH_TOPIC);

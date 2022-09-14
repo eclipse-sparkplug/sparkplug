@@ -78,6 +78,10 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_R
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CASE_SENSITIVITY_SPARKPLUG_IDS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CASE_SENSITIVITY_SPARKPLUG_IDS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
@@ -142,7 +146,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	protected static final String TEST_FAILED_FOR_ASSERTION = "Monitor: Test failed for assertion ";
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private final TreeMap<String, String> testResults = new TreeMap<>();
-	String[] testIds = {ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
+	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
 			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,
@@ -154,7 +158,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED,
-			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID };
+			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID,
+			ID_CASE_SENSITIVITY_SPARKPLUG_IDS, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -179,9 +184,14 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	// host application id to sequence number
 	private HashMap<String, Long> hostBdSeqs = new HashMap<String, Long>();
-	
+
 	// host application id to MQTT client id
 	HashMap<String, String> hostClientids = new HashMap<String, String>();
+
+	// device/edge ids lowercase to original
+	HashMap<String, String> lowerGroupIds = new HashMap<String, String>();
+	HashMap<String, String> lowerEdgeIds = new HashMap<String, String>();
+	HashMap<String, String> lowerDeviceIds = new HashMap<String, String>();
 
 	public Monitor() {
 		logger.info("Sparkplug TCK message monitor 1.0");
@@ -304,14 +314,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
 									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
 								log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: " + id);
-								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: " + getNextSeq(edgeBdSeqs.get(id)));
+								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
+										+ getNextSeq(edgeBdSeqs.get(id)));
 							}
 						}
 						edgeBdSeqs.put(id, bdseq);
 					}
 				}
-			} else if (levels[0].equals(TOPIC_ROOT_STATE)) {
-				String hostid = levels[1];
+			} else if (levels[1].equals(TOPIC_ROOT_STATE)) {
+				String hostid = levels[2];
 				ObjectMapper mapper = new ObjectMapper();
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
 				boolean isValidPayload = true;
@@ -397,10 +408,20 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		if (topic.startsWith(NAMESPACE)) {
 			String[] topicParts = topic.split("/");
 			// topic is spBv1.0/group_id/message_type/edge_node_id/[device_id]"
+			// or spBv1.0/STATE/hostid
 
-			if (topicParts.length != 5 && topicParts.length != 4) {
+			if (topicParts.length > 5 || topicParts.length < 3) {
 				return;
 			}
+
+			if (topicParts[1].equals(TOPIC_ROOT_STATE)) {
+				if (packet.getPayload().isPresent()) {
+					String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
+					handleSTATE(clientId, topic, payloadString);
+				}
+				return;
+			}
+
 			String device_id = null;
 			String group_id = topicParts[1];
 			String message_type = topicParts[2];
@@ -429,11 +450,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			} else if (message_type.equals(TOPIC_PATH_DDATA)) {
 				handleDDATA(group_id, edge_node_id, device_id, payload);
 			}
-		} else if (topic.startsWith(TOPIC_ROOT_STATE)) {
-			if (packet.getPayload().isPresent()) {
-				String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
-				handleSTATE(clientId, topic, payloadString);
-			}
 		}
 	}
 
@@ -449,6 +465,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
+			id = ID_CASE_SENSITIVITY_SPARKPLUG_IDS)
 	private void handleNBIRTH(String group_id, String edge_node_id, String clientId, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NBIRTH *** {}/{} {}", group_id, edge_node_id, clientId);
 		String client_id = (String) edge_nodes.get(edge_node_id);
@@ -466,6 +485,26 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			clientids.put(clientId, edge_node_id);
 			edge_to_devices.put(edge_node_id, new HashSet<String>());
 		}
+
+		boolean lowerResult = true;
+
+		String lowGroupId = group_id.toLowerCase();
+		if (lowerGroupIds.containsKey(lowGroupId)) {
+			lowerResult = group_id.equals(lowerGroupIds.get(lowGroupId));
+		} else {
+			lowerGroupIds.put(lowGroupId, group_id);
+		}
+		setShouldResultIfNotFail(testResults, lowerResult, ID_CASE_SENSITIVITY_SPARKPLUG_IDS,
+				CASE_SENSITIVITY_SPARKPLUG_IDS + " group ids: " + group_id + " " + lowerGroupIds.get(lowGroupId));
+
+		String lowEdgeId = edge_node_id.toLowerCase();
+		if (lowerEdgeIds.containsKey(lowEdgeId)) {
+			lowerResult = edge_node_id.equals(lowerEdgeIds.get(lowEdgeId));
+		} else {
+			lowerEdgeIds.put(lowEdgeId, edge_node_id);
+		}
+		setShouldResultIfNotFail(testResults, lowerResult, ID_CASE_SENSITIVITY_SPARKPLUG_IDS,
+				CASE_SENSITIVITY_SPARKPLUG_IDS + " edge ids: " + edge_node_id + " " + lowerEdgeIds.get(lowEdgeId));
 
 		String id = group_id + "/" + edge_node_id;
 		if (payload.hasSeq()) {
@@ -561,25 +600,26 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
 			id = ID_PRINCIPLES_RBE_RECOMMENDED)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_PAYLOAD,
+			id = ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING)
 	private void handleNDATA(String group_id, String edge_node_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NDATA *** {}/{}", group_id, edge_node_id);
+
+		boolean correct_seq = false;
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
-
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
-					if (testResults.get(ID_PAYLOADS_NDATA_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(true, PAYLOADS_NDATA_SEQ_INC));
-					}
-				} else {
-					testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, PAYLOADS_NDATA_SEQ_INC));
+					correct_seq = true;
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
-		} else {
-			testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, PAYLOADS_NDATA_SEQ_INC));
 		}
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+				PAYLOADS_SEQUENCE_NUM_INCREMENTING);
 
 		long lastHistoricalTimestamp = 0L;
 		List<Metric> metrics = payload.getMetricsList();
@@ -695,6 +735,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
+			id = ID_CASE_SENSITIVITY_SPARKPLUG_IDS)
 	private void handleDBIRTH(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DBIRTH *** {}/{}/{}", group_id, edge_node_id, device_id);
 		if (!edge_to_devices.keySet().contains(edge_node_id)) {
@@ -714,6 +757,35 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				devices.add(device_id);
 			}
 		}
+
+		boolean lowerResult = true;
+
+		String lowGroupId = group_id.toLowerCase();
+		if (lowerGroupIds.containsKey(lowGroupId)) {
+			lowerResult = group_id.equals(lowerGroupIds.get(lowGroupId));
+		} else {
+			lowerGroupIds.put(lowGroupId, group_id);
+		}
+		setShouldResultIfNotFail(testResults, lowerResult, ID_CASE_SENSITIVITY_SPARKPLUG_IDS,
+				CASE_SENSITIVITY_SPARKPLUG_IDS + " group ids: " + group_id + " " + lowerGroupIds.get(lowGroupId));
+
+		String lowEdgeId = edge_node_id.toLowerCase();
+		if (lowerEdgeIds.containsKey(lowEdgeId)) {
+			lowerResult = edge_node_id.equals(lowerEdgeIds.get(lowEdgeId));
+		} else {
+			lowerEdgeIds.put(lowEdgeId, edge_node_id);
+		}
+		setShouldResultIfNotFail(testResults, lowerResult, ID_CASE_SENSITIVITY_SPARKPLUG_IDS,
+				CASE_SENSITIVITY_SPARKPLUG_IDS + " edge ids: " + edge_node_id + " " + lowerEdgeIds.get(lowEdgeId));
+
+		String lowDeviceId = device_id.toLowerCase();
+		if (lowerDeviceIds.containsKey(lowDeviceId)) {
+			lowerResult = device_id.equals(lowerDeviceIds.get(lowDeviceId));
+		} else {
+			lowerDeviceIds.put(lowDeviceId, device_id);
+		}
+		setShouldResultIfNotFail(testResults, lowerResult, ID_CASE_SENSITIVITY_SPARKPLUG_IDS,
+				CASE_SENSITIVITY_SPARKPLUG_IDS + " device ids: " + device_id + " " + lowerDeviceIds.get(lowDeviceId));
 
 		// record sequence numbers for checking
 		if (payload.hasSeq()) {
@@ -823,25 +895,26 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
 			id = ID_PRINCIPLES_RBE_RECOMMENDED)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_PAYLOAD,
+			id = ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING)
 	private void handleDDATA(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DDATA *** {}/{}/{}", group_id, edge_node_id, device_id);
+
+		boolean correct_seq = false;
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
-
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
-					if (testResults.get(ID_PAYLOADS_DDATA_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(true, PAYLOADS_DDATA_SEQ_INC));
-					}
-				} else {
-					testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, PAYLOADS_DDATA_SEQ_INC));
+					correct_seq = true;
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
-		} else {
-			testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, PAYLOADS_DDATA_SEQ_INC));
 		}
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_DDATA_SEQ_INC, PAYLOADS_DDATA_SEQ_INC);
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+				PAYLOADS_SEQUENCE_NUM_INCREMENTING);
 
 		long lastHistoricalTimestamp = 0L;
 		List<Metric> metrics = payload.getMetricsList();

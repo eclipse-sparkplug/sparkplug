@@ -157,8 +157,8 @@ public class SessionTerminationTest extends TCKTest {
 		boolean overallResult = true;
 
 		// Topic is STATE/{host_application_id}
-		final boolean isStateTopic =
-				(packet.getTopic().equals(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
+		final boolean isStateTopic = (packet.getTopic().equals(
+				TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/" + TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
 		overallResult &= isStateTopic;
 		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
 				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC);
