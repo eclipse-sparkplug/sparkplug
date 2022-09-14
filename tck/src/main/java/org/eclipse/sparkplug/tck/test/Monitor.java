@@ -80,6 +80,8 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CASE_SENSITIVITY_SPARKPLUG_IDS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.CASE_SENSITIVITY_SPARKPLUG_IDS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
@@ -157,7 +159,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED,
 			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID,
-			ID_CASE_SENSITIVITY_SPARKPLUG_IDS };
+			ID_CASE_SENSITIVITY_SPARKPLUG_IDS, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -598,25 +600,26 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
 			id = ID_PRINCIPLES_RBE_RECOMMENDED)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_PAYLOAD,
+			id = ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING)
 	private void handleNDATA(String group_id, String edge_node_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** NDATA *** {}/{}", group_id, edge_node_id);
+
+		boolean correct_seq = false;
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
-
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
-					if (testResults.get(ID_PAYLOADS_NDATA_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(true, PAYLOADS_NDATA_SEQ_INC));
-					}
-				} else {
-					testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, PAYLOADS_NDATA_SEQ_INC));
+					correct_seq = true;
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
-		} else {
-			testResults.put(ID_PAYLOADS_NDATA_SEQ_INC, setResult(false, PAYLOADS_NDATA_SEQ_INC));
 		}
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+				PAYLOADS_SEQUENCE_NUM_INCREMENTING);
 
 		long lastHistoricalTimestamp = 0L;
 		List<Metric> metrics = payload.getMetricsList();
@@ -892,25 +895,26 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_REPORT_BY_EXCEPTION,
 			id = ID_PRINCIPLES_RBE_RECOMMENDED)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_PAYLOAD,
+			id = ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING)
 	private void handleDDATA(String group_id, String edge_node_id, String device_id, PayloadOrBuilder payload) {
 		logger.info("Monitor: *** DDATA *** {}/{}/{}", group_id, edge_node_id, device_id);
+
+		boolean correct_seq = false;
 		if (payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
-
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
 				if (payload.getSeq() == expectedSeq) {
-					if (testResults.get(ID_PAYLOADS_DDATA_SEQ_INC) == null) {
-						testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(true, PAYLOADS_DDATA_SEQ_INC));
-					}
-				} else {
-					testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, PAYLOADS_DDATA_SEQ_INC));
+					correct_seq = true;
 				}
 			}
 			edgeSeqs.put(id, payload.getSeq());
-		} else {
-			testResults.put(ID_PAYLOADS_DDATA_SEQ_INC, setResult(false, PAYLOADS_DDATA_SEQ_INC));
 		}
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_DDATA_SEQ_INC, PAYLOADS_DDATA_SEQ_INC);
+		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+				PAYLOADS_SEQUENCE_NUM_INCREMENTING);
 
 		long lastHistoricalTimestamp = 0L;
 		List<Metric> metrics = payload.getMetricsList();
