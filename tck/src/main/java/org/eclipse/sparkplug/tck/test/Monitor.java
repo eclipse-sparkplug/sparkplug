@@ -13,112 +13,105 @@
 
 package org.eclipse.sparkplug.tck.test;
 
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CASE_SENSITIVITY_SPARKPLUG_IDS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CASE_SENSITIVITY_SPARKPLUG_IDS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_NODE_ID_UNIQUENESS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_UNIQUENESS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DBIRTH_SEQ_INC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DBIRTH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_SEQ_INC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDEATH_SEQ_INC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_SEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ_INC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_BDSEQ_INCREMENT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_TEMPLATES;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_UNIQUENESS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DBIRTH_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ_INC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_INCREMENTING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_BDSEQ_INCREMENT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_METRIC_REQS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_TEMPLATES;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_METRIC_REQS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_METRIC_REQS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_TEMPLATES;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_TEMPLATES;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_BDSEQ_INCREMENT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_BDSEQ_INCREMENT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CASE_SENSITIVITY_SPARKPLUG_IDS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.CASE_SENSITIVITY_SPARKPLUG_IDS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_INCREMENTING;
-
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DCMD;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDEATH;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
-import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
-
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
-import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
@@ -321,7 +314,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						edgeBdSeqs.put(id, bdseq);
 					}
 				}
-			} else if (levels[1].equals(TOPIC_ROOT_STATE)) {
+			} else if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(TOPIC_PATH_STATE)) {
 				String hostid = levels[2];
 				ObjectMapper mapper = new ObjectMapper();
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
@@ -414,7 +407,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				return;
 			}
 
-			if (topicParts[1].equals(TOPIC_ROOT_STATE)) {
+			if (topicParts.length == 3 && TopicConstants.TOPIC_PATH_STATE.equals(topicParts[1])) {
 				if (packet.getPayload().isPresent()) {
 					String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
 					handleSTATE(clientId, topic, payloadString);

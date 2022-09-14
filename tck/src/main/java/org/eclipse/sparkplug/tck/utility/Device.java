@@ -13,91 +13,96 @@
 
 package org.eclipse.sparkplug.tck.utility;
 
-/*
- * This is a utility to simulate a Sparkplug edge node and device for the Sparkplug TCK,
- * to help test a Sparkplug Host Application.
- * 
- */
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.tahu.message.model.MetricDataType.Boolean;
+import static org.eclipse.tahu.message.model.MetricDataType.DataSet;
+import static org.eclipse.tahu.message.model.MetricDataType.DateTime;
+import static org.eclipse.tahu.message.model.MetricDataType.Double;
+import static org.eclipse.tahu.message.model.MetricDataType.Float;
+import static org.eclipse.tahu.message.model.MetricDataType.Int16;
+import static org.eclipse.tahu.message.model.MetricDataType.Int32;
+import static org.eclipse.tahu.message.model.MetricDataType.Int64;
+import static org.eclipse.tahu.message.model.MetricDataType.Int8;
+import static org.eclipse.tahu.message.model.MetricDataType.String;
+import static org.eclipse.tahu.message.model.MetricDataType.Template;
+import static org.eclipse.tahu.message.model.MetricDataType.Text;
+import static org.eclipse.tahu.message.model.MetricDataType.UInt16;
+import static org.eclipse.tahu.message.model.MetricDataType.UInt32;
+import static org.eclipse.tahu.message.model.MetricDataType.UInt64;
+import static org.eclipse.tahu.message.model.MetricDataType.UInt8;
+import static org.eclipse.tahu.message.model.MetricDataType.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
-import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-
+import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.eclipse.tahu.SparkplugException;
 import org.eclipse.tahu.SparkplugInvalidTypeException;
-import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
 import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.*;
+import org.eclipse.tahu.message.model.DataSet;
 import org.eclipse.tahu.message.model.DataSet.DataSetBuilder;
+import org.eclipse.tahu.message.model.DataSetDataType;
+import org.eclipse.tahu.message.model.Metric;
 import org.eclipse.tahu.message.model.Metric.MetricBuilder;
+import org.eclipse.tahu.message.model.Parameter;
+import org.eclipse.tahu.message.model.ParameterDataType;
+import org.eclipse.tahu.message.model.PropertyDataType;
+import org.eclipse.tahu.message.model.PropertySet;
 import org.eclipse.tahu.message.model.PropertySet.PropertySetBuilder;
+import org.eclipse.tahu.message.model.PropertyValue;
 import org.eclipse.tahu.message.model.Row.RowBuilder;
+import org.eclipse.tahu.message.model.SparkplugBPayload;
 import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
+import org.eclipse.tahu.message.model.Template;
 import org.eclipse.tahu.message.model.Template.TemplateBuilder;
+import org.eclipse.tahu.message.model.Value;
 import org.eclipse.tahu.util.CompressionAlgorithm;
 import org.eclipse.tahu.util.PayloadUtil;
-
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
-import static org.eclipse.tahu.message.model.MetricDataType.*;
-
-import org.eclipse.sparkplug.tck.sparkplug.Sections;
-import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
-
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.nio.ByteBuffer;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.math.BigInteger;
 
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class Device {
-	
+
 	private static final boolean USING_COMPRESSION = false;
 	private static final CompressionAlgorithm compressionAlgorithm = CompressionAlgorithm.GZIP;
 
 	private String state = null;
-	
+
 	private static final String HW_VERSION = "Emulated Hardware";
 	private static final String SW_VERSION = "v1.0.0";
 	private String namespace = "spBv1.0";
 	private String brokerURI = "tcp://localhost:1883";
-	
-	private String controlId = "Sparkplug TCK device utility"; 
+
+	private String controlId = "Sparkplug TCK device utility";
 	private MqttClient control = null;
 	private MqttTopic log_topic = null;
 	private MessageListener control_listener = null;
-	
+
 	private String group_id = null;
 	private String edge_node_id = null;
 	private String device_id = null;
-	
+
 	private MqttClient edge = null;
 	private MqttTopic edge_topic = null;
 	private MqttTopic device_topic = null;
 	private MessageListener edge_listener = null;
 	private byte[] deathBytes = null;
-	
+
 	private Calendar calendar = Calendar.getInstance();
-	
+
 	private int bdSeq = 0;
 	private int seq = 0;
 
@@ -110,10 +115,10 @@ public class Device {
 		}
 	}
 
-	public static void main(String[] args) {	
+	public static void main(String[] args) {
 		new Device().run(args);
 	}
-	
+
 	public void run(String[] args) {
 		System.out.println("*** Sparkplug TCK Device and Edge Node Utility ***");
 		try {
@@ -130,30 +135,27 @@ public class Device {
 			log_topic = control.getTopic(TCK_LOG_TOPIC);
 			control.connect(options);
 			log("starting");
-			//control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
+			// control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
 			while (true) {
 				MqttMessage msg = control_listener.getNextMessage();
 				if (msg != null) {
 					String[] words = msg.toString().split(" ");
-					if (words.length == 6 && words[0].toUpperCase().equals("NEW") && words[1].toUpperCase().equals("DEVICE")) {
+					if (words.length == 6 && words[0].toUpperCase().equals("NEW")
+							&& words[1].toUpperCase().equals("DEVICE")) {
 						/* NEW DEVICE host application id, group id, edge node id, device id */
 						edgeCreate(words[2], words[3], words[4]);
 						deviceCreate(words[5]);
-					}
-					else if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
+					} else if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
 						/* SEND_EDGE_DATA host application id, edge node id, metric name */
 						publishEdgeData(words[3]);
-					}
-					else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
+					} else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
 						/* SEND_DEVICE_DATA host application id, edge node id, device id, metric name */
 						publishDeviceData(words[4]);
-					}
-					else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
+					} else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
 						/* DISCONNECT_EDGE_NODE host application id, edge node id */
 						edgeDisconnect(words[1], words[2]);
-					}
-					else {
-						log("Command not understood: "+msg + " "+words.length);
+					} else {
+						log("Command not understood: " + msg + " " + words.length);
 					}
 				}
 				Thread.sleep(100);
@@ -163,7 +165,7 @@ public class Device {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// Used to add the birth/death sequence number
 	private SparkplugBPayloadBuilder addBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
 		if (payload == null) {
@@ -172,11 +174,11 @@ public class Device {
 		if (bdSeq == 256) {
 			bdSeq = 0;
 		}
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long)bdSeq).createMetric());
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
 		bdSeq++;
 		return payload;
 	}
-	
+
 	public void edgeCreate(String host_application_id, String a_group_id, String an_edge_node_id) throws Exception {
 		if (edge != null) {
 			log("Edge node already created");
@@ -202,13 +204,14 @@ public class Device {
 		options.setCleanSession(true);
 		options.setConnectionTimeout(30);
 		options.setKeepAliveInterval(30);
-		//options.setUserName(username);
-		//options.setPassword(password.toCharArray());
+		// options.setUserName(username);
+		// options.setPassword(password.toCharArray());
 		options.setWill(namespace + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 1, false);
 
 		edge.connect(options);
 
-		edge.subscribe("STATE/" + host_application_id); /* look for status of the host application we are to use */
+		edge.subscribe(TopicConstants.TOPIC_ROOT_STATE + "/"
+				+ host_application_id); /* look for status of the host application we are to use */
 
 		/* wait for retained message indicating state of host application under test */
 		int count = 0;
@@ -229,18 +232,18 @@ public class Device {
 				return;
 			}
 		}
-		
+
 		// subscribe to NCMD topic
-		edge.subscribe(namespace+"/"+group_id+"/NCMD/"+edge_node_id); 
-		
+		edge.subscribe(namespace + "/" + group_id + "/NCMD/" + edge_node_id);
+
 		// issue NBIRTH for the edge node
 		byte[] payload = createNodeBirthPayload();
 		MqttMessage mqttmessage = new MqttMessage(payload);
-		edge_topic = edge.getTopic(namespace+"/"+group_id+"/NBIRTH/"+edge_node_id);
+		edge_topic = edge.getTopic(namespace + "/" + group_id + "/NBIRTH/" + edge_node_id);
 		edge_topic.publish(mqttmessage);
-		log("Edge node "+edge_node_id+" successfully created");
+		log("Edge node " + edge_node_id + " successfully created");
 	}
-	
+
 	public void edgeDisconnect(String host_application_id, String an_edge_node_id) throws Exception {
 		if (edge == null) {
 			log("Edge node " + edge_node_id + " does not exist");
@@ -255,34 +258,34 @@ public class Device {
 		edge = null;
 		log("Edge node " + edge_node_id + " disconnected");
 	}
-	
+
 	public void deviceCreate(String a_device_id) throws Exception {
 		if (edge == null) {
-			log("No edge node");		
+			log("No edge node");
 			return;
 		}
-		
+
 		if (device_id != null) {
-			log("Device "+device_id+" already created");	
-			log("Device "+device_id+" successfully created");
+			log("Device " + device_id + " already created");
+			log("Device " + device_id + " successfully created");
 			return;
 		}
-		
+
 		device_id = a_device_id;
-		log("Creating new device \""+device_id+"\"");
+		log("Creating new device \"" + device_id + "\"");
 		// Publish device birth message
 		byte[] payload = createDeviceBirthPayload();
 		MqttMessage mqttmessage = new MqttMessage(payload);
-		device_topic = edge.getTopic(namespace+"/"+group_id+"/DBIRTH/"+edge_node_id+"/"+device_id);
+		device_topic = edge.getTopic(namespace + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + device_id);
 		device_topic.publish(mqttmessage);
-		
-		log("Device "+device_id+" successfully created");
+
+		log("Device " + device_id + " successfully created");
 	}
-	
+
 	private String newUUID() {
 		return java.util.UUID.randomUUID().toString();
 	}
-	
+
 	// Used to add the sequence number
 	private long getSeqNum() throws Exception {
 		System.out.println("seq: " + seq);
@@ -305,20 +308,19 @@ public class Device {
 
 		payload.addMetric(new MetricBuilder("TCK_metric/Boolean", Boolean, true).createMetric());
 		payload.addMetric(new MetricBuilder("TCK_metric/Int32", Int32, 0).createMetric());
-		
-		PropertySet propertySet = new PropertySetBuilder()
-				.addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
-				.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
-				.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
-				/*
-				 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
-				 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0)) .addProperty("CustC",
-				 * new PropertyValue(PropertyDataType.Int32, 100))
-				 */
-				.createPropertySet();
-		payload.addMetric(
-				new MetricBuilder("Metric", String, "My Value").properties(propertySet).createMetric());
-		
+
+		PropertySet propertySet =
+				new PropertySetBuilder().addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
+						.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
+						.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
+						/*
+						 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
+						 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0)) .addProperty("CustC",
+						 * new PropertyValue(PropertyDataType.Int32, 100))
+						 */
+						.createPropertySet();
+		payload.addMetric(new MetricBuilder("Metric", String, "My Value").properties(propertySet).createMetric());
+
 		payload.setTimestamp(new Date());
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
 
@@ -329,14 +331,13 @@ public class Device {
 		} else {
 			bytes = encoder.getBytes(payload);
 		}
-		
+
 		return bytes;
 	}
-	
+
 	private byte[] createDeviceBirthPayload() throws Exception {
 		// Create the payload and add some metrics
-		SparkplugBPayload payload =
-				new SparkplugBPayload(new Date(), newMetrics(true), getSeqNum(), newUUID(), null);
+		SparkplugBPayload payload = new SparkplugBPayload(new Date(), newMetrics(true), getSeqNum(), newUUID(), null);
 
 		payload.addMetric(new MetricBuilder("Device Control/Rebirth", Boolean, false).createMetric());
 
@@ -355,18 +356,17 @@ public class Device {
 		payload.addMetric(new MetricBuilder("Properties/hw_version", String, HW_VERSION).createMetric());
 		payload.addMetric(new MetricBuilder("Properties/sw_version", String, SW_VERSION).createMetric());
 
-		PropertySet propertySet = new PropertySetBuilder()
-				.addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
-				.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
-				.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
-				/*
-				 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
-				 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0)) .addProperty("CustC",
-				 * new PropertyValue(PropertyDataType.Int32, 100))
-				 */
-				.createPropertySet();
-		payload.addMetric(
-				new MetricBuilder("MyMetric", String, "My Value").properties(propertySet).createMetric());
+		PropertySet propertySet =
+				new PropertySetBuilder().addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
+						.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
+						.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
+						/*
+						 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
+						 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0)) .addProperty("CustC",
+						 * new PropertyValue(PropertyDataType.Int32, 100))
+						 */
+						.createPropertySet();
+		payload.addMetric(new MetricBuilder("MyMetric", String, "My Value").properties(propertySet).createMetric());
 
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
 
@@ -377,10 +377,10 @@ public class Device {
 		} else {
 			bytes = encoder.getBytes(payload);
 		}
-		
+
 		return bytes;
 	}
-	
+
 	private List<Metric> newMetrics(boolean isBirth) throws SparkplugException {
 		Random random = new Random();
 		List<Metric> metrics = new ArrayList<Metric>();
@@ -434,7 +434,7 @@ public class Device {
 
 		return metrics;
 	}
-	
+
 	private List<Metric> newComplexTemplate(boolean withTemplateDefs) throws SparkplugInvalidTypeException {
 		ArrayList<Metric> metrics = new ArrayList<Metric>();
 		if (withTemplateDefs) {
@@ -468,7 +468,7 @@ public class Device {
 		return metrics;
 
 	}
-	
+
 	private List<Parameter> newParams() throws SparkplugException {
 		Random random = new Random();
 		List<Parameter> params = new ArrayList<Parameter>();
@@ -479,7 +479,7 @@ public class Device {
 		params.add(new Parameter("ParamString", ParameterDataType.String, newUUID()));
 		return params;
 	}
-	
+
 	private Template newTemplate(boolean isDef, String templatRef) throws SparkplugException {
 		Random random = new Random();
 		List<Metric> metrics = new ArrayList<Metric>();
@@ -502,7 +502,7 @@ public class Device {
 		return new TemplateBuilder().version("v1.0").templateRef(templatRef).definition(isDef)
 				.addParameters(newParams()).addMetrics(metrics).createTemplate();
 	}
-	
+
 	private DataSet newDataSet() throws SparkplugException {
 		Random random = new Random();
 		return new DataSetBuilder(14).addColumnName("Int8s").addColumnName("Int16s").addColumnName("Int32s")
@@ -544,57 +544,43 @@ public class Device {
 						.addValue(new Value<String>(DataSetDataType.Text, newUUID())).createRow())
 				.createDataSet();
 	}
-	
+
 	private void publishEdgeData(String metric_name) throws Exception {
 		List<Metric> nodeMetrics = new ArrayList<Metric>();
 
 		Random random = new Random();
 		int value = random.nextInt(100) + 10;
-		
+
 		// Add a 'real time' metric
-		nodeMetrics.add(new MetricBuilder(metric_name, Int32, value)
-				.timestamp(calendar.getTime())
-				.createMetric());
-		
-		log("Updating metric "+metric_name+ " to "+value);
+		nodeMetrics.add(new MetricBuilder(metric_name, Int32, value).timestamp(calendar.getTime()).createMetric());
 
-		SparkplugBPayload nodePayload = new SparkplugBPayload(
-				new Date(), 
-				nodeMetrics, 
-				getSeqNum(),
-				null, 
-				null);
+		log("Updating metric " + metric_name + " to " + value);
 
-		edge.publish(namespace + "/" + group_id + "/NDATA/" + edge_node_id, 
+		SparkplugBPayload nodePayload = new SparkplugBPayload(new Date(), nodeMetrics, getSeqNum(), null, null);
+
+		edge.publish(namespace + "/" + group_id + "/NDATA/" + edge_node_id,
 				new SparkplugBPayloadEncoder().getBytes(nodePayload), 0, false);
 
 	}
-	
+
 	private void publishDeviceData(String metric_name) throws Exception {
 		List<Metric> deviceMetrics = new ArrayList<Metric>();
-		
+
 		Random random = new Random();
 		int value = random.nextInt(100) + 10;
 
 		// Add a 'real time' metric
-		deviceMetrics.add(new MetricBuilder(metric_name, Int32, value)
-				.timestamp(calendar.getTime())
-				.createMetric());
+		deviceMetrics.add(new MetricBuilder(metric_name, Int32, value).timestamp(calendar.getTime()).createMetric());
 
-		log("Updating metric "+metric_name+ " to "+value);
+		log("Updating metric " + metric_name + " to " + value);
 
-		SparkplugBPayload devicePayload = new SparkplugBPayload(
-				new Date(),
-				deviceMetrics,
-				getSeqNum(),
-				null, 
-				null);
+		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getSeqNum(), null, null);
 
-		edge.publish(namespace + "/" + group_id + "/DDATA/" + edge_node_id + "/" + device_id, 
+		edge.publish(namespace + "/" + group_id + "/DDATA/" + edge_node_id + "/" + device_id,
 				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
 
 	}
-	
+
 	public void deviceDestroy() throws MqttException {
 		edge.disconnect();
 		edge.close();
@@ -603,7 +589,7 @@ public class Device {
 		device_id = null;
 		group_id = null;
 	}
-	
+
 	class MessageListener implements MqttCallbackExtended {
 		ArrayList<MqttMessage> messages;
 
@@ -619,14 +605,14 @@ public class Device {
 				return messages.remove(0);
 			}
 		}
-		
+
 		@Override
 		public void connectComplete(boolean reconnect, String serverURI) {
 			System.out.println("Connected!");
-			
+
 			try {
 				control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -636,11 +622,11 @@ public class Device {
 		}
 
 		public void deliveryComplete(IMqttDeliveryToken token) {
-			
+
 		}
 
 		public void messageArrived(String topic, MqttMessage message) throws Exception {
-			//log("message arrived: " + new String(message.getPayload()));
+			// log("message arrived: " + new String(message.getPayload()));
 
 			synchronized (messages) {
 				messages.add(message);

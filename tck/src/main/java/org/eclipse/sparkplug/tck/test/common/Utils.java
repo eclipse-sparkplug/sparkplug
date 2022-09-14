@@ -13,14 +13,11 @@
 
 package org.eclipse.sparkplug.tck.test.common;
 
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.MAYBE;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -34,11 +31,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template.Parameter;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
@@ -86,13 +84,13 @@ public class Utils {
 	}
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
-													  String req_desc) {
+			String req_desc) {
 		if (!results.get(req_id).equals(FAIL)) {
 			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
 		}
 		return result;
 	}
-	
+
 	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
 		if (!results.get(req_id).equals(MAYBE)) {
@@ -179,7 +177,7 @@ public class Utils {
 				return false;
 		}
 	}
-	
+
 	public static boolean hasValue(Parameter p) {
 		if (!p.hasType()) {
 			return false;
@@ -203,7 +201,7 @@ public class Utils {
 	}
 
 	public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
-		// Check that the host application status is ONLINE
+		// Check that the host application status is online
 
 		AtomicBoolean hostOnline = new AtomicBoolean(false);
 		String topic = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
@@ -217,11 +215,16 @@ public class Utils {
 				ByteBuffer bpayload = retainedPublish.getPayload().orElseGet(null);
 				if (bpayload != null) {
 					payload = StandardCharsets.UTF_8.decode(bpayload).toString();
-				}
-				if (!payload.equals(HostState.ONLINE.toString())) {
-					logger.info("Host status payload: " + payload);
-				} else {
-					hostOnline.set(true);
+
+					try {
+						ObjectMapper mapper = new ObjectMapper();
+						StatePayload statePayload = mapper.readValue(payload, StatePayload.class);
+						if (statePayload != null && statePayload.isOnline()) {
+							hostOnline.set(true);
+						}
+					} catch (Exception e) {
+						logger.error("Failed to handle state topic payload: {}", payload);
+					}
 				}
 			} else {
 				logger.info("No retained message for topic: " + topic);
@@ -264,7 +267,7 @@ public class Utils {
 
 		for (final Map.Entry<String, String> reportResult : results.entrySet()) {
 			if (reportResult.getValue().equals(NOT_EXECUTED)) {
-				//skip
+				// skip
 				continue;
 			}
 
