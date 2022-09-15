@@ -131,7 +131,6 @@ network issues. The following message flow diagram outlines how the STATE messag
 
 .Figure 14 – Primary Application STATE flow diagram
 plantuml::{assetsdir}assets/plantuml/primary-application-state-flow.puml[format=svg, alt="Primary Application STATE flow"]
-//image:extracted-media/media/image11.png[image,width=660,height=304]
 
 [arabic]
 . When an Edge Node is configured with multiple available MQTT Servers in the infrastructure it

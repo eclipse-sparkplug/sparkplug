@@ -15,7 +15,7 @@ MQTT servers in the infrastructure
 and publish a STATE Birth Certificate
 end note
 
-/note right of EoNNode
+note right of EoNNode
 **(1)**
 Establish an MQTT Session with 
 server and then subscribe to the
