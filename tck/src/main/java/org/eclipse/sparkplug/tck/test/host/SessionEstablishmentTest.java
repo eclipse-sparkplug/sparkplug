@@ -111,7 +111,7 @@ import java.util.stream.Collectors;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -466,8 +466,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			logger.info("   checkDeathMessage willPublishPacket: topic={}", willPublishPacket.getTopic(), state);
 
 			// Topic is STATE/{host_application_id}
-			final boolean topicIsValid = willPublishPacket.getTopic().equals(TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/"
-					+ TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
+			final boolean topicIsValid = willPublishPacket.getTopic().equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/"
+					+ Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 			overallResult = topicIsValid;
 
 			logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC,
@@ -592,8 +592,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
 			id = ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED)
 	private void checkSubscribes(final boolean shouldBeSubscribed) {
-		final List<String> namespaceTopicFilter = List.of(TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/#");
-		String prefix = TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/" + TopicConstants.TOPIC_ROOT_STATE + "/";
+		final List<String> namespaceTopicFilter = List.of(Constants.TOPIC_ROOT_SP_BV_1_0 + "/#");
+		String prefix = Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + Constants.TOPIC_ROOT_STATE + "/";
 		final List<String> stateTopicFilter = List.of(prefix + hostApplicationId,
 				prefix + "+", prefix + "#");
 		boolean isSubscribed = false;
@@ -691,7 +691,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		// Topic is STATE/{host_application_id}
 		final boolean topicIsValid = packet.getTopic().equals(
-				TopicConstants.TOPIC_ROOT_SP_BV_1_0 + "/" + TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
+				Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 		overallResult = topicIsValid;
 
 		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_TOPIC, HOST_TOPIC_PHID_BIRTH_TOPIC);

@@ -41,9 +41,9 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_T
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_SEQ_NUM;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.util.*;

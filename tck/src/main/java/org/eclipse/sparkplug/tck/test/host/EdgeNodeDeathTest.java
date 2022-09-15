@@ -36,7 +36,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.Utils.TestStatus;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +49,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_DEVICE_CONTROL_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Utils.TestStatus.KILLING_DEVICE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_DEVICE_CONTROL_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.KILLING_DEVICE;
 
 @SpecVersion(
         spec = "sparkplug",

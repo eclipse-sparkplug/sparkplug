@@ -15,18 +15,18 @@
 package org.eclipse.sparkplug.tck.test.edge;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DCMD;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_STATE;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 
@@ -50,7 +50,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -88,7 +88,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311, ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ, ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN, ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS,
-			ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ, ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH,
+			ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ, ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
 			ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP, ID_PAYLOADS_NBIRTH_REBIRTH_REQ,
 			ID_PAYLOADS_NDEATH_BDSEQ, ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE, ID_TOPICS_NBIRTH_MQTT,
 			ID_TOPICS_NBIRTH_SEQ_NUM, ID_TOPICS_NBIRTH_TIMESTAMP, ID_TOPICS_NBIRTH_BDSEQ_INCLUDED,
@@ -193,7 +193,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			PersistentUtils.setNextHostDeathBdSeqNum(hostBdSeq);
 		}
 
-		hostStateTopicName = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
+		hostStateTopicName = Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
 		Publish message = Builders.publish().topic(hostStateTopicName).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(hostBirthPayload)).retain(true).build();
 		logger.info("Publishing Host Application BIRTH on: {} ", hostStateTopicName);
@@ -559,7 +559,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_PAYLOAD,
-			id = ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH)
+			id = ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_TIMESTAMP)
@@ -648,8 +648,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			seq = sparkplugPayload.getSeq();
 			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((seq == 0), PAYLOADS_NBIRTH_SEQ));
 			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((seq == 0), TOPICS_NBIRTH_SEQ_NUM));
-			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH,
-					setResult((seq == 0), PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH));
+			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
+					setResult((seq >= 0 && seq <= 255), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
 
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
 					setResult((seq >= 0 && seq <= 255), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
@@ -718,7 +718,7 @@ public class SessionEstablishmentTest extends TCKTest {
 					setResult(birthBdSeq == deathBdSeq, PAYLOADS_NBIRTH_BDSEQ_REPEAT));
 
 			if (testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ) == null
-					|| testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(TopicConstants.PASS)) {
+					|| testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(Constants.PASS)) {
 				logger.debug(
 						"Check req: The datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.");
 				int hasDataTypeCnt = countDataType(metrics);

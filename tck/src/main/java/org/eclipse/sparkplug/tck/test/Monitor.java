@@ -75,15 +75,15 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_T
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDEATH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_STATE;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
@@ -104,7 +104,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -124,10 +124,9 @@ import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 
 /*
- * A utility to check MQTT Sparkplug messages at any time for conformance to
- * the spec. It runs in parallel to any Sparkplug SDK test, providing checks
- * for additional assertions which apply at all times.
- *
+ * This Monitor class holds tests for assertions that don't neatly fit into a single test scenario,
+ * or apply all the time, so it runs alongside all tests in the Host and Edge profiles. It does not
+ * apply to the Broker profile, and is switched off in that case.
  */
 
 @SpecVersion(
@@ -407,7 +406,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				return;
 			}
 
-			if (topicParts.length == 3 && TopicConstants.TOPIC_PATH_STATE.equals(topicParts[1])) {
+			if (topicParts.length == 3 && Constants.TOPIC_PATH_STATE.equals(topicParts[1])) {
 				if (packet.getPayload().isPresent()) {
 					String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
 					handleSTATE(clientId, topic, payloadString);

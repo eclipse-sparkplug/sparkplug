@@ -48,12 +48,12 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.hasValue;
