@@ -49,7 +49,7 @@ public class TCK {
 	private final Monitor monitor = new Monitor();
 	private final MQTTListener listener = new MQTTListener();
 	private final Results results = new Results();
-	private @NotNull Boolean hasMonitor;
+	private @NotNull Boolean hasMonitor = true;
 
 	public void MQTTLog(String message) {
 		final PublishService publishService = Services.publishService();
