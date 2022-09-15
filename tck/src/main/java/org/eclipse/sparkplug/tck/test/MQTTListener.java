@@ -14,60 +14,90 @@
 
 package org.eclipse.sparkplug.tck.test;
 
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_DEVICE_ID_CHARS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_DEVICE_ID_STRING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_NODE_ID_CHARS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_NODE_ID_STRING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_GROUP_ID_CHARS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_GROUP_ID_STRING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TIMESTAMP_IN_UTC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_A;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_DEVICE_ID_STRING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_CHARS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_STRING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_GROUP_ID_CHARS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_GROUP_ID_STRING;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TIMESTAMP_IN_UTC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_A;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_RESULTS_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.paho.client.mqttv3.MqttException;
-
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
-
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
-
 @SpecVersion(
-        spec = "sparkplug",
-        version = "3.0.0-SNAPSHOT")
+		spec = "sparkplug",
+		version = "3.0.0-SNAPSHOT")
 public class MQTTListener implements MqttCallbackExtended {
-    private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
-    protected static final String SPARKPLUG_TCK_MQTT_LISTENER = "Sparkplug TCK MQTT listener";
-    // Configuration
-    private String serverUrl = "tcp://localhost:1883";
-    private String clientId = SPARKPLUG_TCK_MQTT_LISTENER + UUID.randomUUID();
-    private String username = "admin";
-    private String password = "changeme";
+	private final static Logger logger = LoggerFactory.getLogger(MQTTListener.class);
+	protected static final String SPARKPLUG_TCK_MQTT_LISTENER = "Sparkplug TCK MQTT listener";
+	// Configuration
+	private String serverUrl = "tcp://localhost:1883";
+	private String clientId = SPARKPLUG_TCK_MQTT_LISTENER + UUID.randomUUID();
+	private String username = "admin";
+	private String password = "changeme";
 
-    private MqttTopic log_topic = null;
-    private MqttClient client = null;
+	private MqttTopic log_topic = null;
+	private MqttClient client = null;
 
-    private String primary_host_application_id = null;
+	private String primary_host_application_id = null;
 
-    private TreeMap<String, String> testResults = new TreeMap<>();
+	private TreeMap<String, String> testResults = new TreeMap<>();
 
-    String[] testIds = {ID_INTRO_GROUP_ID_STRING, ID_INTRO_GROUP_ID_CHARS, ID_INTRO_EDGE_NODE_ID_STRING,
-            ID_INTRO_EDGE_NODE_ID_CHARS, ID_INTRO_DEVICE_ID_STRING, ID_INTRO_DEVICE_ID_CHARS, ID_TOPIC_STRUCTURE,
-            ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
-            ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
-            ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
-            ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_PAYLOADS_TIMESTAMP_IN_UTC};
+	String[] testIds = { ID_INTRO_GROUP_ID_STRING, ID_INTRO_GROUP_ID_CHARS, ID_INTRO_EDGE_NODE_ID_STRING,
+			ID_INTRO_EDGE_NODE_ID_CHARS, ID_INTRO_DEVICE_ID_STRING, ID_INTRO_DEVICE_ID_CHARS, ID_TOPIC_STRUCTURE,
+			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
+			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_PAYLOADS_TIMESTAMP_IN_UTC };
 
-    public void log(String message) {
-        try {
+	public void log(String message) {
+		try {
 			MqttMessage mqttmessage = new MqttMessage(("MQTTListener: " + message).getBytes());
 			log_topic.publish(mqttmessage);
 		} catch (Exception e) {
@@ -98,21 +128,21 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	public void run(String[] args) {
 		if (client != null) {
-            return;
-        }
-        logger.info("Initialize {} ", clientId);
-        clearResults();
-        try {
-            // Connect to the MQTT Server
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(30);
-            options.setKeepAliveInterval(30);
-            // options.setUserName(username);
-            // options.setPassword(password.toCharArray());
+			return;
+		}
+		logger.info("Initialize {} ", clientId);
+		clearResults();
+		try {
+			// Connect to the MQTT Server
+			MqttConnectOptions options = new MqttConnectOptions();
+			options.setAutomaticReconnect(true);
+			options.setCleanSession(true);
+			options.setConnectionTimeout(30);
+			options.setKeepAliveInterval(30);
+			// options.setUserName(username);
+			// options.setPassword(password.toCharArray());
 			client = new MqttClient(serverUrl, clientId);
-			//client.setTimeToWait(10000); // short timeout on failure to connect
+			// client.setTimeToWait(10000); // short timeout on failure to connect
 			client.setCallback(this);
 			log_topic = client.getTopic(TCK_LOG_TOPIC);
 			client.connect(options);
@@ -124,22 +154,21 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
-        System.out.println(SPARKPLUG_TCK_MQTT_LISTENER + ": Connected");
+		System.out.println(SPARKPLUG_TCK_MQTT_LISTENER + ": Connected");
 
-        try {
-            // Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
-            client.subscribe(
-                    new String[]{"spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#", TCK_LOG_TOPIC, TCK_RESULTS_TOPIC},
-                    new int[]{2, 2, 2, 2, 2});
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		try {
+			// Just listen to all DDATA messages on spBv1.0 topics and wait for inbound messages
+			client.subscribe(new String[] { "spAv1.0/#", TOPIC_ROOT_SP_BV_1_0 + "/#", TOPIC_ROOT_STATE + "/#",
+					TCK_LOG_TOPIC, TCK_RESULTS_TOPIC }, new int[] { 2, 2, 2, 2, 2 });
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void connectionLost(Throwable cause) {
-        System.out.println(SPARKPLUG_TCK_MQTT_LISTENER + ": connection lost - will auto-reconnect");
-    }
+		System.out.println(SPARKPLUG_TCK_MQTT_LISTENER + ": connection lost - will auto-reconnect");
+	}
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_PAYLOAD,
@@ -150,7 +179,7 @@ public class MQTTListener implements MqttCallbackExtended {
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		try {
-			if (topic.startsWith(TOPIC_ROOT_STATE+"/")) {
+			if (topic.startsWith(TOPIC_ROOT_STATE + "/")) {
 				System.out.println("Sparkplug message: " + topic + " " + new String(message.getPayload()));
 			} else if (topic.equals(TCK_LOG_TOPIC)) {
 				System.out.println("TCK log: " + new String(message.getPayload()));
@@ -165,14 +194,14 @@ public class MQTTListener implements MqttCallbackExtended {
 					checkTopic(topic.split("/"));
 
 					PayloadOrBuilder inboundPayload = Payload.parseFrom(message.getPayload());
-					//System.out.println(inboundPayload.toString());
+					// System.out.println(inboundPayload.toString());
 
 					if (inboundPayload.hasTimestamp()) {
 						int timestamp_max_diff = 60000; // milliseconds difference allowed
 						Date now = new Date();
 						long diff = now.getTime() - inboundPayload.getTimestamp();
-						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC, setResult(
-								diff >= 0 && diff <= timestamp_max_diff, PAYLOADS_TIMESTAMP_IN_UTC));
+						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC,
+								setResult(diff >= 0 && diff <= timestamp_max_diff, PAYLOADS_TIMESTAMP_IN_UTC));
 						if (diff < 0 || diff > timestamp_max_diff) {
 							System.out.println("Timestamp diff " + diff);
 						}
@@ -191,7 +220,7 @@ public class MQTTListener implements MqttCallbackExtended {
 
 	private void testResult(String id, String state) {
 		// Don't override a failing test fail
-		if (!((String)testResults.get(id)).startsWith(FAIL)) {
+		if (!((String) testResults.get(id)).startsWith(FAIL)) {
 			testResults.put(id, state);
 		}
 	}
@@ -234,10 +263,10 @@ public class MQTTListener implements MqttCallbackExtended {
 			id = ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES)
 	public void checkTopic(String[] elements) {
 		Boolean result = false;
-		if (elements[0].equals(TOPIC_ROOT_STATE)) {
-			if (elements.length == 2) {
+		if (elements[0].equals(TOPIC_ROOT_SP_BV_1_0) && elements[1].equals(TOPIC_PATH_STATE)) {
+			if (elements.length == 3) {
 				result = true;
-			}	
+			}
 			testResult(ID_TOPIC_STRUCTURE, setResult(result, TOPIC_STRUCTURE));
 		} else {
 			if (elements.length < 4) {
@@ -253,17 +282,17 @@ public class MQTTListener implements MqttCallbackExtended {
 				}
 
 				if (message_type.equals("DBIRTH") || message_type.equals("DDEATH") || message_type.equals("DDATA")
-						|| message_type.equals("DCMD")) {				
-					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES, 
-							setResult(elements.length == 5, TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES));	
+						|| message_type.equals("DCMD")) {
+					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES, setResult(
+							elements.length == 5, TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES));
 					result = (elements.length == 5) ? true : false;
 				}
 
 				if (message_type.equals("NBIRTH") || message_type.equals("NDEATH") || message_type.equals("NDATA")
 						|| message_type.equals("NCMD")) {
-					
-					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES, 
-							setResult(elements.length == 4, TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES));					
+
+					testResult(ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES, setResult(
+							elements.length == 4, TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES));
 					result = (elements.length == 4) ? true : false;
 				}
 				testResult(ID_TOPIC_STRUCTURE, setResult(result, TOPIC_STRUCTURE));

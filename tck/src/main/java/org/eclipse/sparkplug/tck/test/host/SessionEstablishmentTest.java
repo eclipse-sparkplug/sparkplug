@@ -21,6 +21,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_QOS;
@@ -35,6 +36,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_P
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_QOS;
@@ -69,11 +71,11 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_SPARKPLUG_HOST_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD;
@@ -94,8 +96,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.charset.StandardCharsets;
@@ -103,7 +103,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -126,11 +125,11 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
-import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 
 /**
  * This is the primary host Sparkplug session establishment, and re-establishment test.

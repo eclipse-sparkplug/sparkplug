@@ -25,17 +25,19 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NB
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_STATE;
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,25 +45,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
-import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 /**
  * This is the edge node Sparkplug session establishment.
@@ -128,6 +137,14 @@ public class SessionEstablishmentTest extends TCKTest {
 	private @NotNull long birthBdSeq = -1;
 	private @NotNull HashSet<Long> aliases = new HashSet<Long>();
 
+	// Host Application variables
+	private String hostStateTopicName = null;
+	private byte[] hostBirthPayload = null;
+	private byte[] hostDeathPayload = null;
+	private int hostBdSeq;
+
+	private PublishService publishService = Services.publishService();
+
 	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
 		logger.info("Edge Node session establishment test. Parameters: {} ", Arrays.asList(parms));
 		theTCK = aTCK;
@@ -159,6 +176,28 @@ public class SessionEstablishmentTest extends TCKTest {
 		}
 		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device ids: {}", hostApplicationId,
 				groupId, edgeNodeId, deviceIds.keySet());
+
+		// Set up the BIRTH and DEATH payloads
+		hostBdSeq = PersistentUtils.getNextHostDeathBdSeqNum();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			StatePayload birthStatePayload = new StatePayload(true, hostBdSeq, System.currentTimeMillis());
+			hostBirthPayload = mapper.writeValueAsString(birthStatePayload).getBytes();
+			StatePayload deathStatePayload = new StatePayload(false, hostBdSeq, System.currentTimeMillis());
+			hostDeathPayload = mapper.writeValueAsString(deathStatePayload).getBytes();
+		} catch (Exception e) {
+			logger.error("Failed to construct Host ID payloads - not starting", e);
+			return;
+		} finally {
+			hostBdSeq++;
+			PersistentUtils.setNextHostDeathBdSeqNum(hostBdSeq);
+		}
+
+		hostStateTopicName = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
+		Publish message = Builders.publish().topic(hostStateTopicName).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(hostBirthPayload)).retain(true).build();
+		logger.info("Publishing Host Application BIRTH on: {} ", hostStateTopicName);
+		publishService.publish(message);
 	}
 
 	public String getName() {
@@ -176,6 +215,12 @@ public class SessionEstablishmentTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
+
+		Publish message = Builders.publish().topic(hostStateTopicName).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(hostDeathPayload)).retain(true).build();
+		logger.info("Publishing Host Application DEATH on: {} ", hostStateTopicName);
+		publishService.publish(message);
+
 		testClientId = null;
 		nbirthFound = false;
 		nbirthTopic = false;
@@ -263,7 +308,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		for (Subscription s : subscriptions) {
 			String[] levels = s.getTopicFilter().split("/");
 
-			if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(TOPIC_ROOT_STATE)
+			if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(TOPIC_PATH_STATE)
 					&& levels[2].equals(hostApplicationId)) {
 				stateFound = true;
 			} else if (testClientId != null && testClientId.equals(clientId)) {
@@ -909,7 +954,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				} else if (testResults.get(ID_TOPICS_DBIRTH_METRICS) == null) {
 					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(true, TOPICS_DBIRTH_METRICS));
 				}
-				
+
 				if (m.hasName()) {
 					String name = m.getName().toLowerCase();
 					setShouldResultIfNotFail(testResults, !metric_names.contains(name),
