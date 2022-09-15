@@ -34,7 +34,7 @@ import java.sql.Timestamp;
 import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.Monitor;
+
 import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
 /**
@@ -43,20 +43,26 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
  */
 public abstract class TCKTest {
 
-    protected final @NotNull Map<String, String> testResults = new TreeMap<>();
+	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	protected final @NotNull Map<String, String> testResults = new TreeMap<>();
 
-    private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	public Utils.Profile getProfile() {
+		return profile;
+	}
 
-    public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+	public void setProfile(Utils.Profile profile) {
+		this.profile = profile;
+	}
 
-    }
+	protected @NotNull Utils.Profile profile;
 
-    public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+	}
 
-    }
+	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+	}
 
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
-
 	}
 
 	public abstract void connect(String clientId, ConnectPacket packet);
@@ -73,10 +79,11 @@ public abstract class TCKTest {
 
 	public abstract String[] getTestIds();
 
+
 	public abstract void endTest(Map<String, String> results);
 
 	public void log(String message) {
-		logger.info("TCKTest log " + message);
+		logger.info("TCKTest log: " + message);
 		final PublishService publishService = Services.publishService();
 		final Publish payload = Builders.publish().topic(TCK_LOG_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(message.getBytes())).build();

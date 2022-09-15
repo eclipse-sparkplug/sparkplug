@@ -86,18 +86,18 @@ public class MQTTListener implements MqttCallbackExtended {
 		}
 	}
 
-	public HashMap<String, String> getResults() {
-		HashMap labelledResults = new HashMap<String, String>();
-        for (int i = 0; i < testIds.length; ++i) {
-            if (testResults.containsKey(testIds[i])) {
-                labelledResults.put("MQTTListener:" + testIds[i], testResults.get(testIds[i]));
-            }
-        }
+	public Map<String, String> getResults() {
+		Map labelledResults = new TreeMap<String, String>();
+		for (int i = 0; i < testIds.length; ++i) {
+			if (testResults.containsKey(testIds[i])) {
+				labelledResults.put("MQTTListener:" + testIds[i], testResults.get(testIds[i]));
+			}
+		}
 		return labelledResults;
 	}
 
 	public void run(String[] args) {
-        if (client != null) {
+		if (client != null) {
             return;
         }
         logger.info("Initialize {} ", clientId);
@@ -153,9 +153,9 @@ public class MQTTListener implements MqttCallbackExtended {
 			if (topic.startsWith(TOPIC_ROOT_STATE+"/")) {
 				System.out.println("Sparkplug message: " + topic + " " + new String(message.getPayload()));
 			} else if (topic.equals(TCK_LOG_TOPIC)) {
-				//System.out.println("TCK log: " + new String(message.getPayload()));
+				System.out.println("TCK log: " + new String(message.getPayload()));
 			} else if (topic.equals(TCK_RESULTS_TOPIC)) {
-				//System.out.println("TCK results: " + new String(message.getPayload()));
+				System.out.println("TCK results: " + new String(message.getPayload()));
 			} else {
 				if (topic.startsWith("spAv1.0/")) {
 					log("Warning - non-standard Sparkplug A message received");

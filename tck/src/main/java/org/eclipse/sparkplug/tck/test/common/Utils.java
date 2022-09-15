@@ -237,6 +237,12 @@ public class Utils {
 		OFFLINE
 	}
 
+	public enum Profile {
+		HOST,
+		EDGE,
+		BROKER
+	}
+
 	public enum TestStatus {
 		NONE,
 		CONSOLE_RESPONSE,

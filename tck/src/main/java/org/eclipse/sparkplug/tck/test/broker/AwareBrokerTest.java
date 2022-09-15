@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -73,8 +72,8 @@ public class AwareBrokerTest extends TCKTest {
     private BrokerAwareFeatureTester brokerAwareFeatureTester;
 
 	public AwareBrokerTest(TCK aTCK, String[] params) {
-		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
-		theTCK = aTCK;
+        logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
+        theTCK = aTCK;
 		testIds.addAll(Arrays.asList(testId));
 		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -207,7 +206,7 @@ public class AwareBrokerTest extends TCKTest {
             checkDBIRTHAware(isRetain);
         }
 
-        if (bNBirthChecked && bNDeathChecked) {
+        if (bNBirthChecked && bDBirthChecked) {
             checkStoreAware();
         }
 
