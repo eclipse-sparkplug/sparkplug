@@ -85,7 +85,7 @@ public class Utils {
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		if (!results.get(req_id).equals(FAIL)) {
+		if (results.get(req_id) == null || !results.get(req_id).equals(FAIL)) {
 			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
 		}
 		return result;
@@ -93,7 +93,7 @@ public class Utils {
 
 	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		if (!results.get(req_id).equals(MAYBE)) {
+		if (results.get(req_id) == null || !results.get(req_id).equals(MAYBE)) {
 			results.put(req_id, setShouldResult(result, req_desc));
 		}
 		return result;
