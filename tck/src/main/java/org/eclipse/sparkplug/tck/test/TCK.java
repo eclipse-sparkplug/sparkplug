@@ -49,6 +49,7 @@ public class TCK {
 	private final Monitor monitor = new Monitor();
 	private final MQTTListener listener = new MQTTListener();
 	private final Results results = new Results();
+	private @NotNull Boolean hasMonitor;
 
 	public void MQTTLog(String message) {
 		final PublishService publishService = Services.publishService();
@@ -72,8 +73,9 @@ public class TCK {
 			current = (TCKTest) constructor.newInstance(parameters);
 			current.setProfile(Utils.Profile.valueOf(profile.toUpperCase(Locale.ROOT)));
 			results.initialize(new String[0]);
+			hasMonitor = !current.getProfile().equals(Utils.Profile.BROKER);
 
-			if (!current.getProfile().equals(Utils.Profile.BROKER)) {
+			if (hasMonitor) {
 				monitor.startTest();
 				if (!listenerRunning) {
 					listener.run(new String[0]);
@@ -96,7 +98,7 @@ public class TCK {
 		if (current != null) {
 			logger.info("Test end requested for " + current.getName());
 			final TreeMap<String, String> testResults = new TreeMap<>();
-			if (current.getProfile().equals(Utils.Profile.BROKER)) {
+			if (!hasMonitor) {
 				current.endTest(testResults);
 			} else {
 				testResults.putAll(monitor.getResults());
@@ -105,7 +107,6 @@ public class TCK {
 				monitor.endTest(null);
 				listener.clearResults();
 			}
-
 			current = null;
 		} else {
 			logger.info("Test end requested but no test active");
@@ -113,42 +114,56 @@ public class TCK {
 	}
 
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
-		monitor.onMqttConnectionStart(connectionStartInput);
+		if (hasMonitor) {
+			monitor.onMqttConnectionStart(connectionStartInput);
+		}
 	}
 
 	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
-		monitor.onAuthenticationSuccessful(authenticationSuccessfulInput);
+		if (hasMonitor) {
+			monitor.onAuthenticationSuccessful(authenticationSuccessfulInput);
+		}
 	}
 
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
-		monitor.onDisconnect(disconnectEventInput);
+		if (hasMonitor) {
+			monitor.onDisconnect(disconnectEventInput);
+		}
 	}
 
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
 		if (current != null) {
 			current.connect(clientId, packet);
 		}
-		monitor.connect(clientId, packet);
+		if (hasMonitor) {
+			monitor.connect(clientId, packet);
+		}
 	}
 
 	public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
 		if (current != null) {
 			current.disconnect(clientId, packet);
 		}
-		monitor.disconnect(clientId, packet);
+		if (hasMonitor) {
+			monitor.disconnect(clientId, packet);
+		}
 	}
 
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 		if (current != null) {
 			current.subscribe(clientId, packet);
 		}
-		monitor.subscribe(clientId, packet);
+		if (hasMonitor) {
+			monitor.subscribe(clientId, packet);
+		}
 	}
 
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		if (current != null) {
 			current.publish(clientId, packet);
 		}
-		monitor.publish(clientId, packet);
+		if (hasMonitor) {
+			monitor.publish(clientId, packet);
+		}
 	}
 }
