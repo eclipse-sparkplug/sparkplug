@@ -1109,7 +1109,7 @@ Consider the following Sparkplug B payload in the NBIRTH message shown above:
         "metrics": [{
                 "name": "bdSeq",
                 "timestamp": 1486144502122,
-                "dataType": "Uint64",
+                "dataType": "Int64",
                 "value": 0
         }, {
                 "name": "Node Control/Reboot",
