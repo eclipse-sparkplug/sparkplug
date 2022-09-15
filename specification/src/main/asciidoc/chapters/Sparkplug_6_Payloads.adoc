@@ -421,14 +421,15 @@ link:#payloads_b_metric[here].
 ** _seq_
 *** This is the sequence number which is an unsigned 64-bit integer.
 **** [tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*[tck-id-payloads-sequence-num-always-included] A
-sequence number MUST be included in the payload of every Sparkplug MQTT message except NDEATH
-messages.*#
-**** [tck-testable tck-id-payloads-sequence-num-zero-nbirth]#[yellow-background]*[tck-id-payloads-sequence-num-zero-nbirth] A
-NBIRTH message MUST always contain a sequence number of zero.*#
+sequence number MUST be included in the payload of every Sparkplug MQTT message from an Edge Node
+except NDEATH messages.*#
+**** [tck-testable tck-id-payloads-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-sequence-num-zero-nbirth] A
+NBIRTH message from an Edge Node MUST always contain a sequence number between 0 and 255
+(inclusive).*#
 **** [tck-testable tck-id-payloads-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-sequence-num-incrementing] All
-subsequent messages MUST contain a sequence number that is continually increasing by one in each
-message until a value of 255 is reached. At that point, the sequence number of the following message
-MUST be zero.*#
+subsequent messages after an NBIRTH from an Edge Node MUST contain a sequence number that is
+continually increasing by one in each message from that Edge Node until a value of 255 is reached.
+At that point, the sequence number of the following message MUST be zero.*#
 ** _uuid_
 *** This is a field which can be used to represent a schema or some other specific form of the
 message. Example usage would be to supply a UUID which represents an encoding mechanism of the
