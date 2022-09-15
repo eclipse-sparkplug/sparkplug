@@ -13,7 +13,7 @@
 
 package org.eclipse.sparkplug.tck.utility;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ import org.eclipse.sparkplug.tck.test.common.StatePayload;
  * 
  */
 
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
 import org.eclipse.tahu.message.model.SparkplugBPayload;
 import org.eclipse.tahu.message.model.Topic;
@@ -94,7 +94,7 @@ public class HostApplication {
 			log_topic = control.getTopic(TCK_LOG_TOPIC);
 			control.connect();
 			log("starting");
-			control.subscribe(TopicConstants.TCK_HOST_CONTROL);
+			control.subscribe(Constants.TCK_HOST_CONTROL);
 			while (true) {
 				MqttMessage msg = control_listener.getNextMessage();
 				if (msg != null) {
@@ -125,7 +125,7 @@ public class HostApplication {
 		host_listener = new HostListener();
 		host.setCallback(host_listener);
 
-		stateTopic = host.getTopic(TopicConstants.TOPIC_ROOT_STATE + "/" + host_application_id);
+		stateTopic = host.getTopic(Constants.TOPIC_ROOT_STATE + "/" + host_application_id);
 
 		// Set up the BIRTH and DEATH payloads
 		bdSeq = PersistentUtils.getNextHostDeathBdSeqNum();

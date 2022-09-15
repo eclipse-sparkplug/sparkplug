@@ -13,11 +13,11 @@
 
 package org.eclipse.sparkplug.tck.test.common;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.MAYBE;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.PASS;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.MAYBE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -85,7 +85,7 @@ public class Utils {
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		if (!results.get(req_id).equals(FAIL)) {
+		if (results.get(req_id) == null || !results.get(req_id).equals(FAIL)) {
 			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
 		}
 		return result;
@@ -93,7 +93,7 @@ public class Utils {
 
 	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		if (!results.get(req_id).equals(MAYBE)) {
+		if (results.get(req_id) == null || !results.get(req_id).equals(MAYBE)) {
 			results.put(req_id, setShouldResult(result, req_desc));
 		}
 		return result;
@@ -204,7 +204,7 @@ public class Utils {
 		// Check that the host application status is online
 
 		AtomicBoolean hostOnline = new AtomicBoolean(false);
-		String topic = TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
+		String topic = Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
 		final CompletableFuture<Optional<RetainedPublish>> getFuture =
 				Services.retainedMessageStore().getRetainedMessage(topic);
 		try {
@@ -235,35 +235,10 @@ public class Utils {
 		return hostOnline;
 	}
 
-	private enum HostState {
-		ONLINE,
-		OFFLINE
-	}
-
-	public enum Profile {
-		HOST,
-		EDGE,
-		BROKER
-	}
-
-	public enum TestStatus {
-		NONE,
-		CONSOLE_RESPONSE,
-		CONNECTING_DEVICE,
-		REQUESTED_NODE_DATA,
-		REQUESTED_DEVICE_DATA,
-		KILLING_DEVICE,
-		EXPECT_NODE_REBIRTH,
-		EXPECT_NODE_COMMAND,
-		EXPECT_DEVICE_REBIRTH,
-		EXPECT_DEVICE_COMMAND,
-		DEATH_MESSAGE_RECEIVED
-	}
-
 	public static StringBuilder getSummary(final @NotNull Map<String, String> results) {
 		final StringBuilder summary = new StringBuilder();
 
-		String overall = results.entrySet().isEmpty() ? TopicConstants.EMPTY : TopicConstants.NOT_EXECUTED;
+		String overall = results.entrySet().isEmpty() ? Constants.EMPTY : Constants.NOT_EXECUTED;
 
 		for (final Map.Entry<String, String> reportResult : results.entrySet()) {
 			if (reportResult.getValue().equals(NOT_EXECUTED)) {
@@ -274,11 +249,11 @@ public class Utils {
 			summary.append(reportResult.getKey()).append(": ").append(reportResult.getValue()).append(";")
 					.append(System.lineSeparator());
 
-			if (!overall.equals(TopicConstants.FAIL)) { // don't overwrite an overall fail status
-				if (reportResult.getValue().startsWith(TopicConstants.PASS)) {
-					overall = TopicConstants.PASS;
-				} else if (reportResult.getValue().startsWith(TopicConstants.FAIL)) {
-					overall = TopicConstants.FAIL;
+			if (!overall.equals(Constants.FAIL)) { // don't overwrite an overall fail status
+				if (reportResult.getValue().startsWith(Constants.PASS)) {
+					overall = Constants.PASS;
+				} else if (reportResult.getValue().startsWith(Constants.FAIL)) {
+					overall = Constants.FAIL;
 				}
 			}
 		}

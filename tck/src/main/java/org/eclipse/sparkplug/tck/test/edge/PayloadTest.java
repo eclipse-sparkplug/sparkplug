@@ -38,7 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 /**

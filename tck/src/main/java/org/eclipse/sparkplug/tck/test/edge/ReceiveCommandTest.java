@@ -63,7 +63,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(

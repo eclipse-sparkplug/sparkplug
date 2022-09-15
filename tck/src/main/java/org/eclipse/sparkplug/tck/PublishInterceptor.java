@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_CONSOLE_TEST_CONTROL_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_TEST_CONTROL_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 /**
  * @author Ian Craggs

@@ -24,7 +24,7 @@ public class PersistentUtils {
 	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
 
 	private static final String HOST_BD_SEQ_NUM_FILE_NAME =
-			TMP_DIR + SPARKPLUG_DIRNAME + FILE_SEPARATOR + "HOST_BD_SEQ_NUM";
+			TMP_DIR + FILE_SEPARATOR + SPARKPLUG_DIRNAME + FILE_SEPARATOR + "HOST_BD_SEQ_NUM";
 
 	public static int getNextHostDeathBdSeqNum() {
 		try {

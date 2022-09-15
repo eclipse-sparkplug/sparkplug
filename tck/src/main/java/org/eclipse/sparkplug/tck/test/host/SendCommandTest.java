@@ -48,9 +48,9 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.Utils.TestStatus;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -62,16 +62,16 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_CONSOLE_PROMPT_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_NCMD;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_DCMD;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
@@ -141,7 +141,7 @@ public class SendCommandTest extends TCKTest {
 		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
 		state = TestStatus.CONNECTING_DEVICE;
 		String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
-		Publish message = Builders.publish().topic(TopicConstants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
+		Publish message = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(payload.getBytes())).build();
 		logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
 				deviceId);
@@ -248,7 +248,7 @@ public class SendCommandTest extends TCKTest {
 					state = TestStatus.EXPECT_NODE_REBIRTH;
 				}
 			}
-		} else if (topic.equals(TopicConstants.SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC + edgeNodeId)) {
+		} else if (topic.equals(Constants.SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC + edgeNodeId)) {
 			if (state == TestStatus.EXPECT_NODE_REBIRTH) {
 				checkNodeCommand(clientId, packet);
 				publishToTckConsolePrompt("Send an edge command to edge node " + edgeNodeId + " metric " + EDGE_METRIC);
@@ -259,12 +259,12 @@ public class SendCommandTest extends TCKTest {
 						"Send a device rebirth command to device " + deviceId + " at edge node " + edgeNodeId);
 				state = TestStatus.EXPECT_DEVICE_REBIRTH;
 			}
-		} else if (topic.equals(TopicConstants.SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC + edgeNodeId + "/" + deviceId)) {
+		} else if (topic.equals(Constants.SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC + edgeNodeId + "/" + deviceId)) {
 			if (state == TestStatus.EXPECT_DEVICE_REBIRTH) {
 				checkDeviceCommand(clientId, packet);
 				publishToTckConsolePrompt("Send a device command to device " + deviceId + " at edge node " + edgeNodeId
 						+ " metric " + DEVICE_METRIC);
-				state = Utils.TestStatus.EXPECT_DEVICE_COMMAND;
+				state = Constants.TestStatus.EXPECT_DEVICE_COMMAND;
 			} else if (state == TestStatus.EXPECT_DEVICE_COMMAND) {
 				checkDeviceCommand(clientId, packet);
 				theTCK.endTest();

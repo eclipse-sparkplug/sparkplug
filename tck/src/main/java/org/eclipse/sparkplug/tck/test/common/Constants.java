@@ -14,7 +14,7 @@ package org.eclipse.sparkplug.tck.test.common;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-public class TopicConstants {
+public class Constants {
 
 	public static final @NotNull String TOPIC_ROOT_SP_BV_1_0 = "spBv1.0";
 	public static final @NotNull String TOPIC_PATH_STATE = "STATE";
@@ -46,5 +46,24 @@ public class TopicConstants {
 	public static final String SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC = "spBv1.0/SparkplugTCK/NCMD/";
 	public static final String SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC = "spBv1.0/SparkplugTCK/DCMD/";
 	public static final String SPARKPLUG_AWARE_ROOT = "$sparkplug/certificates/";
+	
+	public enum Profile {
+		HOST,
+		EDGE,
+		BROKER
+	}
 
+	public enum TestStatus {
+		NONE,
+		CONSOLE_RESPONSE,
+		CONNECTING_DEVICE,
+		REQUESTED_NODE_DATA,
+		REQUESTED_DEVICE_DATA,
+		KILLING_DEVICE,
+		EXPECT_NODE_REBIRTH,
+		EXPECT_NODE_COMMAND,
+		EXPECT_DEVICE_REBIRTH,
+		EXPECT_DEVICE_COMMAND,
+		DEATH_MESSAGE_RECEIVED
+	}
 }

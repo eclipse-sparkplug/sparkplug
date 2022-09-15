@@ -41,13 +41,13 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.FAIL;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.NOT_EXECUTED;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_RESULTS_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_PATH_STATE;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TOPIC_ROOT_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.charset.StandardCharsets;

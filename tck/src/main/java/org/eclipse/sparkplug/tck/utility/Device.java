@@ -13,7 +13,7 @@
 
 package org.eclipse.sparkplug.tck.utility;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 import static org.eclipse.tahu.message.model.MetricDataType.Boolean;
 import static org.eclipse.tahu.message.model.MetricDataType.DataSet;
 import static org.eclipse.tahu.message.model.MetricDataType.DateTime;
@@ -46,7 +46,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.tahu.SparkplugException;
 import org.eclipse.tahu.SparkplugInvalidTypeException;
 import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
@@ -210,7 +210,7 @@ public class Device {
 
 		edge.connect(options);
 
-		edge.subscribe(TopicConstants.TOPIC_ROOT_STATE + "/"
+		edge.subscribe(Constants.TOPIC_ROOT_STATE + "/"
 				+ host_application_id); /* look for status of the host application we are to use */
 
 		/* wait for retained message indicating state of host application under test */

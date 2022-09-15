@@ -36,7 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.TreeMap;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 
 /**
  * @author Ian Craggs
@@ -49,6 +49,13 @@ public class TCK {
 	private final Monitor monitor = new Monitor();
 	private final MQTTListener listener = new MQTTListener();
 	private final Results results = new Results();
+	
+	/**
+	 * The hasMonitor variable indicates whether the Monitor class should be run for a 
+	 * test. This is switched off for the Broker profile, and on for the Host and Edge profiles.
+	 * The Monitor class holds tests for assertions that don't neatly fit into a single test scenario,
+	 * or apply all the time, so it runs alongside all Host and Edge tests.
+	 */
 	private @NotNull Boolean hasMonitor = true;
 
 	public void MQTTLog(String message) {
@@ -71,9 +78,9 @@ public class TCK {
 
 			final Object[] parameters = {this, parms};
 			current = (TCKTest) constructor.newInstance(parameters);
-			current.setProfile(Utils.Profile.valueOf(profile.toUpperCase(Locale.ROOT)));
+			current.setProfile(Profile.valueOf(profile.toUpperCase(Locale.ROOT)));
 			results.initialize(new String[0]);
-			hasMonitor = !current.getProfile().equals(Utils.Profile.BROKER);
+			hasMonitor = !current.getProfile().equals(Profile.BROKER);
 
 			if (hasMonitor) {
 				monitor.startTest();

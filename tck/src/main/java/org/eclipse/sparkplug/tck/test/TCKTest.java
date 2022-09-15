@@ -35,7 +35,7 @@ import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.test.common.Utils;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 
 /**
  * @author Ian Craggs
@@ -46,15 +46,15 @@ public abstract class TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	protected final @NotNull Map<String, String> testResults = new TreeMap<>();
 
-	public Utils.Profile getProfile() {
+	public Profile getProfile() {
 		return profile;
 	}
 
-	public void setProfile(Utils.Profile profile) {
+	public void setProfile(Profile profile) {
 		this.profile = profile;
 	}
 
-	protected @NotNull Utils.Profile profile;
+	protected @NotNull Profile profile;
 
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
 	}
