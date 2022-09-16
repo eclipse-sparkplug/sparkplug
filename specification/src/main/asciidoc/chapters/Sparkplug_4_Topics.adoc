@@ -64,10 +64,12 @@ Nodes into the MQTT Server and back out to the consuming Sparkplug Host Applicat
 [tck-testable tck-id-topic-structure-namespace-valid-group-id]#[yellow-background]*[tck-id-topic-structure-namespace-valid-group-id] The
 format of the Group ID MUST be a valid UTF-8 string with the exception of the reserved characters of
 + (plus), / (forward slash), and # (number sign).*#
-In most use cases to minimize bandwidth, it should be descriptive but as small as possible. Examples
-of where the [group_id] might be used include Oil/Gas applications where Sparkplug Edge Nodes on a
-physical pipeline segment all have the same [group_id]. Plant floor applications may group
-Sparkplug Edge Nodes based on logical cell or manufacturing line requirements.
+
+In most use cases to minimize bandwidth, the Group ID should be descriptive but as small as
+possible. Examples of where the [group_id] might be used include Oil/Gas applications where
+Sparkplug Edge Nodes on a physical pipeline segment all have the same [group_id]. Plant floor
+applications may group Sparkplug Edge Nodes based on logical cell or manufacturing line
+requirements.
 
 [[topics_message_type_element]]
 ==== message_type Element
@@ -210,14 +212,11 @@ MUST match the bdSeq number provided in the MQTT CONNECT packet’s Will Message
 ** This allows Host Applications to correlate NBIRTHs to NDEATHs.
 * [tck-testable tck-id-topics-nbirth-bdseq-increment]#[yellow-background]*[tck-id-topics-nbirth-bdseq-increment] The
 bdSeq number MUST start at zero and increment by one on every new MQTT CONNECT packet.*#
-
-[tck-testable tck-id-topics-nbirth-rebirth-metric]#[yellow-background]*[tck-id-topics-nbirth-rebirth-metric] The
-NBIRTH message MUST include the following metric:*#
-[yellow-background]
- * Metric name: ‘Node Control/Rebirth’
- ** Used by Host Application(s) to request a new NBIRTH and DBIRTH(s) from an Edge Node.
- ** Datatype: boolean
- ** Value: false
+* [tck-testable tck-id-topics-nbirth-rebirth-metric]#[yellow-background]*[tck-id-topics-nbirth-rebirth-metric] The
+NBIRTH message MUST include a metric with the name 'Node Control/Rebirth'. It MUST be of datatype
+boolean and have a value of false.*#
+** The 'Node Control/Rebirth' metric is used by Host Application(s) to request a new NBIRTH and
+DBIRTH(s) from an Edge Node.
 
 The NBIRTH message can also include additional Node Control payload components. These are used by a
 Sparkplug Host Application to control aspects of the Edge Node. The following are examples of Node
@@ -587,11 +586,10 @@ MQTT retain flag for the Birth Certificate MUST be set to TRUE*#
 [[topics_death_message_state]]
 ====== Death Certificate Topic (STATE)
 
-[tck-testable tck-id-host-topic-phid-death-topic]#[yellow-background]*[tck-id-host-topic-phid-death-topic] The
+* [tck-testable tck-id-host-topic-phid-death-topic]#[yellow-background]*[tck-id-host-topic-phid-death-topic] The
 Sparkplug Host Application Death topic MUST be of the form spBv1.0/STATE/sparkplug_host_id where the
-sparkplug_host_id must be replaced with the specific Spakrplug Host ID of this Sparkplug Host
+sparkplug_host_id must be replaced with the specific Sparkplug Host ID of this Sparkplug Host
 Application.*#
-
 * [tck-testable tck-id-host-topic-phid-death-required]#[yellow-background]*[tck-id-host-topic-phid-death-required] The
 Sparkplug Host Application MUST provide a Will message in the MQTT CONNECT packet*#
 ** This is the Sparkplug Host Application DEATH certificate

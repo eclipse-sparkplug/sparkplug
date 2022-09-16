@@ -47,6 +47,7 @@ A Sparkplug Host Application is typically at a 'central location' and primarily 
 multiple Sparkplug Edge Nodes. It also may send command messages to Sparkplug Edge Nodes to write to
 outputs of Sparkplug Edge Nodes and/or Devices. Sparkplug Host Applications may also sends rebirth
 requests to Edge Nodes when required.
+
 [tck-testable tck-id-conformance-primary-host]#[yellow-background]*[tck-id-conformance-primary-host] Sparkplug
 Host Applications MUST publish 'STATE' messages that represent its Birth and Death Certificates.*#
 
