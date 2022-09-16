@@ -412,9 +412,9 @@ components.
 ** _timestamp_
 *** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
 milliseconds since epoch (Jan 1, 1970).
-[tck-not-testable tck-id-payloads_timestamp_in_UTC]#[yellow-background]*This timestamp MUST be in
-UTC.*#
-This timestamp represents the time at which the message was published.
+*** [tck-not-testable tck-id-payloads_timestamp_in_UTC]#[yellow-background]*[tck-id-payloads_timestamp_in_UTC] This
+timestamp MUST be in UTC.*#
+*** This timestamp represents the time at which the message was published.
 ** _metrics_
 *** This is an array of metrics representing key/value/datatype values. Metrics are further defined 
 link:#payloads_b_metric[here].
@@ -567,13 +567,13 @@ containing the values. It includes the following components.
 
 * *keys*
 ** This is an array of UTF-8 strings representing the names of the properties in this PropertySet.
-[tck-testable tck-id-payloads-propertyset-keys-array-size]#[yellow-background]*[tck-id-payloads-propertyset-keys-array-size] The
+** [tck-testable tck-id-payloads-propertyset-keys-array-size]#[yellow-background]*[tck-id-payloads-propertyset-keys-array-size] The
 array of keys in a PropertySet MUST contain the same number of values included in the array of
 PropertyValue objects.*#
 * *values*
 ** This is an array of PropertyValue objects representing the values of the properties in the
 PropertySet.
-[tck-testable tck-id-payloads-propertyset-values-array-size]#[yellow-background]*[tck-id-payloads-propertyset-values-array-size] The
+** [tck-testable tck-id-payloads-propertyset-values-array-size]#[yellow-background]*[tck-id-payloads-propertyset-values-array-size] The
 array of values in a PropertySet MUST contain the same number of items that are in the keys array.*#
 
 [[payloads_b_propertyvalue]]
@@ -655,7 +655,7 @@ components.
 MUST be an unsigned 64-bit integer representing the number of columns in this DataSet.*#
 * *columns*
 ** This is an array of strings representing the column headers of this DataSet.
-[tck-testable tck-id-payloads-dataset-column-num-headers]#[yellow-background]*[tck-id-payloads-dataset-column-num-headers] The
+** [tck-testable tck-id-payloads-dataset-column-num-headers]#[yellow-background]*[tck-id-payloads-dataset-column-num-headers] The
 size of the array MUST have the same number of elements that the types array contains.*#
 * *types*
 ** [tck-testable tck-id-payloads-dataset-types-def]#[yellow-background]*[tck-id-payloads-dataset-types-def] This
@@ -802,7 +802,7 @@ MUST be included in Template Parameter Definitions in NBIRTH and DBIRTH messages
 ** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*[tck-id-payloads-template-parameter-value] The
 value supplied MUST be one of the following Google Protocol Buffer types: _uint32_, _uint64_,
 _float_, _double_, _bool_, or _string_.*#
-More information on these types can be found here:
+*** More information on these types can be found here:
 https://developers.google.com/protocol-buffers/docs/proto#scalar
 ** For a template definition, this is the default value of the parameter. For a template instance,
 this is the value unique to that instance.
@@ -1066,7 +1066,7 @@ messages MUST include a payload timestamp that denotes the time at which the mes
 published.*#
 * [tck-testable tck-id-payloads-nbirth-edge-node-descriptor]#[yellow-background]*[tck-id-payloads-nbirth-edge-node-descriptor] Every
 Edge Node Descriptor in any Sparkplug infrastructure MUST be unique in the system.*#
-These are used like addresses and need to be unique as a result.
+** These are used like addresses and need to be unique as a result.
 * [tck-testable tck-id-payloads-nbirth-seq]#[yellow-background]*[tck-id-payloads-nbirth-seq] Every
 NBIRTH message MUST include a sequence number and it MUST have a value between 0 and 255
 (inclusive).*#
