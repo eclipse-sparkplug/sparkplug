@@ -43,7 +43,7 @@ document. The Edge Node is responsible for any local protocol interface to exist
 internal process variables (PVs).
 
 [[components_device_sensor]]
-=== Device / Sensor 
+=== Device/Sensor
 
 The Device/Sensor represents any physical or logical device connected to the MQTT Edge Node
 providing any data, process variables or metrics.
