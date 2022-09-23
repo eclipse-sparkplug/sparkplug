@@ -106,7 +106,7 @@ associated with the Edge Node MUST subscribe to a topic of the form
 'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id
 is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of
 1.*#
-** This subscription is not optional as Edge Nodes MUST be able to respond to 'rebirth requests'.
+** This subscription is mandatory as Edge Nodes MUST be able to respond to 'rebirth requests'.
 
 After subscribing, the Edge Node must follow these additional rules.
 
