@@ -40,7 +40,7 @@ Client application that manages an MQTT session and provides the physical and/or
 functions required to participate in the topic namespace and payload definitions described in this
 document. The Edge Node is responsible for any local protocol interface to existing legacy devices
 (PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete I/O, and/or any logical
-internal process variables(PVs).
+internal process variables (PVs).
 
 [[components_device_sensor]]
 === Device / Sensor 
