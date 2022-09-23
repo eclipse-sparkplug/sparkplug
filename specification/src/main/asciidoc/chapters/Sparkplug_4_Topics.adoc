@@ -329,7 +329,7 @@ denoting the date and time the message was sent from the Host Application’s MQ
 that need to be written to on the Edge Node.*#
 
 [[topics_device_sensor]]  
-==== Device / Sensor
+==== Device/Sensor
 [upperalpha, start=1]
 
 [[birth_message_dbirth]]

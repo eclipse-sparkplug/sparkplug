@@ -90,7 +90,7 @@ public class Requirements {
     // 3 Sparkplug Architecture and Infrastructure Components
     // 3.1 MQTT Server(s)
     // 3.2 MQTT Edge Node
-    // 3.3 Device / Sensor
+    // 3.3 Device/Sensor
     // 3.4 MQTT Enabled Device (Sparkplug)
     // 3.5 Primary Host Application
     // 3.6 Sparkplug Host Application
@@ -205,7 +205,7 @@ public class Requirements {
     public final static String ID_TOPICS_NCMD_PAYLOAD = "topics-ncmd-payload";
     public final static String TOPICS_NCMD_PAYLOAD = "The NCMD MUST include the metrics that need to be written to on the Edge Node.";
 
-    // 4.2.2 Device / Sensor
+    // 4.2.2 Device/Sensor
     // 4.2.2.1 Birth Message (DBIRTH)
     // 4.2.2.1.1 Topic (DBIRTH)
     // 4.2.2.1.2 Payload (DBIRTH)
