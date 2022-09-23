@@ -1001,7 +1001,7 @@ enum DataType {
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 33
 ** _DateTimeArray_
-*** DateTimeArray as an array of packed little endian bytes where each date/time value is an 8-byte
+*** DateTimeArray as an array of packed little endian bytes where each Datetime value is an 8-byte
 value representing the number of milliseconds since epoch in UTC
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 34

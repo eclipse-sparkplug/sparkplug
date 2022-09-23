@@ -146,7 +146,7 @@ public class Requirements {
     public final static String TOPICS_NBIRTH_SEQ_NUM = "The NBIRTH MUST include a sequence number in the payload and it MUST have a value of 0.";
 
     public final static String ID_TOPICS_NBIRTH_TIMESTAMP = "topics-nbirth-timestamp";
-    public final static String TOPICS_NBIRTH_TIMESTAMP = "The NBIRTH MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.";
+    public final static String TOPICS_NBIRTH_TIMESTAMP = "The NBIRTH MUST include a timestamp denoting the date and time the message was sent from the Edge Node.";
 
     public final static String ID_TOPICS_NBIRTH_METRIC_REQS = "topics-nbirth-metric-reqs";
     public final static String TOPICS_NBIRTH_METRIC_REQS = "The NBIRTH MUST include every metric the Edge Node will ever report on.";
@@ -179,7 +179,7 @@ public class Requirements {
     public final static String TOPICS_NDATA_SEQ_NUM = "The NDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.";
 
     public final static String ID_TOPICS_NDATA_TIMESTAMP = "topics-ndata-timestamp";
-    public final static String TOPICS_NDATA_TIMESTAMP = "The NDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.";
+    public final static String TOPICS_NDATA_TIMESTAMP = "The NDATA MUST include a timestamp denoting the date and time the message was sent from the Edge Node.";
 
     public final static String ID_TOPICS_NDATA_PAYLOAD = "topics-ndata-payload";
     public final static String TOPICS_NDATA_PAYLOAD = "The NDATA MUST include the Edge Node's metrics that have changed since the last NBIRTH or NDATA message.";
@@ -200,7 +200,7 @@ public class Requirements {
     public final static String TOPICS_NCMD_MQTT = "NCMD messages MUST be published with MQTT QoS equal to 0 and retain equal to false.";
 
     public final static String ID_TOPICS_NCMD_TIMESTAMP = "topics-ncmd-timestamp";
-    public final static String TOPICS_NCMD_TIMESTAMP = "The NCMD MUST include a timestamp denoting the Date/Time the message was sent from the Host Application's MQTT client.";
+    public final static String TOPICS_NCMD_TIMESTAMP = "The NCMD MUST include a timestamp denoting the date and time the message was sent from the Host Application's MQTT client.";
 
     public final static String ID_TOPICS_NCMD_PAYLOAD = "topics-ncmd-payload";
     public final static String TOPICS_NCMD_PAYLOAD = "The NCMD MUST include the metrics that need to be written to on the Edge Node.";
@@ -216,7 +216,7 @@ public class Requirements {
     public final static String TOPICS_DBIRTH_SEQ = "The DBIRTH MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.";
 
     public final static String ID_TOPICS_DBIRTH_TIMESTAMP = "topics-dbirth-timestamp";
-    public final static String TOPICS_DBIRTH_TIMESTAMP = "The DBIRTH MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.";
+    public final static String TOPICS_DBIRTH_TIMESTAMP = "The DBIRTH MUST include a timestamp denoting the date and time the message was sent from the Edge Node.";
 
     public final static String ID_TOPICS_DBIRTH_METRIC_REQS = "topics-dbirth-metric-reqs";
     public final static String TOPICS_DBIRTH_METRIC_REQS = "The DBIRTH MUST include every metric the Edge Node will ever report on.";
@@ -234,7 +234,7 @@ public class Requirements {
     public final static String TOPICS_DDATA_SEQ_NUM = "The DDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.";
 
     public final static String ID_TOPICS_DDATA_TIMESTAMP = "topics-ddata-timestamp";
-    public final static String TOPICS_DDATA_TIMESTAMP = "The DDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.";
+    public final static String TOPICS_DDATA_TIMESTAMP = "The DDATA MUST include a timestamp denoting the date and time the message was sent from the Edge Node.";
 
     public final static String ID_TOPICS_DDATA_PAYLOAD = "topics-ddata-payload";
     public final static String TOPICS_DDATA_PAYLOAD = "The DDATA MUST include the Device's metrics that have changed since the last DBIRTH or DDATA message.";
@@ -255,7 +255,7 @@ public class Requirements {
     public final static String TOPICS_DCMD_MQTT = "DCMD messages MUST be published with MQTT QoS equal to 0 and retain equal to false.";
 
     public final static String ID_TOPICS_DCMD_TIMESTAMP = "topics-dcmd-timestamp";
-    public final static String TOPICS_DCMD_TIMESTAMP = "The DCMD MUST include a timestamp denoting the Date/Time the message was sent from the Host Application's MQTT client.";
+    public final static String TOPICS_DCMD_TIMESTAMP = "The DCMD MUST include a timestamp denoting the date and time the message was sent from the Host Application's MQTT client.";
 
     public final static String ID_TOPICS_DCMD_PAYLOAD = "topics-dcmd-payload";
     public final static String TOPICS_DCMD_PAYLOAD = "The DCMD MUST include the metrics that need to be written to on the Device.";

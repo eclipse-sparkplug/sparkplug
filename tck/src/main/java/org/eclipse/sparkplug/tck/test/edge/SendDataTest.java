@@ -205,7 +205,7 @@ public class SendDataTest extends TCKTest {
 		testResults.put(ID_TOPICS_NDATA_SEQ_NUM, setResult(bValid[1], TOPICS_NDATA_SEQ_NUM));
 
 		logger.debug(
-				"Check Req: {} The NDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.",
+				"Check Req: {} The NDATA MUST include a timestamp denoting the date and time the message was sent from the Edge Node.",
 				ID_TOPICS_NDATA_TIMESTAMP);
 		testIds.add(ID_TOPICS_NDATA_TIMESTAMP);
 		testResults.put(ID_TOPICS_NDATA_TIMESTAMP, setResult(bValid[2], TOPICS_NDATA_TIMESTAMP));
@@ -289,7 +289,7 @@ public class SendDataTest extends TCKTest {
 		testResults.put(ID_TOPICS_DDATA_SEQ_NUM, setResult(bValid[1], TOPICS_DDATA_SEQ_NUM));
 
 		logger.debug(
-				"Check Req: {} The DDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.",
+				"Check Req: {} The DDATA MUST include a timestamp denoting the date and time the message was sent from the Edge Node.",
 				ID_TOPICS_DDATA_TIMESTAMP);
 		testIds.add(ID_TOPICS_DDATA_TIMESTAMP);
 		testResults.put(ID_TOPICS_DDATA_TIMESTAMP, setResult(bValid[2], TOPICS_DDATA_TIMESTAMP));
