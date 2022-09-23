@@ -89,7 +89,7 @@ link:#payloads_b_state[Host Application Death Certificates]
 
 [tck-testable tck-id-principles-birth-certificates-order]#[yellow-background]*Birth Certificates
 MUST be the first MQTT messages published by any Edge Node or any Host Application.*#
-They denote to any subscribing MQTT clients that they are now online. For Edge Nodes, the Birth
+Birth Certificates denote to any subscribing MQTT clients that the Edge Node or Host Application is now online. For Edge Nodes, the Birth
 Certificate uses the NBIRTH Sparkplug verb in the topic. For Host Applications, the STATE/host_id
 topic is used. More details and requirements on Birth certificates can be found in
 link:#payloads_b_nbirth[Edge Node Birth Certificates] and
