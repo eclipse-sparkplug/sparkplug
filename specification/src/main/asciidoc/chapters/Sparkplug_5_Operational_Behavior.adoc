@@ -294,7 +294,7 @@ flow diagram assumes that the Edge Node session has already been established wit
 Application. Depending on the target platform, the Edge Node may be a physical "Edge of Network"
 gateway device polling physical legacy devices via Modbus, AB, DNP3.0, HART, etc, an MQTT enabled
 sensor or device, or it might be a logical implementation of one of the Eclipse Tahu compatible
-implementations for prototype Edge Nodes running on the Raspberry PI platform. Regardless of the
+implementations for prototype Edge Nodes running on a Raspberry Pi. Regardless of the
 implementation, at some point the device interface will need to provide a state and associated
 metrics to publish to the MQTT infrastructure.
 
