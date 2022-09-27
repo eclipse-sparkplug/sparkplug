@@ -410,10 +410,10 @@ session to any one of the MQTT Servers.
 Edge Nodes MUST not connected to more than one server at any point in time.*#
 
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
-published by Primary Host Application. Since the STATE message is published with the RETAIN message
+published by the Primary Host Application. Since the STATE message is published with the RETAIN message
 flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
-examine the payload of this message to ensure that it is a value of "ONLINE". If the value is
-"OFFLINE", this indicates the Primary Application has lost its MQTT Session to this particular MQTT
+examine the payload of this message to ensure that it has a value of "ONLINE". If the value is
+"OFFLINE" then this indicates that the Primary Application has lost its MQTT Session to this particular MQTT
 Server.
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*If
@@ -424,8 +424,8 @@ available.*#
 [tck-testable tck-id-operational-behavior-edge-node-birth-sequence-wait]#[yellow-background]*The
 Edge Node MUST also wait to publish its BIRTH sequence until an "ONLINE" STATE message is received
 by the Edge Node.*#
-This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
-to the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
+This use of the STATE message in this manner ensures that any loss of connectivity between an MQTT Server
+and the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
 because of network issues. The following message flow diagram outlines how the STATE message is
 used when three (3) MQTT Servers are available in the infrastructure:
 
