@@ -38,7 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 /**
@@ -54,7 +54,6 @@ public class PayloadTest extends TCKTest {
     private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
     public static final String PROPERTY_KEY_QUALITY = "Quality";
 
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
 	private final @NotNull String testIds[] = { ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED,
 			ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE, ID_PAYLOADS_METRIC_DATATYPE_VALUE,
 			ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE, ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE,
@@ -83,20 +82,22 @@ public class PayloadTest extends TCKTest {
     private @NotNull String hostApplicationId;
     private @NotNull long seqUnassigned = -1;
 
-    public PayloadTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
-        logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
-        theTCK = aTCK;
+	public PayloadTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+		logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
+		theTCK = aTCK;
 
-        if (parms.length < 4) {
-            logger.error("Parameters to edge payload test must be: {hostId}, groupId edgeNodeId deviceId");
-            throw new IllegalArgumentException("Parameters to edge payload test must be: {hostId}, groupId edgeNodeId deviceId");
-        }
-        hostApplicationId = parms[0];
-        groupId = parms[1];
-        edgeNodeId = parms[2];
-        deviceId = parms[3];
-        logger.info("Parameters are HostId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId, edgeNodeId, deviceId);
-    }
+		if (parms.length < 4) {
+			log("Not enough parameters: " + Arrays.toString(parms));
+			log("Parameters to edge payload test must be: hostId groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
+		}
+		hostApplicationId = parms[0];
+		groupId = parms[1];
+		edgeNodeId = parms[2];
+		deviceId = parms[3];
+		logger.info("Parameters are HostId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId,
+				edgeNodeId, deviceId);
+	}
 
     @Override
     public void endTest(Map<String, String> results) {
@@ -475,7 +476,7 @@ public class PayloadTest extends TCKTest {
         final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
-				DataType datatype = DataType.valueOf(m.getDatatype());
+				DataType datatype = DataType.forNumber(m.getDatatype());
 
 				if (datatype == DataType.DataSet && m.hasDatasetValue()) {
 					Payload.DataSet d = m.getDatasetValue();
@@ -500,7 +501,7 @@ public class PayloadTest extends TCKTest {
 							if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
 								uint32types = false;
 							}
-							if (!valueTypes.contains(DataType.valueOf(curtype))) {
+							if (!valueTypes.contains(DataType.forNumber(curtype))) {
 								validtypes = false;
 							}
 						}
@@ -596,7 +597,7 @@ public class PayloadTest extends TCKTest {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
-				DataType datatype = DataType.valueOf(m.getDatatype());
+				DataType datatype = DataType.forNumber(m.getDatatype());
 
 				if (datatype == DataType.Template && m.hasTemplateValue()) {
 					Payload.Template t = m.getTemplateValue();
@@ -657,14 +658,15 @@ public class PayloadTest extends TCKTest {
 							
 							if (p.hasType()) {
 								int curtype = p.getType();
-								boolean uint32types = true;
-								if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
-									uint32types = false;
+								boolean isBasicType = true;
+								if (curtype < 0 || curtype > DataType.Text.getNumber()) {
+									logger.info("FOR {} the TYPE is: {} AND {}", p.getName(), curtype, p);
+									isBasicType = false;
 								}
 								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
-									setResult(uint32types, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
+									setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
 								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
-										setResult(uint32types, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
+										setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
 								
 							}
 							

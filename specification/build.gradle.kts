@@ -54,7 +54,7 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
     baseDirFollowsSourceDir()
     sourceDirProperty.set(file("build/spec"))
     sources {
-        include("*.adoc", "chapters/*.adoc")
+        include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/pdf"))
 
@@ -105,7 +105,7 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
     baseDirFollowsSourceDir()
     sourceDirProperty.set(file("build/spec"))
     sources {
-        include("*.adoc", "chapters/*.adoc")
+        include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/html"))
 
@@ -144,7 +144,7 @@ val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::c
     baseDirFollowsSourceDir()
     sourceDirProperty.set(file("build/spec"))
     sources {
-        include("*.adoc", "chapters/*.adoc")
+        include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/docbook"))
     outputs.file(buildDir.resolve("docs/docbook/sparkplug_spec.xml"))

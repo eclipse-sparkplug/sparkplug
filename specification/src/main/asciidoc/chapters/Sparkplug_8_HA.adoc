@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[high_availability]]
 == High Availability
 
@@ -65,9 +68,8 @@ Sparkplug Host Applications, and MQTT enabled Devices. Each component can connec
 MQTT Server. A message sent to any MQTT Server will be distributed to all available MQTT Servers in
 the cluster (which will distribute the message to all subscribing Sparkplug components).
 
-image:extracted-media/media/image15.png[image,width=660,height=314]
-
-Figure X – High Availability MQTT Server Cluster
+.Figure 12 – High Availability MQTT Server Cluster
+plantuml::{assetsdir}assets/plantuml/HA-mqtt-server-cluster.puml[format=svg, alt="High Availability MQTT Server Cluster"]
 
 If any MQTT Server would fail, the MQTT connection for components connected to the broker will break
 and the component can connect to any other MQTT Server to resume operations.
@@ -81,9 +83,8 @@ beforehand (like in cloud native deployment environments such as Kubernetes) or 
 not desired that all IP addresses (or DNS lookup names) are configured on the Sparkplug components,
 a load balancer might be used.
 
-image:extracted-media/media/image16.png[image,width=660,height=314]
-
-Figure X – High Availability MQTT Server Cluster with Load Balancer
+.Figure 13 – High Availability MQTT Server Cluster with Load Balancer
+plantuml::{assetsdir}assets/plantuml/HA-mqtt-server-cluster-with-load-balancer.puml[format=svg, alt="High Availability MQTT Server Cluster with Load Balancer"]
 
 A load balancer acts as the single point of contact for Sparkplug components, so only a single IP
 address or DNS name needs to be configured on the components. The load balancer will proxy the MQTT
@@ -99,66 +100,66 @@ work with most Sparkplug compatible MQTT Servers on the market.
 
 A second approach to high availability is the use of several isolated MQTT Servers. This approach
 works with all Sparkplug certified MQTT Servers and does not need cluster technology but requires
-Primary Host Applications that support multiple isolated MQTT brokers. The
-_Primary Host Application_ is responsible for managing state across the several MQTT brokers.
+Primary Host Applications that support multiple isolated MQTT brokers. The Primary Host Application
+is responsible for managing state across the several MQTT brokers.
 
-When multiple MQTT Servers are available there is the possibility of “stranding” and EoN node if the
-Primary command/control of the _Primary Host Application_ loses network connectivity to one of the
-MQTT Servers. In this instance the EoN node would stay properly connected to the MQTT Server
-publishing information not knowing that _Primary Host Application_ was not able to receive the
-messages. When using multiple MQTT Servers, the _Primary Host Application_ instance must be
-configured to publish a STATE Birth Certificate and all EoN nodes need to subscribe to this STATE
+When multiple MQTT Servers are available there is the possibility of “stranding” and Edge Node if the
+Primary command/control of the Primary Host Application loses network connectivity to one of the
+MQTT Servers. In this instance the Edge Node would stay properly connected to the MQTT Server
+publishing information not knowing that Primary Host Application was not able to receive the
+messages. When using multiple MQTT Servers, the Primary Host Application instance must be
+configured to publish a STATE Birth Certificate and all Edge Nodes need to subscribe to this STATE
 message.
 
-The _Primary Host Application_ will need to specify whether it is a “Primary” command/control
+The Primary Host Application will need to specify whether it is a “Primary” command/control
 instance or not. If it is a primary instance then every time it establishes a new MQTT Session with
 an MQTT Server, the STATE Birth Certificate defined in section above is the first message that is
 published after a successful MQTT Session is established.
 
-EoN node devices in an infrastructure that provides multiple MQTT Servers can establish a session to
-any one of the MQTT Servers. Upon establishing a session, the EoN node should issue a subscription
-to the STATE message published by _Primary Host Application_. Since the STATE message is published
-with the RETAIN message flag set, MQTT will guarantee that the last STATE message is always
-available. The EoN node should examine the payload of this message to ensure that it is a value of
-“ONLINE”. If the value is “OFFLINE”, this indicates the Primary Application has lost its MQTT
-Session to this particular MQTT Server. This should cause the EoN node to terminate its session
-with this MQTT Server and move to the next available MQTT Server that is available. This use of the
-STATE message in this manner ensures that any loss of connectivity to an MQTT Server to the
-_Primary Host Application_ does not result in EoN nodes being “stranded” on an MQTT server because
-of network issues. The following message flow diagram outlines how the STATE message is used when
-three (3) MQTT Servers are available in the infrastructure:
+Edge Nodes in an infrastructure that provides multiple MQTT Servers can establish a session to any
+one of the MQTT Servers. Upon establishing a session, the Edge Node should issue a subscription to
+the STATE message published by Primary Host Application. Since the STATE message is published with
+the RETAIN message flag set, MQTT will guarantee that the last STATE message is always available.
+The Edge Node should examine the JOSN payload of this message to ensure that it is a value of
+“online=true”. If the value is “online=false”, this indicates the Primary Application has lost its
+MQTT Session to this particular MQTT Server. This should cause the Edge Node to terminate its
+session with this MQTT Server and move to the next available MQTT Server that is available. This use
+of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server to the
+Primary Host Application does not result in Edge Nodes being “stranded” on an MQTT server because of
+network issues. The following message flow diagram outlines how the STATE message is used when three
+(3) MQTT Servers are available in the infrastructure:
 
-image:extracted-media/media/image11.png[image,width=660,height=304]
-
-Figure 7 – Primary Application STATE flow diagram
+.Figure 14 – Primary Application STATE flow diagram
+plantuml::{assetsdir}assets/plantuml/primary-application-state-flow.puml[format=svg, alt="Primary Application STATE flow"]
 
 [arabic]
-. When an EoN node is configured with multiple available MQTT Servers in the infrastructure it
-should issue a subscription to the _Primary Host Application_ STATE message. The EoN nodes are free
+. When an Edge Node is configured with multiple available MQTT Servers in the infrastructure it
+should issue a subscription to the Primary Host Application STATE message. The Edge Nodes are free
 to establish an MQTT Session to any of the available servers over any available network at any time
-and examine the current STATE value. If the STATE message payload is ‘OFFLINE’ then the EoN node
-should disconnect and walk to the next available server.
+and examine the current STATE online value. If the STATE message payload contains ‘online=false’ and
+the bdSeq number value in the paylaod matches the bdSeq number in the prior Host Application BIRTH
+message then the Edge Node should disconnect and walk to the next available server.
 . Upon startup, the configured Primary Application, the MQTT Session will be configured to register
-the _Primary Host Application_ DEATH Certificate that indicates STATE is ‘OFFLINE’ with the message
-RETAIN flag set to true. Then the _Primary Host Application_ BIRTH Certificate will be published
-with a STATE payload of ‘ONLINE’.
-. As the EoN node walks its available MQTT Server table, it will establish an MQTT Session with a
-server that has a STATE message with a payload of ‘ONLINE’. The EoN node can stay connected to this
-server if its MQTT Session stays intact and it does not receive the _Primary Host Application_ DEATH
-Certificate.
+the Primary Host Application DEATH Certificate that indicates STATE is ‘online=false’ with the
+message RETAIN flag set to true. Then the Primary Host Application BIRTH Certificate will be
+published with a STATE payload of ‘online=true’.
+. As the Edge Node walks its available MQTT Server table, it will establish an MQTT Session with a
+server that has a STATE message with a JSON payload that contains ‘online=true’. The Edge Node can
+stay connected to this server if its MQTT Session stays intact and it does not receive the Primary
+Host Application DEATH Certificate.
 . Having a subscription registered to the MQTT Server on the STATE topic will result in any change
-to the current the _Primary Host Application_ STATE being received immediately. In this case, a
-network disruption causes the _Primary Host Application_ MQTT Session to server #2 to be terminated.
-This will cause the MQTT Server, on behalf of the now terminated the _Primary Host Application_ MQTT
+to the current the Primary Host Application STATE being received immediately. In this case, a
+network disruption causes the Primary Host Application MQTT Session to server #2 to be terminated.
+This will cause the MQTT Server, on behalf of the now terminated the Primary Host Application MQTT
 Client to publish the DEATH certificate to anyone that is currently subscribed to it. Upon receipt
-of the _Primary Host Application_ DEATH Certificate this EoN node will move to the next MQTT Server
+of the Primary Host Application DEATH Certificate this Edge Node will move to the next MQTT Server
 in its table.
-. The EoN node moved to the next available MQTT Server and since the current STATE on this server is
-‘ONLINE’, it can stay connected.
-. In the meantime, the network disruption between _Primary Host Application_ and MQTT Server #2 has
-been corrected. The _Primary Host Application_ has a new MQTT Session established to server #2 with
-an update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is ready to accept new EoN node session
-requests.
+. The Edge Node moved to the next available MQTT Server and since the current STATE on this server
+is ‘online=true’, it can stay connected.
+. In the meantime, the network disruption between Primary Host Application and MQTT Server #2 has
+been corrected. The Primary Host Application has a new MQTT Session established to server #2 with an
+update Birth Certificate with 'online=true’. Now MQTT Server #2 is ready to accept new Edge Node
+session requests.
 
 ////
 [[high_availability_other_considerations]]

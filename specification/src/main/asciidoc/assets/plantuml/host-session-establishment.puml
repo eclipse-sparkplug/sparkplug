@@ -15,6 +15,8 @@ PrimApp -> Server : CONNECT
 
 |||
 PrimApp -> Server : SUBSCRIBE( **spBv1.0/#** )
+|||
+PrimApp -> Server : SUBSCRIBE( **STATE/host_app_id** )
 
 
 PrimApp -> Server : PUBLISH( **STATE** )
@@ -58,8 +60,10 @@ end note
 PrimApp -> Server : CONNECT
 
 |||
-
 PrimApp -> Server : SUBSCRIBE( **spBv1.0/#** )
+|||
+PrimApp -> Server : SUBSCRIBE( **STATE/host_app_id** )
+
 
 PrimApp -> Server : PUBLISH( **STATE** )
 activate PrimApp

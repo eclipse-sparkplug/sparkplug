@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -37,7 +37,7 @@ import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.Utils.TestStatus.DEATH_MESSAGE_RECEIVED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.DEATH_MESSAGE_RECEIVED;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 /**
@@ -57,7 +57,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 		version = "3.0.0-SNAPSHOT")
 public class SessionTerminationTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
 
 	private final @NotNull List<String> testIds = List.of(
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
@@ -67,7 +66,7 @@ public class SessionTerminationTest extends TCKTest {
 
 	private final @NotNull TCK theTCK;
 	private @NotNull String hostApplicationId;
-	private Utils.TestStatus state = Utils.TestStatus.NONE;
+	private Constants.TestStatus state = Constants.TestStatus.NONE;
 
 	private @Nullable String hostClientId = null;
 
@@ -76,10 +75,9 @@ public class SessionTerminationTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length != 2) {
-			String errmsg = "Parameters to host session termination test must be: hostApplicationId hostClientId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to host session termination test must be: hostApplicationId hostClientId");
+			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
 		hostClientId = params[1];
@@ -159,8 +157,8 @@ public class SessionTerminationTest extends TCKTest {
 		boolean overallResult = true;
 
 		// Topic is STATE/{host_application_id}
-		final boolean isStateTopic =
-				(packet.getTopic().equals(TopicConstants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
+		final boolean isStateTopic = (packet.getTopic().equals(
+				Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
 		overallResult &= isStateTopic;
 		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
 				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC);

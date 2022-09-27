@@ -24,7 +24,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
@@ -42,62 +42,62 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 @SpecVersion(
-		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+        spec = "sparkplug",
+        version = "3.0.0-SNAPSHOT")
 public class Results implements MqttCallbackExtended {
-	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
+    private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
+    protected static final String SPARKPLUG_TCKRESULTS_LOG = "SparkplugTCKresults.log";
 
-	// Configuration
-	private String serverUrl = "tcp://localhost:1883";
-	private String clientId = "Sparkplug TCK Results Collector";
-	private String username = "admin";
-	private String password = "changeme";
-	private String filename = "SparkplugTCKresults.txt";
+    // Configuration
+    private String serverUrl = "tcp://localhost:1883";
+    private String clientId = "Sparkplug TCK Results Collector";
+    private String username = "admin";
+    private String password = "changeme";
+    private String filename = SPARKPLUG_TCKRESULTS_LOG;
 
-	private MqttTopic log_topic = null;
-	private MqttClient client = null;
+    private MqttTopic log_topic = null;
+    private MqttClient client = null;
 
-	private String primary_host_application_id = null;
+    private String primary_host_application_id = null;
 
-	public void log(String message) {
-		try {
-			MqttMessage mqttmessage = new MqttMessage((clientId + ": " + message).getBytes());
-			log_topic.publish(mqttmessage);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public void log(String message) {
+        try {
+            MqttMessage mqttmessage = new MqttMessage((clientId + ": " + message).getBytes());
+            log_topic.publish(mqttmessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	public static void main(String[] args) {
-		Results listener = new Results();
-		listener.run(args);
-	}
+    public static void main(String[] args) {
+        Results listener = new Results();
+        listener.initialize(args);
+    }
 
-	public void run(String[] args) {
-		if (client != null) {
-			return;
-		}
+    public void initialize(String[] args) {
 
-		logger.info("*** " + clientId + " ***");
-		try {
-			// Connect to the MQTT Server
-			MqttConnectOptions options = new MqttConnectOptions();
-			options.setAutomaticReconnect(true);
-			options.setCleanSession(true);
-			options.setConnectionTimeout(30);
-			options.setKeepAliveInterval(30);
-			// options.setUserName(username);
-			// options.setPassword(password.toCharArray());
-			client = new MqttClient(serverUrl, clientId);
-			//client.setTimeToWait(10000); // short timeout on failure to connect
-			client.setCallback(this);
-			log_topic = client.getTopic(TCK_LOG_TOPIC);
-			client.connect(options);
-
-		} catch (Exception e) {
+        if (client != null && client.isConnected()) {
+            return;
+        }
+        logger.info("Initialize {} ", clientId);
+        try {
+            // Connect to the MQTT Server
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setAutomaticReconnect(true);
+            options.setCleanSession(true);
+            options.setConnectionTimeout(30);
+            options.setKeepAliveInterval(30);
+            // options.setUserName(username);
+            // options.setPassword(password.toCharArray());
+            client = new MqttClient(serverUrl, clientId);
+            //client.setTimeToWait(10000); // short timeout on failure to connect
+            client.setCallback(this);
+            client.connect(options);
+            log_topic = client.getTopic(TCK_LOG_TOPIC);
+        } catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -106,11 +106,13 @@ public class Results implements MqttCallbackExtended {
 	public void connectComplete(boolean reconnect, String serverURI) {
 		logger.info(clientId + ": connected");
 
-		try {
-			client.subscribe(new String[] { TCK_RESULTS_TOPIC }, new int[] { 2 });
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        try {
+            client.subscribe(TCK_RESULTS_CONFIG_TOPIC, 2);
+            client.subscribe(TCK_RESULTS_TOPIC, 2);
+            logger.info(clientId + ": subscribed");
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
 	}
 
 	@Override
@@ -121,30 +123,49 @@ public class Results implements MqttCallbackExtended {
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		try {
-			if (topic.equals(TCK_RESULTS_TOPIC)) {
-				try {
-					File myObj = new File(filename);
-					if (myObj.createNewFile()) {
-						logger.info(clientId + " File created: " + myObj.getName());
-					} else {
-						// System.out.println("File already exists.");
-					}
-					FileWriter myWriter = new FileWriter(filename, true);
-					myWriter.write(new String(message.getPayload()) + System.lineSeparator());
-					myWriter.close();
-				} catch (IOException e) {
-					logger.error("An error occurred.");
-					e.printStackTrace();
-				}
+            if (topic.equals(TCK_RESULTS_CONFIG_TOPIC)) {
+                logger.debug("{}: topic: {} msg: {}", clientId, topic, new String(message.getPayload())); // display log message
+                checkOrCreateNewResultLog(message);
+            } else if (topic.equals(TCK_RESULTS_TOPIC)) {
+                try {
+                    logger.debug(" {}: {} used as log file.", clientId, (new File(filename).getAbsolutePath()));
+                    FileWriter resultFileWriter = new FileWriter(filename, true);
+                    resultFileWriter.write(new String(message.getPayload()) + System.lineSeparator());
+                    resultFileWriter.close();
+                } catch (IOException e) {
+                    logger.error("An error occurred. {} ", e.getMessage());
+                    e.printStackTrace();
+                }
 
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void deliveryComplete(IMqttDeliveryToken token) {
-		// System.out.println("Published message: " + token);
-	}
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken token) {
+        // System.out.println("Published message: " + token);
+    }
+
+    private void checkOrCreateNewResultLog(MqttMessage message) throws IOException {
+        final String cmd = "NEW_RESULT-LOG ";
+        final String payload = new String(message.getPayload());
+        final int index = payload.toUpperCase().indexOf(cmd);
+
+        if (index >= 0 && payload.length() >= cmd.length()) {
+            final String newFilename = payload.substring(cmd.length());
+            logger.info(" {}: Got new result log file: {} ", clientId, newFilename);
+            if (!filename.equals(newFilename)) {
+                File testFile = new File(newFilename);
+                if (testFile.canWrite() || testFile.createNewFile()) {
+                    filename = newFilename;
+                    logger.info(" {}: New log file created: {} ", clientId, testFile.getAbsolutePath());
+                } else {
+                    logger.error(" {}: New log file: {} has no write access, use old setting: {} ", clientId, newFilename, filename);
+                }
+            }
+            logger.info(" {}: Set new result log file: {} ", clientId, filename);
+        }
+    }
 }

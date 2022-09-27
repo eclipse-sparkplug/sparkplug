@@ -63,7 +63,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(
@@ -75,7 +75,6 @@ public class ReceiveCommandTest extends TCKTest {
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull TCK theTCK;
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
 
 	private final @NotNull List<String> testIds = List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,
@@ -96,10 +95,9 @@ public class ReceiveCommandTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length < 3) {
-			String errmsg = "Parameters to edge receive command test must be: groupId edgeNodeId deviceId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
 		}
 		state = status.START;
 		deathBdSeq = -1;

@@ -127,10 +127,20 @@
                     <div v-if="loggingSplitInLines.length > 0" class="mt-3">
                         <h6 class="text-primary">Logging:</h6>
                         <div>
-                            <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
-                                <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
-                            </ul>
-
+                            <ol v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
+                                <li v-if="logLine.indexOf('PASS')>=0"
+                                    class="list-group-item border-bottom-0 small border-success">
+                                    {{ logLine }}
+                                </li>
+                                <li v-else-if="logLine.indexOf('FAIL')>=0"
+                                    class="list-group-item border-bottom-0 small border-danger">
+                                    {{ logLine }}
+                                </li>
+                                <li v-else
+                                    class="list-group-item border-bottom-0 small border-dark">
+                                    {{ logLine }}
+                                </li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -166,12 +176,22 @@
                             </span>
                         </b-button-toolbar>
                         <div v-if="loggingSplitInLines.length > 0" class="mt-3">
-                            <h6 class="text-primary">Logging:</h6>
+                            <h6 class="text-primary">Logging: </h6>
                             <div>
-                                <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
-                                    <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
-                                </ul>
-
+                                <ol v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
+                                    <li v-if="logLine.indexOf('PASS')>=0"
+                                        class="list-group-item border-bottom-0 small border-success">
+                                        {{ logLine }}
+                                    </li>
+                                    <li v-else-if="logLine.indexOf('FAIL')>=0"
+                                        class="list-group-item border-bottom-0 small border-danger">
+                                        {{ logLine }}
+                                    </li>
+                                    <li v-else
+                                        class="list-group-item border-bottom-0 small border-dark">
+                                        {{ logLine }}
+                                    </li>
+                                </ol>
                             </div>
                         </div>
                     </div>
@@ -211,9 +231,20 @@
                         <div v-if="loggingSplitInLines.length > 0" class="mt-3">
                             <h6 class="text-primary">Logging:</h6>
                             <div>
-                                <ul v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
-                                    <li class="list-group-item border-bottom-0 small">{{ logLine }}</li>
-                                </ul>
+                                <ol v-for="logLine in loggingSplitInLines" :key="logLine" class="list-group">
+                                    <li v-if="logLine.indexOf('PASS')>=0"
+                                        class="list-group-item border-bottom-0 small border-success">
+                                        {{ logLine }}
+                                    </li>
+                                    <li v-else-if="logLine.indexOf('FAIL')>=0"
+                                        class="list-group-item border-bottom-0 small border-danger">
+                                        {{ logLine }}
+                                    </li>
+                                    <li v-else
+                                        class="list-group-item border-bottom-0 small border-dark">
+                                        {{ logLine }}
+                                    </li>
+                                </ol>
 
                             </div>
                         </div>
@@ -359,10 +390,9 @@ export default {
             let logLines = [];
             for (const logMessage of this.test.logging) {
                 const lines = logMessage.logValue.trim().split(/\r\n|\n\r|\n|\r/);
-                logLines = logLines.concat(lines);
                 console.log(lines);
+                logLines = logLines.concat(lines);
             }
-            console.log(logLines);
             logLines = logLines.filter((line) => line.trim().length != 0);
             return logLines;
         },

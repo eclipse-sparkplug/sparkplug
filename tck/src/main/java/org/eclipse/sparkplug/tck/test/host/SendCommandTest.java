@@ -20,7 +20,6 @@ package org.eclipse.sparkplug.tck.test.host;
  * edge node (NCMD) and a device (DCMD).
  *
  * There will be a prompt to the person executing the test to send a command to
- * a device and edge node we will connect.
  *
  * The host application under test must be connected and online prior to starting this test.
  * The id of the host application must be passed as the first parameter to this test.
@@ -35,11 +34,13 @@ import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
+
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
@@ -47,9 +48,9 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.Utils.TestStatus;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -61,10 +62,19 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_CONSOLE_PROMPT_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -84,11 +94,19 @@ public class SendCommandTest extends TCKTest {
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB,
 			ID_TOPICS_DCMD_MQTT, ID_PAYLOADS_DCMD_QOS, ID_PAYLOADS_DCMD_RETAIN, ID_TOPICS_DCMD_TIMESTAMP,
-			ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ, ID_TOPICS_DCMD_PAYLOAD);
+			ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ, ID_TOPICS_DCMD_PAYLOAD,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE, ID_TOPICS_NCMD_TOPIC, ID_TOPICS_DCMD_TOPIC);
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
 	private @NotNull String hostApplicationId;
+
+	private String testClientId = null;
+	private List<Metric> edgeBirthMetrics = null;
+	private List<Metric> deviceBirthMetrics = null;
 
 	private TestStatus state = null;
 	private TCK theTCK = null;
@@ -100,10 +118,9 @@ public class SendCommandTest extends TCKTest {
 		theTCK = aTCK;
 
 		if (params.length < 4) {
-			String errmsg = "Parameters to host send command test must be: hostApplicationId, groupId edgeNodeId deviceId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to host send command test must be: hostApplicationId, groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
 		groupId = params[1];
@@ -113,7 +130,7 @@ public class SendCommandTest extends TCKTest {
 				hostApplicationId, groupId, edgeNodeId, deviceId);
 
 		final AtomicBoolean hostOnline = checkHostApplicationIsOnline(hostApplicationId);
-		
+
 		if (!hostOnline.get()) {
 			logger.info("HostApplication {} not online - test not started.", hostApplicationId);
 			return;
@@ -124,7 +141,7 @@ public class SendCommandTest extends TCKTest {
 		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
 		state = TestStatus.CONNECTING_DEVICE;
 		String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
-		Publish message = Builders.publish().topic(TopicConstants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
+		Publish message = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(payload.getBytes())).build();
 		logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
 				deviceId);
@@ -150,8 +167,24 @@ public class SendCommandTest extends TCKTest {
 		return testResults;
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
+		/* Determine if this the connect packet for the Edge node under test.
+		 * Set the clientid if so. */
+		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String willTopic = willPublishPacket.getTopic();
+			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
+				testClientId = clientId;
+				logger.info("Edge session establishment test - connect - client id is " + clientId);
+				testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC,
+						setResult(true, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC));
+			}
+		}
 	}
 
 	@Override
@@ -171,7 +204,39 @@ public class SendCommandTest extends TCKTest {
 
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
-		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
+		logger.debug("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
+
+		if (testClientId != null && testClientId.equals(clientId)) {
+			logger.debug("Host send command test - publish -  to topic: {} ", packet.getTopic());
+			String topic = packet.getTopic();
+			String[] topicLevels = topic.split("/");
+
+			if (!(topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId))) {
+				logger.info("Skip - Edge session establishment test for this topic");
+				return;
+			}
+
+			// Example: spBv1.0/Group0/DBIRTH/Edge0/Device0
+			if (topicLevels[2].equals(TOPIC_PATH_NBIRTH)) {
+				if (topicLevels[3].equals(edgeNodeId)) {
+					PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+					if (sparkplugPayload != null) {
+						edgeBirthMetrics = sparkplugPayload.getMetricsList();
+					}
+				}
+			}
+			if (topicLevels[2].equals(TOPIC_PATH_DBIRTH) && topicLevels[3].equals(edgeNodeId)) {
+				String device = topicLevels[topicLevels.length - 1];
+				logger.debug("Start check for Device {} ", device);
+				if (device.equals(deviceId)) {
+					PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+					if (sparkplugPayload != null) {
+						deviceBirthMetrics = sparkplugPayload.getMetricsList();
+					}
+				}
+			}
+		}
+
 		final String topic = packet.getTopic();
 		if (topic.equals(TCK_LOG_TOPIC)) {
 			ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
@@ -183,7 +248,7 @@ public class SendCommandTest extends TCKTest {
 					state = TestStatus.EXPECT_NODE_REBIRTH;
 				}
 			}
-		} else if (topic.equals(TopicConstants.SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC + edgeNodeId)) {
+		} else if (topic.equals(Constants.SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC + edgeNodeId)) {
 			if (state == TestStatus.EXPECT_NODE_REBIRTH) {
 				checkNodeCommand(clientId, packet);
 				publishToTckConsolePrompt("Send an edge command to edge node " + edgeNodeId + " metric " + EDGE_METRIC);
@@ -194,12 +259,12 @@ public class SendCommandTest extends TCKTest {
 						"Send a device rebirth command to device " + deviceId + " at edge node " + edgeNodeId);
 				state = TestStatus.EXPECT_DEVICE_REBIRTH;
 			}
-		} else if (topic.equals(TopicConstants.SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC + edgeNodeId + "/" + deviceId)) {
+		} else if (topic.equals(Constants.SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC + edgeNodeId + "/" + deviceId)) {
 			if (state == TestStatus.EXPECT_DEVICE_REBIRTH) {
 				checkDeviceCommand(clientId, packet);
 				publishToTckConsolePrompt("Send a device command to device " + deviceId + " at edge node " + edgeNodeId
 						+ " metric " + DEVICE_METRIC);
-				state = Utils.TestStatus.EXPECT_DEVICE_COMMAND;
+				state = Constants.TestStatus.EXPECT_DEVICE_COMMAND;
 			} else if (state == TestStatus.EXPECT_DEVICE_COMMAND) {
 				checkDeviceCommand(clientId, packet);
 				theTCK.endTest();
@@ -240,6 +305,9 @@ public class SendCommandTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE)
+	@SpecAssertion(
+			section = Sections.TOPICS_COMMAND_NCMD,
+			id = ID_TOPICS_NCMD_TOPIC)
 	public void checkNodeCommand(final String clientId, final @NotNull PublishPacket packet) {
 		logger.info("Host - {}  - PUBLISH - checkNodeCommand {}, {}", getName(), packet.getTopic(), state);
 
@@ -290,6 +358,11 @@ public class SendCommandTest extends TCKTest {
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
 				setResult(bValid[4], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE));
 
+		// Topic check
+		String topic = packet.getTopic();
+		boolean goodTopic =
+				topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId);
+		testResults.put(ID_TOPICS_NCMD_TOPIC, setResult(goodTopic, TOPICS_NCMD_TOPIC));
 	}
 
 	@SpecAssertion(
@@ -316,6 +389,9 @@ public class SendCommandTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB)
+	@SpecAssertion(
+			section = Sections.TOPICS_COMMAND_DCMD,
+			id = ID_TOPICS_DCMD_TOPIC)
 	public void checkDeviceCommand(String clientId, PublishPacket packet) {
 		logger.info("Host - {}  - PUBLISH - checkDeviceCommand {}, {} ", getName(), packet.getTopic(), state);
 
@@ -350,8 +426,20 @@ public class SendCommandTest extends TCKTest {
 
 		logger.debug("Check Req: {}:{}.", ID_TOPICS_DCMD_PAYLOAD, TOPICS_DCMD_PAYLOAD);
 		testResults.put(ID_TOPICS_DCMD_PAYLOAD, setResult(bValid[2], TOPICS_DCMD_PAYLOAD));
+
+		// Topic check
+		String topic = packet.getTopic();
+		boolean goodTopic = topic.equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId);
+		testResults.put(ID_TOPICS_DCMD_TOPIC, setResult(goodTopic, TOPICS_DCMD_TOPIC));
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE)
 	private Boolean[] checkValidDeviceCommandPayload(PayloadOrBuilder payload) {
 		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
@@ -366,11 +454,30 @@ public class SendCommandTest extends TCKTest {
 				if (current.getName().equals(DEVICE_METRIC)) {
 					bValidPayload[2] = true;
 				}
+
+				// look for the current metric name in the birth metrics
+				for (Metric birth : deviceBirthMetrics) {
+					if (birth.getName().equals(current.getName())) {
+						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
+								setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME));
+						if (current.getDatatype() == birth.getDatatype() && Utils.hasValue(current)) {
+							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE,
+									setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE));
+						}
+						break;
+					}
+				}
 			}
 		}
 		return bValidPayload;
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE)
 	private Boolean[] checkValidCommandPayload(PayloadOrBuilder payload) {
 		Boolean[] bValidPayload = new Boolean[] { false, false, false, false, false };
 
@@ -389,6 +496,18 @@ public class SendCommandTest extends TCKTest {
 					bValidPayload[3] = true;
 					if (current.getDatatype() == DataType.Boolean.getNumber()) {
 						bValidPayload[4] = current.getBooleanValue();
+					}
+				}
+
+				// look for the current metric name in the birth metrics
+				for (Metric birth : edgeBirthMetrics) {
+					if (birth.getName().equals(current.getName())) {
+						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
+								setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME));
+						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
+								setResult(current.getDatatype() == birth.getDatatype() && Utils.hasValue(current),
+										OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
+						break;
 					}
 				}
 			}

@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -61,35 +60,35 @@ public class CompliantBrokerTest extends TCKTest {
     private final @NotNull String[] testId = {ID_CONFORMANCE_MQTT_QOS0,
             ID_CONFORMANCE_MQTT_QOS1, ID_CONFORMANCE_MQTT_WILL_MESSAGES, ID_CONFORMANCE_MQTT_RETAINED};
     private final @NotNull ArrayList<String> testIds = new ArrayList<>();
-    private final HashMap<String, String> testResults = new HashMap<String, String>();
     private TCK theTCK = null;
     private @NotNull String host;
     private @NotNull String port;
 
-    public CompliantBrokerTest(TCK aTCK, String[] params) {
+	public CompliantBrokerTest(TCK aTCK, String[] params) {
         logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
         theTCK = aTCK;
-        testIds.addAll(Arrays.asList(testId));
-        if (params.length < 2) {
-            logger.error("Parameters must be: host and port, (already set during mqtt connection establishment)");
-            return;
-        }
-        host = params[0];
-        port = params[1];
-        logger.info("Parameters are Broker host: {}, port: {}, ", host, port);
+		testIds.addAll(Arrays.asList(testId));
+		if (params.length < 2) {
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters must be: host and port, (already set during mqtt connection establishment)");
+			throw new IllegalArgumentException();
+		}
+		host = params[0];
+		port = params[1];
+		logger.info("Parameters are Broker host: {}, port: {}, ", host, port);
 
-        Services.extensionExecutorService().schedule(new Runnable() {
-            @Override
-            public void run() {
-                logger.info("Broker - Sparkplug Broker compliant Test - execute test");
-                try {
-                    checkCompliance(host, Integer.parseInt(port), testResults);
-                } finally {
-                    theTCK.endTest();
-                }
-            }
-        }, 5, TimeUnit.SECONDS);
-    }
+		Services.extensionExecutorService().schedule(new Runnable() {
+			@Override
+			public void run() {
+				logger.info("Broker - Sparkplug Broker compliant Test - execute test");
+				try {
+					checkCompliance(host, Integer.parseInt(port), testResults);
+				} finally {
+					theTCK.endTest();
+				}
+			}
+		}, 5, TimeUnit.SECONDS);
+	}
 
     @SpecAssertion(
             section = Sections.CONFORMANCE_MQTT_SERVER,
@@ -103,7 +102,7 @@ public class CompliantBrokerTest extends TCKTest {
     @SpecAssertion(
             section = Sections.CONFORMANCE_MQTT_SERVER,
             id = ID_CONFORMANCE_MQTT_RETAINED)
-    public static void checkCompliance(final String host, final int port, HashMap<String, String> testResults) {
+    public static void checkCompliance(final String host, final int port, final Map<String, String> testResults) {
         logger.info("{} - Start", Sections.CONFORMANCE_MQTT_SERVER);
 
         logger.debug("Check Req: {} ", ID_CONFORMANCE_MQTT_QOS0);
@@ -142,7 +141,7 @@ public class CompliantBrokerTest extends TCKTest {
         return testIds.toArray(new String[0]);
     }
 
-    public HashMap<String, String> getResults() {
+    public Map<String, String> getResults() {
         return testResults;
     }
 

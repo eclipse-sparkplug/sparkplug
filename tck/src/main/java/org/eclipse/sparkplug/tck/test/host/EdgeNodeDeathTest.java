@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -36,7 +36,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.Utils.TestStatus;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +49,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_DEVICE_CONTROL_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Utils.TestStatus.KILLING_DEVICE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_DEVICE_CONTROL_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.KILLING_DEVICE;
 
 @SpecVersion(
         spec = "sparkplug",
@@ -59,7 +59,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.TestStatus.KILLING_DEV
 public class EdgeNodeDeathTest extends TCKTest {
 
     private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-    private final @NotNull Map<String, String> testResults = new HashMap<>();
     private final @NotNull ArrayList<String> testIds = new ArrayList<>();
     private @NotNull String deviceId;
     private @NotNull String edgeNodeId;
@@ -70,37 +69,37 @@ public class EdgeNodeDeathTest extends TCKTest {
 
     private PublishService publishService = Services.publishService();
 
-    public EdgeNodeDeathTest(TCK aTCK, String[] params) {
-        logger.info("Primary host {} Parameters: {} ", getName(), Arrays.asList(params));
-        theTCK = aTCK;
+	public EdgeNodeDeathTest(TCK aTCK, String[] params) {
+		logger.info("Primary host {} Parameters: {} ", getName(), Arrays.asList(params));
+		theTCK = aTCK;
 
-        if (params.length < 3) {
-            logger.error("Parameters to host edge node death test must be: host_application_id edge_node_id device_id");
-            return;
-        }
-        hostApplicationId = params[0];
-        edgeNodeId = params[1];
-        deviceId = params[2];
-        logger.info("Parameters are HostApplicationId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, edgeNodeId, deviceId);
+		if (params.length < 3) {
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to host edge node death test must be: host_application_id edge_node_id device_id");
+			throw new IllegalArgumentException();
+		}
+		hostApplicationId = params[0];
+		edgeNodeId = params[1];
+		deviceId = params[2];
+		logger.info("Parameters are HostApplicationId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, edgeNodeId,
+				deviceId);
 
-        final AtomicBoolean hostOnline = Utils.checkHostApplicationIsOnline(hostApplicationId);
+		final AtomicBoolean hostOnline = Utils.checkHostApplicationIsOnline(hostApplicationId);
 
-        if (!hostOnline.get()) {
-            logger.info("HostApplication {} not online - test not started.", hostApplicationId);
-            return;
-        }
+		if (!hostOnline.get()) {
+			logger.info("HostApplication {} not online - test not started.", hostApplicationId);
+			return;
+		}
 
-        // First we have to connect an edge node and device.
-        // We do this by sending an MQTT control message to the TCK device utility.
-        state = TestStatus.CONNECTING_DEVICE;
-        String payload = "NEW DEVICE " + hostApplicationId + " " + edgeNodeId + " " + deviceId;
-        Publish message = Builders.publish()
-                .topic(TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
-                .payload(ByteBuffer.wrap(payload.getBytes()))
-                .build();
-        logger.info("Requesting new device creation.  Edge node id: " + edgeNodeId + " device id: " + deviceId);
-        publishService.publish(message);
-    }
+		// First we have to connect an edge node and device.
+		// We do this by sending an MQTT control message to the TCK device utility.
+		state = TestStatus.CONNECTING_DEVICE;
+		String payload = "NEW DEVICE " + hostApplicationId + " " + edgeNodeId + " " + deviceId;
+		Publish message = Builders.publish().topic(TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(payload.getBytes())).build();
+		logger.info("Requesting new device creation.  Edge node id: " + edgeNodeId + " device id: " + deviceId);
+		publishService.publish(message);
+	}
 
     @Override
     public void endTest(Map<String, String> results) {
