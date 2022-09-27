@@ -1,0 +1,56 @@
+name: Build
+on:
+  push: {}
+  pull_request: {}
+jobs:
+
+  gradleValidation:
+    name: Gradle Wrapper
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+  build:
+    name: Build
+    needs: gradleValidation
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          cache: 'gradle'
+          java-version: 11
+          distribution: 'temurin'
+
+      - name: Setup Gradle Wrapper Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Build Plugin
+        run: ./gradlew build
+
+      - name: Upload specification artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sparkplug_spec
+          path: specification/build/docs/pdf/sparkplug_spec.pdf
+          if-no-files-found: error
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: tck/build/coverage-report/**/*
+          if-no-files-found: error
+
