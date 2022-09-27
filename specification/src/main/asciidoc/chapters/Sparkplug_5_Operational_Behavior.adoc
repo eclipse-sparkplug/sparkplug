@@ -331,7 +331,7 @@ connected to or to walk to another server in the infrastructure. Both are common
 of a mission critical SCADA system.
 
 But unlike legacy SCADA system implementations, all real time process variable information being
-published thru the MQTT infrastructure is available to any number of additional MQTT Clients in the
+published through the MQTT infrastructure is available to any number of additional MQTT Clients in the
 business that might be interested in subsets if not all of the real time data.
 
 The only fundamental difference between a Primary Host Application MQTT Client and other Sparkplug
