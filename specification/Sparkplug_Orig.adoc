@@ -276,7 +276,7 @@ For the sake of keeping the Sparkplug™ specification as real world as possible
 
 This section discusses the generic topology shown in Figure 3 – Simple MQTT Infrastructure identifying how each of the components of the infrastructure interacts.
 
-At the simplest level, there are only two components required as shown below. An MQTT Client and an MQTT Server. With proper credentials, any MQTT Client can connect to the MQTT Server without any notion of other MQTT Client applications that are connected, and can issue subscriptions to any MQTT messages that it might be interested in as well as start publishing any message containing data that it has. This is one of the principal notions of IIoT, that is the decoupling of intelligent devices from any direct connection to any one consumer application.
+At the simplest level, there are only two components required as shown below. An MQTT Client and an MQTT Server. With proper credentials, any MQTT Client can connect to the MQTT Server without any notion of other MQTT Client applications that are connected, and can issue subscriptions to any MQTT messages that it might be interested in as well as start publishing any message containing data that it has. This is one of the principal notions of IIoT, that is the decoupling of devices from any direct connection to any one consumer application.
 
 image:extracted-media/media/image6.png[image,width=311,height=116]
 
@@ -539,7 +539,7 @@ The Sparkplug™ specification is provided to get real time process variable inf
 
 The preceding sections in this document detail how the _Primary Application_ interacts with the _MQTT Server infrastructure_ and how that infrastructure interacts with the notion of an MQTT EoN node. But to a large extent the technical requirements of those pieces of the infrastructure have already been provided. For most use cases in this market sector the primary focus will be on the implementation of the Sparkplug™ specification between the native device and the EoN node API’s.
 
-In order to expose and populate the metrics from any intelligent device, the following simple session diagram outlines the requirements:
+In order to expose and populate the metrics from any device, the following simple session diagram outlines the requirements:
 
 image:extracted-media/media/image9.png[image,width=660,height=309]Figure 5 - MQTT Device Session Establishment
 

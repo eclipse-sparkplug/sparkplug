@@ -27,7 +27,7 @@ MQTT server are the primary two components. With proper credentials, any MQTT cl
 the MQTT server without any notion of other MQTT client applications that are connected. The client
 can issue subscriptions to any MQTT messages that it might be interested in as well as start
 publishing any message containing data that it has. This is one of the principal notions of IIoT,
-that is the decoupling of intelligent devices from any direct connection to any one consumer
+that is the decoupling of devices from any direct connection to any one consumer
 application.
 
 .Figure 2 - Simple MQTT Infrastructure
@@ -98,7 +98,7 @@ link:#payloads_b_state[Host Application Death Certificates]
 Birth Certificates MUST be the first MQTT messages published by any Edge Node or any Host
 Application.*#
 
-They denote to any subscribing MQTT clients that they are now online. For Edge Nodes,
+Birth Certificates denote to any subscribing MQTT clients that the Edge Node or Host Application is now online. For Edge Nodes,
 the Birth Certificate uses the NBIRTH Sparkplug verb in the topic. For Host Applications, the
 spBv1.0/STATE/sparkplug_host_id topic is used. More details and requirements on Birth certificates
 can be found in

@@ -25,7 +25,7 @@ Edge Node/Device. Additional Sparkplug Host Application MQTT clients can connect
 any of the real time data without impacting the Primary Host Application.
 
 Due to the nature of real time SCADA solutions, it is very important for the Primary Host
-Application and all connected Eclipse Sparkplug Edge Nodes to have the MQTT Session state
+Application and all connected Edge Nodes to have the MQTT Session state
 information for each other. In order to accomplish this the Sparkplug Topic Namespace definitions
 for Birth/Death Certificates along with the defined payloads provide both state and context between
 the Primary Host Application and the associated Edge Nodes. In most use cases and solution scenarios
@@ -53,11 +53,11 @@ critical to all timestamps in Sparkplug.
 [[operational_behavior_case_sensitivity]]
 === Case Sensitivity in Sparkplug
 
-The MQTT specification states that MQTT topics are case sensitive [MQTTV5-4.7.3]. For example, the 
-topic a/b is different than A/b. Sparkplug in turn is also case sensitive with regard to both topics 
-as well as metric names. So, a metric 'temperature' is not the same as the metric 'Temperature'. 
-However, this generally should be avoided. Many Host Applications may not be able to differentiate 
-the two metric names as unique. Many databases are case-insensitive and would not be able to handle 
+The MQTT specification states that MQTT topics are case sensitive [MQTTV5-4.7.3]. For example, the
+topic a/b is different than A/b. Sparkplug in turn is also case sensitive with regard to both topics
+as well as metric names. So, a metric 'temperature' is not the same as the metric 'Temperature'.
+However, this generally should be avoided. Many Host Applications may not be able to differentiate
+the two metric names as unique. Many databases are case-insensitive and would not be able to handle
 this situation well.
 
 * [tck-testable tck-id-case-sensitivity-sparkplug-ids]#[yellow-background]*[tck-id-case-sensitivity-sparkplug-ids] Edge
@@ -161,7 +161,7 @@ MQTT client associated with the Edge Node MUST subscribe to a topic of the form
 'spBv1.0/group_id/NCMD/edge_node_id' where group_id is the Sparkplug Group ID and the edge_node_id
 is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on this topic with a QoS of
 1.*#
-** This subscription is not optional as Edge Nodes MUST be able to respond to 'rebirth requests'.
+** This subscription is mandatory as Edge Nodes MUST be able to respond to 'rebirth requests'.
 
 After subscribing, the Edge Node must follow these additional rules.
 
@@ -360,12 +360,7 @@ does not match the bdSeq number value from the previous 'online STATE message'.*
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
 
-The Sparkplug Specification is provided to get real time process variable information from existing
-and new end devices measuring, monitoring, and controlling a physical process into an MQTT
-infrastructure and the Host Application Industrial Internet of Things application platform. In the
-context of this document an MQTT Device can represent anything from existing legacy poll/response
-driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and instrumentation
-devices that can implement a conformant MQTT client natively.
+The aim of the Sparkplug Specification is to enable the transport of real time process variable information from existing and new end devices measuring, monitoring, and controlling a physical process into an MQTT infrastructure subsequently a Sparkplug Host Application. In the context of this document an MQTT Device can represent anything from existing legacy poll/response driven PLCs, RTUs, HART Smart Transmitters, etc., to new generation automation and instrumentation devices that can implement a conformant MQTT client natively.
 
 The preceding sections in this document detail how the Sparkplug Host Application interacts with the
 MQTT Server infrastructure and how that infrastructure interacts with the notion of a Sparkplug
@@ -407,7 +402,7 @@ Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 255 (i
 more than was included in the prior Sparkplug message sent from the Edge Node associated with this
 Device.*#
 
-In order to expose and populate the metrics from any intelligent device, the following simple
+In order to expose and populate the metrics from any device, the following simple
 session diagram outlines the requirements:
 
 .Figure 6 - MQTT Device Session Establishment
@@ -432,13 +427,13 @@ flow diagram assumes that the Edge Node session has already been established wit
 Application. Depending on the target platform, the Edge Node may be a physical "Edge of Network"
 gateway device polling physical legacy devices via Modbus, AB, DNP3.0, HART, etc, an MQTT enabled
 sensor or device, or it might be a logical implementation of one of the Eclipse Tahu compatible
-implementations for prototype Edge Nodes running on the Raspberry PI platform. Regardless of the
+implementations for prototype Edge Nodes running on a Raspberry Pi. Regardless of the
 implementation, at some point the device interface will need to provide a state and associated
 metrics to publish to the MQTT infrastructure.
 
 . State #4 in the session diagram represents the state at which the Edge Node is ready to report all
 of its metric data to the MQTT Server(s) as defined in Sparkplug. It is the responsibility of the
-Edge node (logical or physical) to put this information in a form defined in
+Edge node (logical or physical) to put this information in the form defined in
 link:#payloads_dbirth[DBIRTH messages]. Upon receiving the DBIRTH message, the Primary Host
 Application can build out the proper metric structure and set the Sparkplug Device to 'online'.
 
@@ -462,7 +457,7 @@ When a Sparkplug Device goes offline by having its DDEATH published by an Edge N
 Sparkplug Host Applications to know that the Sparkplug Device is no longer reporting current and
 accurate values to the Edge Node. Therefore the Edge Node is not able to report live/accurate data
 values on behalf of the Sparkplug Device to the MQTT Server or in turn to Sparkplug Host
-Applications. As a result the Sparkplug Host Applications must mark the Device offline and denote
+Applications. As a result the Sparkplug Host Applications must mark the Device as offline and denote
 the Sparkplug Device's tags as stale.
 
 For the following normative statements it is up to the designers of the Sparkplug Host Application
@@ -489,14 +484,13 @@ the DDEATH payload*#
 [[operational_behavior_sparkplug_host_applications]]
 === Sparkplug Host Applications
 
-As noted above, there is the notion of a Sparkplug Host Application in the infrastructure that has
-the required permissions to send commands to Edge Nodes and Sparkplug Devices and the fact that all
-Edge Nodes need to know the Primary Host Application is connected to the same MQTT Server its
-connected to or it needs to walk to another one in the infrastructure. Both are common requirements
+As noted above, the Sparkplug Host Application has the required permissions to send commands to Edge Nodes and Sparkplug Devices because
+Edge Nodes need to know that the Primary Host Application is connected to the same MQTT Server that it is
+connected to or to walk to another server in the infrastructure. Both are common requirements
 of a mission critical SCADA system.
 
 But unlike legacy SCADA system implementations, all real time process variable information being
-published thru the MQTT infrastructure is available to any number of additional MQTT Clients in the
+published through the MQTT infrastructure is available to any number of additional MQTT Clients in the
 business that might be interested in subsets if not all of the real time data.
 
 The only fundamental difference between a Primary Host Application MQTT Client and other Sparkplug
@@ -517,16 +511,16 @@ can be as little as a couple of seconds. In deployments with very slow networks 
 servers it may need to be longer. In some environments, the MQTT Server may ensure in-order delivery
 of QoS0 MQTT messages even across topics. In these cases this timeout could be zero.
 
-If a Sparkplug Host Applications receives messages from Edge Node with sequence numbers 1, 2, and 4.
-At the time the message with a sequence number of 4 arrives, a timer SHOULD be started within the
-Host Application. This is the start of the Reordering Timeout timer. A messages with sequence number
+For example, if a Sparkplug Host Application receives messages from an Edge Node with sequence numbers 1, 2, and 4 then
+at the time the message with a sequence number 4 arrives, a timer SHOULD be started within the
+Host Application. This is the start of the Reordering Timeout timer. A message with sequence number
 3 MUST arrive before the Reordering Timeout elapses. If a message with sequence number 3 does not
-arrive before the timeout, a Rebirth Request should be sent to the Edge Node. The ensures the
+arrive before the timeout, a Rebirth Request should be sent to the Edge Node. This ensures that the
 session state is properly reestablished. If a message with a sequence number of 3 arrives before the
-Reorder Timeout occurs, the timer can be shutdown and normal operation of the Host Application can
+Reorder Timeout occurs then the timer can be shutdown and normal operation of the Host Application can
 continue.
 
-It is also important to note that depending on the Sparkplug Host Application's purpose, it may make
+It is also important to note that depending on the Sparkplug Host Application's purpose it may make
 sense to never process messages out of order. It also may make sense to not process a message that
 arrived out of sequence if its preceding messages didn't arrive before the Reorder Timeout. These
 choices are left to the Sparkplug Host Application developer. For example, a Host Application that
@@ -577,11 +571,9 @@ session to any one of the MQTT Servers.
 Edge Nodes MUST not connected to more than one server at any point in time.*#
 
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
-published by Primary Host Application. Since the STATE message is published with the MQTT RETAIN
+published by the Primary Host Application. Since the STATE message is published with the MQTT RETAIN
 flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
-examine the JSON payload of this message to ensure that it is a value of the 'online' key is true.
-If the value is false, this indicates the Primary Application has lost its MQTT Session to this
-particular MQTT Server.
+examine the JSON payload of this message to ensure that the value of the 'online' key is true. If the value is false, this indicates the Primary Application has lost its MQTT Session to this particular MQTT Server.
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*[tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk] If
 the Primary Host Application is offline as denoted via the STATE MQTT Message, the Edge Node MUST
@@ -591,8 +583,8 @@ available.*#
 [tck-testable tck-id-operational-behavior-edge-node-birth-sequence-wait]#[yellow-background]*[tck-id-operational-behavior-edge-node-birth-sequence-wait] The
 Edge Node MUST also wait to publish its BIRTH sequence until an online=true STATE message is
 received by the Edge Node.*#
-This use of the STATE message in this manner ensures that any loss of connectivity to an MQTT Server
-to the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
+This use of the STATE message in this manner ensures that any loss of connectivity between an MQTT Server
+and the Primary Host Application does not result in Edge Nodes being "stranded" on an MQTT server
 because of network issues. The following message flow diagram outlines how the STATE message is
 used when three (3) MQTT Servers are available in the infrastructure:
 
@@ -629,9 +621,8 @@ in its list. Before the Edge Node disconnects and walks to the next MQTT Server 
 that the JSON payload denotes online=false and the bdSeq number matches the prior STATE message
 bdSeq number from that Host Application's BIRTH message.
 
-. The Edge Node connected to the next available MQTT Server and since the current STATE on this
-server is online=true, it can stay connected. In the meantime, the network disruption between
-Primary Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a
+. The Edge Node connects to the next available MQTT Server and since the current STATE on this
+server is online=true, it can stay connected. In the meantime, the network disruption between the Primary Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a
 new MQTT Session established to server #2 with an updated Birth Certificate of online=true. Now MQTT
 Server #2 is ready to accept new Edge Node session requests.
 
@@ -891,7 +882,7 @@ ways. ACLs (Access Control Lists) may be used to allow/disallow certain MQTT cli
 NCMD and DCMD messages. Security features in the Sparkplug Host Application itself could be used to
 allow/disallow certain users or applications from sending certain commands. Security features in the
 Sparkplug Edge Node application could be used to allow/disallow CMD messages to be honored. There
-are a number of ways in which this can be done and should be considered. However, implementation
+are a number of ways in which this can be achieved based on the use case. However, implementation
 details are not covered in the Sparkplug Specification and is left to specific application designers
 to consider.
 

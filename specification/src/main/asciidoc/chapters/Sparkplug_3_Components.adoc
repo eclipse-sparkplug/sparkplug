@@ -38,15 +38,15 @@ and scalability within any given infrastructure.
 [[components_mqtt_edge_node]]
 === MQTT Edge Node
 
-In the context of this specification, an MQTT Edge Node is any MQTT v3.1.1 [MQTTV3.1.1] or v5.0 
-[MQTTV5] compliant MQTT Client application that manages an MQTT session and provides the physical 
-and/or logical gateway functions required to participate in the topic namespace and payload 
-definitions described in this document. The Edge Node is responsible for any local protocol 
-interface to existing legacy devices (PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local 
+In the context of this specification, an MQTT Edge Node is any MQTT v3.1.1 [MQTTV3.1.1] or v5.0
+[MQTTV5] compliant MQTT Client application that manages an MQTT session and provides the physical
+and/or logical gateway functions required to participate in the topic namespace and payload
+definitions described in this document. The Edge Node is responsible for any local protocol
+interface to existing legacy devices (PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local
 discrete I/O, and/or any logical internal process variables(PVs).
 
 [[components_device_sensor]]
-=== Device / Sensor 
+=== Device/Sensor
 
 The Device/Sensor represents any physical or logical device connected to the MQTT Edge Node
 providing any data, process variables or metrics.

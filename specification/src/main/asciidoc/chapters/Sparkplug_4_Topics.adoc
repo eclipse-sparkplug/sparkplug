@@ -184,8 +184,7 @@ Node.*#
 
 The Sparkplug Edge Node Birth Certificate payload contains everything required to build out a data
 structure for all metrics for this Edge Node. At the time any Host Application receives an NBIRTH,
-the 'online' state of this Edge Node should be set to 'true' along with the associated 'online'
-Date/Time parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself
+the 'online' state of this Edge Node should be set to 'true' along with the associated 'online' date and time parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself
 is online and in an MQTT Session, but any devices that have previously published a DBIRTH will still
 have STALE metric quality until the Host Application receives the new DBIRTH messages associated
 with the new Sparkplug session..
@@ -197,7 +196,7 @@ messages MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-nbirth-seq-num]#[yellow-background]*[tck-id-topics-nbirth-seq-num] The
 NBIRTH MUST include a sequence number in the payload and it MUST have a value of 0.*#
 * [tck-testable tck-id-topics-nbirth-timestamp]#[yellow-background]*[tck-id-topics-nbirth-timestamp] The
-NBIRTH MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+NBIRTH MUST include a timestamp denoting the date and time the message was sent from the Edge Node.*#
 * [tck-testable tck-id-topics-nbirth-metric-reqs]#[yellow-background]*[tck-id-topics-nbirth-metric-reqs] The
 NBIRTH MUST include every metric the Edge Node will ever report on.*#
 * [tck-testable tck-id-topics-nbirth-metrics]#[yellow-background]*[tck-id-topics-nbirth-metrics] At
@@ -277,7 +276,7 @@ NDATA MUST include a sequence number in the payload and it MUST have a value of 
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
 value of 255. In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-ndata-timestamp]#[yellow-background]*[tck-id-topics-ndata-timestamp] The
-NDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+NDATA MUST include a timestamp denoting the date and time the message was sent from the Edge Node.*#
 * [tck-testable tck-id-topics-ndata-payload]#[yellow-background]*[tck-id-topics-ndata-payload] The
 NDATA MUST include the Edge Node’s metrics that have changed since the last NBIRTH or NDATA
 message.*#
@@ -344,13 +343,13 @@ The NCMD message requires the following payload components.
 * [tck-testable tck-id-topics-ncmd-mqtt]#[yellow-background]*[tck-id-topics-ncmd-mqtt] NCMD messages
 MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-ncmd-timestamp]#[yellow-background]*[tck-id-topics-ncmd-timestamp] The
-NCMD MUST include a timestamp denoting the Date/Time the message was sent from the Host
+NCMD MUST include a timestamp denoting the date and time the message was sent from the Host
 Application’s MQTT client.*#
 * [tck-testable tck-id-topics-ncmd-payload]#[yellow-background]*[tck-id-topics-ncmd-payload] The
 NCMD MUST include the metrics that need to be written to on the Edge Node.*#
 
 [[topics_device_sensor]]  
-==== Device / Sensor
+==== Device/Sensor
 [upperalpha, start=1]
 
 [[birth_message_dbirth]]
@@ -364,8 +363,7 @@ create/update the metric structure (if this is the first time this device has be
 associated metrics in the application to a “*GOOD*” state.
 
 The DBIRTH payload contains everything required to build out a data structure for all metrics for
-this device. The 'online' state of this device should be set to TRUE along with the associated
-'online' Date/Time this message was received.
+this device. The 'online' state of this device should be set to TRUE along with the associated 'online' date and time this message was received.
 
 [[topics_birth_message_dbirth]]
 ====== Topic (DBIRTH)
@@ -388,7 +386,7 @@ MUST include a sequence number in the payload and it MUST have a value of one gr
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
 value of 255. In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-dbirth-timestamp]#[yellow-background]*[tck-id-topics-dbirth-timestamp] The
-DBIRTH MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+DBIRTH MUST include a timestamp denoting the date and time the message was sent from the Edge Node.*#
 * [tck-testable tck-id-topics-dbirth-metric-reqs]#[yellow-background]*[tck-id-topics-dbirth-metric-reqs] The
 DBIRTH MUST include every metric the Edge Node will ever report on.*#
 * [tck-testable tck-id-topics-dbirth-metrics]#[yellow-background]*[tck-id-topics-dbirth-metrics] At
@@ -448,7 +446,7 @@ DDATA MUST include a sequence number in the payload and it MUST have a value of 
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
 value of 255. In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-ddata-timestamp]#[yellow-background]*[tck-id-topics-ddata-timestamp] The
-DDATA MUST include a timestamp denoting the Date/Time the message was sent from the Edge Node.*#
+DDATA MUST include a timestamp denoting the date and time the message was sent from the Edge Node.*#
 * [tck-testable tck-id-topics-ddata-payload]#[yellow-background]*[tck-id-topics-ddata-payload] The
 DDATA MUST include the Device’s metrics that have changed since the last DBIRTH or DDATA message.*#
 
@@ -508,7 +506,7 @@ The DCMD message requires the following payload components.
 * [tck-testable tck-id-topics-dcmd-mqtt]#[yellow-background]*[tck-id-topics-dcmd-mqtt] DCMD messages
 MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-dcmd-timestamp]#[yellow-background]*[tck-id-topics-dcmd-timestamp] The
-DCMD MUST include a timestamp denoting the Date/Time the message was sent from the Host
+DCMD MUST include a timestamp denoting the date and time the message was sent from the Host
 Application’s MQTT client.*#
 * [tck-testable tck-id-topics-dcmd-payload]#[yellow-background]*[tck-id-topics-dcmd-payload] The
 DCMD MUST include the metrics that need to be written to on the Device.*#
