@@ -673,7 +673,7 @@ ways. ACLs (Access Control Lists) may be used to allow/disallow certain MQTT cli
 NCMD and DCMD messages. Security features in the Sparkplug Host Application itself could be used to
 allow/disallow certain users or applications from sending certain commands. Security features in the
 Sparkplug Edge Node application could be used to allow/disallow CMD messages to be honored. There
-are a number of ways in which this can be done and should be considered. However, implementation
+are a number of ways in which this can be achieved based on the use case. However, implementation
 details are not covered in the Sparkplug Specification and is left to specific application designers
 to consider.
 

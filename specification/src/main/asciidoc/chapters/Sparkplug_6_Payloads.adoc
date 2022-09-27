@@ -65,9 +65,9 @@ deprecated and is not included in this document.
 [[payloads_sparkplug_b_mqtt_payload_definition]]
 === Sparkplug B MQTT Payload Definition
 
-The goal of the Sparkplug is to provide a specification that both OEM device manufactures and
+The goal of Sparkplug is to provide a specification that both OEM device manufactures and
 application developers can use to create rich and interoperable SCADA/IIoT solutions using MQTT as a
-base messaging technology. In Sparkplug B message payload definition, the goal was to create a
+base messaging technology. In the Sparkplug B message payload definition, the goal was to create a
 simple and straightforward binary message encoding that could be used primarily for legacy register
 based process variables (Modbus register value for example).
 
@@ -76,18 +76,17 @@ integrators and end users who wanted to be able to natively support a much riche
 the MQTT infrastructures that they were designing and deploying. Using the feedback from the user
 community Sparkplug B provides support for:
 
-* Complex data types using templates.
-* Datasets.
-* Richer metrics with the ability to add property metadata for each metric.
-* Metric alias support to maintain rich metric naming while keeping bandwidth usage to a minimum.
-* Historical data.
-* File data.
+* Complex data types using templates
+* Datasets
+* Richer metrics with the ability to add property metadata for each metric
+* Metric alias support to maintain rich metric naming while keeping bandwidth usage to a minimum
+* Historical data
+* File data
 
-Sparkplug B definition creates a bandwidth efficient data transport for real time device data. For
+The Sparkplug B payload definition creates a bandwidth efficient data transport for real time device data. For
 WAN based SCADA/IIoT infrastructures this equates to lower latency data updates while minimizing the
 amount of traffic and therefore cellular and/or VSAT bandwidth required. In situations where
-bandwidth savings is not the primary concern, the efficient use enables higher throughput of more
-and interesting data eliminating sensor data that may have previously been left stranded in the
+bandwidth savings is not the primary concern, the efficient use enables higher throughput of more data eliminating sensor data that may have previously been left stranded in the
 field. It is also ideal for LAN based SCADA infrastructures equating to higher throughput of real
 time data to consumer applications without requiring extreme networking topologies and/or equipment.
 
