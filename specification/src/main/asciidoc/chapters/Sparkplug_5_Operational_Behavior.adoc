@@ -352,16 +352,16 @@ can be as little as a couple of seconds. In deployments with very slow networks 
 servers it may need to be longer. In some environments, the MQTT Server may ensure in-order delivery
 of QoS0 MQTT messages even across topics. In these cases this timeout could be zero.
 
-If a Sparkplug Host Applications receives messages from Edge Node with sequence numbers 1, 2, and 4.
-At the time the message with a sequence number of 4 arrives, a timer SHOULD be started within the
-Host Application. This is the start of the Reordering Timeout timer. A messages with sequence number
+For example, if a Sparkplug Host Application receives messages from an Edge Node with sequence numbers 1, 2, and 4 then
+at the time the message with a sequence number 4 arrives, a timer SHOULD be started within the
+Host Application. This is the start of the Reordering Timeout timer. A message with sequence number
 3 MUST arrive before the Reordering Timeout elapses. If a message with sequence number 3 does not
-arrive before the timeout, a Rebirth Request SHOULD be sent to the Edge Node. The ensures the
+arrive before the timeout, a Rebirth Request SHOULD be sent to the Edge Node. This ensures that the
 session state is properly reestablished. If a message with a sequence number of 3 arrives before the
-Reorder Timeout occurs, the timer can be shutdown and normal operation of the Host Application can
+Reorder Timeout occurs then the timer can be shutdown and normal operation of the Host Application can
 continue.
 
-It is also important to note that depending on the Sparkplug Host Application's purpose, it may make
+It is also important to note that depending on the Sparkplug Host Application's purpose it may make
 sense to never process messages out of order. It also may make sense to not process a message that
 arrived out of sequence if its preceding messages didn't arrive before the Reorder Timeout. These
 choices are left to the Sparkplug Host Application developer. For example, a Host Application that
