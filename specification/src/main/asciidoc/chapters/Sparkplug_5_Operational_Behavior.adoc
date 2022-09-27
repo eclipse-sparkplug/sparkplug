@@ -300,7 +300,7 @@ metrics to publish to the MQTT infrastructure.
 
 . State #4 in the session diagram represents the state at which the Edge Node is ready to report all
 of its metric data to the MQTT Server(s) as defined in Sparkplug. It is the responsibility of the
-Edge node (logical or physical) to put this information in a form defined in
+Edge node (logical or physical) to put this information in the form defined in
 link:#payloads_dbirth[DBIRTH messages]. Upon receiving the DBIRTH message, the Primary Host
 Application can build out the proper metric structure and set the Sparkplug Device to 'online'.
 
@@ -320,15 +320,14 @@ that all metric information associated with that Sparkplug Device be set to a ST
 Node loses connection with an attached Sparkplug Device, it MUST publish a DDEATH message on behalf
 of the device.*# This allows Sparkplug Host Applications to know that the Device is no longer
 connected and therefore the Edge Node is not able to report live/accurate data values. In turn, the
-Sparkplug Host Applications MUST mark the Device offline and denote that Device's tags as stale.
+Sparkplug Host Applications MUST mark the Device as offline and denote that Device's tags as stale.
 
 [[operational_behavior_sparkplug_host_applications]]
 === Sparkplug Host Applications
 
-As noted above, there is the notion of a Sparkplug Host Application in the infrastructure that has
-the required permissions to send commands to Edge Nodes and Sparkplug Devices and the fact that all
-Edge Nodes need to know the Primary Host Application is connected to the same MQTT Server its
-connected to or it needs to walk to another one in the infrastructure. Both are common requirements
+As noted above, the Sparkplug Host Application has the required permissions to send commands to Edge Nodes and Sparkplug Devices because
+Edge Nodes need to know that the Primary Host Application is connected to the same MQTT Server that it is
+connected to or to walk to another server in the infrastructure. Both are common requirements
 of a mission critical SCADA system.
 
 But unlike legacy SCADA system implementations, all real time process variable information being
