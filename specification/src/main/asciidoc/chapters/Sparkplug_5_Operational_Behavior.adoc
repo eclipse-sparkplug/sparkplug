@@ -227,12 +227,7 @@ all Sparkplug Device's associated with this Edge Node.
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
 
-The Sparkplug Specification is provided to get real time process variable information from existing
-and new end devices measuring, monitoring, and controlling a physical process into an MQTT
-infrastructure and the Host Application Industrial Internet of Things application platform. In the
-context of this document an MQTT Device can represent anything from existing legacy poll/response
-driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and instrumentation
-devices that can implement a conformant MQTT client natively.
+The Sparkplug Specification is provided to get real time process variable information from existing and new end devices measuring, monitoring, and controlling a physical process into an MQTT infrastructure and the Host Application Industrial Internet of Things application platform. In the context of this document an MQTT Device can represent anything from existing legacy poll/response driven PLCs, RTUs, HART Smart Transmitter, etc., to new generation automation and instrumentation devices that can implement a conformant MQTT client natively.
 
 The preceding sections in this document detail how the Sparkplug Host Application interacts with the
 MQTT Server infrastructure and how that infrastructure interacts with the notion of a Sparkplug
