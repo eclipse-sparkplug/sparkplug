@@ -459,8 +459,8 @@ Client to publish the Death Certificate to anyone that is currently subscribed t
 of the Primary Host Application Death Certificate this Edge Node will move to the next MQTT Server
 in its list.
 
-. The Edge Node connected to the next available MQTT Server and since the current STATE on this
-server is ‘ONLINE’, it can stay connected. In the meantime, the network disruption between Primary
+. The Edge Node connects to the next available MQTT Server and since the current STATE on this
+server is ‘ONLINE’ it can stay connected. In the meantime, the network disruption between the Primary
 Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a new MQTT
 Session established to server #2 with an update Birth Certificate of ‘ONLINE’. Now MQTT Server #2 is
 ready to accept new Edge Node session requests.
