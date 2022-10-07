@@ -49,7 +49,7 @@ MQTT Server fail, all data is still present at the other MQTT Servers.
 The main advantage of MQTT Server clusters is operations simplicity. Sparkplug components don't need
 to distribute state themselves between MQTT Servers (which is required for
 <<high_availability_multiple_mqtt_server_topology,Multiple MQTT Server Topologies>>). From the
-perspective of an MQTT Edge node, MQTT enabled Device, or Sparkplug Host Application, any of the
+perspective of an MQTT Edge Node, MQTT enabled Device, or Sparkplug Host Application, any of the
 MQTT Servers can be used and devices are not required to be connected to the same MQTT Server. A
 MQTT cluster provides the illusion to MQTT clients that there is only one MQTT server while
 providing High Availability.
@@ -103,8 +103,8 @@ works with all Sparkplug certified MQTT Servers and does not need cluster techno
 Primary Host Applications that support multiple isolated MQTT brokers. The Primary Host Application
 is responsible for managing state across the several MQTT brokers.
 
-When multiple MQTT Servers are available there is the possibility of “stranding” and Edge Node if the
-Primary command/control of the Primary Host Application loses network connectivity to one of the
+When multiple MQTT Servers are available there is the possibility of “stranding” and Edge Node if
+the Primary command/control of the Primary Host Application loses network connectivity to one of the
 MQTT Servers. In this instance the Edge Node would stay properly connected to the MQTT Server
 publishing information not knowing that Primary Host Application was not able to receive the
 messages. When using multiple MQTT Servers, the Primary Host Application instance must be
