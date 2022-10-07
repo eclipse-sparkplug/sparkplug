@@ -189,7 +189,7 @@ Edge Node's MQTT Will Message's retained flag MUST be set to false.*#
 Edge Nodes can be configured to support the concept of a 'Primary Host Application'. In this case,
 the Edge Node must wait until the Primary Host Application is online and subscribed to Sparkplug
 messages before the Edge Node publishes its NBIRTH and DBIRTH messages. Specifying a Primary Host is
-not required for an Edge Node. But, it is often desired. For example say an Edge Node is in a
+not required for an Edge Node. But it is often desired. For example say an Edge Node is in a
 Sparkplug environment and there is a single consuming Host Application that historizes the data. It
 would not be beneficial for the Sparkplug Edge Node to publish data if the Host Application is not
 connected and subscribed to messages. Instead, it would be better for the Edge Node to store data
@@ -340,18 +340,23 @@ after receiving an NDEATH from an Edge Node, Host Applications MUST mark all of 
 were included with associated Sparkplug Device DBIRTH messages as STALEusing the current Host
 Application's system UTC time*#
 
-For the following normative statements an 'online STATE message' is one where a Host Application's
-JSON payload has the 'online' key's value set to true. An 'offline STATE message' is one where the
-Host Application's JSON payload has the 'online' key's value set to false.
+For the following assertions an 'online STATE message' is one where a Host Application's JSON
+payload has the 'online' key's value set to true. An 'offline STATE message' is one where the Host
+Application's JSON payload has the 'online' key's value set to false.
 
 If the Edge Node is configured to use a Primary Host Application, it must also watch for 'STATE'
-messages from the Primary Host Application. If the Primary Host Application denotes it is offline,
-the Edge Node must disconnect from the current MQTT server following these rules:
+messages from the Primary Host Application via an MQTT subscription. If the Primary Host Application
+denotes it is offline, the Edge Node must disconnect from the current MQTT server following these
+rules:
 
 * [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline]#[yellow-background]*[tck-id-operational-behavior-edge-node-termination-host-offline] If
 the Edge Node is configured to use a Primary Host Application, it MUST disconnect from the current
-MQTT Server if a the online JSON value is false and if the bdSeq number matches the bdSeq number
-from the previous 'online STATE message'.*#
+MQTT Server if the online JSON value is false and the bdSeq number matches the bdSeq number from the
+previous 'online STATE message'.*#
+** [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline-reconnect]#[yellow-background]*[tck-id-operational-behavior-edge-node-termination-host-offline-reconnect] If the Edge
+Node disconnects after being in a Sparkplug session due to an 'offline STATE message', it MUST
+attempt to connect to the next MQTT Server in its connection list to start the session establishment
+procedure over again.*#
 * [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline-bdSeq]#[yellow-background]*[tck-id-operational-behavior-edge-node-termination-host-offline-bdSeq] Consider
 an Edge Node that is configured to use a Primary Host Application and the Edge Node is connected and
 publishing. Then it receives an 'offline STATE message'. It MUST NOT disconnect if the bdSeq number
@@ -366,7 +371,12 @@ match the current bdSeq value. For this reason, it must be ignored.
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
 
-The aim of the Sparkplug Specification is to enable the transport of real time process variable information from existing and new end devices measuring, monitoring, and controlling a physical process into an MQTT infrastructure subsequently a Sparkplug Host Application. In the context of this document an MQTT Device can represent anything from existing legacy poll/response driven PLCs, RTUs, HART Smart Transmitters, etc., to new generation automation and instrumentation devices that can implement a conformant MQTT client natively.
+The aim of the Sparkplug Specification is to enable the transport of real time process variable
+information from existing and new end devices measuring, monitoring, and controlling a physical
+process into an MQTT infrastructure subsequently a Sparkplug Host Application. In the context of
+this document an MQTT Device can represent anything from existing legacy poll/response driven PLCs,
+RTUs, HART Smart Transmitters, etc., to new generation automation and instrumentation devices that
+can implement a conformant MQTT client natively.
 
 The preceding sections in this document detail how the Sparkplug Host Application interacts with the
 MQTT Server infrastructure and how that infrastructure interacts with the notion of a Sparkplug
@@ -490,10 +500,10 @@ the DDEATH payload*#
 [[operational_behavior_sparkplug_host_applications]]
 === Sparkplug Host Applications
 
-As noted above, the Sparkplug Host Application has the required permissions to send commands to Edge Nodes and Sparkplug Devices because
-Edge Nodes need to know that the Primary Host Application is connected to the same MQTT Server that it is
-connected to or to walk to another server in the infrastructure. Both are common requirements
-of a mission critical SCADA system.
+As noted above, the Sparkplug Host Application has the required permissions to send commands to Edge
+Nodes and Sparkplug Devices because Edge Nodes need to know that the Primary Host Application is
+connected to the same MQTT Server that it is connected to or to walk to another server in the
+infrastructure. Both are common requirements of a mission critical SCADA system.
 
 But unlike legacy SCADA system implementations, all real time process variable information being
 published through the MQTT infrastructure is available to any number of additional MQTT Clients in the
@@ -517,14 +527,14 @@ can be as little as a couple of seconds. In deployments with very slow networks 
 servers it may need to be longer. In some environments, the MQTT Server may ensure in-order delivery
 of QoS0 MQTT messages even across topics. In these cases this timeout could be zero.
 
-For example, if a Sparkplug Host Application receives messages from an Edge Node with sequence numbers 1, 2, and 4 then
-at the time the message with a sequence number 4 arrives, a timer SHOULD be started within the
-Host Application. This is the start of the Reordering Timeout timer. A message with sequence number
-3 MUST arrive before the Reordering Timeout elapses. If a message with sequence number 3 does not
-arrive before the timeout, a Rebirth Request should be sent to the Edge Node. This ensures that the
-session state is properly reestablished. If a message with a sequence number of 3 arrives before the
-Reorder Timeout occurs then the timer can be shutdown and normal operation of the Host Application can
-continue.
+For example, if a Sparkplug Host Application receives messages from an Edge Node with sequence
+numbers 1, 2, and 4 then at the time the message with a sequence number 4 arrives, a timer SHOULD be
+started within the Host Application. This is the start of the Reordering Timeout timer. A message
+with sequence number 3 MUST arrive before the Reordering Timeout elapses. If a message with sequence
+number 3 does not arrive before the timeout, a Rebirth Request should be sent to the Edge Node. This
+ensures that the session state is properly reestablished. If a message with a sequence number of 3
+arrives before the Reorder Timeout occurs then the timer can be shutdown and normal operation of the
+Host Application can continue.
 
 It is also important to note that depending on the Sparkplug Host Application's purpose it may make
 sense to never process messages out of order. It also may make sense to not process a message that
@@ -579,7 +589,9 @@ Edge Nodes MUST not connected to more than one server at any point in time.*#
 Upon establishing a session, the Edge Node should issue a subscription to the STATE message
 published by the Primary Host Application. Since the STATE message is published with the MQTT RETAIN
 flag set, MQTT will guarantee that the last STATE message is always available. The Edge Node should
-examine the JSON payload of this message to ensure that the value of the 'online' key is true. If the value is false, this indicates the Primary Application has lost its MQTT Session to this particular MQTT Server.
+examine the JSON payload of this message to ensure that the value of the 'online' key is true. If
+the value is false, this indicates the Primary Application has lost its MQTT Session to this
+particular MQTT Server.
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk]#[yellow-background]*[tck-id-operational-behavior-primary-application-state-with-multiple-servers-walk] If
 the Primary Host Application is offline as denoted via the STATE MQTT Message, the Edge Node MUST
@@ -628,7 +640,8 @@ that the JSON payload denotes online=false and the bdSeq number matches the prio
 bdSeq number from that Host Application's BIRTH message.
 
 . The Edge Node connects to the next available MQTT Server and since the current STATE on this
-server is online=true, it can stay connected. In the meantime, the network disruption between the Primary Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a
+server is online=true, it can stay connected. In the meantime, the network disruption between the
+Primary Host Application and MQTT Server #2 has been corrected. The Primary Host Application has a
 new MQTT Session established to server #2 with an updated Birth Certificate of online=true. Now MQTT
 Server #2 is ready to accept new Edge Node session requests.
 
