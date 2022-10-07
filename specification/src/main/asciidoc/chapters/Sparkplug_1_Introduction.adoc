@@ -375,10 +375,14 @@ Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14,
 Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words", BCP 14, RFC 8174, May 2017.
 
 - [MQTTV50]
-MQTT Version 5.0. Edited by Andrew Banks, Ed Briggs, Ken Borgendale, and Rahul Gupta. 07 March 2019. OASIS Standard. https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html. Latest version: https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html.
+MQTT Version 5.0. Edited by Andrew Banks, Ed Briggs, Ken Borgendale, and Rahul Gupta. 07 March 2019.
+OASIS Standard. https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html.
+Latest version: https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html.
 
 - [MQTTV311]
-MQTT Version 3.1.1 Plus Errata 01. Edited by Andrew Banks and Rahul Gupta. 10 December 2015. OASIS Standard Incorporating Approved Errata 01. http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html. Latest version: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html.
+MQTT Version 3.1.1 Plus Errata 01. Edited by Andrew Banks and Rahul Gupta. 10 December 2015. OASIS
+Standard Incorporating Approved Errata 01. http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/errata01/os/mqtt-v3.1.1-errata01-os-complete.html.
+Latest version: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html.
 
 - [ISO/IEC 20922:2016]
 Information technology — Message Queuing Telemetry Transport (MQTT) v3.1.1
@@ -433,7 +437,8 @@ to secure an MQTT infrastructure using TLS security.
 === Editing Convention
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
-"RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [BCP14].
+"RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14
+[BCP14].
 
 All normative statements in this document are highlighted in [yellow-background]*yellow text as
 shown here*.
@@ -441,7 +446,7 @@ shown here*.
 [[introduction_leveragint_standards_and_open_source]]
 === Leveraging Standards and Open Source
 
-In addition to leveraging MQTT v3.1.1 [MQTTV311] and MQTT v5.0 [MQTTV50] standards, the Sparkplug Specification leverages
-as much open source development tooling and data encoding as possible. Many different open source
-organizations, projects, and ideas were used in the development of the Sparkplug Specification. More
-information on these can be found in link:#appendix_a[Appendix A]
+In addition to leveraging MQTT v3.1.1 [MQTTV311] and MQTT v5.0 [MQTTV50] standards, the Sparkplug
+Specification leverages as much open source development tooling and data encoding as possible. Many
+different open source organizations, projects, and ideas were used in the development of the
+Sparkplug Specification. More information on these can be found in link:#appendix_a[Appendix A]

@@ -174,17 +174,18 @@ This section defines the payload contents and how each of the associated message
 ====== Topic (NBIRTH)
 
 * [tck-testable tck-id-topics-nbirth-topic]#[yellow-background]*[tck-id-topics-nbirth-topic] The
-Birth Certificate topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NBIRTH/edge_node_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
-Node.*#
+Birth Certificate topic for a Sparkplug Edge Node MUST be of the form
+'namespace/group_id/NBIRTH/edge_node_id' where the namespace is replaced with the specific namespace
+for this version of Sparkplug and the group_id and edge_node_id are replaced with the Group and Edge
+Node ID for this specific Edge Node.*#
 
 [[payloads_desc_nbirth]]
 ====== Payload (NBIRTH)
 
 The Sparkplug Edge Node Birth Certificate payload contains everything required to build out a data
 structure for all metrics for this Edge Node. At the time any Host Application receives an NBIRTH,
-the 'online' state of this Edge Node should be set to 'true' along with the associated 'online' date and time parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself
+the 'online' state of this Edge Node should be set to 'true' along with the associated 'online' date
+and time parameter. Note that the Edge Node Birth Certificate ONLY indicates the Edge Node itself
 is online and in an MQTT Session, but any devices that have previously published a DBIRTH will still
 have STALE metric quality until the Host Application receives the new DBIRTH messages associated
 with the new Sparkplug session..
@@ -256,10 +257,10 @@ is not necessary to send the same data again on a periodic basis.
 ====== Topic (NDATA)
 
 * [tck-testable tck-id-topics-ndata-topic]#[yellow-background]*[tck-id-topics-ndata-topic] The
-Edge Node data topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NDATA/edge_node_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
-Node.*#
+Edge Node data topic for a Sparkplug Edge Node MUST be of the form
+'namespace/group_id/NDATA/edge_node_id' where the namespace is replaced with the specific namespace
+for this version of Sparkplug and the group_id and edge_node_id are replaced with the Group and Edge
+Node ID for this specific Edge Node.*#
 
 The payload of NDATA messages will contain any RBE or time based metric Edge Node values that need
 to be reported to any subscribing MQTT clients.
@@ -297,10 +298,10 @@ NDEATH message was received.
 ====== Topic (NDEATH)
 
 * [tck-testable tck-id-topics-ndeath-topic]#[yellow-background]*[tck-id-topics-ndeath-topic] The
-Edge Node Death Certificate topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NDEATH/edge_node_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
-Node.*#
+Edge Node Death Certificate topic for a Sparkplug Edge Node MUST be of the form
+'namespace/group_id/NDEATH/edge_node_id' where the namespace is replaced with the specific namespace
+for this version of Sparkplug and the group_id and edge_node_id are replaced with the Group and Edge
+Node ID for this specific Edge Node.*#
   
 [[payloads_desc_ndeath]]
 ====== Payload (NDEATH)
@@ -330,10 +331,10 @@ Nodes. This means sending an updated metric value to an associated metric includ
 metric list.
 
 * [tck-testable tck-id-topics-ncmd-topic]#[yellow-background]*[tck-id-topics-ncmd-topic] The
-Edge Node command topic for a Sparkplug Edge Node MUST be of the form 'namespace/group_id/NCMD/edge_node_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id and edge_node_id are replaced with the Group and Edge Node ID for this specific Edge
-Node.*#
+Edge Node command topic for a Sparkplug Edge Node MUST be of the form
+'namespace/group_id/NCMD/edge_node_id' where the namespace is replaced with the specific namespace
+for this version of Sparkplug and the group_id and edge_node_id are replaced with the Group and Edge
+Node ID for this specific Edge Node.*#
   
 [[payloads_desc_ncmd]]
 ====== Payload (NCMD)
@@ -363,16 +364,17 @@ create/update the metric structure (if this is the first time this device has be
 associated metrics in the application to a “*GOOD*” state.
 
 The DBIRTH payload contains everything required to build out a data structure for all metrics for
-this device. The 'online' state of this device should be set to TRUE along with the associated 'online' date and time this message was received.
+this device. The 'online' state of this device should be set to TRUE along with the associated
+'online' date and time this message was received.
 
 [[topics_birth_message_dbirth]]
 ====== Topic (DBIRTH)
 
 * [tck-testable tck-id-topics-dbirth-topic]#[yellow-background]*[tck-id-topics-dbirth-topic] The
-Device Birth topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DBIRTH/edge_node_id/device_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
-specific Device.*#
+Device Birth topic for a Sparkplug Device MUST be of the form
+'namespace/group_id/DBIRTH/edge_node_id/device_id' where the namespace is replaced with the specific
+namespace for this version of Sparkplug and the group_id, edge_node_id, and device_id are replaced
+with the Group, Edge Node, and Device ID for this specific Device.*#
 
 [[payloads_desc_dbirth]]
 ====== Payload (DBIRTH)
@@ -427,10 +429,10 @@ typically unnecessary.
 ====== Topic (DDATA)
 
 * [tck-testable tck-id-topics-ddata-topic]#[yellow-background]*[tck-id-topics-ddata-topic] The
-Device command topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DDATA/edge_node_id/device_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
-specific Device.*#
+Device command topic for a Sparkplug Device MUST be of the form
+'namespace/group_id/DDATA/edge_node_id/device_id' where the namespace is replaced with the specific
+namespace for this version of Sparkplug and the group_id, edge_node_id, and device_id are replaced
+with the Group, Edge Node, and Device ID for this specific Device.*#
 
 The payload of DDATA messages can contain one or more metric values that need to be reported.
 
@@ -466,10 +468,10 @@ DDEATH message was received.
 ====== Topic (DDEATH)
 
 * [tck-testable tck-id-topics-ddeath-topic]#[yellow-background]*[tck-id-topics-ddeath-topic] The
-Device Death Certificate topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DDEATH/edge_node_id/device_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
-specific Device.*#
+Device Death Certificate topic for a Sparkplug Device MUST be of the form
+'namespace/group_id/DDEATH/edge_node_id/device_id' where the namespace is replaced with the specific
+namespace for this version of Sparkplug and the group_id, edge_node_id, and device_id are replaced
+with the Group, Edge Node, and Device ID for this specific Device.*#
   
 [[payloads_desc_ddeath]]
 ====== Payload (DDEATH)
@@ -493,10 +495,10 @@ means sending a new metric value to an associated metric included in the DBIRTH 
 ====== Topic DCMD)
 
 * [tck-testable tck-id-topics-dcmd-topic]#[yellow-background]*[tck-id-topics-dcmd-topic] The
-Device command topic for a Sparkplug Device MUST be of the form 'namespace/group_id/DCMD/edge_node_id/device_id'
-where the namespace is replaced with the specific namespace for this version of Sparkplug and the
-group_id, edge_node_id, and device_id are replaced with the Group, Edge Node, and Device ID for this
-specific Device.*#
+Device command topic for a Sparkplug Device MUST be of the form
+'namespace/group_id/DCMD/edge_node_id/device_id' where the namespace is replaced with the specific
+namespace for this version of Sparkplug and the group_id, edge_node_id, and device_id are replaced
+with the Group, Edge Node, and Device ID for this specific Device.*#
   
 [[payloads_desc_dcmd]]
 ====== Payload (DCMD)

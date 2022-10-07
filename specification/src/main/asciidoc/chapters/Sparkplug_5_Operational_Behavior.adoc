@@ -273,7 +273,7 @@ in section on link:#payloads_ndeath[NDEATH messages].
 Host Application are delivered. The subscription to DCMD ensures that device targeted messages from
 the Primary Host Application are delivered. In infrastructures with multiple MQTT Servers and a
 designated Primary Host Application, the subscription to STATE informs the Edge Node the current
-state of the Primary Host Application. At this point the Edge node has fully completed the steps
+state of the Primary Host Application. At this point the Edge Node has fully completed the steps
 required for establishing a valid MQTT Session with the Primary Host Application.
 
 . Once an MQTT Session has been established, the Edge Node MQTT client MUST publish an application
@@ -449,7 +449,7 @@ metrics to publish to the MQTT infrastructure.
 
 . State #4 in the session diagram represents the state at which the Edge Node is ready to report all
 of its metric data to the MQTT Server(s) as defined in Sparkplug. It is the responsibility of the
-Edge node (logical or physical) to put this information in the form defined in
+Edge Node (logical or physical) to put this information in the form defined in
 link:#payloads_dbirth[DBIRTH messages]. Upon receiving the DBIRTH message, the Primary Host
 Application can build out the proper metric structure and set the Sparkplug Device to 'online'.
 
@@ -506,8 +506,8 @@ connected to the same MQTT Server that it is connected to or to walk to another 
 infrastructure. Both are common requirements of a mission critical SCADA system.
 
 But unlike legacy SCADA system implementations, all real time process variable information being
-published through the MQTT infrastructure is available to any number of additional MQTT Clients in the
-business that might be interested in subsets if not all of the real time data.
+published through the MQTT infrastructure is available to any number of additional MQTT Clients in
+the business that might be interested in subsets if not all of the real time data.
 
 The only fundamental difference between a Primary Host Application MQTT Client and other Sparkplug
 Host Application MQTT Clients is that the Edge Nodes in the infrastructure know to make sure the

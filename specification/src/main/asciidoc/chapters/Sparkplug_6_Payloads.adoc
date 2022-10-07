@@ -86,10 +86,11 @@ community Sparkplug B provides support for:
 * Historical data
 * File data
 
-The Sparkplug B payload definition creates a bandwidth efficient data transport for real time device data. For
-WAN based SCADA/IIoT infrastructures this equates to lower latency data updates while minimizing the
-amount of traffic and therefore cellular and/or VSAT bandwidth required. In situations where
-bandwidth savings is not the primary concern, the efficient use enables higher throughput of more data eliminating sensor data that may have previously been left stranded in the
+The Sparkplug B payload definition creates a bandwidth efficient data transport for real time device
+data. For WAN based SCADA/IIoT infrastructures this equates to lower latency data updates while
+minimizing the amount of traffic and therefore cellular and/or VSAT bandwidth required. In
+situations where bandwidth savings is not the primary concern, the efficient use enables higher
+throughput of more data eliminating sensor data that may have previously been left stranded in the
 field. It is also ideal for LAN based SCADA infrastructures equating to higher throughput of real
 time data to consumer applications without requiring extreme networking topologies and/or equipment.
 

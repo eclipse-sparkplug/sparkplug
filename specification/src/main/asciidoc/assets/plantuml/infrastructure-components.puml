@@ -91,7 +91,7 @@ package "Security" {
 	
 	together {
 		rectangle Node1 [
-		===""MQTT EoN Node""
+		===""Edge Node""
 		""(Sparkplug)""
 		]
 		
@@ -108,7 +108,7 @@ package "Security" {
 	
 	together {
 		rectangle Node2 [
-		===""MQTT EoN Node""
+		===""Edge Node""
 		""(Sparkplug)""
 		]	
 		card Node2Device [
@@ -118,7 +118,7 @@ package "Security" {
 	
 	together {
 		rectangle Node3 [
-		===""MQTT EoN Node""
+		===""Edge Node""
 		""(Sparkplug)""
 		]		
 		card Node3Device [
@@ -128,7 +128,7 @@ package "Security" {
 	
 	together {
 		rectangle Node4 [
-		===""MQTT EoN Node""
+		===""Edge Node""
 		""(Sparkplug)""
 		]
 		card Node420maInput1 [
