@@ -356,6 +356,12 @@ from the previous 'online STATE message'.*#
 an Edge Node that is configured to use a Primary Host Application and the Edge Node is connected and
 publishing. Then it receives an 'offline STATE message'. It MUST NOT disconnect if the bdSeq number
 does not match the bdSeq number value from the previous 'online STATE message'.*#
+** It must not disconnect because a mismatched bdSeq number indicates the Host Application MQTT
+session that is being denoted as lost is not the one the current session the Host Application has
+established with the MQTT Server. Due to how an MQTT connection can be lost it is possible and
+likely that an old Host Application death message could be delivered after a new Host Application
+MQTT session is established. In this case, the bdSeq number on the incoming death message will not
+match the current bdSeq value. For this reason, it must be ignored.
 
 [[operational_behavior_device_session_establishment]]
 === Device Session Establishment
@@ -754,12 +760,21 @@ Host Application's Birth MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-retained]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-birth-retained] The
 Host Application's Birth retained flag MUST be set to true.*#
 
+The following additional rule applies if the Host Application is connecting to more than one MQTT
+Server.
+
+* [tck-testable tck-id-operational-behavior-host-application-multi-server-bdseq]#[yellow-background]*[tck-id-operational-behavior-host-application-multi-server-bdseq] The
+Host Application MUST maintain a bdSeq number on a per MQTT Server basis.*#
+** For example if a connection is lost to one MQTT Server, when the Host Application connects and
+publishes a new STATE message, it must increment the bdSeq number for only this MQTT Server and not
+any others it may be connected to.
+
 [[operational_behavior_sparkplug_host_application_session_termination]]
 === Sparkplug Host Application Session Termination
 
-[tck-testable tck-id-operational-behavior-host-application-termination]#[yellow-background]*[tck-id-operational-behavior-host-application-termination] If
+* [tck-testable tck-id-operational-behavior-host-application-termination]#[yellow-background]*[tck-id-operational-behavior-host-application-termination] If
 the Sparkplug Host Application ever disconnects intentionally, it must publish a Death message with
-the following characteristics.
+the following characteristics.*#
 
 * [tck-testable tck-id-operational-behavior-host-application-death-topic]#[yellow-background]*[tck-id-operational-behavior-host-application-death-topic] The
 Sparkplug Host Application's Death topic MUST be of the form 'spBv1.0/STATE/sparkplug_host_id' where
