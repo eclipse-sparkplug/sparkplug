@@ -412,7 +412,7 @@ components.
 ** _timestamp_
 *** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
 milliseconds since epoch (Jan 1, 1970).
-*** [tck-not-testable tck-id-payloads_timestamp_in_UTC]#[yellow-background]*[tck-id-payloads_timestamp_in_UTC] This
+*** [tck-testable tck-id-payloads_timestamp_in_UTC]#[yellow-background]*[tck-id-payloads_timestamp_in_UTC] This
 timestamp MUST be in UTC.*#
 *** This timestamp represents the time at which the message was published.
 ** _metrics_
@@ -476,7 +476,7 @@ milliseconds since epoch (Jan 1, 1970).
 timestamp MUST be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.*#
 ** [tck-testable tck-id-payloads-name-cmd-requirement]#[yellow-background]*[tck-id-payloads-name-cmd-requirement] The
 timestamp MAY be included with metrics in NCMD and DCMD messages.*#
-** [tck-not-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*[tck-id-payloads_metric_timestamp_in_UTC] The
+** [tck-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*[tck-id-payloads_metric_timestamp_in_UTC] The
 timestamp MUST be in UTC.*#
 *** Non-normative comment: This timestamp represents the time at which the value of a metric was
 captured.
