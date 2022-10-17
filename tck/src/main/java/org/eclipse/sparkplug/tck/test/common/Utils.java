@@ -21,6 +21,7 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +37,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -274,5 +276,76 @@ public class Utils {
 			rc = true;
 		}
 		return rc;
+	}
+
+	public static StatePayload getHostPayload(String payloadString, boolean expectOnline) {
+		logger.debug("Incoming potential Host STATE payload: {}", payloadString);
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode json = null;
+		try {
+			json = mapper.readTree(payloadString);
+		} catch (Exception e) {
+
+		}
+
+		boolean isValidPayload = false;
+		boolean retOnline = false;
+		int retBdSeq = -1;
+		long retTimestamp = -1;
+
+		if (json != null) {
+			if (json.has("timestamp")) {
+				JsonNode timestamp = json.get("timestamp");
+				if (timestamp.isLong()) {
+					int timestamp_max_diff = 60000; // milliseconds difference allowed
+					Date now = new Date();
+					long diff = now.getTime() - timestamp.longValue();
+					if (diff >= 0 && diff <= timestamp_max_diff) {
+						isValidPayload = true;
+						retTimestamp = timestamp.longValue();
+					} else {
+						logger.info("StatePayload is invalid - Timestamp diff " + diff);
+					}
+				}
+			}
+
+			if (json.has("bdSeq")) {
+				JsonNode bdseq = json.get("bdSeq");
+				if (bdseq.isShort() && bdseq.shortValue() >= 0 || bdseq.shortValue() <= 255) {
+					// valid - don't set isValidPayload as it might be false
+					retBdSeq = bdseq.shortValue();
+				} else if (bdseq.isInt() && bdseq.intValue() >= 0 || bdseq.intValue() <= 255) {
+					// valid - don't set isValidPayload as it might be false
+					retBdSeq = bdseq.intValue();
+				} else {
+					isValidPayload = false;
+					logger.info("StatePayload is invalid - bdSeq is invalid: {}", bdseq);
+				}
+			} else {
+				isValidPayload = false;
+				logger.info("StatePayload is invalid - bdSeq field is missing");
+			}
+
+			if (json.has("online")) {
+				JsonNode online = json.get("online");
+				if (online.isBoolean() && online.booleanValue() == expectOnline) {
+					// valid - don't set isValidPayload as it might be false
+				} else {
+					isValidPayload = false;
+					logger.info("StatePayload is invalid - online={} - expected={}", online, expectOnline);
+				}
+			} else {
+				isValidPayload = false;
+				logger.info("StatePayload is invalid - online field is missing");
+			}
+		}
+
+		if (isValidPayload) {
+			logger.info("Returning StatePaload with online={} bdSeq={} timestamp={}", retOnline, retBdSeq,
+					retTimestamp);
+			return new StatePayload(retOnline, retBdSeq, retTimestamp);
+		} else {
+			return null;
+		}
 	}
 }

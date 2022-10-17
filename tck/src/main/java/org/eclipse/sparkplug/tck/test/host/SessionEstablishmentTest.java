@@ -112,6 +112,7 @@ import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -215,22 +216,9 @@ public class SessionEstablishmentTest extends TCKTest {
 		return testResults;
 	}
 
-	private boolean isHostApplication(final @NotNull ConnectPacket packet) {
-		final Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
-		if (willPublishPacketOptional.isPresent()) {
-			final WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
-
-			// Topic is STATE/{host_application_id}
-			if (willPublishPacket.getTopic().equals("STATE/" + hostApplicationId)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	@Override
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
-		if (isHostApplication(packet)) {
+		if (HostUtils.isHostApplication(hostApplicationId, packet)) {
 			logger.debug("Primary {} - connect", getName());
 
 			boolean overallPass = checkConnectMessage(packet);
@@ -465,9 +453,9 @@ public class SessionEstablishmentTest extends TCKTest {
 			final WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
 			logger.info("   checkDeathMessage willPublishPacket: topic={}", willPublishPacket.getTopic(), state);
 
-			// Topic is STATE/{host_application_id}
-			final boolean topicIsValid = willPublishPacket.getTopic().equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/"
-					+ Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
+			// Topic is spBv1.0/STATE/{host_application_id}
+			final boolean topicIsValid =
+					willPublishPacket.getTopic().equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 			overallResult = topicIsValid;
 
 			logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC,
@@ -483,55 +471,13 @@ public class SessionEstablishmentTest extends TCKTest {
 			overallResult &= payloadExists;
 
 			if (payloadExists) {
-				ObjectMapper mapper = new ObjectMapper();
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
-
-				JsonNode json = null;
-				try {
-					json = mapper.readTree(payloadString);
-				} catch (Exception e) {
-
-				}
+				StatePayload deathPayload = Utils.getHostPayload(payloadString, false);
 
 				boolean isValidPayload = false;
-
-				if (json != null) {
-					if (json.has("timestamp")) {
-						JsonNode timestamp = json.get("timestamp");
-						if (timestamp.isLong()) {
-							int timestamp_max_diff = 60000; // milliseconds difference allowed
-							Date now = new Date();
-							long diff = now.getTime() - timestamp.longValue();
-							if (diff >= 0 && diff <= timestamp_max_diff) {
-								isValidPayload = true;
-							} else {
-								logger.info("Timestamp diff " + diff);
-							}
-						}
-					}
-
-					if (json.has("bdSeq")) {
-						JsonNode bdseq = json.get("bdSeq");
-						if (bdseq.isShort() && bdseq.shortValue() >= 0 || bdseq.shortValue() <= 255) {
-							// valid - don't set isValidPayload as it might be false
-							deathBdSeq = bdseq.shortValue();
-						} else {
-							isValidPayload = false;
-						}
-					} else {
-						isValidPayload = false;
-					}
-
-					if (json.has("online")) {
-						JsonNode online = json.get("online");
-						if (online.isBoolean() && online.booleanValue() == false) {
-							// valid - don't set isValidPayload as it might be false
-						} else {
-							isValidPayload = false;
-						}
-					} else {
-						isValidPayload = false;
-					}
+				if (deathPayload != null) {
+					deathBdSeq = deathPayload.getBdSeq().shortValue();
+					isValidPayload = true;
 				}
 
 				logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_DEATH_PAYLOAD, HOST_TOPIC_PHID_DEATH_PAYLOAD);
@@ -593,9 +539,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED)
 	private void checkSubscribes(final boolean shouldBeSubscribed) {
 		final List<String> namespaceTopicFilter = List.of(Constants.TOPIC_ROOT_SP_BV_1_0 + "/#");
-		String prefix = Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + Constants.TOPIC_ROOT_STATE + "/";
-		final List<String> stateTopicFilter = List.of(prefix + hostApplicationId,
-				prefix + "+", prefix + "#");
+		String prefix = Constants.TOPIC_ROOT_STATE + "/";
+		final List<String> stateTopicFilter = List.of(prefix + hostApplicationId, prefix + "+", prefix + "#");
 		boolean isSubscribed = false;
 		final boolean nameSpaceMissing = Collections.disjoint(namespaceTopicFilter, subscriptions);
 		final boolean stateFilterMissing = Collections.disjoint(stateTopicFilter, subscriptions);
@@ -690,8 +635,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		boolean overallResult = false;
 
 		// Topic is STATE/{host_application_id}
-		final boolean topicIsValid = packet.getTopic().equals(
-				Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
+		final boolean topicIsValid = packet.getTopic().equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 		overallResult = topicIsValid;
 
 		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_TOPIC, HOST_TOPIC_PHID_BIRTH_TOPIC);
