@@ -13,6 +13,35 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.DEATH_MESSAGE_RECEIVED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.jboss.test.audit.annotations.SpecAssertion;
+import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
@@ -20,25 +49,6 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import org.eclipse.sparkplug.tck.sparkplug.Sections;
-import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.jboss.test.audit.annotations.SpecAssertion;
-import org.jboss.test.audit.annotations.SpecVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.nio.charset.StandardCharsets;
-
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.DEATH_MESSAGE_RECEIVED;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 /**
  * This is the primary host Sparkplug session termination test.
@@ -69,6 +79,8 @@ public class SessionTerminationTest extends TCKTest {
 	private Constants.TestStatus state = Constants.TestStatus.NONE;
 
 	private @Nullable String hostClientId = null;
+
+	private short deathBdSeq = -1;
 
 	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
@@ -107,6 +119,20 @@ public class SessionTerminationTest extends TCKTest {
 
 	@Override
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
+		if (HostUtils.isHostApplication(hostApplicationId, packet)) {
+			logger.debug("Got a connect from {}", hostApplicationId);
+
+			// get the bdSeq number
+			String payloadString =
+					StandardCharsets.UTF_8.decode(packet.getWillPublish().get().getPayload().get()).toString();
+			StatePayload statePayload = Utils.getHostPayload(payloadString, false);
+			if (statePayload != null) {
+				deathBdSeq = statePayload.getBdSeq().shortValue();
+			} else {
+				logger.error("Test failed on connect.");
+				theTCK.endTest();
+			}
+		}
 	}
 
 	@SpecAssertion(
@@ -132,7 +158,16 @@ public class SessionTerminationTest extends TCKTest {
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		logger.info("{} test - PUBLISH - topic: {}, clientId: {} ", getName(), packet.getTopic(), clientId);
 
-		if (clientId.equals(hostClientId)) {
+		if (clientId.equals(hostClientId) && packet.getTopic().startsWith(Constants.TOPIC_ROOT_STATE)
+				&& deathBdSeq == -1) {
+			// See if this is the original online STATE message after the connect and return early
+			StatePayload statePayload =
+					Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), true);
+			if (statePayload != null) {
+				logger.debug("Ignoring original online state message");
+				return;
+			}
+
 			if (checkDeathMessage(packet)) {
 				state = DEATH_MESSAGE_RECEIVED;
 			}
@@ -156,9 +191,8 @@ public class SessionTerminationTest extends TCKTest {
 				state);
 		boolean overallResult = true;
 
-		// Topic is STATE/{host_application_id}
-		final boolean isStateTopic = (packet.getTopic().equals(
-				Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
+		// Topic is spBv1.0/STATE/{host_application_id}
+		final boolean isStateTopic = (packet.getTopic().equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId));
 		overallResult &= isStateTopic;
 		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
 				OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC);
@@ -174,8 +208,12 @@ public class SessionTerminationTest extends TCKTest {
 				setResult(isPayloadPresent, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC));
 
 		// Payload message exists
-		boolean payloadIsOffline = isPayloadPresent
-				&& "OFFLINE".equals(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
+		StatePayload statePayload =
+				Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false);
+		boolean payloadIsOffline = false;
+		if (statePayload != null && !statePayload.isOnline() && statePayload.getBdSeq() == deathBdSeq) {
+			payloadIsOffline = true;
+		}
 		overallResult &= payloadIsOffline;
 
 		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD,

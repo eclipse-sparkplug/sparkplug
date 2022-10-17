@@ -13,6 +13,15 @@
 
 package org.eclipse.sparkplug.tck.test;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.CASE_SENSITIVITY_SPARKPLUG_IDS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CASE_SENSITIVITY_SPARKPLUG_IDS;
@@ -75,15 +84,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_T
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
-import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDEATH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
@@ -100,11 +100,11 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -331,51 +331,62 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				} else {
 					if (json.has("bdSeq")) {
 						JsonNode bdseqnode = json.get("bdSeq");
+						int bdseq = -1;
 						if (bdseqnode.isShort()) {
-							short bdseq = bdseqnode.shortValue();
-							if (hostBdSeqs.get(hostid) != null) {
-								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-										ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
-										PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
-									log(TEST_FAILED_FOR_ASSERTION + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
-											+ ": host id: " + hostid);
-								}
-								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-										ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ, HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)) {
-									log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ
-											+ ": host id: " + hostid);
-								}
-								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-										ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
-										MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
-									log(TEST_FAILED_FOR_ASSERTION
-											+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
-											+ ": host id: " + hostid);
-								}
-								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
-										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)) {
-									log(TEST_FAILED_FOR_ASSERTION
-											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ
-											+ ": host id: " + hostid);
-								}
-								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-										ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ,
-										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)) {
-									log(TEST_FAILED_FOR_ASSERTION
-											+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ
-											+ ": host id: " + hostid);
-								}
-							}
-							hostBdSeqs.put(hostid, (long) bdseq);
+							bdseq = bdseqnode.shortValue();
+						} else if (bdseqnode.isInt()) {
+							bdseq = bdseqnode.intValue();
 						} else {
 							setResultIfNotFail(testResults, false,
 									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
 									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ);
 							log("Test failed for assertion "
 									+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ + ": host id: "
-									+ hostid);
+									+ hostid + " with bdSeq=" + bdseqnode);
+							return;
 						}
+
+						if (hostBdSeqs.get(hostid) != null) {
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+									ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
+									PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+								log(TEST_FAILED_FOR_ASSERTION + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
+										+ ": host id: " + hostid + " received bdSeq=" + bdseq + " expected="
+										+ getNextSeq(hostBdSeqs.get(hostid)));
+							}
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+									ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ, HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)) {
+								log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ + ": host id: "
+										+ hostid + " received bdSeq=" + bdseq + " expected="
+										+ getNextSeq(hostBdSeqs.get(hostid)));
+							}
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+								log(TEST_FAILED_FOR_ASSERTION
+										+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
+										+ ": host id: " + hostid + " received bdSeq=" + bdseq + " expected="
+										+ getNextSeq(hostBdSeqs.get(hostid)));
+							}
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+									ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
+									OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)) {
+								log(TEST_FAILED_FOR_ASSERTION
+										+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ
+										+ ": host id: " + hostid + " received bdSeq=" + bdseq + " expected="
+										+ getNextSeq(hostBdSeqs.get(hostid)));
+							}
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
+									ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ,
+									OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)) {
+								log(TEST_FAILED_FOR_ASSERTION
+										+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ + ": host id: "
+										+ hostid + " received bdSeq=" + bdseq + " expected="
+										+ getNextSeq(hostBdSeqs.get(hostid)));
+							}
+						}
+						hostBdSeqs.put(hostid, (long) bdseq);
+
 					}
 				}
 			}

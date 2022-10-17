@@ -246,8 +246,8 @@ export default {
                         requirements: [
                             "Setup a MQTT Connection.",
                             "Set a Host Application Id that is used by an Application.",
-                            "Start the Host Application, if it is not yet running.",
                             "Start this test.",
+                            "Start the Host Application.",
                             "Stop the Host Application to trigger events of MQTT messages.",
                             "Wait until Tests are finished and check Results."
                         ],
