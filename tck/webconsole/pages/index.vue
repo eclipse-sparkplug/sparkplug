@@ -456,12 +456,14 @@ export default {
         /**
          * Handles a successful MQTT connection.
          */
-        mqttConnected: function (mqttClient, filename) {
+        mqttConnected: function (mqttClient, filename, UTCwindow) {
             this.mqttClient = mqttClient;
             this.filename = filename;
+            this.UTCwindow = UTCwindow;
             this.createInteractionListener();
             this.createResultLogTopic();
             this.createResultLog();
+            this.setTCKParms();
             this.activeTab = 1;
         },
 
@@ -469,6 +471,17 @@ export default {
             let topic = "SPARKPLUG_TCK/RESULT_CONFIG";
             let payload = "NEW_RESULT-LOG " + this.filename;
             console.log("index: createResultLog - write into: ", this.filename);
+            this.mqttClient.publish(topic, payload, {qos: 1, retain: true}, (error) => {
+                if (error) {
+                    console.log("Publish error", error);
+                }
+            });
+        },
+
+        setTCKParms: function () {
+            let topic = "SPARKPLUG_TCK/CONFIG";
+            let payload = "UTCwindow " + this.UTCwindow;
+            console.log("index: setTCKParms - UTCwindow: ", this.UTCwindow);
             this.mqttClient.publish(topic, payload, {qos: 1, retain: true}, (error) => {
                 if (error) {
                     console.log("Publish error", error);

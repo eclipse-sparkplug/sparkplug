@@ -47,6 +47,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TIMESTAMP_IN_UTC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NBIRTH_BDSEQ_INCREMENT;
@@ -76,6 +77,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TIMESTAMP_IN_UTC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_BDSEQ_INCREMENT;
@@ -84,11 +86,13 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NBIRTH_T
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -151,7 +155,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED,
 			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID,
-			ID_CASE_SENSITIVITY_SPARKPLUG_IDS, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING };
+			ID_CASE_SENSITIVITY_SPARKPLUG_IDS, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING, ID_PAYLOADS_TIMESTAMP_IN_UTC };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -184,10 +188,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	HashMap<String, String> lowerGroupIds = new HashMap<String, String>();
 	HashMap<String, String> lowerEdgeIds = new HashMap<String, String>();
 	HashMap<String, String> lowerDeviceIds = new HashMap<String, String>();
+	
+	private Results results = null;
 
-	public Monitor() {
+	public Monitor(Results results) {
 		logger.info("Sparkplug TCK message monitor 1.0");
-
+		this.results = results;
 		clearResults();
 	}
 
@@ -404,6 +410,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	}
 
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_PAYLOAD,
+			id = ID_PAYLOADS_TIMESTAMP_IN_UTC)
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
 
@@ -438,6 +447,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			edge_node_id = group_id + ":" + edge_node_id;
 
 			PayloadOrBuilder payload = getSparkplugPayload(packet);
+
+			if (payload.hasTimestamp()) {
+				setResultIfNotFail(testResults, checkUTC(payload.getTimestamp(), results.getConfig().UTCwindow),
+						ID_PAYLOADS_TIMESTAMP_IN_UTC, PAYLOADS_TIMESTAMP_IN_UTC);
+			}
 
 			// if we have more than one MQTT client id with the same edge node id then it's an error
 			if (message_type.equals(TOPIC_PATH_NBIRTH)) {

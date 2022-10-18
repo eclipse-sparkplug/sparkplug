@@ -31,6 +31,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
@@ -39,6 +40,8 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.Results;
+
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -57,6 +60,7 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.hasValue;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -65,6 +69,7 @@ public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+	private Results.Config config = null;
 
 	private HashMap<String, Payload.Template> definitions = new HashMap<String, Payload.Template>();
 
@@ -78,7 +83,8 @@ public class SendDataTest extends TCKTest {
 			ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA,
 			ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH, ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS,
 			ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS, ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS,
-			ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS, ID_TOPICS_NDATA_TOPIC, ID_TOPICS_DDATA_TOPIC };
+			ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS, ID_TOPICS_NDATA_TOPIC, ID_TOPICS_DDATA_TOPIC,
+			ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC };
 	private String testClientId = null;
 	private String state = null;
 	private TCK theTCK = null;
@@ -87,9 +93,10 @@ public class SendDataTest extends TCKTest {
 	private String deviceId = null;
 	private boolean isEdgeNodeChecked = false, isDeviceChecked = false;
 
-	public SendDataTest(TCK aTCK, String[] params) {
+	public SendDataTest(TCK aTCK, String[] params, Results.Config config) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.config = config;
 		testIds.addAll(Arrays.asList(testId));
 
 		if (params.length < 3) {
@@ -101,6 +108,12 @@ public class SendDataTest extends TCKTest {
 		edgeNodeId = params[1];
 		deviceId = params[2];
 		logger.info("Parameters are GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
+
+		try {
+			logger.info("UTCwindow is " + config.UTCwindow);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -206,6 +219,9 @@ public class SendDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_DATA_MESSAGE_NDATA,
 			id = ID_TOPICS_NDATA_TOPIC)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_METRIC,
+			id = ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC)
 	public void checkNDATA(String clientId, PublishPacket packet) {
 		logger.info("Send data test payload::check Edge Node data - Start");
 		logger.debug(
@@ -270,6 +286,10 @@ public class SendDataTest extends TCKTest {
 					checkInstance(m.getTemplateValue(), TOPIC_PATH_DDATA);
 				}
 			}
+			if (m.hasTimestamp()) {
+				setResultIfNotFail(testResults, checkUTC(m.getTimestamp(), config.UTCwindow),
+						ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC, PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
+			}
 		}
 	}
 
@@ -300,6 +320,9 @@ public class SendDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_DATA_MESSAGE_DDATA,
 			id = ID_TOPICS_DDATA_TOPIC)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_METRIC,
+			id = ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC)
 	public void checkDDATA(String clientId, PublishPacket packet) {
 		logger.info("Send data test payload::check Device data - Start");
 
@@ -364,6 +387,10 @@ public class SendDataTest extends TCKTest {
 				if (datatype == DataType.Template && m.hasTemplateValue()) {
 					checkInstance(m.getTemplateValue(), TOPIC_PATH_DDATA);
 				}
+			}
+			if (m.hasTimestamp()) {
+				setResultIfNotFail(testResults, checkUTC(m.getTimestamp(), config.UTCwindow),
+						ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC, PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
 			}
 		}
 	}
