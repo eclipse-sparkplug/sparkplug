@@ -49,6 +49,7 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -197,14 +198,8 @@ public class MQTTListener implements MqttCallbackExtended {
 					// System.out.println(inboundPayload.toString());
 
 					if (inboundPayload.hasTimestamp()) {
-						int timestamp_max_diff = 60000; // milliseconds difference allowed
-						Date now = new Date();
-						long diff = now.getTime() - inboundPayload.getTimestamp();
 						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC,
-								setResult(diff >= 0 && diff <= timestamp_max_diff, PAYLOADS_TIMESTAMP_IN_UTC));
-						if (diff < 0 || diff > timestamp_max_diff) {
-							System.out.println("Timestamp diff " + diff);
-						}
+								setResult(checkUTC(inboundPayload.getTimestamp()), PAYLOADS_TIMESTAMP_IN_UTC));
 					}
 				}
 			}

@@ -18,6 +18,9 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.MAYBE;
 import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TIMESTAMP_IN_UTC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TIMESTAMP_IN_UTC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -347,5 +350,30 @@ public class Utils {
 		} else {
 			return null;
 		}
+	}
+	
+	public static boolean checkUTC(long timestamp) {
+		boolean result = false;
+		int timestamp_max_diff = 60000; // milliseconds difference allowed
+		
+		Date now = new Date();
+		long diff = now.getTime() - timestamp;
+		
+		if (diff == 0) {
+			result = true; // Exactly the same so we're good.
+		} else if (diff > 0) {
+			// The timestamp is within the previous allowed interval.
+			result = diff <= timestamp_max_diff; 
+		} else if (diff < 0) {
+			// The timestamp is within the next allowed interval.
+			// This shouldn't happen unless clocks differ between machines
+			// but we should allow for it.
+			result = diff >= timestamp_max_diff;
+		}
+	
+		if (result == false) {
+			logger.info("Timestamp diff " + diff);
+		}
+		return result;
 	}
 }
