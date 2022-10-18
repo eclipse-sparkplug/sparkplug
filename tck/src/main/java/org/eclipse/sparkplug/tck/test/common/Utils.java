@@ -352,9 +352,8 @@ public class Utils {
 		}
 	}
 	
-	public static boolean checkUTC(long timestamp) {
+	public static boolean checkUTC(long timestamp, long UTCwindow) {
 		boolean result = false;
-		int timestamp_max_diff = 60000; // milliseconds difference allowed
 		
 		Date now = new Date();
 		long diff = now.getTime() - timestamp;
@@ -363,12 +362,12 @@ public class Utils {
 			result = true; // Exactly the same so we're good.
 		} else if (diff > 0) {
 			// The timestamp is within the previous allowed interval.
-			result = diff <= timestamp_max_diff; 
+			result = diff <= UTCwindow; 
 		} else if (diff < 0) {
 			// The timestamp is within the next allowed interval.
 			// This shouldn't happen unless clocks differ between machines
 			// but we should allow for it.
-			result = diff >= timestamp_max_diff;
+			result = diff >= UTCwindow;
 		}
 	
 		if (result == false) {

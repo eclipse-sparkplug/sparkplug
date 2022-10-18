@@ -31,6 +31,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
@@ -39,6 +40,8 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.Results;
+
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -66,6 +69,7 @@ public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+	private Results.Config config = null;
 
 	private HashMap<String, Payload.Template> definitions = new HashMap<String, Payload.Template>();
 
@@ -89,9 +93,10 @@ public class SendDataTest extends TCKTest {
 	private String deviceId = null;
 	private boolean isEdgeNodeChecked = false, isDeviceChecked = false;
 
-	public SendDataTest(TCK aTCK, String[] params) {
+	public SendDataTest(TCK aTCK, String[] params, Results.Config config) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.config = config;
 		testIds.addAll(Arrays.asList(testId));
 
 		if (params.length < 3) {
@@ -103,6 +108,12 @@ public class SendDataTest extends TCKTest {
 		edgeNodeId = params[1];
 		deviceId = params[2];
 		logger.info("Parameters are GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
+
+		try {
+			logger.info("UTCwindow is " + config.UTCwindow);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -276,8 +287,8 @@ public class SendDataTest extends TCKTest {
 				}
 			}
 			if (m.hasTimestamp()) {
-				setResultIfNotFail(testResults, checkUTC(m.getTimestamp()), ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC,
-						PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
+				setResultIfNotFail(testResults, checkUTC(m.getTimestamp(), config.UTCwindow),
+						ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC, PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
 			}
 		}
 	}
@@ -378,8 +389,8 @@ public class SendDataTest extends TCKTest {
 				}
 			}
 			if (m.hasTimestamp()) {
-				setResultIfNotFail(testResults, checkUTC(m.getTimestamp()), ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC,
-						PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
+				setResultIfNotFail(testResults, checkUTC(m.getTimestamp(), config.UTCwindow),
+						ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC, PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
 			}
 		}
 	}

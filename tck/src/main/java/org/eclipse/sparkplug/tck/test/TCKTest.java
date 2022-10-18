@@ -55,7 +55,7 @@ public abstract class TCKTest {
 	}
 
 	protected @NotNull Profile profile;
-
+	
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
 	}
 

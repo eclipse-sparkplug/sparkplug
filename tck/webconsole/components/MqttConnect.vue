@@ -1,4 +1,16 @@
-<!-- @author Lukas Brand -->
+<!----------------------------------------------------------------------------
+ * Copyright (c) 2021, 2022 HiveMQ and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Lukas Brand - initial implementation
+ * 
+ ----------------------------------------------------------------------------->
 
 <template>
   <div>
@@ -21,7 +33,7 @@
       >Webconsole disconnected</b-alert
     >
     <b-collapse v-model="change" id="collapse-1" class="mt-3">
-      <b-card title="Mqtt Server Configuration" @submit="createConnection" border-variant="primary">
+      <b-card title="MQTT Server Configuration" @submit="createConnection" border-variant="primary">
         <b-form>
           <b-container fluid>
               <b-row class="mt-3">
@@ -85,16 +97,6 @@
                   </b-col>
               </b-row>
               <b-row class="mt-3">
-                  <b-col sm="3">
-                      <label>Result logfile:</label>
-                  </b-col>
-                  <b-col sm="9">
-                      <b-form-input v-model="filename" size="sm"
-                                    :disabled="mqttClient.connected"
-                                    placeholder="Enter the result log file name"></b-form-input>
-                  </b-col>
-              </b-row>
-              <b-row class="mt-3">
                   <b-col sm="9">
                       <b-button type="submit" variant="primary" :disabled="mqttClient.connected"
                                 @click="createConnection">
@@ -115,6 +117,30 @@
         </b-form>
       </b-card>
     </b-collapse>
+    <b-collapse v-model="change" id="collapse-1" class="mt-3">
+      <b-card title="Other settings" @submit="createConnection" border-variant="primary">
+        <b-row class="mt-3">
+          <b-col sm="3">
+            <label>Result logfile:</label>
+          </b-col>
+          <b-col sm="9">
+            <b-form-input v-model="filename" size="sm"
+                :disabled="mqttClient.connected"
+                placeholder="Enter the result log file name"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mt-3">
+          <b-col sm="3">
+            <label>UTC check window (ms):</label>
+          </b-col>
+          <b-col sm="9">
+            <b-form-input v-model="UTCwindow" size="sm"
+                :disabled="mqttClient.connected"
+                placeholder=defaultUTCwindow></b-form-input>
+          </b-col>
+        </b-row>
+      </b-card>
+    </b-collapse>
   </div>
 </template>
 
@@ -124,6 +150,7 @@ import {v4 as uuidv4} from "uuid";
 import {cloneDeep, set, tap} from "lodash";
 
 let defaultLogFileName = "SparkplugTCKResults.log";
+let defaultUTCwindow = "60000";
 
 export default {
     props: {
@@ -141,6 +168,7 @@ export default {
     data: function () {
         return {
             filename: defaultLogFileName,
+            UTCwindow: defaultUTCwindow,
             /**
              ** The MQTT Client used throughout the whole application.
              ** @type {MqttClient}
@@ -171,8 +199,8 @@ export default {
                 reconnectPeriod: 4000,
                 clientId: "",
                 username: null,
-        password: null,
-      },
+                 password: null,
+            },
       successCountDown: 0,
       failureCountDown: 0,
     };
@@ -188,7 +216,8 @@ export default {
         this.connection.port = 8000;
         this.connection.endpoint = "/mqtt";
         this.connection.clientId = "tck-web-console-" + uuidv4();
-        this.filename = defaultLogFileName
+        this.filename = defaultLogFileName;
+        this.UTCwindow = defaultUTCwindow
     },
 
     /**
@@ -201,6 +230,9 @@ export default {
         if (this.filename === '') {
             this.filename = defaultLogFileName
         }
+        if (this.UTCwindow === '') {
+            this.UTCwindow = defaultUTCwindow
+        }
         const {host, port, endpoint, ...options} = this.connection;
 
         console.log(this.connection);
@@ -208,7 +240,7 @@ export default {
         const connectUrl = `ws://${host}:${port}${endpoint}`;
         try {
             this.mqttClient = mqtt.connect(connectUrl, options);
-            this.$emit("on-connect", this.mqttClient, this.filename);
+            this.$emit("on-connect", this.mqttClient, this.filename, this.UTCwindow);
             console.log(this.mqttClient);
             console.log(this.filename);
         } catch (error) {

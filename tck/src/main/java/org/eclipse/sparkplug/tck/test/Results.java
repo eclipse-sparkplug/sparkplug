@@ -35,9 +35,17 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.admin.LifecycleStage;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -50,6 +58,9 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 public class Results implements MqttCallbackExtended {
     private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
     protected static final String SPARKPLUG_TCKRESULTS_LOG = "SparkplugTCKresults.log";
+    
+    private final @NotNull AdminService adminService = Services.adminService();
+    private final @NotNull ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 
     // Configuration
     private String serverUrl = "tcp://localhost:1883";
@@ -60,6 +71,12 @@ public class Results implements MqttCallbackExtended {
 
     private MqttTopic log_topic = null;
     private MqttClient client = null;
+    
+    public class Config {
+    	public long UTCwindow = 60000L;
+    } 
+    
+    private Config config = new Config();
 
     private String primary_host_application_id = null;
 
@@ -83,6 +100,19 @@ public class Results implements MqttCallbackExtended {
             return;
         }
         logger.info("Initialize {} ", clientId);
+        
+        executorService.schedule(() -> {
+            // check if broker is ready
+            if (adminService.getCurrentStage() == LifecycleStage.STARTED_SUCCESSFULLY) {
+                connectMQTT();
+            } else {
+                // schedule next check
+                initialize(new String[] {});
+            }
+        }, 1, TimeUnit.SECONDS);
+	}
+    
+    private void connectMQTT() {
         try {
             // Connect to the MQTT Server
             MqttConnectOptions options = new MqttConnectOptions();
@@ -100,7 +130,7 @@ public class Results implements MqttCallbackExtended {
         } catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+    }
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
@@ -109,6 +139,7 @@ public class Results implements MqttCallbackExtended {
         try {
             client.subscribe(TCK_RESULTS_CONFIG_TOPIC, 2);
             client.subscribe(TCK_RESULTS_TOPIC, 2);
+            client.subscribe(TCK_CONFIG_TOPIC, 2);
             logger.info(clientId + ": subscribed");
         } catch (MqttException e) {
             e.printStackTrace();
@@ -119,11 +150,19 @@ public class Results implements MqttCallbackExtended {
 	public void connectionLost(Throwable cause) {
 		logger.debug(clientId + " connection lost - will auto-reconnect");
 	}
+	
+	public Config getConfig() {
+		return config;
+	}
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		try {
-            if (topic.equals(TCK_RESULTS_CONFIG_TOPIC)) {
+			if (topic.equals(TCK_CONFIG_TOPIC)) {
+				String[] words = new String(message.getPayload()).split(" ");
+				config.UTCwindow = Long.parseLong(words[1]);
+				logger.info("Results: setting UTCwindow to "+config.UTCwindow);
+			} else if (topic.equals(TCK_RESULTS_CONFIG_TOPIC)) {
                 logger.debug("{}: topic: {} msg: {}", clientId, topic, new String(message.getPayload())); // display log message
                 checkOrCreateNewResultLog(message);
             } else if (topic.equals(TCK_RESULTS_TOPIC)) {

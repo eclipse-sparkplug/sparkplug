@@ -46,9 +46,9 @@ public class TCK {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
 	private @Nullable TCKTest current = null;
-	private final Monitor monitor = new Monitor();
 	private final MQTTListener listener = new MQTTListener();
-	private final Results results = new Results();
+	final Results results = new Results();
+	private final Monitor monitor = new Monitor(results);
 	
 	/**
 	 * The hasMonitor variable indicates whether the Monitor class should be run for a 
@@ -66,6 +66,10 @@ public class TCK {
 	}
 
 	private boolean listenerRunning = false;
+	
+	public TCK() {
+		results.initialize(new String[0]);
+	}
 
 	public void newTest(final @NotNull String profile, final @NotNull String test, final @NotNull String[] parms) {
 
@@ -73,13 +77,20 @@ public class TCK {
 
 		try {
 			final Class testClass = Class.forName("org.eclipse.sparkplug.tck.test." + profile + "." + test);
-			final Class[] types = {this.getClass(), String[].class};
-			final Constructor constructor = testClass.getConstructor(types);
+					
+			try {
+				final Class[] types = {this.getClass(), String[].class};
+				final Constructor constructor = testClass.getConstructor(types);
+				final Object[] parameters = {this, parms};		
+				current = (TCKTest) constructor.newInstance(parameters);
+			} catch (NoSuchMethodException e) {
+				final Class[] types = {this.getClass(), String[].class, Results.Config.class};
+				final Constructor constructor = testClass.getConstructor(types);
+				final Object[] parameters = {this, parms, results.getConfig()};		
+				current = (TCKTest) constructor.newInstance(parameters);
+			}
 
-			final Object[] parameters = {this, parms};
-			current = (TCKTest) constructor.newInstance(parameters);
 			current.setProfile(Profile.valueOf(profile.toUpperCase(Locale.ROOT)));
-			results.initialize(new String[0]);
 			hasMonitor = !current.getProfile().equals(Profile.BROKER);
 
 			if (hasMonitor) {

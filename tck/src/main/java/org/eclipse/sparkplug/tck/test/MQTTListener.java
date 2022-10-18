@@ -95,7 +95,7 @@ public class MQTTListener implements MqttCallbackExtended {
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
-			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_PAYLOADS_TIMESTAMP_IN_UTC };
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID };
 
 	public void log(String message) {
 		try {
@@ -172,9 +172,6 @@ public class MQTTListener implements MqttCallbackExtended {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_B_PAYLOAD,
-			id = ID_PAYLOADS_TIMESTAMP_IN_UTC)
-	@SpecAssertion(
 			section = Sections.TOPICS_NAMESPACE_ELEMENT,
 			id = ID_TOPIC_STRUCTURE_NAMESPACE_A)
 	@Override
@@ -196,11 +193,6 @@ public class MQTTListener implements MqttCallbackExtended {
 
 					PayloadOrBuilder inboundPayload = Payload.parseFrom(message.getPayload());
 					// System.out.println(inboundPayload.toString());
-
-					if (inboundPayload.hasTimestamp()) {
-						testResult(ID_PAYLOADS_TIMESTAMP_IN_UTC,
-								setResult(checkUTC(inboundPayload.getTimestamp()), PAYLOADS_TIMESTAMP_IN_UTC));
-					}
 				}
 			}
 		} catch (Exception e) {
