@@ -18,9 +18,6 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.MAYBE;
 import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TIMESTAMP_IN_UTC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TIMESTAMP_IN_UTC;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -235,8 +232,9 @@ public class Utils {
 				logger.info("No retained message for topic: " + topic);
 			}
 		} catch (InterruptedException | ExecutionException e) {
-
+			e.printStackTrace();
 		}
+		logger.info("Is Host online? {}", hostOnline);
 		return hostOnline;
 	}
 
@@ -344,32 +342,32 @@ public class Utils {
 		}
 
 		if (isValidPayload) {
-			logger.info("Returning StatePaload with online={} bdSeq={} timestamp={}", retOnline, retBdSeq,
+			logger.debug("Returning StatePaload with online={} bdSeq={} timestamp={}", retOnline, retBdSeq,
 					retTimestamp);
 			return new StatePayload(retOnline, retBdSeq, retTimestamp);
 		} else {
 			return null;
 		}
 	}
-	
+
 	public static boolean checkUTC(long timestamp, long UTCwindow) {
 		boolean result = false;
-		
+
 		Date now = new Date();
 		long diff = now.getTime() - timestamp;
-		
+
 		if (diff == 0) {
 			result = true; // Exactly the same so we're good.
 		} else if (diff > 0) {
 			// The timestamp is within the previous allowed interval.
-			result = diff <= UTCwindow; 
+			result = diff <= UTCwindow;
 		} else if (diff < 0) {
 			// The timestamp is within the next allowed interval.
 			// This shouldn't happen unless clocks differ between machines
 			// but we should allow for it.
 			result = diff >= UTCwindow;
 		}
-	
+
 		if (result == false) {
 			logger.info("CheckUTC: timestamp diff " + diff);
 		}

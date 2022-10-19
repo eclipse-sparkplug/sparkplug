@@ -13,6 +13,94 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DCMD_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DCMD_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DCMD_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NCMD_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NCMD_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NCMD_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DCMD_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DCMD_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DCMD_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NCMD_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NCMD_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NCMD_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.jboss.test.audit.annotations.SpecAssertion;
+import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * This is the primary host Sparkplug send command test:
  *
@@ -31,50 +119,15 @@ package org.eclipse.sparkplug.tck.test.host;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
-
-import org.eclipse.sparkplug.tck.sparkplug.Sections;
-import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.jboss.test.audit.annotations.SpecAssertion;
-import org.jboss.test.audit.annotations.SpecVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
 
 @SpecVersion(
 		spec = "sparkplug",

@@ -14,11 +14,13 @@
 package org.eclipse.sparkplug.tck.test.host;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.DEATH_MESSAGE_RECEIVED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED;
@@ -80,6 +82,7 @@ public class SessionTerminationTest extends TCKTest {
 
 	private @Nullable String hostClientId = null;
 
+	private TestStatus testStatus = TestStatus.STARTED;
 	private short deathBdSeq = -1;
 
 	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
@@ -125,9 +128,11 @@ public class SessionTerminationTest extends TCKTest {
 			// get the bdSeq number
 			String payloadString =
 					StandardCharsets.UTF_8.decode(packet.getWillPublish().get().getPayload().get()).toString();
+			logger.debug("Will message STATE payload={}", payloadString);
 			StatePayload statePayload = Utils.getHostPayload(payloadString, false);
-			if (statePayload != null) {
+			if (statePayload != null && testStatus == TestStatus.STARTED) {
 				deathBdSeq = statePayload.getBdSeq().shortValue();
+				testStatus = TestStatus.CONNECT_RECEIVED;
 			} else {
 				logger.error("Test failed on connect.");
 				theTCK.endTest();
@@ -154,23 +159,44 @@ public class SessionTerminationTest extends TCKTest {
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH)
 	@Override
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		logger.info("{} test - PUBLISH - topic: {}, clientId: {} ", getName(), packet.getTopic(), clientId);
 
-		if (clientId.equals(hostClientId) && packet.getTopic().startsWith(Constants.TOPIC_ROOT_STATE)
-				&& deathBdSeq == -1) {
-			// See if this is the original online STATE message after the connect and return early
-			StatePayload statePayload =
-					Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), true);
-			if (statePayload != null) {
-				logger.debug("Ignoring original online state message");
-				return;
-			}
+		if (clientId.equals(hostClientId) && packet.getTopic().startsWith(Constants.TOPIC_ROOT_STATE)) {
+			if (testStatus == TestStatus.CONNECT_RECEIVED) {
+				// Looking for a BIRTH - see if this is the original online STATE message after the connect and return
+				// early
+				StatePayload statePayload =
+						Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), true);
 
-			if (checkDeathMessage(packet)) {
-				state = DEATH_MESSAGE_RECEIVED;
+				boolean receivedBirthAfterConnect = statePayload != null;
+				testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
+						setResult(receivedBirthAfterConnect, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH));
+
+				if (statePayload != null) {
+					logger.debug("Ignoring original online state message");
+					testStatus = TestStatus.BIRTH_RECEIVED;
+				} else {
+					logger.error("Received unexpected STATE message from {}", clientId);
+
+				}
+			} else if (testStatus == TestStatus.BIRTH_RECEIVED) {
+				if (checkDeathMessage(packet)) {
+					state = DEATH_MESSAGE_RECEIVED;
+				} else {
+					logger.warn("Failed to validate the death message");
+				}
+			} else {
+				logger.error(
+						"Received unexpected message in termination flow with TestStatus={} topic={} and clientId={}",
+						testStatus, packet.getTopic(), clientId);
 			}
+		} else {
+			logger.debug("Ignoring message from {}", clientId);
 		}
 	}
 
@@ -242,4 +268,10 @@ public class SessionTerminationTest extends TCKTest {
 		return overallResult;
 	}
 
+	public enum TestStatus {
+		STARTED,
+		CONNECT_RECEIVED,
+		BIRTH_RECEIVED,
+		DEATH_RECEIVED;
+	}
 }
