@@ -190,7 +190,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
 			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
 			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
-			ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED, ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED );
+			ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED, ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED);
 
 	private @NotNull String hostApplicationId;
 
@@ -201,7 +201,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private Results.Config config = null;
 
 	private short deathBdSeq = -1;
-	
+
 	private PublishService publishService = Services.publishService();
 
 	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] params, Results.Config config) {
@@ -325,7 +325,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		if (hostClientId.equals(clientId)) {
 			if (state == HostState.PUBLISHED) {
 				final boolean overallPass = checkBirthMessage(packet);
-				
+
 				testResults.put(ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED,
 						setResult(overallPass, MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED));
 				theTCK.endTest("resend good");
@@ -379,7 +379,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 				logger.debug("Check Req: {}:{}.", ID_INTRO_SPARKPLUG_HOST_STATE, INTRO_SPARKPLUG_HOST_STATE);
 				testResults.put(ID_INTRO_SPARKPLUG_HOST_STATE, setResult(true, INTRO_SPARKPLUG_HOST_STATE));
-				
+
 				/* Now send a state message with the online value of false to provoke the
 				 * host application into sending another STATE message.
 				 */
@@ -388,7 +388,6 @@ public class SessionEstablishmentTest extends TCKTest {
 			}
 		}
 	}
-
 
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
@@ -605,7 +604,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED + addInformation);
 		testResults.put(ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED,
 				setResult(isSubscribed, HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED + addInformation));
-		
+
 		if (shouldBeSubscribed && !isSubscribed) {
 			theTCK.endTest("shouldBeSubscribed");
 			return false;
