@@ -111,10 +111,14 @@ public class TCK {
 			logger.error("Could not find or set test class " + profile + "." + test, e);
 		}
 	}
-
+	
 	public void endTest() {
+		endTest("");
+	}
+
+	public void endTest(String info) {
 		if (current != null) {
-			logger.info("Test end requested for " + current.getName());
+			logger.info("Test end requested for " + current.getName() + " " + info);
 			final TreeMap<String, String> testResults = new TreeMap<>();
 			if (!hasMonitor) {
 				current.endTest(testResults);
