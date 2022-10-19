@@ -13,6 +13,10 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.COMPONENTS_PH_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_PRIMARY_HOST;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_MESSAGE;
@@ -96,9 +100,15 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -112,8 +122,12 @@ import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -121,6 +135,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
@@ -131,6 +146,10 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 /**
  * This is the primary host Sparkplug session establishment, and re-establishment test.
@@ -171,7 +190,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
 			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
 			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
-			ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED);
+			ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED, ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED );
 
 	private @NotNull String hostApplicationId;
 
@@ -179,12 +198,16 @@ public class SessionEstablishmentTest extends TCKTest {
 	private @NotNull HostState state = HostState.DISCONNECTED;
 	private @Nullable String hostClientId = null;
 	private TCK theTCK = null;
+	private Results.Config config = null;
 
 	private short deathBdSeq = -1;
+	
+	private PublishService publishService = Services.publishService();
 
-	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
+	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] params, Results.Config config) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.config = config;
 
 		if (params.length != 1) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -230,7 +253,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				state = HostState.CONNECTED;
 			} else {
 				logger.error("Test failed on connect.");
-				theTCK.endTest();
+				theTCK.endTest("connect fail");
 			}
 		}
 	}
@@ -259,7 +282,7 @@ public class SessionEstablishmentTest extends TCKTest {
 						MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION);
 				testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION,
 						setResult(false, MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION));
-				theTCK.endTest();
+				theTCK.endTest("subscribe state");
 				return;
 			}
 			subscriptions.addAll(
@@ -290,6 +313,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
 			id = ID_HOST_TOPIC_PHID_BIRTH_REQUIRED)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED)
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		// ignore messages before connect
 		if (hostClientId == null) {
@@ -297,66 +323,73 @@ public class SessionEstablishmentTest extends TCKTest {
 		}
 
 		if (hostClientId.equals(clientId)) {
-			logger.info("Primary - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
-			// Check if subscribe completed
-			checkSubscribes(true);
-
-			// Publish is after subscribe (and theoretically allow additional publishes)
-			logger.debug("Check Req: {}:{}.", ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
-					MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH);
-
-			if (state != HostState.SUBSCRIBED && state != HostState.PUBLISHED) {
-				testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
-						setResult(false, MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH));
-				theTCK.endTest();
-				return;
-			}
-
-			final boolean overallPass = checkBirthMessage(packet);
-
-			logger.debug("Check Req: {}:{}.", ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
-					PRINCIPLES_BIRTH_CERTIFICATES_ORDER);
-			testResults.put(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
-					setResult(overallPass, PRINCIPLES_BIRTH_CERTIFICATES_ORDER));
-
-			logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
-					OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH);
-			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
-					setResult(overallPass, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH));
-
-			testResults.put(ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, setResult(overallPass, HOST_TOPIC_PHID_BIRTH_REQUIRED));
-
-			if (overallPass) {
-				state = HostState.PUBLISHED;
-				testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
-						setResult(true, MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH));
-
-				testResults.put(ID_CONFORMANCE_PRIMARY_HOST, setResult(true, CONFORMANCE_PRIMARY_HOST));
+			if (state == HostState.PUBLISHED) {
+				final boolean overallPass = checkBirthMessage(packet);
+				
+				testResults.put(ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED,
+						setResult(overallPass, MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED));
+				theTCK.endTest("resend good");
 			} else {
-				logger.error("Test failed on published.");
-				theTCK.endTest();
+				logger.info("Primary - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
+				// Check if subscribe completed
+				if (!checkSubscribes(true))
+					return;
+
+				// Publish is after subscribe (and theoretically allow additional publishes)
+				logger.debug("Check Req: {}:{}.", ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
+						MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH);
+
+				if (state != HostState.SUBSCRIBED && state != HostState.PUBLISHED) {
+					testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
+							setResult(false, MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH));
+					theTCK.endTest("publish state");
+					return;
+				}
+
+				final boolean overallPass = checkBirthMessage(packet);
+
+				logger.debug("Check Req: {}:{}.", ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
+						PRINCIPLES_BIRTH_CERTIFICATES_ORDER);
+				testResults.put(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
+						setResult(overallPass, PRINCIPLES_BIRTH_CERTIFICATES_ORDER));
+
+				logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
+						OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH);
+				testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
+						setResult(overallPass, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH));
+
+				testResults.put(ID_HOST_TOPIC_PHID_BIRTH_REQUIRED,
+						setResult(overallPass, HOST_TOPIC_PHID_BIRTH_REQUIRED));
+
+				if (overallPass) {
+					state = HostState.PUBLISHED;
+					testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
+							setResult(true, MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH));
+
+					testResults.put(ID_CONFORMANCE_PRIMARY_HOST, setResult(true, CONFORMANCE_PRIMARY_HOST));
+				} else {
+					logger.error("Test failed on published.");
+					theTCK.endTest("publish fail");
+					return;
+				}
+
+				// TODO: test reconnect
+				logger.debug("Check Req: {}:{}.", ID_COMPONENTS_PH_STATE, COMPONENTS_PH_STATE);
+				testResults.put(ID_COMPONENTS_PH_STATE, setResult(true, COMPONENTS_PH_STATE));
+
+				logger.debug("Check Req: {}:{}.", ID_INTRO_SPARKPLUG_HOST_STATE, INTRO_SPARKPLUG_HOST_STATE);
+				testResults.put(ID_INTRO_SPARKPLUG_HOST_STATE, setResult(true, INTRO_SPARKPLUG_HOST_STATE));
+				
+				/* Now send a state message with the online value of false to provoke the
+				 * host application into sending another STATE message.
+				 */
+
+				sendOfflineStateMessage();
 			}
-
-			// TODO: test reconnect
-			logger.debug("Check Req: {}:{}.", ID_COMPONENTS_PH_STATE, COMPONENTS_PH_STATE);
-			testResults.put(ID_COMPONENTS_PH_STATE, setResult(true, COMPONENTS_PH_STATE));
-
-			logger.debug("Check Req: {}:{}.", ID_INTRO_SPARKPLUG_HOST_STATE, INTRO_SPARKPLUG_HOST_STATE);
-			testResults.put(ID_INTRO_SPARKPLUG_HOST_STATE, setResult(true, INTRO_SPARKPLUG_HOST_STATE));
 		}
-
-		// TODO: now we can disconnect the client and allow it to reconnect and go throught the
-		// session re-establishment phases. It would be nice to be able to do this at after a
-		// short arbitrary interval, but I haven't worked out a good way of doing that yet (assuming
-		// that a sleep here is not a good idea). Using a PING interceptor could be one way but
-		// we probably can't rely on any particular keepalive interval values.
-
-		theTCK.endTest();
 	}
 
-	/*@SpecAssertion(
-			section = Sections.TOPICS_DEATH_MESSAGE_STATE,
-			id = ID_HOST_TOPIC_PHID_REQUIRED)*/
+
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL)
@@ -537,7 +570,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
 			id = ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED)
-	private void checkSubscribes(final boolean shouldBeSubscribed) {
+	private boolean checkSubscribes(final boolean shouldBeSubscribed) {
 		final List<String> namespaceTopicFilter = List.of(Constants.TOPIC_ROOT_SP_BV_1_0 + "/#");
 		String prefix = Constants.TOPIC_ROOT_STATE + "/";
 		final List<String> stateTopicFilter = List.of(prefix + hostApplicationId, prefix + "+", prefix + "#");
@@ -572,11 +605,12 @@ public class SessionEstablishmentTest extends TCKTest {
 				HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED + addInformation);
 		testResults.put(ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED,
 				setResult(isSubscribed, HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED + addInformation));
-
-		if (shouldBeSubscribed) {
-			theTCK.endTest();
+		
+		if (shouldBeSubscribed && !isSubscribed) {
+			theTCK.endTest("shouldBeSubscribed");
+			return false;
 		}
-
+		return true;
 	}
 
 	@SpecAssertion(
@@ -673,13 +707,9 @@ public class SessionEstablishmentTest extends TCKTest {
 				if (json.has("timestamp")) {
 					JsonNode timestamp = json.get("timestamp");
 					if (timestamp.isLong()) {
-						int timestamp_max_diff = 60000; // milliseconds difference allowed
-						Date now = new Date();
-						long diff = now.getTime() - timestamp.longValue();
-						if (diff >= 0 && diff <= timestamp_max_diff) {
+						if (checkUTC(timestamp.longValue(), config.UTCwindow)) {
 							// valid - don't set isValidPayload as it might be false
 						} else {
-							logger.info("Timestamp diff " + diff);
 							isValidPayload = false;
 						}
 					} else {
@@ -770,5 +800,27 @@ public class SessionEstablishmentTest extends TCKTest {
 		CONNECTED,
 		SUBSCRIBED,
 		PUBLISHED
+	}
+
+	private void sendOfflineStateMessage() {
+		String topicName = TOPIC_ROOT_STATE + "/" + hostApplicationId;
+
+		String now = String.valueOf(Instant.now().toEpochMilli());
+		String bdseq = String.valueOf(deathBdSeq);
+
+		String json = "{ \"online\": false, \"bdseq\" : " + bdseq + ", \"timestamp\": " + now + "}";
+
+		ByteBuffer bytebuf = null;
+		try {
+			bytebuf = ByteBuffer.wrap(json.getBytes("utf8"));
+		} catch (UnsupportedEncodingException e) {
+			logger.info("failed to create state payload");
+			return;
+		}
+
+		Publish message = Builders.publish().topic(topicName).qos(Qos.AT_LEAST_ONCE).payload(bytebuf).build();
+
+		logger.info("Requesting host application with id {} resend state message", hostApplicationId);
+		publishService.publish(message);
 	}
 }

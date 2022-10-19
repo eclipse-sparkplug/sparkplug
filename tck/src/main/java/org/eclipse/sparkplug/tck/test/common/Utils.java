@@ -371,7 +371,7 @@ public class Utils {
 		}
 	
 		if (result == false) {
-			logger.info("Timestamp diff " + diff);
+			logger.info("CheckUTC: timestamp diff " + diff);
 		}
 		return result;
 	}
