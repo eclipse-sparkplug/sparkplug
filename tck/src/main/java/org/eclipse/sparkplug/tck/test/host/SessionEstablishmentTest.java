@@ -807,7 +807,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		String now = String.valueOf(Instant.now().toEpochMilli());
 		String bdseq = String.valueOf(deathBdSeq);
 
-		String json = "{ \"online\": false, \"bdseq\" : " + bdseq + ", \"timestamp\": " + now + "}";
+		String json = "{ \"online\": false, \"bdSeq\" : " + bdseq + ", \"timestamp\": " + now + "}";
 
 		ByteBuffer bytebuf = null;
 		try {
