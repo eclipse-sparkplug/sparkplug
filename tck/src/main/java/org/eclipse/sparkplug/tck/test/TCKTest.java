@@ -100,7 +100,7 @@ public abstract class TCKTest {
 	public void reportResults(final @NotNull Map<String, String> results) {
 		logger.info("Summary Test Results for {} ", getName());
 
-		final StringBuilder summary = Utils.getSummary(results);
+		final StringBuilder summary = Results.getSummary(results);
 		logger.info(summary.toString());
 		summary.insert(0, new Timestamp(new Date().getTime()) + " Summary Test Results for " + getName()
 				+ System.lineSeparator());

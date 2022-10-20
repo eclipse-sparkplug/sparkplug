@@ -238,33 +238,6 @@ public class Utils {
 		return hostOnline;
 	}
 
-	public static StringBuilder getSummary(final @NotNull Map<String, String> results) {
-		final StringBuilder summary = new StringBuilder();
-
-		String overall = results.entrySet().isEmpty() ? Constants.EMPTY : Constants.NOT_EXECUTED;
-
-		for (final Map.Entry<String, String> reportResult : results.entrySet()) {
-			if (reportResult.getValue().equals(NOT_EXECUTED)) {
-				// skip
-				continue;
-			}
-
-			summary.append(reportResult.getKey()).append(": ").append(reportResult.getValue()).append(";")
-					.append(System.lineSeparator());
-
-			if (!overall.equals(Constants.FAIL)) { // don't overwrite an overall fail status
-				if (reportResult.getValue().startsWith(Constants.PASS)) {
-					overall = Constants.PASS;
-				} else if (reportResult.getValue().startsWith(Constants.FAIL)) {
-					overall = Constants.FAIL;
-				}
-			}
-		}
-		summary.append("OVERALL: ").append(overall).append(";").append(System.lineSeparator());
-
-		return summary;
-	}
-
 	public static boolean checkUTF8String(String inString) {
 		// MUST be a valid UTF-8 string
 

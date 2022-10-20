@@ -33,7 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TreeMap;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.*;
@@ -46,15 +49,14 @@ public class TCK {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
 	private @Nullable TCKTest current = null;
-	private final MQTTListener listener = new MQTTListener();
 	final Results results = new Results();
 	private final Monitor monitor = new Monitor(results);
-	
+
 	/**
-	 * The hasMonitor variable indicates whether the Monitor class should be run for a 
-	 * test. This is switched off for the Broker profile, and on for the Host and Edge profiles.
-	 * The Monitor class holds tests for assertions that don't neatly fit into a single test scenario,
-	 * or apply all the time, so it runs alongside all Host and Edge tests.
+	 * The hasMonitor variable indicates whether the Monitor class should be run for a test. This is switched off for
+	 * the Broker profile, and on for the Host and Edge profiles. The Monitor class holds tests for assertions that
+	 * don't neatly fit into a single test scenario, or apply all the time, so it runs alongside all Host and Edge
+	 * tests.
 	 */
 	private @NotNull Boolean hasMonitor = true;
 
@@ -66,7 +68,7 @@ public class TCK {
 	}
 
 	private boolean listenerRunning = false;
-	
+
 	public TCK() {
 		results.initialize(new String[0]);
 	}
@@ -77,16 +79,16 @@ public class TCK {
 
 		try {
 			final Class testClass = Class.forName("org.eclipse.sparkplug.tck.test." + profile + "." + test);
-					
+
 			try {
-				final Class[] types = {this.getClass(), String[].class};
+				final Class[] types = { this.getClass(), String[].class };
 				final Constructor constructor = testClass.getConstructor(types);
-				final Object[] parameters = {this, parms};		
+				final Object[] parameters = { this, parms };
 				current = (TCKTest) constructor.newInstance(parameters);
 			} catch (NoSuchMethodException e) {
-				final Class[] types = {this.getClass(), String[].class, Results.Config.class};
+				final Class[] types = { this.getClass(), String[].class, Results.Config.class };
 				final Constructor constructor = testClass.getConstructor(types);
-				final Object[] parameters = {this, parms, results.getConfig()};		
+				final Object[] parameters = { this, parms, results.getConfig() };
 				current = (TCKTest) constructor.newInstance(parameters);
 			}
 
@@ -95,11 +97,6 @@ public class TCK {
 
 			if (hasMonitor) {
 				monitor.startTest();
-				if (!listenerRunning) {
-					listener.run(new String[0]);
-					listenerRunning = true;
-				}
-				listener.clearResults();
 			}
 		} catch (java.lang.reflect.InvocationTargetException e) {
 			logger.error("Error starting test " + profile + "." + test);
@@ -111,7 +108,7 @@ public class TCK {
 			logger.error("Could not find or set test class " + profile + "." + test, e);
 		}
 	}
-	
+
 	public void endTest() {
 		endTest("");
 	}
@@ -120,14 +117,13 @@ public class TCK {
 		if (current != null) {
 			logger.info("Test end requested for " + current.getName() + " " + info);
 			final TreeMap<String, String> testResults = new TreeMap<>();
+
 			if (!hasMonitor) {
 				current.endTest(testResults);
 			} else {
 				testResults.putAll(monitor.getResults());
-				testResults.putAll(listener.getResults());
 				current.endTest(testResults);
 				monitor.endTest(null);
-				listener.clearResults();
 			}
 			current = null;
 		} else {
