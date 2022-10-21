@@ -202,6 +202,27 @@ public class Utils {
 		}
 	}
 
+	public static String getRetained(String topic) {
+		String payload = null;
+		final CompletableFuture<Optional<RetainedPublish>> getFuture =
+				Services.retainedMessageStore().getRetainedMessage(topic);
+		try {
+			Optional<RetainedPublish> retainedPublishOptional = getFuture.get();
+			if (retainedPublishOptional.isPresent()) {
+				final RetainedPublish retainedPublish = retainedPublishOptional.get();
+				ByteBuffer bpayload = retainedPublish.getPayload().orElseGet(null);
+				if (bpayload != null) {
+					payload = StandardCharsets.UTF_8.decode(bpayload).toString();
+				}
+			} else {
+				logger.info("No retained message for topic: " + topic);
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		return payload;
+	}
+
 	public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
 		// Check that the host application status is online
 
