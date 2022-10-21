@@ -13,7 +13,6 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
-import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.DEATH_MESSAGE_RECEIVED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS;
@@ -44,6 +43,7 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
@@ -58,9 +58,10 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
  * We do know the host application id, but there is no requirement on the MQTT client id, which means the first that we
  * know we are dealing with the host application is the receipt of the STATE message.
  * <p>
- * Currently this test works if the first MQTT client to connect is the host application. To make it completely robust
- * means following all connect/subscribe/publish combinations and ruling out the ones that don't match. There could be
- * many in parallel.
+ * There are two ways of running this test: 1. pass in the host application clientid as a parameter. Start the test with
+ * the host application running, then stop the host application. The clientid parameter must match the MQTT clientid
+ * being used by the host application. 2. start with the host application disconnected. Connect so we can get the MQTT
+ * clientid, then shutdown the host application. The clientid parameter to the test doesn't matter.
  *
  * @author Ian Craggs, Anja Helmbrecht-Schaar
  */
@@ -89,16 +90,19 @@ public class SessionTerminationTest extends TCKTest {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
 
-		if (params.length != 2) {
+		if (params.length < 1) {
 			log("Not enough parameters: " + Arrays.toString(params));
-			log("Parameters to host session termination test must be: hostApplicationId hostClientId");
+			log("Parameters to host session termination test must be: hostApplicationId <hostClientId> where the hostClientid is optional");
 			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
-		hostClientId = params[1];
+		if (params.length == 2) {
+			hostClientId = params[1];
+		}
 
 		logger.info("Parameters are HostApplicationId: {}, HostClientId: {}", hostApplicationId, hostClientId);
 
+		setBdSeq();
 	}
 
 	@Override
@@ -133,6 +137,8 @@ public class SessionTerminationTest extends TCKTest {
 			if (statePayload != null && testStatus == TestStatus.STARTED) {
 				deathBdSeq = statePayload.getBdSeq().shortValue();
 				testStatus = TestStatus.CONNECT_RECEIVED;
+				hostClientId = clientId;
+				logger.info("{} : setting clientid to {}", getName(), hostClientId);
 			} else {
 				logger.error("Test failed on connect.");
 				theTCK.endTest();
@@ -147,11 +153,17 @@ public class SessionTerminationTest extends TCKTest {
 	public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
 		logger.info("Host - {} test - DISCONNECT - clientId: {}, state: {} ", getName(), clientId, state);
 
+		if (hostClientId == null) {
+			logger.warn("{} host application clientid is not set", getName());
+			return;
+		}
+
 		if (clientId.equals(hostClientId)) {
 			logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
 					OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL);
-			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL, setResult(
-					state == DEATH_MESSAGE_RECEIVED, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
+			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
+					setResult(testStatus == TestStatus.DEATH_RECEIVED,
+							OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
 			theTCK.endTest();
 		}
 	}
@@ -165,6 +177,11 @@ public class SessionTerminationTest extends TCKTest {
 	@Override
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		logger.info("{} test - PUBLISH - topic: {}, clientId: {} ", getName(), packet.getTopic(), clientId);
+
+		if (hostClientId == null) {
+			logger.warn("{} host application clientid is not set", getName());
+			return;
+		}
 
 		if (clientId.equals(hostClientId) && packet.getTopic().startsWith(Constants.TOPIC_ROOT_STATE)) {
 			if (testStatus == TestStatus.CONNECT_RECEIVED) {
@@ -184,9 +201,9 @@ public class SessionTerminationTest extends TCKTest {
 					logger.error("Received unexpected STATE message from {}", clientId);
 
 				}
-			} else if (testStatus == TestStatus.BIRTH_RECEIVED) {
+			} else if (testStatus == TestStatus.BIRTH_RECEIVED || testStatus == TestStatus.STARTED) {
 				if (checkDeathMessage(packet)) {
-					state = DEATH_MESSAGE_RECEIVED;
+					testStatus = TestStatus.DEATH_RECEIVED;
 				} else {
 					logger.warn("Failed to validate the death message");
 				}
@@ -266,6 +283,22 @@ public class SessionTerminationTest extends TCKTest {
 				setResult(isRetain, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED));
 
 		return overallResult;
+	}
+
+	private void setBdSeq() {
+		String payload = Utils.getRetained(Constants.TOPIC_ROOT_STATE + '/' + hostApplicationId);
+		if (payload != null) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				StatePayload statePayload = mapper.readValue(payload, StatePayload.class);
+				if (statePayload != null && statePayload.isOnline()) {
+					deathBdSeq = statePayload.getBdSeq().shortValue();
+					logger.info("{} setting bdseq to {}", getName(), deathBdSeq);
+				}
+			} catch (Exception e) {
+				logger.error("Failed to handle state topic payload: {}", payload);
+			}
+		}
 	}
 
 	public enum TestStatus {

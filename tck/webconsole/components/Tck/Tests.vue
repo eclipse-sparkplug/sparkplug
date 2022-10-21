@@ -9,6 +9,7 @@
  *
  * Contributors:
  *    Lukas Brand - initial implementation and documentation
+ *    Ian Craggs - updates for usability and features
  ****************************************************************************-->
 
 <template>
@@ -242,20 +243,23 @@ export default {
                         testType: "HOSTAPPLICATION",
                         name: "SessionTerminationTest",
                         readableName: "Session Termination Test",
-                        description: "This is the Host Application Sparkplug session termination test.",
+                        description: `This is the Sparkplug Host Application session termination test. There are 
+                        two ways of running it. Either set the MQTT Client id of an already connected Host Application,
+                        or connect the Host Application while the test is running.`,
                         requirements: [
-                            "Setup a MQTT Connection.",
-                            "Set a Host Application Id that is used by an Application.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Enter the MQTT Client id if the Host Application is already running.",
                             "Start this test.",
-                            "Start the Host Application.",
-                            "Stop the Host Application to trigger events of MQTT messages.",
-                            "Wait until Tests are finished and check Results."
+                            "Start the Host Application, if it wasn't already.",
+                            "Stop the Host Application to trigger the Sparkplug death messages.",
+                            "Wait until the test is finished and check the results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             client_id: {
-                                parameterReadableName: "Host App Id",
+                                parameterReadableName: "MQTT ClientId",
                                 parameterValue: "",
-                                parameterDescription: "The MQTT Client Id of the already connected Host Application",
+                                parameterDescription: "The MQTT Client Id of the Host Application",
                             },
                         },
                         result: null,
