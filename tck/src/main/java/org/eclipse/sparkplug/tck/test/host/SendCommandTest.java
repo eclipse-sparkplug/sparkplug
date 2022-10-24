@@ -76,6 +76,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NCMD_TOP
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.addQuotes;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -193,7 +194,9 @@ public class SendCommandTest extends TCKTest {
 		// We do this by sending an MQTT control message to the TCK device utility.
 		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
 		state = TestStatus.CONNECTING_DEVICE;
-		String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
+
+		String payload = "NEW DEVICE " + addQuotes(hostApplicationId) + " " + addQuotes(groupId) + " "
+				+ addQuotes(edgeNodeId) + " " + addQuotes(deviceId);
 		Publish message = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(payload.getBytes())).build();
 		logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
