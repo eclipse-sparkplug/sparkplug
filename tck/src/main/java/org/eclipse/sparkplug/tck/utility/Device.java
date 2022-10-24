@@ -46,8 +46,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.StatePayload;
+
 import org.eclipse.tahu.SparkplugException;
 import org.eclipse.tahu.SparkplugInvalidTypeException;
 import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
@@ -70,6 +69,11 @@ import org.eclipse.tahu.message.model.Template.TemplateBuilder;
 import org.eclipse.tahu.message.model.Value;
 import org.eclipse.tahu.util.CompressionAlgorithm;
 import org.eclipse.tahu.util.PayloadUtil;
+
+import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
+
 import org.jboss.test.audit.annotations.SpecVersion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -143,7 +147,7 @@ public class Device {
 			while (true) {
 				MqttMessage msg = control_listener.getNextMessage();
 				if (msg != null) {
-					String[] words = msg.toString().split(" ");
+					String[] words = Utils.tokenize(msg.toString());
 					if (words.length == 6 && words[0].toUpperCase().equals("NEW")
 							&& words[1].toUpperCase().equals("DEVICE")) {
 						/* NEW DEVICE host application id, group id, edge node id, device id */
@@ -623,7 +627,7 @@ public class Device {
 			System.out.println("Connected!");
 
 			try {
-				control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
+				control.subscribe(Constants.TCK_DEVICE_CONTROL_TOPIC);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_TEST_CONTROL_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.tokenize;
 
 /**
  * @author Ian Craggs
@@ -65,22 +66,7 @@ public class PublishInterceptor implements PublishInboundInterceptor, PublishOut
 				if (topic.equals(TCK_CONSOLE_TEST_CONTROL_TOPIC)) {
 					String cmd = "NEW_TEST";
 					if (payload.toUpperCase().startsWith(cmd)) {
-						// find all tokens which are either plain tokens or
-						// containing whitespaces and therefore surrounded with double quotes
-						final Pattern tokenPattern = Pattern.compile("(\"[^\"]+\")|\\S+");
-						final Matcher matcher = tokenPattern.matcher(payload.trim());
-						final List<String> tokens = new ArrayList<>();
-						while (matcher.find()) {
-							tokens.add(matcher.group());
-						}
-						final String[] strings = tokens.stream().map(token -> {
-								if (token.startsWith("\"") && token.endsWith("\"")) {
-									return token.substring(1, token.length() - 1);
-								} else {
-									return token;
-								}
-							}).toArray(String[]::new);
-
+						final String[] strings = tokenize(payload.trim());
 						if (strings.length < 3) {
 							throw new RuntimeException("New test syntax is: NEW_TEST profile testname <parameters>");
 						}
@@ -106,7 +92,8 @@ public class PublishInterceptor implements PublishInboundInterceptor, PublishOut
 	}
 
 	@Override
-	public void onOutboundPublish(@NotNull PublishOutboundInput publishOutboundInput, @NotNull PublishOutboundOutput publishOutboundOutput) {
+	public void onOutboundPublish(@NotNull PublishOutboundInput publishOutboundInput,
+			@NotNull PublishOutboundOutput publishOutboundOutput) {
 		final String clientId = publishOutboundInput.getClientInformation().getClientId();
 		final PublishPacket packet = publishOutboundInput.getPublishPacket();
 		final String topic = packet.getTopic();

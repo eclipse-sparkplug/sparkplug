@@ -21,6 +21,7 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
@@ -366,5 +369,33 @@ public class Utils {
 			logger.info("CheckUTC: timestamp diff " + diff);
 		}
 		return result;
+	}
+
+	public static String addQuotes(String string) {
+		String result = string;
+		if (result.contains(" ")) {
+			result = "\"" + result + "\"";
+		}
+		return result;
+	}
+
+	public static String[] tokenize(String payload) {
+		// find all tokens which are either plain tokens or
+		// containing whitespaces and therefore surrounded with double quotes
+		final Pattern tokenPattern = Pattern.compile("(\"[^\"]+\")|\\S+");
+		final Matcher matcher = tokenPattern.matcher(payload.trim());
+		final List<String> tokens = new ArrayList<>();
+		while (matcher.find()) {
+			tokens.add(matcher.group());
+		}
+		final String[] strings = tokens.stream().map(token -> {
+			if (token.startsWith("\"") && token.endsWith("\"")) {
+				return token.substring(1, token.length() - 1);
+			} else {
+				return token;
+			}
+		}).toArray(String[]::new);
+
+		return strings;
 	}
 }
