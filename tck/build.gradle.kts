@@ -1,5 +1,6 @@
 import de.undercouch.gradle.tasks.download.Download
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
+import org.gradle.jvm.tasks.Jar
 
 plugins {
     id("java")
@@ -440,3 +441,12 @@ tasks.runHivemqWithExtension {
  */
  */
 
+tasks.jar {
+    manifest.attributes["Main-Class"] = "org.eclipse.sparkplug.tck.utility.Device"
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree) // OR .map { zipTree(it) }
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

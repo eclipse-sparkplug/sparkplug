@@ -157,7 +157,7 @@ public class SendCommandTest extends TCKTest {
 	private @NotNull String edgeNodeId;
 	private @NotNull String hostApplicationId;
 
-	private String testClientId = null;
+	private String edgeNodeTestClientId = null;
 	private List<Metric> edgeBirthMetrics = null;
 	private List<Metric> deviceBirthMetrics = null;
 
@@ -208,14 +208,17 @@ public class SendCommandTest extends TCKTest {
 		reportResults(testResults);
 	}
 
+	@Override
 	public String getName() {
 		return "Host SendCommand";
 	}
 
+	@Override
 	public String[] getTestIds() {
 		return testIds.toArray(new String[0]);
 	}
 
+	@Override
 	public Map<String, String> getResults() {
 		return testResults;
 	}
@@ -232,8 +235,8 @@ public class SendCommandTest extends TCKTest {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
 			String willTopic = willPublishPacket.getTopic();
 			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
-				testClientId = clientId;
-				logger.info("Edge session establishment test - connect - client id is " + clientId);
+				edgeNodeTestClientId = clientId;
+				logger.info("Host Application send command test - connect - client id is " + clientId);
 				testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC,
 						setResult(true, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC));
 			}
@@ -242,10 +245,12 @@ public class SendCommandTest extends TCKTest {
 
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
+		logger.info("Host - {} - DISCONNECT {}, {} ", getName(), clientId, state);
 	}
 
 	@Override
 	public void subscribe(String clientId, SubscribePacket packet) {
+		logger.info("Host - {} - SUBSCRIBE {}, {} ", getName(), clientId, state);
 	}
 
 	private void publishToTckConsolePrompt(String payload) {
@@ -257,9 +262,9 @@ public class SendCommandTest extends TCKTest {
 
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
-		logger.debug("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
+		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
 
-		if (testClientId != null && testClientId.equals(clientId)) {
+		if (edgeNodeTestClientId != null && edgeNodeTestClientId.equals(clientId)) {
 			logger.debug("Host send command test - publish -  to topic: {} ", packet.getTopic());
 			String topic = packet.getTopic();
 			String[] topicLevels = topic.split("/");
@@ -301,7 +306,8 @@ public class SendCommandTest extends TCKTest {
 					state = TestStatus.EXPECT_NODE_REBIRTH;
 				}
 			}
-		} else if (topic.equals(Constants.SP_BV_1_0_SPARKPLUG_TCK_NCMD_TOPIC + edgeNodeId)) {
+		} else if (topic
+				.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId)) {
 			if (state == TestStatus.EXPECT_NODE_REBIRTH) {
 				checkNodeCommand(clientId, packet);
 				publishToTckConsolePrompt("Send an edge command to edge node " + edgeNodeId + " metric " + EDGE_METRIC);
@@ -312,7 +318,8 @@ public class SendCommandTest extends TCKTest {
 						"Send a device rebirth command to device " + deviceId + " at edge node " + edgeNodeId);
 				state = TestStatus.EXPECT_DEVICE_REBIRTH;
 			}
-		} else if (topic.equals(Constants.SP_BV_1_0_SPARKPLUG_TCK_DCMD_TOPIC + edgeNodeId + "/" + deviceId)) {
+		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DCMD + "/"
+				+ edgeNodeId + "/" + deviceId)) {
 			if (state == TestStatus.EXPECT_DEVICE_REBIRTH) {
 				checkDeviceCommand(clientId, packet);
 				publishToTckConsolePrompt("Send a device command to device " + deviceId + " at edge node " + edgeNodeId
@@ -350,18 +357,9 @@ public class SendCommandTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB)
 	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE)
-	@SpecAssertion(
 			section = Sections.TOPICS_COMMAND_NCMD,
 			id = ID_TOPICS_NCMD_TOPIC)
-	public void checkNodeCommand(final String clientId, final @NotNull PublishPacket packet) {
+	private void checkNodeCommand(final String clientId, final @NotNull PublishPacket packet) {
 		logger.info("Host - {}  - PUBLISH - checkNodeCommand {}, {}", getName(), packet.getTopic(), state);
 
 		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB,
@@ -395,21 +393,6 @@ public class SendCommandTest extends TCKTest {
 
 		logger.debug("Check Req: {}:{}.", ID_TOPICS_NCMD_PAYLOAD, TOPICS_NCMD_PAYLOAD);
 		testResults.put(ID_TOPICS_NCMD_PAYLOAD, setResult(bValid[2], TOPICS_NCMD_PAYLOAD));
-
-		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
-				OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB);
-		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
-				setResult(bValid[3], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB));
-
-		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-				OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME);
-		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-				setResult(bValid[3], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB));
-
-		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
-				OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE);
-		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
-				setResult(bValid[4], OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE));
 
 		// Topic check
 		String topic = packet.getTopic();
@@ -445,7 +428,7 @@ public class SendCommandTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_COMMAND_DCMD,
 			id = ID_TOPICS_DCMD_TOPIC)
-	public void checkDeviceCommand(String clientId, PublishPacket packet) {
+	private void checkDeviceCommand(String clientId, PublishPacket packet) {
 		logger.info("Host - {}  - PUBLISH - checkDeviceCommand {}, {} ", getName(), packet.getTopic(), state);
 
 		logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB,
@@ -494,11 +477,13 @@ public class SendCommandTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE)
 	private Boolean[] checkValidDeviceCommandPayload(PayloadOrBuilder payload) {
+		logger.info("Host - {}  - PUBLISH - checkValidDeviceCommandPayload {}, {} ", getName(), payload, state);
+
 		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
 		if (payload != null) {
 			bValidPayload[0] = (payload.hasTimestamp());
-			bValidPayload[1] = (payload.getSeq() < 0);
+			bValidPayload[1] = !payload.hasSeq();
 			List<Metric> metrics = payload.getMetricsList();
 
 			ListIterator<Metric> metricIterator = metrics.listIterator();
@@ -527,16 +512,27 @@ public class SendCommandTest extends TCKTest {
 
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE)
 	private Boolean[] checkValidCommandPayload(PayloadOrBuilder payload) {
-		Boolean[] bValidPayload = new Boolean[] { false, false, false, false, false };
+		logger.info("Host - {}  - PUBLISH - checkValidCommandPayload {}, {} ", getName(), payload, state);
+
+		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
 		if (payload != null) {
 			bValidPayload[0] = payload.hasTimestamp();
-			bValidPayload[1] = (payload.getSeq() < 0);
+			bValidPayload[1] = !payload.hasSeq();
 			List<Metric> metrics = payload.getMetricsList();
 
 			ListIterator<Metric> metricIterator = metrics.listIterator();
@@ -544,11 +540,24 @@ public class SendCommandTest extends TCKTest {
 				Metric current = metricIterator.next();
 				if (current.getName().equals(EDGE_METRIC)) {
 					bValidPayload[2] = true;
-				}
-				if (current.getName().equals(NODE_CONTROL_REBIRTH)) {
-					bValidPayload[3] = true;
+				} else if (current.getName().equals(NODE_CONTROL_REBIRTH)) {
+					bValidPayload[2] = true;
+
+					logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
+							OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB);
+					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
+							setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB));
+
+					logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
+							OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME);
+					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
+							setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME));
+
 					if (current.getDatatype() == DataType.Boolean.getNumber()) {
-						bValidPayload[4] = current.getBooleanValue();
+						logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
+								OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE);
+						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, setResult(
+								current.getBooleanValue(), OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE));
 					}
 				}
 

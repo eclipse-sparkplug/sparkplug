@@ -115,14 +115,17 @@ public class SessionTerminationTest extends TCKTest {
 		reportResults(testResults);
 	}
 
+	@Override
 	public String getName() {
 		return "Host SessionTermination";
 	}
 
+	@Override
 	public String[] getTestIds() {
 		return testIds.toArray(new String[0]);
 	}
 
+	@Override
 	public Map<String, String> getResults() {
 		return testResults;
 	}

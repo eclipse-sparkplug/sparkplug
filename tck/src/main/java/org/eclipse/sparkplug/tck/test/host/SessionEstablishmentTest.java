@@ -13,9 +13,6 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.COMPONENTS_PH_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_PRIMARY_HOST;
@@ -48,6 +45,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_P
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_SPARKPLUG_HOST_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
@@ -75,6 +73,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_SPARKPLUG_HOST_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
@@ -100,10 +99,8 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -112,22 +109,18 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -135,7 +128,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
@@ -709,12 +701,15 @@ public class SessionEstablishmentTest extends TCKTest {
 						if (checkUTC(timestamp.longValue(), config.UTCwindow)) {
 							// valid - don't set isValidPayload as it might be false
 						} else {
+							logger.info("StatePayload is invalid - timestamp diff");
 							isValidPayload = false;
 						}
 					} else {
+						logger.info("StatePayload is invalid - timestamp is the wrong type", timestamp.getNodeType());
 						isValidPayload = false;
 					}
 				} else {
+					logger.info("StatePayload is invalid - timestamp is missing");
 					isValidPayload = false;
 				}
 
@@ -734,10 +729,26 @@ public class SessionEstablishmentTest extends TCKTest {
 						testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
 								setResult(bdseq.shortValue() == deathBdSeq,
 										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ));
+					} else if (bdseq.isInt() && bdseq.intValue() >= 0 || bdseq.intValue() <= 255) {
+						testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
+								setResult(bdseq.intValue() == deathBdSeq,
+										MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ));
+
+						testResults.put(ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
+								setResult(bdseq.intValue() == deathBdSeq, PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ));
+
+						testResults.put(ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
+								setResult(bdseq.intValue() == deathBdSeq, HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ));
+
+						testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
+								setResult(bdseq.intValue() == deathBdSeq,
+										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ));
 					} else {
+						logger.info("StatePayload is invalid - bdSeq is invalid: {}", bdseq);
 						isValidPayload = false;
 					}
 				} else {
+					logger.info("StatePayload is invalid - bdSeq field is missing");
 					isValidPayload = false;
 				}
 
@@ -746,9 +757,11 @@ public class SessionEstablishmentTest extends TCKTest {
 					if (online.isBoolean() && online.booleanValue() == true) {
 						// valid - don't set isValidPayload as it might be false
 					} else {
+						logger.info("StatePayload is invalid - online={} - expected=true", online);
 						isValidPayload = false;
 					}
 				} else {
+					logger.info("StatePayload is invalid - online field is missing");
 					isValidPayload = false;
 				}
 			}
