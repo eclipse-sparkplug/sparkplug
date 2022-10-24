@@ -291,6 +291,13 @@ export default {
                         " " + testParameter.parameters["edge_node_id"].parameterValue +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "EdgeSessionTerminationTest") {
+                    const testParameters =
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + testParameter.parameters["group_id"].parameterValue +
+                        " " + testParameter.parameters["edge_node_id"].parameterValue +
+                        " " + testParameter.parameters["device_id"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");
                 }

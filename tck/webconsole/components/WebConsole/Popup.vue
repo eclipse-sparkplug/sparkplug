@@ -95,7 +95,7 @@ export default {
     confirmNotification: function () {
       this.removeNotificationFromNotifications();
 
-      const topic = "SPARKPLUG_TCK/CONSOLE_LOG";
+      const topic = "SPARKPLUG_TCK/CONSOLE_REPLY";
       const message = "PASS";
       this.$emit("handle-notification", topic, message);
     },
@@ -109,7 +109,7 @@ export default {
     declineNotification: function () {
       this.removeNotificationFromNotifications();
 
-      const topic = "SPARKPLUG_TCK/CONSOLE_LOG";
+      const topic = "SPARKPLUG_TCK/CONSOLE_REPLY";
       const message = "FAIL";
       this.$emit("handle-notification", topic, message);
     },

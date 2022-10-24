@@ -46,16 +46,6 @@ public abstract class TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	protected final @NotNull Map<String, String> testResults = new TreeMap<>();
 
-	public Profile getProfile() {
-		return profile;
-	}
-
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
-
-	protected @NotNull Profile profile;
-	
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
 	}
 

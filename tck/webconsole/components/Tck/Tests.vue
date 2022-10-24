@@ -338,6 +338,42 @@ export default {
                         logging: [],
                     },
                 },
+                edgeSessionTerminationTest: {
+                    testValues: {
+                        testType: "HOSTAPPLICATION",
+                        name: "EdgeSessionTerminationTest",
+                        readableName: "Edge Session Termination Test",
+                        description:
+                            "To check that the Host Application behaves correctly when death messages are received from an Edge Node.",
+                        requirements: [
+                            "Start the Host Application, if it is not yet running.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Set a Host Application Id that is used by an Application.",
+                            "Start this test.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        parameters: {
+                            group_id: {
+                                parameterReadableName: "Group Id",
+                                parameterValue: "",
+                                parameterDescription: "The Group Id of the Edge Node",
+                            },
+                            edge_node_id: {
+                                parameterReadableName: "Edge Node Id",
+                                parameterValue: "",
+                                parameterDescription: "The id of the Edge Node the Host Application will receive the death message from.",
+                            },
+                            device_id: {
+                                parameterReadableName: "Device Id",
+                                parameterValue: "",
+                                parameterDescription: "The Device Id of a device connected to the Edge Node.",
+                            },
+                        },
+                        code: "",
+                        result: null,
+                        logging: [],
+                    },
+                },
             },
 
             /**
