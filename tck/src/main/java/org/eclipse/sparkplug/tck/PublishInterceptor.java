@@ -18,6 +18,7 @@ import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboun
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundOutput;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.common.Constants.Profile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +77,7 @@ public class PublishInterceptor implements PublishInboundInterceptor, PublishOut
 						if (no_parms > 0) {
 							System.arraycopy(strings, 3, parms, 0, no_parms);
 						}
-						theTCK.newTest(strings[1], strings[2], parms);
+						theTCK.newTest(Profile.valueOf(strings[1].toUpperCase()), strings[2], parms);
 					} else {
 						cmd = "END_TEST";
 						if (payload.toUpperCase().trim().equals(cmd)) {

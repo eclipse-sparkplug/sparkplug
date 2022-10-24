@@ -251,6 +251,16 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		return testIds;
 	}
 
+	public boolean hasEdgeNode(String groupId, String edgeNodeId) {
+		return edge_nodes.containsKey(groupId + ":" + edgeNodeId);
+	}
+
+	public boolean hasDevice(String groupId, String edgeNodeId, String deviceId) {
+		logger.info("Monitor edge {} ", edge_nodes.keySet().toString());
+		String edgeId = groupId + ":" + edgeNodeId;
+		return edge_to_devices.containsKey(edgeId) && edge_to_devices.get(edgeId).contains(deviceId);
+	}
+
 	public TreeMap<String, String> getResults() {
 		TreeMap<String, String> labelledResults = new TreeMap<>();
 		for (int i = 0; i < testIds.length; ++i) {

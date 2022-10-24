@@ -73,12 +73,13 @@ public class TCK {
 		results.initialize(new String[0]);
 	}
 
-	public void newTest(final @NotNull String profile, final @NotNull String test, final @NotNull String[] parms) {
+	public void newTest(final @NotNull Profile profile, final @NotNull String test, final @NotNull String[] parms) {
 
-		logger.info("Test requested " + profile + " " + test);
+		logger.info("Test requested " + profile.name().toLowerCase() + " " + test);
 
 		try {
-			final Class testClass = Class.forName("org.eclipse.sparkplug.tck.test." + profile + "." + test);
+			final Class testClass =
+					Class.forName("org.eclipse.sparkplug.tck.test." + profile.name().toLowerCase() + "." + test);
 
 			try {
 				final Class[] types = { this.getClass(), String[].class };
@@ -86,26 +87,32 @@ public class TCK {
 				final Object[] parameters = { this, parms };
 				current = (TCKTest) constructor.newInstance(parameters);
 			} catch (NoSuchMethodException e) {
-				final Class[] types = { this.getClass(), String[].class, Results.Config.class };
-				final Constructor constructor = testClass.getConstructor(types);
-				final Object[] parameters = { this, parms, results.getConfig() };
-				current = (TCKTest) constructor.newInstance(parameters);
+				try {
+					final Class[] types = { this.getClass(), String[].class, Results.Config.class };
+					final Constructor constructor = testClass.getConstructor(types);
+					final Object[] parameters = { this, parms, results.getConfig() };
+					current = (TCKTest) constructor.newInstance(parameters);
+				} catch (NoSuchMethodException f) {
+					final Class[] types = { this.getClass(), Monitor.class, String[].class, Results.Config.class };
+					final Constructor constructor = testClass.getConstructor(types);
+					final Object[] parameters = { this, monitor, parms, results.getConfig() };
+					current = (TCKTest) constructor.newInstance(parameters);
+				}
 			}
 
-			current.setProfile(Profile.valueOf(profile.toUpperCase(Locale.ROOT)));
-			hasMonitor = !current.getProfile().equals(Profile.BROKER);
+			hasMonitor = !profile.equals(Profile.BROKER);
 
 			if (hasMonitor) {
 				monitor.startTest();
 			}
 		} catch (java.lang.reflect.InvocationTargetException e) {
-			logger.error("Error starting test " + profile + "." + test);
+			logger.error("Error starting test " + profile.name().toLowerCase() + "." + test);
 			if (e.getMessage() != null) {
 				logger.error(e.getMessage());
 			}
 			MQTTLog("OVERALL: NOT EXECUTED"); // Ensure the test ends
 		} catch (final Exception e) {
-			logger.error("Could not find or set test class " + profile + "." + test, e);
+			logger.error("Could not find or set test class " + profile.name().toLowerCase() + "." + test, e);
 		}
 	}
 

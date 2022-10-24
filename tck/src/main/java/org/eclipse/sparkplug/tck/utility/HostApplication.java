@@ -55,7 +55,6 @@ public class HostApplication {
 
 	private String state = null;
 
-	private String namespace = "spBv1.0";
 	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
 
@@ -147,8 +146,8 @@ public class HostApplication {
 		connectOptions.setWill(stateTopic, deathPayload, 1, true);
 		host.connect(connectOptions);
 
-		// subscribe to topic namespace
-		host.subscribe(namespace + "/#");
+		// subscribe to Sparkplug namespace
+		host.subscribe(Constants.TOPIC_ROOT_SP_BV_1_0 + "/#");
 
 		// send online state message
 		MqttMessage online = new MqttMessage(birthPayload);
