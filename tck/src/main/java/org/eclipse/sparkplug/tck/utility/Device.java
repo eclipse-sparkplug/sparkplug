@@ -47,6 +47,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.eclipse.tahu.SparkplugException;
 import org.eclipse.tahu.SparkplugInvalidTypeException;
 import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
@@ -70,6 +71,8 @@ import org.eclipse.tahu.message.model.Value;
 import org.eclipse.tahu.util.CompressionAlgorithm;
 import org.eclipse.tahu.util.PayloadUtil;
 import org.jboss.test.audit.annotations.SpecVersion;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -108,6 +111,7 @@ public class Device {
 
 	public void log(String message) {
 		try {
+			System.out.println("Message: " + message);
 			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
 			log_topic.publish(mqttmessage);
 		} catch (Exception e) {
@@ -182,7 +186,7 @@ public class Device {
 	public void edgeCreate(String host_application_id, String a_group_id, String an_edge_node_id) throws Exception {
 		if (edge != null) {
 			log("Edge node already created");
-			log("Edge node " + edge_node_id + " successfully created");
+			log("Edge node " + a_group_id + "/" + an_edge_node_id + " successfully created");
 			return;
 		}
 		edge_node_id = an_edge_node_id;
@@ -219,13 +223,21 @@ public class Device {
 			MqttMessage msg = edge_listener.getNextMessage();
 
 			if (msg != null) {
-				if (msg.toString().equals("ONLINE")) {
-					break;
-				} else {
-					log("Error: host application not online");
-					return;
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					StatePayload statePayload = mapper.readValue(new String(msg.getPayload()), StatePayload.class);
+					if (statePayload != null && statePayload.isOnline()) {
+						log("Host application is online");
+						break;
+					} else {
+						log("Error: host application not online");
+						return;
+					}
+				} catch (Exception e) {
+					log("Failed to handle state topic payload: " + new String(msg.getPayload()));
 				}
 			}
+
 			Thread.sleep(100);
 			if (++count >= 5) {
 				log("Error: no host application state");
