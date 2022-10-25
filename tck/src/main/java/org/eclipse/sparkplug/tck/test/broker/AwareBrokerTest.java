@@ -45,35 +45,34 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(
-        spec = "sparkplug",
-        version = "3.0.0-SNAPSHOT")
+		spec = "sparkplug",
+		version = "3.0.0-SNAPSHOT")
 public class AwareBrokerTest extends TCKTest {
-    private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
-    private final @NotNull String[] testId = {
-            ID_CONFORMANCE_MQTT_AWARE_BASIC,
-            ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN,
-            ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
-            ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP};
-    private final @NotNull ArrayList<String> testIds = new ArrayList<>();
-    private TCK theTCK = null;
-    private @NotNull String host;
-    private @NotNull String port;
-    private @NotNull String groupId;
-    private @NotNull String edgeNodeId;
-    private boolean bNBirthChecked = false;
-    private boolean bDBirthChecked = false;
-    private boolean bNDeathChecked = false;
-    private boolean bBasicAwareChecked = false;
-    private boolean bStoreAwareChecked = false;
-    private AwareTestResult createSubscriptionResult = AwareTestResult.NOT_SUBSCRIBED;
-    private Mqtt3Client subscriber;
+	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
+	private final @NotNull String[] testId = { ID_CONFORMANCE_MQTT_AWARE_BASIC, ID_CONFORMANCE_MQTT_AWARE_STORE,
+			ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN,
+			ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
+			ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP };
+	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+	private TCK theTCK = null;
+	private @NotNull String host;
+	private @NotNull String port;
+	private @NotNull String groupId;
+	private @NotNull String edgeNodeId;
+	private boolean bNBirthChecked = false;
+	private boolean bDBirthChecked = false;
+	private boolean bNDeathChecked = false;
+	private boolean bBasicAwareChecked = false;
+	private boolean bStoreAwareChecked = false;
+	private AwareTestResult createSubscriptionResult = AwareTestResult.NOT_SUBSCRIBED;
+	private Mqtt3Client subscriber;
 
-    private long willTimestamp;
-    private BrokerAwareFeatureTester brokerAwareFeatureTester;
+	private long willTimestamp;
+	private BrokerAwareFeatureTester brokerAwareFeatureTester;
 
 	public AwareBrokerTest(TCK aTCK, String[] params) {
-        logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
-        theTCK = aTCK;
+		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
+		theTCK = aTCK;
 		testIds.addAll(Arrays.asList(testId));
 		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -102,224 +101,222 @@ public class AwareBrokerTest extends TCKTest {
 		});
 	}
 
-    @Override
-    public void endTest(Map<String, String> results) {
-        testResults.putAll(results);
-        Utils.setEndTest(getName(), testIds, testResults);
-        brokerAwareFeatureTester.finish(subscriber);
-        reportResults(testResults);
-    }
+	@Override
+	public void endTest(Map<String, String> results) {
+		testResults.putAll(results);
+		Utils.setEndTest(getName(), testIds, testResults);
+		brokerAwareFeatureTester.finish(subscriber);
+		reportResults(testResults);
+	}
 
-    public String getName() {
-        return "Sparkplug Broker Aware Test";
-    }
+	public String getName() {
+		return "Sparkplug Broker Aware Test";
+	}
 
-    public String[] getTestIds() {
-        return testIds.toArray(new String[0]);
-    }
+	public String[] getTestIds() {
+		return testIds.toArray(new String[0]);
+	}
 
-    public Map<String, String> getResults() {
-        return testResults;
-    }
+	public Map<String, String> getResults() {
+		return testResults;
+	}
 
-    @Override
-    public void connect(String clientId, ConnectPacket packet) {
-        if (packet.getClientId() == edgeNodeId && packet.getWillPublish().isPresent()) {
-            logger.info("AWARE:: Broker - {} - connect - clientId: {}", getName(), clientId);
-            //catch the will message and store the timestamp for later comparison
-            willTimestamp = System.currentTimeMillis();
-        }
+	@Override
+	public void connect(String clientId, ConnectPacket packet) {
+		if (packet.getClientId() == edgeNodeId && packet.getWillPublish().isPresent()) {
+			logger.info("AWARE:: Broker - {} - connect - clientId: {}", getName(), clientId);
+			// catch the will message and store the timestamp for later comparison
+			willTimestamp = System.currentTimeMillis();
+		}
 
-        if (clientId.equals("AwareTestSubscriber")) {
-            logger.info("AWARE:: Broker - {} - connect - clientId: {}", getName(), clientId);
-            createSubscriptionToSysTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/#");
-        }
-    }
+		if (clientId.equals("AwareTestSubscriber")) {
+			logger.info("AWARE:: Broker - {} - connect - clientId: {}", getName(), clientId);
+			createSubscriptionToSysTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/#");
+		}
+	}
 
-    @Override
-    public void disconnect(String clientId, DisconnectPacket packet) {
-        //
-    }
+	@Override
+	public void disconnect(String clientId, DisconnectPacket packet) {
+		//
+	}
 
-    @Override
-    public void subscribe(String clientId, SubscribePacket packet) {
-        //
-    }
+	@Override
+	public void subscribe(String clientId, SubscribePacket packet) {
+		//
+	}
 
-    @Override
-    public void publish(String clientId, PublishPacket packet) {
-        final String packetTopic = packet.getTopic();
-        logger.info("AWARE:: Broker - {} - publish - topic: {}", getName(), packetTopic);
+	@Override
+	public void publish(String clientId, PublishPacket packet) {
+		final String packetTopic = packet.getTopic();
+		logger.info("AWARE:: Broker - {} - publish - topic: {}", getName(), packetTopic);
 
-        if (!bBasicAwareChecked) {
-            //async to continue the publish flow!
-            Services.extensionExecutorService().submit(new Runnable() {
-                @Override
-                public void run() {
-                    checkConformanceAware(host, Integer.parseInt(port));
-                }
-            });
-        }
+		if (!bBasicAwareChecked) {
+			// async to continue the publish flow!
+			Services.extensionExecutorService().submit(new Runnable() {
+				@Override
+				public void run() {
+					checkConformanceAware(host, Integer.parseInt(port));
+				}
+			});
+		}
 
-        if (isUsedTopic(packetTopic) && packetTopic.contains(TOPIC_PATH_NDEATH)) {
-            checkNDEATHAware(packet);
-        }
+		if (isUsedTopic(packetTopic) && packetTopic.contains(TOPIC_PATH_NDEATH)) {
+			checkNDEATHAware(packet);
+		}
 
-        if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
-            logger.debug("AWARE:: Broker {}, publish - end test", getName());
-            theTCK.endTest();
-        }
-    }
+		if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
+			logger.debug("AWARE:: Broker {}, publish - end test", getName());
+			theTCK.endTest();
+		}
+	}
 
-    private boolean isUsedTopic(String topic) {
-        final String[] topicLevels = topic.split("/");
-        boolean isSparkplugTopic = topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0);
-        if (isSparkplugTopic &&
-                topicLevels[1].equals(groupId) &&
-                topicLevels[3].equals(edgeNodeId)) {
-            logger.debug("AWARE:: Broker - Found a topic for used group and edge nodes {}", topic);
-            return true;
-        }
+	private boolean isUsedTopic(String topic) {
+		final String[] topicLevels = topic.split("/");
+		boolean isSparkplugTopic = topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0);
+		if (isSparkplugTopic && topicLevels[1].equals(groupId) && topicLevels[3].equals(edgeNodeId)) {
+			logger.debug("AWARE:: Broker - Found a topic for used group and edge nodes {}", topic);
+			return true;
+		}
 
-        logger.error("AWARE:: Broker - Skip not the used group and edge nodes {}", topic);
-        return false;
-    }
+		logger.error("AWARE:: Broker - Skip not the used group and edge nodes {}", topic);
+		return false;
+	}
 
-    private void checkPublishOnSysTopic(Boolean isRetain, String packetTopic) {
-        final String sparkplugTopic = packetTopic.substring(SPARKPLUG_AWARE_ROOT.length());
-        final String[] topicLevels = sparkplugTopic.split("/");
+	private void checkPublishOnSysTopic(Boolean isRetain, String packetTopic) {
+		final String sparkplugTopic = packetTopic.substring(SPARKPLUG_AWARE_ROOT.length());
+		final String[] topicLevels = sparkplugTopic.split("/");
 
-        final boolean ok = isUsedTopic(sparkplugTopic);
-        boolean isNBIRTHTopic = ok && topicLevels[2].equals(TOPIC_PATH_NBIRTH);
-        boolean isDBIRTHTopic = ok && topicLevels[2].equals(TOPIC_PATH_DBIRTH);
+		final boolean ok = isUsedTopic(sparkplugTopic);
+		boolean isNBIRTHTopic = ok && topicLevels[2].equals(TOPIC_PATH_NBIRTH);
+		boolean isDBIRTHTopic = ok && topicLevels[2].equals(TOPIC_PATH_DBIRTH);
 
-        if (!isNBIRTHTopic && !isDBIRTHTopic) {
-            logger.error("AWARE:: Broker - Skip no (N|D)BIRTH sys-topic {}", packetTopic);
-            return;
-        }
+		if (!isNBIRTHTopic && !isDBIRTHTopic) {
+			logger.error("AWARE:: Broker - Skip no (N|D)BIRTH sys-topic {}", packetTopic);
+			return;
+		}
 
-        if (isNBIRTHTopic) {
-            checkNBIRTHAware(isRetain);
-        }
+		if (isNBIRTHTopic) {
+			checkNBIRTHAware(isRetain);
+		}
 
-        if (isDBIRTHTopic) {
-            checkDBIRTHAware(isRetain);
-        }
+		if (isDBIRTHTopic) {
+			checkDBIRTHAware(isRetain);
+		}
 
-        if (bNBirthChecked && bDBirthChecked) {
-            checkStoreAware();
-        }
+		if (bNBirthChecked && bDBirthChecked) {
+			checkStoreAware();
+		}
 
-        if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
-            logger.debug("AWARE:: Broker {}, checkPublishOnSysTopic - end test", getName());
-            theTCK.endTest();
-        }
-    }
+		if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
+			logger.debug("AWARE:: Broker {}, checkPublishOnSysTopic - end test", getName());
+			theTCK.endTest();
+		}
+	}
 
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC)
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN)
+	public void checkNBIRTHAware(Boolean isRetain) {
+		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC);
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC,
+				setResult(true, CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC));
 
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC)
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN)
-    public void checkNBIRTHAware(Boolean isRetain) {
-        logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC);
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC, setResult(true, CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC));
+		logger.debug("AWARE:: Broker - Check Req: {} {}", ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN, isRetain);
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN,
+				setResult(isRetain, CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN));
+		bNBirthChecked = true;
+	}
 
-        logger.debug("AWARE:: Broker - Check Req: {} {}", ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN, isRetain);
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN, setResult(isRetain, CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN));
-        bNBirthChecked = true;
-    }
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC)
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN)
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP)
 
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC)
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN)
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP)
+	public void checkDBIRTHAware(Boolean isRetain) {
 
-    public void checkDBIRTHAware(Boolean isRetain) {
+		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC);
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC,
+				setResult(true, CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC));
 
-        logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC);
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC, setResult(true, CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC));
+		logger.debug("AWARE:: Broker - Check Req: {} {}", ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN, isRetain);
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
+				setResult(isRetain, CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN));
 
-        logger.debug("AWARE:: Broker - Check Req: {} {}", ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN, isRetain);
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN, setResult(isRetain, CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN));
+		bDBirthChecked = true;
+	}
 
-        bDBirthChecked = true;
-    }
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP)
 
+	public void checkNDEATHAware(PublishPacket packet) {
+		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP);
+		SparkplugBProto.PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
+		boolean bValid = result.getTimestamp() > willTimestamp;
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP,
+				setResult(bValid, CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP));
+		bNDeathChecked = true;
+	}
 
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP)
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_BASIC)
+	public void checkConformanceAware(final String host, final int port) {
+		logger.info("AWARE:: Broker - {} - Start", Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER);
+		logger.debug("AWARE:: Broker - Check Req: {} ", CONFORMANCE_MQTT_AWARE_BASIC);
 
-    public void checkNDEATHAware(PublishPacket packet) {
-        logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP);
-        SparkplugBProto.PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
-        boolean bValid = result.getTimestamp() > willTimestamp;
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP, setResult(bValid, CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP));
-        bNDeathChecked = true;
-    }
+		checkCompliance(host, port, testResults);
+		boolean isBasicAware = testResults.get(ID_CONFORMANCE_MQTT_QOS0).equals(PASS)
+				&& testResults.get(ID_CONFORMANCE_MQTT_QOS1).equals(PASS)
+				&& testResults.get(ID_CONFORMANCE_MQTT_WILL_MESSAGES).equals(PASS)
+				&& testResults.get(ID_CONFORMANCE_MQTT_RETAINED).equals(PASS);
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_BASIC, setResult(isBasicAware, CONFORMANCE_MQTT_AWARE_BASIC));
+		bBasicAwareChecked = true;
+	}
 
+	@SpecAssertion(
+			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
+			id = ID_CONFORMANCE_MQTT_AWARE_STORE)
+	public void checkStoreAware() {
+		logger.info("AWARE:: Broker - {} - Start", Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER);
+		logger.debug("AWARE:: Broker - Check Req: {} ", CONFORMANCE_MQTT_AWARE_STORE);
+		final String pass1 = testResults.get(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC);
+		final String pass2 = testResults.get(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC);
 
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_BASIC)
-    public void checkConformanceAware(final String host, final int port) {
-        logger.info("AWARE:: Broker - {} - Start", Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER);
-        logger.debug("AWARE:: Broker - Check Req: {} ", CONFORMANCE_MQTT_AWARE_BASIC);
+		testResults.put(ID_CONFORMANCE_MQTT_AWARE_STORE,
+				setResult(pass1.equals(PASS) && pass2.equals(PASS), CONFORMANCE_MQTT_AWARE_STORE));
+	}
 
-        checkCompliance(host, port, testResults);
-        boolean isBasicAware = testResults.get(ID_CONFORMANCE_MQTT_QOS0).equals(PASS)
-                && testResults.get(ID_CONFORMANCE_MQTT_QOS1).equals(PASS)
-                && testResults.get(ID_CONFORMANCE_MQTT_WILL_MESSAGES).equals(PASS)
-                && testResults.get(ID_CONFORMANCE_MQTT_RETAINED).equals(PASS);
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_BASIC, setResult(isBasicAware, CONFORMANCE_MQTT_AWARE_BASIC));
-        bBasicAwareChecked = true;
-    }
+	public void createSubscriptionToSysTopic(String origin) {
+		logger.info("AWARE:: Broker - {} - create subscription to sys topic for {} {}", getName(), groupId, edgeNodeId);
+		final String topic = SPARKPLUG_AWARE_ROOT + origin;
+		final Mqtt3Subscription subscription =
+				Mqtt3Subscription.builder().topicFilter(topic).qos(MqttQos.AT_LEAST_ONCE).build();
+		try {
+			logger.debug("AWARE:: Broker - subscribing to sys topic {} with qos {}", topic, MqttQos.AT_LEAST_ONCE);
+			subscriber.toAsync().subscribeWith().addSubscription(subscription).callback(publish -> {
+				logger.info("AWARE:: Broker - receive message on sys topic: {} {}", publish.getTopic(),
+						publish.isRetain());
+				checkPublishOnSysTopic(publish.isRetain(), publish.getTopic().toString());
+			}).send().whenComplete((subAck, throwable) -> {
+				if (throwable != null) {
+					logger.error("AWARE:: Broker - Subscribe failed: {}", throwable.getMessage());
+				} else {
+					logger.info("AWARE:: Broker - Successful subscribed to topic: " + subscription.getTopicFilter());
+				}
+			});
 
-    @SpecAssertion(
-            section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
-            id = ID_CONFORMANCE_MQTT_AWARE_STORE)
-    public void checkStoreAware() {
-        logger.info("AWARE:: Broker - {} - Start", Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER);
-        logger.debug("AWARE:: Broker - Check Req: {} ", CONFORMANCE_MQTT_AWARE_STORE);
-        final String pass1 = testResults.get(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC);
-        final String pass2 = testResults.get(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC);
-
-        testResults.put(ID_CONFORMANCE_MQTT_AWARE_STORE, setResult(pass1.equals(PASS) && pass2.equals(PASS), CONFORMANCE_MQTT_AWARE_STORE));
-    }
-
-    public void createSubscriptionToSysTopic(String origin) {
-        logger.info("AWARE:: Broker - {} - create subscription to sys topic for {} {}", getName(), groupId, edgeNodeId);
-        final String topic = SPARKPLUG_AWARE_ROOT + origin;
-        final Mqtt3Subscription subscription = Mqtt3Subscription.builder().topicFilter(topic).qos(MqttQos.AT_LEAST_ONCE).build();
-        try {
-            logger.debug("AWARE:: Broker - subscribing to sys topic {} with qos {}", topic, MqttQos.AT_LEAST_ONCE);
-            subscriber.toAsync()
-                    .subscribeWith()
-                    .addSubscription(subscription)
-                    .callback(publish -> {
-                        logger.info("AWARE:: Broker - receive message on sys topic: {} {}", publish.getTopic(), publish.isRetain());
-                        checkPublishOnSysTopic(publish.isRetain(), publish.getTopic().toString());
-                    })
-                    .send()
-                    .whenComplete((subAck, throwable) -> {
-                        if (throwable != null) {
-                            logger.error("AWARE:: Broker - Subscribe failed: {}", throwable.getMessage());
-                        } else {
-                            logger.info("AWARE:: Broker - Successful subscribed to topic: " + subscription.getTopicFilter());
-                        }
-                    });
-
-        } catch (final Exception ex) {
-            logger.error("Failed to subscribe to topic ", ex);
-            createSubscriptionResult = AwareTestResult.SUBSCRIBE_FAILED;
-        }
-    }
+		} catch (final Exception ex) {
+			logger.error("Failed to subscribe to topic ", ex);
+			createSubscriptionResult = AwareTestResult.SUBSCRIBE_FAILED;
+		}
+	}
 }

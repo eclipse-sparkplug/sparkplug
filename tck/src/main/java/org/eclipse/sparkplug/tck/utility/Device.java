@@ -295,12 +295,11 @@ public class Device {
 
 		if (device_id != null) {
 			log("Device " + device_id + " already created");
-			testLogResponse("Device " + device_id + " successfully created");
-			return;
+		} else {
+			device_id = a_device_id;
+			log("Creating new device \"" + device_id + "\"");
 		}
-
-		device_id = a_device_id;
-		log("Creating new device \"" + device_id + "\"");
+		
 		// Publish device birth message
 		byte[] payload = createDeviceBirthPayload();
 		MqttMessage mqttmessage = new MqttMessage(payload);

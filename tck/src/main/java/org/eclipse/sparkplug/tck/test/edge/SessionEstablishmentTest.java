@@ -42,9 +42,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
@@ -119,6 +122,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_TOPICS_DBIRTH_TOPIC, ID_CASE_SENSITIVITY_METRIC_NAMES);
 
 	private final @NotNull TCK theTCK;
+	private @NotNull Utilities utilities = null;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
 
 	private @NotNull String testClientId = null;
@@ -138,16 +142,14 @@ public class SessionEstablishmentTest extends TCKTest {
 	private @NotNull HashSet<Long> aliases = new HashSet<Long>();
 
 	// Host Application variables
-	private String hostStateTopicName = null;
-	private byte[] hostBirthPayload = null;
-	private byte[] hostDeathPayload = null;
-	private int hostBdSeq;
+	private boolean hostCreated = false;
 
 	private PublishService publishService = Services.publishService();
 
-	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+	public SessionEstablishmentTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("Edge Node session establishment test. Parameters: {} ", Arrays.asList(parms));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
 		if (parms.length < 3) {
 			log("Not enough parameters: " + Arrays.toString(parms));
@@ -177,27 +179,17 @@ public class SessionEstablishmentTest extends TCKTest {
 		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device ids: {}", hostApplicationId,
 				groupId, edgeNodeId, deviceIds.keySet());
 
-		// Set up the BIRTH and DEATH payloads
-		hostBdSeq = PersistentUtils.getNextHostDeathBdSeqNum();
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			StatePayload birthStatePayload = new StatePayload(true, hostBdSeq, System.currentTimeMillis());
-			hostBirthPayload = mapper.writeValueAsString(birthStatePayload).getBytes();
-			StatePayload deathStatePayload = new StatePayload(false, hostBdSeq, System.currentTimeMillis());
-			hostDeathPayload = mapper.writeValueAsString(deathStatePayload).getBytes();
-		} catch (Exception e) {
-			logger.error("Failed to construct Host ID payloads - not starting", e);
-			return;
-		} finally {
-			hostBdSeq++;
-			PersistentUtils.setNextHostDeathBdSeqNum(hostBdSeq);
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			logger.info("Host Application is online, so using that");
+		} else {
+			logger.info("Creating host application");
+			try {
+				utilities.hostApps.hostOnline(hostApplicationId);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
 		}
-
-		hostStateTopicName = Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
-		Publish message = Builders.publish().topic(hostStateTopicName).qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(hostBirthPayload)).retain(true).build();
-		logger.info("Publishing Host Application BIRTH on: {} ", hostStateTopicName);
-		publishService.publish(message);
 	}
 
 	public String getName() {
@@ -215,12 +207,13 @@ public class SessionEstablishmentTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
-
-		Publish message = Builders.publish().topic(hostStateTopicName).qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(hostDeathPayload)).retain(true).build();
-		logger.info("Publishing Host Application DEATH on: {} ", hostStateTopicName);
-		publishService.publish(message);
-
+		if (hostCreated) {
+			try {
+				utilities.hostApps.hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
 		testClientId = null;
 		nbirthFound = false;
 		nbirthTopic = false;

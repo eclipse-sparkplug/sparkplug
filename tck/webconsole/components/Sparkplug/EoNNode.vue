@@ -7,7 +7,7 @@
         <b-container fluid="xs">
             <b-row  >
                 <b-col sm="3">
-                    <label size="sm" description="The identifiers of the Edge of Network node">Edge of Network Node ID:</label>
+                    <label size="sm" description="The identifiers of the Edge Node">Group ID/Edge Node ID:</label>
                 </b-col>
                 <b-col sm="9">
                     <b-input-group class="mb-2">

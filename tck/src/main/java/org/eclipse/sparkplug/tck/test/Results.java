@@ -142,7 +142,7 @@ public class Results implements MqttCallbackExtended {
 			client.subscribe(TCK_RESULTS_CONFIG_TOPIC, 2);
 			client.subscribe(TCK_RESULTS_TOPIC, 2);
 			client.subscribe(TCK_CONFIG_TOPIC, 2);
-			logger.info(clientId + ": subscribed");
+			logger.debug(clientId + ": subscribed");
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
@@ -163,14 +163,14 @@ public class Results implements MqttCallbackExtended {
 			if (topic.equals(TCK_CONFIG_TOPIC)) {
 				String[] words = new String(message.getPayload()).split(" ");
 				config.UTCwindow = Long.parseLong(words[1]);
-				logger.info("Results: setting UTCwindow to " + config.UTCwindow);
+				logger.info("{}: setting UTCwindow to " + config.UTCwindow, clientId);
 			} else if (topic.equals(TCK_RESULTS_CONFIG_TOPIC)) {
 				logger.debug("{}: topic: {} msg: {}", clientId, topic, new String(message.getPayload())); // display log
 																											// message
 				checkOrCreateNewResultLog(message);
 			} else if (topic.equals(TCK_RESULTS_TOPIC)) {
 				try {
-					logger.debug(" {}: {} used as log file.", clientId, (new File(filename).getAbsolutePath()));
+					logger.debug("{}: {} used as log file.", clientId, (new File(filename).getAbsolutePath()));
 					FileWriter resultFileWriter = new FileWriter(filename, true);
 					resultFileWriter.write(new String(message.getPayload()) + System.lineSeparator());
 					resultFileWriter.close();
@@ -197,18 +197,18 @@ public class Results implements MqttCallbackExtended {
 
 		if (index >= 0 && payload.length() >= cmd.length()) {
 			final String newFilename = payload.substring(cmd.length());
-			logger.info(" {}: Got new result log file: {} ", clientId, newFilename);
+			logger.info("{}: Setting new result log file: {} ", clientId, newFilename);
 			if (!filename.equals(newFilename)) {
 				File testFile = new File(newFilename);
 				if (testFile.canWrite() || testFile.createNewFile()) {
 					filename = newFilename;
-					logger.info(" {}: New log file created: {} ", clientId, testFile.getAbsolutePath());
+					logger.debug(" {}: New log file created: {} ", clientId, testFile.getAbsolutePath());
 				} else {
 					logger.error(" {}: New log file: {} has no write access, use old setting: {} ", clientId,
 							newFilename, filename);
 				}
 			}
-			logger.info(" {}: Set new result log file: {} ", clientId, filename);
+			logger.debug("{}: Set new result log file: {} ", clientId, filename);
 		}
 	}
 

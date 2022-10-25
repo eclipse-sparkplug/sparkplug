@@ -38,6 +38,7 @@ import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.Monitor;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.sparkplug.tck.test.common.Constants;
@@ -60,7 +61,7 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_DEVICE_CONTROL_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.KILLING_DEVICE;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.DEATH_MESSAGE_RECEIVED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TestStatus.NDEATH_MESSAGE_RECEIVED;
 
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_OFFLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_OFFLINE;
@@ -95,7 +96,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 
 	private PublishService publishService = Services.publishService();
 
-	public EdgeSessionTerminationTest(TCK aTCK, Monitor monitor, String[] params, Results.Config config) {
+	public EdgeSessionTerminationTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("Primary host {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
 
@@ -118,7 +119,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 			throw new IllegalStateException();
 		}
 
-		if (monitor.hasDevice(groupId, edgeNodeId, deviceId)) {
+		if (utilities.monitor.hasDevice(groupId, edgeNodeId, deviceId)) {
 			logger.info("Edge node {} and device {} already connected, using those.", edgeNodeId, deviceId);
 			state = TestStatus.KILLING_DEVICE;
 		} else {
@@ -221,7 +222,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 			consolePrompt("Immediately after receiving an NDEATH from an Edge Node, Host Applications MUST mark the "
 					+ "Edge Node as offline using the current Host Application's system UTC time.");
 
-			state = DEATH_MESSAGE_RECEIVED;
+			state = NDEATH_MESSAGE_RECEIVED;
 			assertion_count = 1;
 		} else if (packet.getTopic().equals(Constants.TCK_CONSOLE_REPLY_TOPIC)) {
 			if (packet.getPayload().isPresent()) {

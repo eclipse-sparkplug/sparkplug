@@ -16,16 +16,21 @@ package org.eclipse.sparkplug.tck.utility;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
+import org.eclipse.sparkplug.tck.utility.Device.MessageListener;
+import org.eclipse.sparkplug.tck.test.TCKTest;
 
 /*
  * This the Sparkplug Host Application utility.
@@ -45,84 +50,48 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class HostApplication {
 
-	private static Logger logger = LoggerFactory.getLogger(HostApplication.class.getName());
+	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 
 	private String state = null;
 
 	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
+	private String hostApplicationId = null;
 
-	private String controlId = "Sparkplug TCK host application utility";
-	private MqttClient control = null;
 	private MqttTopic log_topic = null;
-	private MessageListener control_listener = null;
 
 	private MqttClient host = null;
 	private MqttTopic stateTopic = null;
-	private HostListener host_listener = null;
+	private MessageListener host_listener = null;
 
 	private byte[] birthPayload = null;
 	private byte[] deathPayload = null;
 	private int bdSeq;
 
-	public void log(String message) {
-		try {
-			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
-			log_topic.publish(mqttmessage);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public HostApplication() {
+		logger.info("Sparkplug TCK Host Application utility");
 	}
 
-	public static void main(String[] args) {
-		new HostApplication().run(args);
-	}
-
-	public void run(String[] args) {
-		System.out.println("*** Sparkplug TCK Host Application Utility ***");
-		try {
-			control = new MqttClient(brokerURI, controlId);
-			control_listener = new MessageListener();
-			control.setCallback(control_listener);
-			log_topic = control.getTopic(TCK_LOG_TOPIC);
-			control.connect();
-			log("starting");
-			control.subscribe(Constants.TCK_HOST_CONTROL);
-			while (true) {
-				MqttMessage msg = control_listener.getNextMessage();
-				if (msg != null) {
-					String[] words = msg.toString().split(" ");
-					if (words.length == 3 && words[0].toUpperCase().equals("NEW")
-							&& words[1].toUpperCase().equals("HOST")) {
-						// log(msg.toString());
-						hostCreate(words[2]);
-					} else {
-						log("Command not understood: " + msg);
-					}
-				}
-				Thread.sleep(100);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void hostCreate(String host_application_id) throws Exception {
+	public void hostOnline(String host_application_id) throws MqttException {
 		if (host != null) {
-			log("host application in use");
+			logger.info("host application in use");
 			return;
 		}
-		log("Creating new host \"" + host_application_id + "\"");
-		host = new MqttClient(brokerURI, "Sparkplug TCK host " + host_application_id);
-		host_listener = new HostListener();
-		host.setCallback(host_listener);
+		logger.info("Creating new host \"" + host_application_id + "\"");
+		hostApplicationId = host_application_id;
+		host = new MqttClient(brokerURI, "Sparkplug TCK host application " + host_application_id);
+		host_listener = new MessageListener();
+		//host.setCallback(host_listener);
 
 		stateTopic = host.getTopic(Constants.TOPIC_ROOT_STATE + "/" + host_application_id);
 
@@ -146,27 +115,28 @@ public class HostApplication {
 		connectOptions.setWill(stateTopic, deathPayload, 1, true);
 		host.connect(connectOptions);
 
-		// subscribe to Sparkplug namespace
-		host.subscribe(Constants.TOPIC_ROOT_SP_BV_1_0 + "/#");
-
 		// send online state message
 		MqttMessage online = new MqttMessage(birthPayload);
 		online.setQos(1);
 		online.setRetained(true);
 		stateTopic.publish(online);
-		log("Host " + host_application_id + " successfully created");
+		logger.info("Host " + host_application_id + " successfully created");
 	}
 
-	public void hostDestroy() throws MqttException {
+	public void hostOffline() throws MqttException {
 		// send OFFLINE state message
-		MqttMessage mqttmessage = new MqttMessage(deathPayload);
-		stateTopic.publish(mqttmessage);
+		MqttMessage offline = new MqttMessage(deathPayload);
+		offline.setQos(1);
+		offline.setRetained(true);
+		MqttDeliveryToken token = stateTopic.publish(offline);
+		token.waitForCompletion(1000L);
+		logger.info("Host " + hostApplicationId + " successfully stopped");
 		host.disconnect();
 		host.close();
 		host = null;
 	}
 
-	class MessageListener implements MqttCallback {
+	class MessageListener implements MqttCallbackExtended {
 		ArrayList<MqttMessage> messages;
 
 		public MessageListener() {
@@ -182,8 +152,20 @@ public class HostApplication {
 			}
 		}
 
+		@Override
+		public void connectComplete(boolean reconnect, String serverURI) {
+			System.out.println("Connected!");
+
+			try {
+				// subscribe to Sparkplug namespace
+				host.subscribe(Constants.TOPIC_ROOT_SP_BV_1_0 + "/#");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		public void connectionLost(Throwable cause) {
-			log("connection lost: " + cause.getMessage());
+			logger.info("connection lost: " + cause.getMessage());
 		}
 
 		public void deliveryComplete(IMqttDeliveryToken token) {
@@ -200,40 +182,5 @@ public class HostApplication {
 		}
 	}
 
-	class HostListener implements MqttCallback {
-
-		public void connectionLost(Throwable cause) {
-			log("connection lost: " + cause.getMessage());
-		}
-
-		public void deliveryComplete(IMqttDeliveryToken token) {
-
-		}
-
-		public void messageArrived(String topic, MqttMessage message) {
-			System.out.println("Message arrived on topic " + topic);
-			try {
-				Topic sparkplugTopic = TopicUtil.parseTopic(topic);
-				ObjectMapper mapper = new ObjectMapper();
-				mapper.setSerializationInclusion(Include.NON_NULL);
-
-				SparkplugBPayloadDecoder decoder = new SparkplugBPayloadDecoder();
-				SparkplugBPayload inboundPayload = decoder.buildFromByteArray(message.getPayload());
-
-				/*if (sparkplugTopic.isType(MessageType.NBIRTH)) {
-					try {*/
-				System.out.println("\n\nReceived Node Birth");
-				System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inboundPayload));
-				System.out.print("\n\n> ");
-				/*} catch (Exception e) {
-					e.printStackTrace();
-				}
-				}*/
-			} catch (Exception e) {
-				System.out.println("Exception");
-				e.printStackTrace();
-			}
-		}
-	}
 
 }
