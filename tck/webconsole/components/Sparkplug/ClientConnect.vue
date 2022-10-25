@@ -3,9 +3,10 @@
 <template>
   <div>
     <b-collapse v-model="change" id="collapse-2" class="mt-2">
-      <b-card title="Sparkplug conformance profile configuration" border-variant="primary">
+      <b-card title="Sparkplug conformance profiles" border-variant="primary">
           <b-form>
-              <b-form-group label="Sparkplug conformance:" description="Choose the type of profile you want to test.">
+              <b-form-group label="The Sparkplug conformance profiles are:" 
+                            description="Choose which one you want to use. Ensure the Host Application ID is completed for Edge Node tests too.">
                   <b-form-radio-group
                       id="radio-group-2"
                       :disabled="currentTest !== null"

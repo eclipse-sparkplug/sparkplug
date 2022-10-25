@@ -1161,7 +1161,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 
 			List<Metric> eBirthMetrics = edgeBirthMetrics.get(id);
-			if (current.getDatatype() == DataType.Template.getNumber()) {
+			if (eBirthMetrics != null && current.getDatatype() == DataType.Template.getNumber()) {
 				if (current.hasTemplateValue()) {
 					Template template = current.getTemplateValue();
 					// instances must have a reference

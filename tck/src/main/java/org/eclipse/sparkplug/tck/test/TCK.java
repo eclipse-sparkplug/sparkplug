@@ -28,6 +28,8 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.utility.Device;
+import org.eclipse.sparkplug.tck.utility.HostApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,20 @@ public class TCK {
 	private @Nullable TCKTest current = null;
 	final Results results = new Results();
 	private final Monitor monitor = new Monitor(results);
+	private final HostApplication hostApps = new HostApplication();
+
+	public class Utilities {
+		public Monitor monitor;
+		public HostApplication hostApps;
+		public Device device;
+
+		public Utilities(Monitor monitor, HostApplication hostApps) {
+			this.monitor = monitor;
+			this.hostApps = hostApps;
+		}
+	}
+
+	Utilities utilities = new Utilities(monitor, hostApps);
 
 	/**
 	 * The hasMonitor variable indicates whether the Monitor class should be run for a test. This is switched off for
@@ -71,6 +87,7 @@ public class TCK {
 
 	public TCK() {
 		results.initialize(new String[0]);
+
 	}
 
 	public void newTest(final @NotNull Profile profile, final @NotNull String test, final @NotNull String[] parms) {
@@ -93,9 +110,9 @@ public class TCK {
 					final Object[] parameters = { this, parms, results.getConfig() };
 					current = (TCKTest) constructor.newInstance(parameters);
 				} catch (NoSuchMethodException f) {
-					final Class[] types = { this.getClass(), Monitor.class, String[].class, Results.Config.class };
+					final Class[] types = { this.getClass(), Utilities.class, String[].class, Results.Config.class };
 					final Constructor constructor = testClass.getConstructor(types);
-					final Object[] parameters = { this, monitor, parms, results.getConfig() };
+					final Object[] parameters = { this, utilities, parms, results.getConfig() };
 					current = (TCKTest) constructor.newInstance(parameters);
 				}
 			}

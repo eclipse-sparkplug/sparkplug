@@ -187,8 +187,8 @@ public class SendCommandTest extends TCKTest {
 		final AtomicBoolean hostOnline = checkHostApplicationIsOnline(hostApplicationId);
 
 		if (!hostOnline.get()) {
-			logger.info("HostApplication {} not online - test not started.", hostApplicationId);
-			return;
+			log(String.format("HostApplication %s not online - test not started.", hostApplicationId));
+			throw new IllegalStateException();
 		}
 
 		// First we have to connect an edge node and device.
@@ -268,6 +268,7 @@ public class SendCommandTest extends TCKTest {
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
 
+		// get the edge and device metrics from the birth messages 
 		if (edgeNodeTestClientId != null && edgeNodeTestClientId.equals(clientId)) {
 			logger.debug("Host send command test - publish -  to topic: {} ", packet.getTopic());
 			String topic = packet.getTopic();
@@ -300,7 +301,7 @@ public class SendCommandTest extends TCKTest {
 		}
 
 		final String topic = packet.getTopic();
-		if (topic.equals(TCK_CONSOLE_REPLY_TOPIC)) {
+		if (topic.equals(TCK_LOG_TOPIC)) {
 			ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
 			if (byteBuffer != null) {
 				final String payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
@@ -565,15 +566,17 @@ public class SendCommandTest extends TCKTest {
 					}
 				}
 
-				// look for the current metric name in the birth metrics
-				for (Metric birth : edgeBirthMetrics) {
-					if (birth.getName().equals(current.getName())) {
-						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
-								setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME));
-						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
-								setResult(current.getDatatype() == birth.getDatatype() && Utils.hasValue(current),
-										OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
-						break;
+				if (edgeBirthMetrics != null) {
+					// look for the current metric name in the birth metrics
+					for (Metric birth : edgeBirthMetrics) {
+						if (birth.getName().equals(current.getName())) {
+							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
+									setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME));
+							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
+									setResult(current.getDatatype() == birth.getDatatype() && Utils.hasValue(current),
+											OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
+							break;
+						}
 					}
 				}
 			}

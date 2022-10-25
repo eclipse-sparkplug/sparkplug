@@ -15,7 +15,7 @@
 <template>
     <div>
         <h3 v-if="testType === 'HOSTAPPLICATION'">Host Application Tests</h3>
-        <h3 v-else-if="testType === 'EONNODE'">EoN Node Tests</h3>
+        <h3 v-else-if="testType === 'EONNODE'">Edge Node Tests</h3>
         <h3 v-else>Broker Tests</h3>
         <TckTestsInformation :testNames="getTestNames" v-model="sidebar"/>
         <div>
@@ -403,14 +403,17 @@ export default {
                         testType: "EONNODE",
                         name: "SessionEstablishmentTest",
                         readableName: "Session Establishment Test",
-                        description: "This is the Edge Node Sparkplug session establishment test.",
+                        description: `This test checks that Edge Nodes and Devices can connect correctly to the MQTT broker.
+                        It can be run in two ways, with a real Host Application or simulated. To use a real Host Application, 
+                        ensure it is active before the test is started.`,
                         requirements: [
-                            "Setup a MQTT Connection.",
-                            "Set a Group and a Device Id that is used by an Application.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Set the Host App, Group, Edge Node and Device ids.",
+                            "Ensure the Host App is started, if you are using a real one.",
                             "Start this test.",
-                            "Start the Host Application to trigger events of MQTT messages.",
-                            "Connect Edge Node and Device.",
-                            "Wait until Tests are finished and check Results."
+                            "Connect the Edge Node and Device.",
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_ids: {

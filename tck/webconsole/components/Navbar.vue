@@ -4,7 +4,7 @@
   <b-navbar :sticky="true" fixed="top" toggleable="lg" type="light" variant="light">
     <b-navbar-brand to="/">
       <SparkplugLogo width="27.04" height="40" />
-      Sparkplug TCK Webconsole
+      Sparkplug TCK Console
     </b-navbar-brand>
 
     <div>

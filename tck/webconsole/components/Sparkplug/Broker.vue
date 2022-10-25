@@ -7,7 +7,7 @@
                 <b-container fluid="xs">
                     <b-row>
                         <b-col sm="3">
-                            <label size="sm" description="The identifiers of the broker">Broker address:</label>
+                            <label size="sm" description="The identifiers of the broker">Broker TCP/IP address:</label>
                         </b-col>
                         <b-col sm="9">
                             <b-input-group class="mb-2">

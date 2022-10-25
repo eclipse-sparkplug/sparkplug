@@ -228,35 +228,21 @@ public class Utils {
 
 	public static AtomicBoolean checkHostApplicationIsOnline(String hostApplicationId) {
 		// Check that the host application status is online
-
 		AtomicBoolean hostOnline = new AtomicBoolean(false);
 		String topic = Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId;
-		final CompletableFuture<Optional<RetainedPublish>> getFuture =
-				Services.retainedMessageStore().getRetainedMessage(topic);
-		try {
-			Optional<RetainedPublish> retainedPublishOptional = getFuture.get();
-			if (retainedPublishOptional.isPresent()) {
-				final RetainedPublish retainedPublish = retainedPublishOptional.get();
-				String payload = null;
-				ByteBuffer bpayload = retainedPublish.getPayload().orElseGet(null);
-				if (bpayload != null) {
-					payload = StandardCharsets.UTF_8.decode(bpayload).toString();
-
-					try {
-						ObjectMapper mapper = new ObjectMapper();
-						StatePayload statePayload = mapper.readValue(payload, StatePayload.class);
-						if (statePayload != null && statePayload.isOnline()) {
-							hostOnline.set(true);
-						}
-					} catch (Exception e) {
-						logger.error("Failed to handle state topic payload: {}", payload);
-					}
+		String payload = getRetained(topic);
+		if (payload == null) {
+			logger.info("No retained message for topic: " + topic);
+		} else {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				StatePayload statePayload = mapper.readValue(payload, StatePayload.class);
+				if (statePayload != null && statePayload.isOnline()) {
+					hostOnline.set(true);
 				}
-			} else {
-				logger.info("No retained message for topic: " + topic);
+			} catch (Exception e) {
+				logger.error("Failed to handle state topic payload: {}", payload);
 			}
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
 		}
 		logger.info("Is Host online? {}", hostOnline);
 		return hostOnline;
