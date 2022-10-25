@@ -223,7 +223,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 
 			state = DEATH_MESSAGE_RECEIVED;
 			assertion_count = 1;
-		} else if (packet.getTopic().equals("SPARKPLUG_TCK/CONSOLE_REPLY")) {	
+		} else if (packet.getTopic().equals(Constants.TCK_CONSOLE_REPLY_TOPIC)) {
 			if (packet.getPayload().isPresent()) {
 				final ByteBuffer payloadByteBuffer = packet.getPayload().get();
 				final String payload = StandardCharsets.UTF_8.decode(payloadByteBuffer).toString();

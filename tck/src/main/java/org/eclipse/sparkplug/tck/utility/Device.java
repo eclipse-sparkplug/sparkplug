@@ -46,7 +46,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-
+import org.eclipse.sparkplug.tck.test.common.Constants;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
+import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.tahu.SparkplugException;
 import org.eclipse.tahu.SparkplugInvalidTypeException;
 import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
@@ -69,11 +71,6 @@ import org.eclipse.tahu.message.model.Template.TemplateBuilder;
 import org.eclipse.tahu.message.model.Value;
 import org.eclipse.tahu.util.CompressionAlgorithm;
 import org.eclipse.tahu.util.PayloadUtil;
-
-import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.common.StatePayload;
-
 import org.jboss.test.audit.annotations.SpecVersion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,6 +120,15 @@ public class Device {
 		}
 	}
 
+	public void testLogResponse(String message) {
+		try {
+			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
+			log_topic.publish(mqttmessage);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
 		new Device().run(args);
 	}
@@ -151,16 +157,22 @@ public class Device {
 					if (words.length == 6 && words[0].toUpperCase().equals("NEW")
 							&& words[1].toUpperCase().equals("DEVICE")) {
 						/* NEW DEVICE host application id, group id, edge node id, device id */
+						log("Creating Edge Node: " + words[3] + "/" + words[4]);
 						edgeCreate(words[2], words[3], words[4]);
 						deviceCreate(words[5]);
 					} else if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
 						/* SEND_EDGE_DATA host application id, edge node id, metric name */
+						log("Publishing Edge Node data: " + words[3]);
 						publishEdgeData(words[3]);
+						testLogResponse("Published Edge Node data: " + words[3]);
 					} else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
 						/* SEND_DEVICE_DATA host application id, edge node id, device id, metric name */
+						log("Publishing Device data: " + words[4]);
 						publishDeviceData(words[4]);
+						testLogResponse("Published Device data: " + words[3]);
 					} else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
 						/* DISCONNECT_EDGE_NODE host application id, edge node id */
+						log("Disconnecting Edge Node: host_app_id=" + words[1] + " edge_node_id=" + words[2]);
 						edgeDisconnect(words[1], words[2]);
 					} else {
 						log("Command not understood: " + msg + " " + words.length);
@@ -283,7 +295,7 @@ public class Device {
 
 		if (device_id != null) {
 			log("Device " + device_id + " already created");
-			log("Device " + device_id + " successfully created");
+			testLogResponse("Device " + device_id + " successfully created");
 			return;
 		}
 
@@ -296,6 +308,7 @@ public class Device {
 		device_topic.publish(mqttmessage);
 
 		log("Device " + device_id + " successfully created");
+		testLogResponse("Device " + device_id + " successfully created");
 	}
 
 	private String newUUID() {

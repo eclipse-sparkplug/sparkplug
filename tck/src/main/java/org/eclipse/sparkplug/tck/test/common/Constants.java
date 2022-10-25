@@ -42,6 +42,7 @@ public class Constants {
 	public static final String TCK_RESULTS_TOPIC = "SPARKPLUG_TCK/RESULT";
 	public static final String TCK_RESULTS_CONFIG_TOPIC = "SPARKPLUG_TCK/RESULT_CONFIG";
 	public static final String TCK_CONFIG_TOPIC = "SPARKPLUG_TCK/CONFIG";
+	public static final String TCK_CONSOLE_REPLY_TOPIC = "SPARKPLUG_TCK/CONSOLE_REPLY";
 
 	public static final String TCK_HOST_CONTROL = "SPARKPLUG_TCK/HOST_CONTROL";
 	public static final String SPARKPLUG_AWARE_ROOT = "$sparkplug/certificates/";
@@ -58,6 +59,8 @@ public class Constants {
 		CONNECTING_DEVICE,
 		REQUESTED_NODE_DATA,
 		REQUESTED_DEVICE_DATA,
+		PUBLISHED_NODE_DATA,
+		PUBLISHED_DEVICE_DATA,
 		KILLING_DEVICE,
 		EXPECT_NODE_REBIRTH,
 		EXPECT_NODE_COMMAND,

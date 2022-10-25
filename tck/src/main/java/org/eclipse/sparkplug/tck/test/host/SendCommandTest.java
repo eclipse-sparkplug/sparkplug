@@ -15,6 +15,7 @@ package org.eclipse.sparkplug.tck.test.host;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_REPLY_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
@@ -299,7 +300,7 @@ public class SendCommandTest extends TCKTest {
 		}
 
 		final String topic = packet.getTopic();
-		if (topic.equals(TCK_LOG_TOPIC)) {
+		if (topic.equals(TCK_CONSOLE_REPLY_TOPIC)) {
 			ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
 			if (byteBuffer != null) {
 				final String payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
