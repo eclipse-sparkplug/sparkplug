@@ -1,9 +1,16 @@
-/*
- * Licensed Materials - Property of Cirrus Link Solutions
- * Copyright (c) 2022 Cirrus Link Solutions LLC - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- */
+/*******************************************************************************
+ * Copyright (c) 2022 Cirrus Link Solutions
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Wes Johnson - initial implementation and documentation
+ *******************************************************************************/
+
 package org.eclipse.sparkplug.tck.test.common;
 
 import java.io.File;
