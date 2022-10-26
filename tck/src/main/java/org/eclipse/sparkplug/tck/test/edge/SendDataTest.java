@@ -13,6 +13,101 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_REF;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_INSTANCE_REF;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDATA_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDATA_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDATA_SEQ_NUM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDATA_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDATA_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDATA_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDATA_SEQ_NUM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDATA_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC_TIMESTAMP_IN_UTC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_QOS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_MEMBERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_REF;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_INSTANCE_MEMBERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_INSTANCE_REF;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDATA_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDATA_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDATA_SEQ_NUM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDATA_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDATA_MQTT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDATA_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDATA_SEQ_NUM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDATA_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDATA_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.hasValue;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template.Parameter;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.jboss.test.audit.annotations.SpecAssertion;
+import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * This is the edge node Sparkplug send data test.  Data can be sent from edge
  * nodes and devices.
@@ -30,37 +125,6 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import org.eclipse.sparkplug.tck.sparkplug.Sections;
-
-import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template.Parameter;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.Results;
-
-import org.jboss.test.audit.annotations.SpecAssertion;
-import org.jboss.test.audit.annotations.SpecVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.Predicate;
-
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
-import static org.eclipse.sparkplug.tck.test.common.Utils.hasValue;
-import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -86,6 +150,7 @@ public class SendDataTest extends TCKTest {
 			ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS, ID_TOPICS_NDATA_TOPIC, ID_TOPICS_DDATA_TOPIC,
 			ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC };
 	private String testClientId = null;
+	private String hostApplicationId;
 	private String state = null;
 	private TCK theTCK = null;
 	private String groupId = null;
@@ -104,10 +169,12 @@ public class SendDataTest extends TCKTest {
 			log("Parameters to send data test must be: groupId edgeNodeId deviceId");
 			throw new IllegalArgumentException();
 		}
-		groupId = params[0];
-		edgeNodeId = params[1];
-		deviceId = params[2];
-		logger.info("Parameters are GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
+		hostApplicationId = params[0];
+		groupId = params[1];
+		edgeNodeId = params[2];
+		deviceId = params[3];
+		logger.info("Parameters are Host application ID: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}",
+				hostApplicationId, groupId, edgeNodeId, deviceId);
 
 		try {
 			logger.info("UTCwindow is " + config.UTCwindow);

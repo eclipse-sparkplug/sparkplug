@@ -13,35 +13,32 @@
 
 package org.eclipse.sparkplug.tck.test;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.events.client.parameters.*;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
 
-import com.hivemq.extension.sdk.api.services.Services;
-import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extension.sdk.api.services.publish.Publish;
-import com.hivemq.extension.sdk.api.services.publish.PublishService;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
+import java.lang.reflect.Constructor;
+import java.nio.ByteBuffer;
+import java.util.TreeMap;
 
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.utility.Device;
+import org.eclipse.sparkplug.tck.test.common.Constants.Profile;
+import org.eclipse.sparkplug.tck.utility.EdgeNode;
 import org.eclipse.sparkplug.tck.utility.HostApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TreeMap;
-
-import static org.eclipse.sparkplug.tck.test.common.Constants.*;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 /**
  * @author Ian Craggs
@@ -54,19 +51,33 @@ public class TCK {
 	final Results results = new Results();
 	private final Monitor monitor = new Monitor(results);
 	private final HostApplication hostApps = new HostApplication();
+	private final EdgeNode edgeNode = new EdgeNode();
 
 	public class Utilities {
-		public Monitor monitor;
-		public HostApplication hostApps;
-		public Device device;
+		private Monitor monitor;
+		private HostApplication hostApps;
+		private EdgeNode edgeNode;
 
-		public Utilities(Monitor monitor, HostApplication hostApps) {
+		public Utilities(Monitor monitor, HostApplication hostApps, EdgeNode edgeNode) {
 			this.monitor = monitor;
 			this.hostApps = hostApps;
+			this.edgeNode = edgeNode;
+		}
+
+		public Monitor getMonitor() {
+			return monitor;
+		}
+
+		public HostApplication getHostApps() {
+			return hostApps;
+		}
+
+		public EdgeNode getEdgeNode() {
+			return edgeNode;
 		}
 	}
 
-	Utilities utilities = new Utilities(monitor, hostApps);
+	Utilities utilities = new Utilities(monitor, hostApps, edgeNode);
 
 	/**
 	 * The hasMonitor variable indicates whether the Monitor class should be run for a test. This is switched off for
@@ -201,6 +212,8 @@ public class TCK {
 	}
 
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
+		logger.debug("CLIENT_ID={} :: TOPIC: {} :: current={}", clientId, packet.getTopic(),
+				current != null ? current.getName() : "null");
 		if (current != null) {
 			current.publish(clientId, packet);
 		}

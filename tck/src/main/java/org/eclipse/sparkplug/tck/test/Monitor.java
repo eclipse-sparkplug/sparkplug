@@ -118,7 +118,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
-import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

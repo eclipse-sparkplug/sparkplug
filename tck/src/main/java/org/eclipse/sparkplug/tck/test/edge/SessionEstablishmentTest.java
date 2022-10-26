@@ -184,7 +184,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		} else {
 			logger.info("Creating host application");
 			try {
-				utilities.hostApps.hostOnline(hostApplicationId);
+				utilities.getHostApps().hostOnline(hostApplicationId);
 			} catch (MqttException m) {
 				throw new IllegalStateException();
 			}
@@ -209,7 +209,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		testResults.putAll(results);
 		if (hostCreated) {
 			try {
-				utilities.hostApps.hostOffline();
+				utilities.getHostApps().hostOffline();
 			} catch (MqttException m) {
 				logger.error("endTest", m);
 			}

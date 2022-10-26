@@ -139,7 +139,7 @@ public class SessionTerminationTest extends TCKTest {
 			String payloadString =
 					StandardCharsets.UTF_8.decode(packet.getWillPublish().get().getPayload().get()).toString();
 			logger.debug("Will message STATE payload={}", payloadString);
-			StatePayload statePayload = Utils.getHostPayload(payloadString, false);
+			StatePayload statePayload = Utils.getHostPayload(payloadString, false, true);
 			if (statePayload != null && testStatus == TestStatus.STARTED) {
 				deathBdSeq = statePayload.getBdSeq().shortValue();
 				testStatus = TestStatus.CONNECT_RECEIVED;
@@ -188,7 +188,8 @@ public class SessionTerminationTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH)
 	@Override
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
-		logger.info("{} test - PUBLISH - topic: {}, clientId: {} ", getName(), packet.getTopic(), clientId);
+		logger.info("{} test - PUBLISH - topic: {}, clientId: {}, testStatus: {} ", getName(), packet.getTopic(),
+				clientId, testStatus);
 
 		if (hostClientId == null) {
 			logger.warn("{} host application clientid is not set", getName());
@@ -199,8 +200,8 @@ public class SessionTerminationTest extends TCKTest {
 			if (testStatus == TestStatus.CONNECT_RECEIVED) {
 				// Looking for a BIRTH - see if this is the original online STATE message after the connect and return
 				// early
-				StatePayload statePayload =
-						Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), true);
+				StatePayload statePayload = Utils.getHostPayload(
+						StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), true, false);
 
 				boolean receivedBirthAfterConnect = statePayload != null;
 				testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
@@ -214,6 +215,14 @@ public class SessionTerminationTest extends TCKTest {
 
 				}
 			} else if (testStatus == TestStatus.BIRTH_RECEIVED || testStatus == TestStatus.STARTED) {
+				StatePayload statePayload = Utils.getHostPayload(
+						StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false, false);
+				if (statePayload == null || statePayload.isOnline()) {
+					logger.debug("Ignoring birth/online STATE message: {}",
+							StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
+					return;
+				}
+
 				if (checkDeathMessage(packet)) {
 					testStatus = TestStatus.DEATH_RECEIVED;
 				} else {
@@ -242,8 +251,8 @@ public class SessionTerminationTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED)
 	private boolean checkDeathMessage(final @NotNull PublishPacket packet) {
-		logger.info("Host - {} test - PUBLISH - topic: {}, checkDeathMessage state: {} ", getName(), packet.getTopic(),
-				state);
+		logger.info("Host - {} test - checkDeathMessage - topic: {}, checkDeathMessage state: {} ", getName(),
+				packet.getTopic(), state);
 		boolean overallResult = true;
 
 		// Topic is spBv1.0/STATE/{host_application_id}
@@ -264,7 +273,7 @@ public class SessionTerminationTest extends TCKTest {
 
 		// Payload message exists
 		StatePayload statePayload =
-				Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false);
+				Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false, false);
 		boolean payloadIsOffline = false;
 		if (statePayload != null && !statePayload.isOnline() && statePayload.getBdSeq() == deathBdSeq) {
 			payloadIsOffline = true;

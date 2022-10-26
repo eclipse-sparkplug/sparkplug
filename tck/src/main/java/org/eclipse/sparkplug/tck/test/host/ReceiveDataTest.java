@@ -96,7 +96,7 @@ public class ReceiveDataTest extends TCKTest {
 		}
 
 		// First we have to connect an edge node and device.
-		// We do this by sending an MQTT control message to the TCK device utility.
+		// We do this by sending an MQTT control message to the TCK EdgeNode utility.
 		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
 		state = TestStatus.CONNECTING_DEVICE;
 		String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
@@ -159,7 +159,7 @@ public class ReceiveDataTest extends TCKTest {
 			if (state == TestStatus.PUBLISHED_NODE_DATA && Constants.PASS.equals(payload)) {
 				logger.info("Received node data confirmation from tester: {}", payload);
 
-				// Now tell the device simulator to send some data from the device
+				// Now tell the EdgeNode simulator to send some data from the device
 				logger.info("Requesting data from device id: " + deviceId + " metric: " + DEVICE_METRIC);
 				String message = "SEND_DEVICE_DATA " + hostApplicationId + " " + edgeNodeId + " " + deviceId + " "
 						+ DEVICE_METRIC;
@@ -190,7 +190,7 @@ public class ReceiveDataTest extends TCKTest {
 
 				logger.info("{}: Device was created", getName());
 
-				// Now tell the device simulator to send some data from the edge node
+				// Now tell the EdgeNode simulator to send some data from the edge node
 				logger.info("Requesting data from edgeNodeId: {}  and metric: {} ", edgeNodeId, EDGE_METRIC);
 
 				String message = "SEND_EDGE_DATA " + hostApplicationId + " " + edgeNodeId + " " + EDGE_METRIC;

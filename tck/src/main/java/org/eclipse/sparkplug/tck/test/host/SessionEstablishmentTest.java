@@ -309,6 +309,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED)
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
+
 		// ignore messages before connect
 		if (hostClientId == null) {
 			return;
@@ -375,7 +376,6 @@ public class SessionEstablishmentTest extends TCKTest {
 				/* Now send a state message with the online value of false to provoke the
 				 * host application into sending another STATE message.
 				 */
-
 				sendOfflineStateMessage();
 			}
 		}
@@ -496,7 +496,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 			if (payloadExists) {
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
-				StatePayload deathPayload = Utils.getHostPayload(payloadString, false);
+				StatePayload deathPayload = Utils.getHostPayload(payloadString, false, true);
 
 				boolean isValidPayload = false;
 				if (deathPayload != null) {
