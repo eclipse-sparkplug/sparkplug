@@ -132,7 +132,6 @@ public class MultipleBrokerTest extends TCKTest {
 			public void run() {
 				logger.info("Creating the Edge Node");
 				try {
-					utilities.getEdgeNode().controlOnline();
 					utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
 				} catch (Exception e) {
 					throw new IllegalStateException();
@@ -150,7 +149,6 @@ public class MultipleBrokerTest extends TCKTest {
 	public void endTest(Map<String, String> results) {
 		try {
 			utilities.getEdgeNode().edgeOffline();
-			utilities.getEdgeNode().controlOffline();
 		} catch (Exception e) {
 			logger.error("endTest", e);
 		}
