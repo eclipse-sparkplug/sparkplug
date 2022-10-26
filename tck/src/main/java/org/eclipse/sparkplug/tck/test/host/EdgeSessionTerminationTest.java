@@ -119,12 +119,12 @@ public class EdgeSessionTerminationTest extends TCKTest {
 			throw new IllegalStateException();
 		}
 
-		if (utilities.monitor.hasDevice(groupId, edgeNodeId, deviceId)) {
+		if (utilities.getMonitor().hasDevice(groupId, edgeNodeId, deviceId)) {
 			logger.info("Edge node {} and device {} already connected, using those.", edgeNodeId, deviceId);
 			state = TestStatus.KILLING_DEVICE;
 		} else {
 			// First we .........have to connect an edge node and device.
-			// We do this by sending an MQTT control message to the TCK device utility.
+			// We do this by sending an MQTT control message to the TCK EdgeNode utility.
 			state = TestStatus.CONNECTING_DEVICE;
 			String payload = "NEW DEVICE " + hostApplicationId + " " + edgeNodeId + " " + deviceId;
 			Publish message = Builders.publish().topic(TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
@@ -207,7 +207,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 				logger.info("EdgeNodeDeathTest: Device was created");
 
 				// Now force an NDEATH from the edge node.
-				// We do this by sending an MQTT control message to the TCK device utility.
+				// We do this by sending an MQTT control message to the TCK EdgeNode utility.
 				state = KILLING_DEVICE;
 				String disconnectMsg = "DISCONNECT_EDGE_NODE " + hostApplicationId + " " + edgeNodeId;
 				Publish publish = Builders.publish().topic(TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)

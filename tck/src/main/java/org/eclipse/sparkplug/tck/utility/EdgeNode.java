@@ -38,12 +38,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.sparkplug.tck.test.common.Constants;
@@ -72,13 +74,17 @@ import org.eclipse.tahu.message.model.Value;
 import org.eclipse.tahu.util.CompressionAlgorithm;
 import org.eclipse.tahu.util.PayloadUtil;
 import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
-public class Device {
+public class EdgeNode {
+
+	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 
 	private static final boolean USING_COMPRESSION = false;
 	private static final CompressionAlgorithm compressionAlgorithm = CompressionAlgorithm.GZIP;
@@ -90,14 +96,14 @@ public class Device {
 	private String namespace = "spBv1.0";
 	private String brokerURI = "tcp://localhost:1883";
 
-	private String controlId = "Sparkplug TCK device utility";
+	private String controlId = "Sparkplug TCK edgeNode utility";
 	private MqttClient control = null;
 	private MqttTopic log_topic = null;
 	private MessageListener control_listener = null;
 
 	private String group_id = null;
 	private String edge_node_id = null;
-	private String device_id = null;
+	private String deviceId = null;
 
 	private MqttClient edge = null;
 	private MqttTopic edge_topic = null;
@@ -110,104 +116,19 @@ public class Device {
 	private int bdSeq = 0;
 	private int seq = 0;
 
-	public void log(String message) {
-		try {
-			System.out.println("Message: " + message);
-			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
-			log_topic.publish(mqttmessage);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	private ScheduledExecutorService controlExecutor;
 
-	public void testLogResponse(String message) {
-		try {
-			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
-			log_topic.publish(mqttmessage);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void main(String[] args) {
-		new Device().run(args);
-	}
-
-	public void run(String[] args) {
-		System.out.println("*** Sparkplug TCK Device and Edge Node Utility ***");
-		try {
-
-			MqttConnectOptions options = new MqttConnectOptions();
-			options.setAutomaticReconnect(true);
-			options.setCleanSession(true);
-			options.setConnectionTimeout(30);
-			options.setKeepAliveInterval(30);
-
-			control = new MqttClient(brokerURI, controlId);
-			control_listener = new MessageListener();
-			control.setCallback(control_listener);
-			log_topic = control.getTopic(TCK_LOG_TOPIC);
-			control.connect(options);
-			log("starting");
-			// control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
-			while (true) {
-				MqttMessage msg = control_listener.getNextMessage();
-				if (msg != null) {
-					String[] words = Utils.tokenize(msg.toString());
-					if (words.length == 6 && words[0].toUpperCase().equals("NEW")
-							&& words[1].toUpperCase().equals("DEVICE")) {
-						/* NEW DEVICE host application id, group id, edge node id, device id */
-						log("Creating Edge Node: " + words[3] + "/" + words[4]);
-						edgeCreate(words[2], words[3], words[4]);
-						deviceCreate(words[5]);
-					} else if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
-						/* SEND_EDGE_DATA host application id, edge node id, metric name */
-						log("Publishing Edge Node data: " + words[3]);
-						publishEdgeData(words[3]);
-						testLogResponse("Published Edge Node data: " + words[3]);
-					} else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
-						/* SEND_DEVICE_DATA host application id, edge node id, device id, metric name */
-						log("Publishing Device data: " + words[4]);
-						publishDeviceData(words[4]);
-						testLogResponse("Published Device data: " + words[3]);
-					} else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
-						/* DISCONNECT_EDGE_NODE host application id, edge node id */
-						log("Disconnecting Edge Node: host_app_id=" + words[1] + " edge_node_id=" + words[2]);
-						edgeDisconnect(words[1], words[2]);
-					} else {
-						log("Command not understood: " + msg + " " + words.length);
-					}
-				}
-				Thread.sleep(100);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	// Used to add the birth/death sequence number
-	private SparkplugBPayloadBuilder addBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
-		if (payload == null) {
-			payload = new SparkplugBPayloadBuilder();
-		}
-		if (bdSeq == 256) {
-			bdSeq = 0;
-		}
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
-		bdSeq++;
-		return payload;
-	}
-
-	public void edgeCreate(String host_application_id, String a_group_id, String an_edge_node_id) throws Exception {
+	public void edgeNodeOnline(String hostApplicationId, String groupId, String edgeNodeId, String deviceId)
+			throws Exception {
 		if (edge != null) {
 			log("Edge node already created");
-			log("Edge node " + a_group_id + "/" + an_edge_node_id + " successfully created");
+			log("Edge Node " + groupId + "/" + edgeNodeId + " successfully created");
 			return;
 		}
-		edge_node_id = an_edge_node_id;
-		group_id = a_group_id;
-		log("Creating new edge node \"" + edge_node_id + "\"");
+
+		edge_node_id = edgeNodeId;
+		group_id = groupId;
+		log("Creating new edge node \"" + group_id + "/" + edge_node_id + "\"");
 		edge = new MqttClient(brokerURI, "Sparkplug TCK " + group_id + " " + edge_node_id);
 		edge_listener = new MessageListener();
 		edge.setCallback(edge_listener);
@@ -231,7 +152,7 @@ public class Device {
 		edge.connect(options);
 
 		edge.subscribe(Constants.TOPIC_ROOT_STATE + "/"
-				+ host_application_id); /* look for status of the host application we are to use */
+				+ hostApplicationId); /* look for status of the host application we are to use */
 
 		/* wait for retained message indicating state of host application under test */
 		int count = 0;
@@ -269,10 +190,13 @@ public class Device {
 		MqttMessage mqttmessage = new MqttMessage(payload);
 		edge_topic = edge.getTopic(namespace + "/" + group_id + "/NBIRTH/" + edge_node_id);
 		edge_topic.publish(mqttmessage);
-		log("Edge node " + edge_node_id + " successfully created");
+		log("Edge Node " + group_id + "/" + edge_node_id + " successfully created");
+
+		// Create the device
+		deviceCreate(deviceId);
 	}
 
-	public void edgeDisconnect(String host_application_id, String an_edge_node_id) throws Exception {
+	public void edgeOffline() throws Exception {
 		if (edge == null) {
 			log("Edge node " + edge_node_id + " does not exist");
 			return;
@@ -287,27 +211,100 @@ public class Device {
 		log("Edge node " + edge_node_id + " disconnected");
 	}
 
-	public void deviceCreate(String a_device_id) throws Exception {
+	public void controlOnline() {
+		System.out.println("*** Sparkplug TCK EdgeNode and Edge Node Utility ***");
+		try {
+			controlExecutor = Executors.newScheduledThreadPool(1);
+			controlExecutor.schedule(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						MqttMessage msg = control_listener.getNextMessage();
+						if (msg != null) {
+							String[] words = Utils.tokenize(msg.toString());
+							if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
+								/* SEND_EDGE_DATA host application id, edge node id, metric name */
+								log("Publishing Edge Node data: " + words[3]);
+								publishEdgeData(words[3]);
+								log("Published Edge Node data: " + words[3]);
+							} else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
+								/* SEND_DEVICE_DATA host application id, edge node id, edgeNode id, metric name */
+								log("Publishing Edge Node data: " + words[4]);
+								publishDeviceData(words[4]);
+								log("Published Edge Node data: " + words[3]);
+							} else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
+								/* DISCONNECT_EDGE_NODE host application id, edge node id */
+								log("Disconnecting Edge Node: host_app_id=" + words[1] + " edge_node_id=" + words[2]);
+								edgeOffline();
+							} else {
+								log("Command not understood: " + msg + " " + words.length);
+							}
+						}
+					} catch (Exception e) {
+						logger.error("Failed to handle message", e);
+					}
+				}
+			}, 100, TimeUnit.MILLISECONDS);
+
+			MqttConnectOptions options = new MqttConnectOptions();
+			options.setAutomaticReconnect(true);
+			options.setCleanSession(true);
+			options.setConnectionTimeout(30);
+			options.setKeepAliveInterval(30);
+
+			control = new MqttClient(brokerURI, controlId);
+			control_listener = new MessageListener();
+			control.setCallback(control_listener);
+			log_topic = control.getTopic(TCK_LOG_TOPIC);
+			control.connect(options);
+			log("starting");
+			// control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void controlOffline() throws Exception {
+		controlExecutor.shutdownNow();
+
+		control.disconnect(0);
+		control.close();
+		control = null;
+	}
+
+	// Used to add the birth/death sequence number
+	private SparkplugBPayloadBuilder addBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
+		if (payload == null) {
+			payload = new SparkplugBPayloadBuilder();
+		}
+		if (bdSeq == 256) {
+			bdSeq = 0;
+		}
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
+		bdSeq++;
+		return payload;
+	}
+
+	private void deviceCreate(String deviceId) throws Exception {
 		if (edge == null) {
 			log("No edge node");
 			return;
 		}
 
-		if (device_id != null) {
-			log("Device " + device_id + " already created");
+		if (deviceId != null) {
+			log("Device " + deviceId + " already created");
 		} else {
-			device_id = a_device_id;
-			log("Creating new device \"" + device_id + "\"");
+			this.deviceId = deviceId;
+			log("Creating new edgeNode \"" + deviceId + "\"");
 		}
-		
-		// Publish device birth message
+
+		// Publish edgeNode birth message
 		byte[] payload = createDeviceBirthPayload();
 		MqttMessage mqttmessage = new MqttMessage(payload);
-		device_topic = edge.getTopic(namespace + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + device_id);
+		device_topic = edge.getTopic(namespace + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + deviceId);
 		device_topic.publish(mqttmessage);
 
-		log("Device " + device_id + " successfully created");
-		testLogResponse("Device " + device_id + " successfully created");
+		log("Device " + deviceId + " successfully created");
 	}
 
 	private String newUUID() {
@@ -367,7 +364,7 @@ public class Device {
 		// Create the payload and add some metrics
 		SparkplugBPayload payload = new SparkplugBPayload(new Date(), newMetrics(true), getSeqNum(), newUUID(), null);
 
-		payload.addMetric(new MetricBuilder("Device Control/Rebirth", Boolean, false).createMetric());
+		payload.addMetric(new MetricBuilder("EdgeNode Control/Rebirth", Boolean, false).createMetric());
 
 		// Only do this once to set up the inputs and outputs
 		payload.addMetric(new MetricBuilder("Inputs/0", Boolean, true).createMetric());
@@ -604,18 +601,9 @@ public class Device {
 
 		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getSeqNum(), null, null);
 
-		edge.publish(namespace + "/" + group_id + "/DDATA/" + edge_node_id + "/" + device_id,
+		edge.publish(namespace + "/" + group_id + "/DDATA/" + edge_node_id + "/" + deviceId,
 				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
 
-	}
-
-	public void deviceDestroy() throws MqttException {
-		edge.disconnect();
-		edge.close();
-		edge = null;
-		edge_node_id = null;
-		device_id = null;
-		group_id = null;
 	}
 
 	class MessageListener implements MqttCallbackExtended {
@@ -663,4 +651,13 @@ public class Device {
 		}
 	}
 
+	private void log(String message) {
+		try {
+			System.out.println("Message: " + message);
+			MqttMessage mqttmessage = new MqttMessage(message.getBytes());
+			log_topic.publish(mqttmessage);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

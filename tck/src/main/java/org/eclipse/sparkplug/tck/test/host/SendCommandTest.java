@@ -15,7 +15,6 @@ package org.eclipse.sparkplug.tck.test.host;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_REPLY_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
@@ -77,7 +76,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NCMD_TOP
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
-import static org.eclipse.sparkplug.tck.test.common.Utils.addQuotes;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -87,10 +85,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
@@ -165,12 +167,14 @@ public class SendCommandTest extends TCKTest {
 
 	private TestStatus state = null;
 	private TCK theTCK = null;
+	private @NotNull Utilities utilities = null;
 
 	private PublishService publishService = Services.publishService();
 
-	public SendCommandTest(TCK aTCK, String[] params) {
+	public SendCommandTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
 		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -191,22 +195,36 @@ public class SendCommandTest extends TCKTest {
 			throw new IllegalStateException();
 		}
 
+		// The TCK_CONSOLE_TEST_CONTROL_TOPIC gets sent to the PublishInterceptor from the web ui - give it some time
+		// before starting the edge node
+		Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+			@Override
+			public void run() {
+				logger.info("Creating the Edge Node");
+				try {
+					utilities.getEdgeNode().controlOnline();
+					utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
+				} catch (Exception e) {
+					throw new IllegalStateException();
+				}
+			}
+		}, 2, TimeUnit.SECONDS);
+
 		// First we have to connect an edge node and device.
-		// We do this by sending an MQTT control message to the TCK device utility.
+		// We do this by sending an MQTT control message to the TCK EdgeNode utility.
 		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
 		state = TestStatus.CONNECTING_DEVICE;
-
-		String payload = "NEW DEVICE " + addQuotes(hostApplicationId) + " " + addQuotes(groupId) + " "
-				+ addQuotes(edgeNodeId) + " " + addQuotes(deviceId);
-		Publish message = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
-				deviceId);
-		publishService.publish(message);
 	}
 
 	@Override
 	public void endTest(Map<String, String> results) {
+		try {
+			utilities.getEdgeNode().edgeOffline();
+			utilities.getEdgeNode().controlOffline();
+		} catch (Exception e) {
+			logger.error("endTest", e);
+		}
+
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
@@ -260,7 +278,7 @@ public class SendCommandTest extends TCKTest {
 	private void publishToTckConsolePrompt(String payload) {
 		Publish message = Builders.publish().topic(TCK_CONSOLE_PROMPT_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting command to edge node id:{} ", edgeNodeId);
+		logger.info("Requesting command to edge node id:{}: {} ", edgeNodeId, payload);
 		publishService.publish(message);
 	}
 
@@ -268,7 +286,7 @@ public class SendCommandTest extends TCKTest {
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
 
-		// get the edge and device metrics from the birth messages 
+		// get the edge and device metrics from the birth messages
 		if (edgeNodeTestClientId != null && edgeNodeTestClientId.equals(clientId)) {
 			logger.debug("Host send command test - publish -  to topic: {} ", packet.getTopic());
 			String topic = packet.getTopic();
@@ -499,11 +517,11 @@ public class SendCommandTest extends TCKTest {
 				}
 
 				// look for the current metric name in the birth metrics
-				for (Metric birth : deviceBirthMetrics) {
-					if (birth.getName().equals(current.getName())) {
+				for (Metric metric : deviceBirthMetrics) {
+					if (metric.getName().equals(current.getName())) {
 						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
 								setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME));
-						if (current.getDatatype() == birth.getDatatype() && Utils.hasValue(current)) {
+						if (current.getDatatype() == metric.getDatatype() && Utils.hasValue(current)) {
 							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE,
 									setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE));
 						}

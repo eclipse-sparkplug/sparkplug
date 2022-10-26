@@ -262,7 +262,7 @@ public class Utils {
 		return rc;
 	}
 
-	public static StatePayload getHostPayload(String payloadString, boolean expectOnline) {
+	public static StatePayload getHostPayload(String payloadString, boolean expectOnline, boolean logMismatchErrors) {
 		logger.debug("Incoming potential Host STATE payload: {}", payloadString);
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode json = null;
@@ -288,7 +288,7 @@ public class Utils {
 						isValidPayload = true;
 						retTimestamp = timestamp.longValue();
 					} else {
-						logger.info("StatePayload is invalid - Timestamp diff " + diff);
+						logger.warn("StatePayload is invalid - Timestamp diff " + diff);
 					}
 				}
 			}
@@ -303,11 +303,11 @@ public class Utils {
 					retBdSeq = bdseq.intValue();
 				} else {
 					isValidPayload = false;
-					logger.info("StatePayload is invalid - bdSeq is invalid: {}", bdseq);
+					logger.warn("StatePayload is invalid - bdSeq is invalid: {}", bdseq);
 				}
 			} else {
 				isValidPayload = false;
-				logger.info("StatePayload is invalid - bdSeq field is missing");
+				logger.warn("StatePayload is invalid - bdSeq field is missing");
 			}
 
 			if (json.has("online")) {
@@ -316,11 +316,15 @@ public class Utils {
 					// valid - don't set isValidPayload as it might be false
 				} else {
 					isValidPayload = false;
-					logger.info("StatePayload is invalid - online={} - expected={}", online, expectOnline);
+					if (logMismatchErrors) {
+						logger.warn("StatePayload is invalid - online={} - expected={}", online, expectOnline);
+					} else {
+						logger.debug("StatePayload is invalid - online={} - expected={}", online, expectOnline);
+					}
 				}
 			} else {
 				isValidPayload = false;
-				logger.info("StatePayload is invalid - online field is missing");
+				logger.warn("StatePayload is invalid - online field is missing");
 			}
 		}
 

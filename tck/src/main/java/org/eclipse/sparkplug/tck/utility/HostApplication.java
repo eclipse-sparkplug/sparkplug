@@ -29,7 +29,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
-import org.eclipse.sparkplug.tck.utility.Device.MessageListener;
+import org.eclipse.sparkplug.tck.utility.EdgeNode.MessageListener;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 
 /*
