@@ -4,11 +4,9 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-package org.eclipse.sparkplug.tck.test.host;
+package org.eclipse.sparkplug.tck.test.common;
 
 import java.util.Optional;
-
-import org.eclipse.sparkplug.tck.test.common.Constants;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
