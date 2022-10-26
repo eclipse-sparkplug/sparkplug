@@ -14,7 +14,6 @@
 package org.eclipse.sparkplug.tck.test.host;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
@@ -78,14 +77,12 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -128,6 +125,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
@@ -171,6 +169,8 @@ public class SendCommandTest extends TCKTest {
 
 	private PublishService publishService = Services.publishService();
 
+	final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
+
 	public SendCommandTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
@@ -197,13 +197,20 @@ public class SendCommandTest extends TCKTest {
 
 		// The TCK_CONSOLE_TEST_CONTROL_TOPIC gets sent to the PublishInterceptor from the web ui - give it some time
 		// before starting the edge node
-		Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+		executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
 				logger.info("Creating the Edge Node");
 				try {
-					utilities.getEdgeNode().controlOnline();
-					utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
+					boolean created =
+							utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
+					if (created) {
+						logger.info("SendCommandTest: Device was created");
+						publishToTckConsolePrompt("Send an edge rebirth to edge node " + edgeNodeId);
+						state = TestStatus.EXPECT_NODE_REBIRTH;
+					} else {
+						logger.error("SendCommandTest: Failed to create the device");
+					}
 				} catch (Exception e) {
 					throw new IllegalStateException();
 				}
@@ -220,7 +227,6 @@ public class SendCommandTest extends TCKTest {
 	public void endTest(Map<String, String> results) {
 		try {
 			utilities.getEdgeNode().edgeOffline();
-			utilities.getEdgeNode().controlOffline();
 		} catch (Exception e) {
 			logger.error("endTest", e);
 		}
@@ -286,10 +292,11 @@ public class SendCommandTest extends TCKTest {
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
 
+		final String topic = packet.getTopic();
+
 		// get the edge and device metrics from the birth messages
 		if (edgeNodeTestClientId != null && edgeNodeTestClientId.equals(clientId)) {
 			logger.debug("Host send command test - publish -  to topic: {} ", packet.getTopic());
-			String topic = packet.getTopic();
 			String[] topicLevels = topic.split("/");
 
 			if (!(topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId))) {
@@ -318,19 +325,7 @@ public class SendCommandTest extends TCKTest {
 			}
 		}
 
-		final String topic = packet.getTopic();
-		if (topic.equals(TCK_LOG_TOPIC)) {
-			ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
-			if (byteBuffer != null) {
-				final String payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
-				if (payload.equals("Device " + deviceId + " successfully created")) {
-					logger.info("SendCommandTest: Device was created");
-					publishToTckConsolePrompt("Send an edge rebirth to edge node " + edgeNodeId);
-					state = TestStatus.EXPECT_NODE_REBIRTH;
-				}
-			}
-		} else if (topic
-				.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId)) {
+		if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId)) {
 			if (state == TestStatus.EXPECT_NODE_REBIRTH) {
 				checkNodeCommand(clientId, packet);
 				publishToTckConsolePrompt("Send an edge command to edge node " + edgeNodeId + " metric " + EDGE_METRIC);
