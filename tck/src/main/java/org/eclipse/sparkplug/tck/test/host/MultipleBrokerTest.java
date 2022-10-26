@@ -22,28 +22,19 @@
 package org.eclipse.sparkplug.tck.test.host;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResult;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
@@ -51,11 +42,7 @@ import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -125,25 +112,6 @@ public class MultipleBrokerTest extends TCKTest {
 			log(String.format("HostApplication %s not online - test not started.", hostApplicationId));
 			throw new IllegalStateException();
 		}
-
-		// The TCK_CONSOLE_TEST_CONTROL_TOPIC gets sent to the PublishInterceptor from the web ui - give it some time
-		// before starting the edge node
-		Executors.newScheduledThreadPool(1).schedule(new Runnable() {
-			@Override
-			public void run() {
-				logger.info("Creating the Edge Node");
-				try {
-					utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
-				} catch (Exception e) {
-					throw new IllegalStateException();
-				}
-			}
-		}, 2, TimeUnit.SECONDS);
-
-		// First we have to connect an edge node and device.
-		// We do this by sending an MQTT control message to the TCK EdgeNode utility.
-		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
-		state = TestStatus.CONNECTING_DEVICE;
 	}
 
 	@Override
