@@ -14,45 +14,35 @@
 
 package org.eclipse.sparkplug.tck.test;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONFIG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_CONFIG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.paho.client.mqttv3.MqttException;
-
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.Constants.*;
-
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.*;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-
-import org.eclipse.sparkplug.tck.sparkplug.Sections;
-import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.admin.LifecycleStage;
-
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -67,8 +57,8 @@ public class Results implements MqttCallbackExtended {
 	// Configuration
 	private String serverUrl = "tcp://localhost:1883";
 	private String clientId = "Sparkplug TCK Results Collector";
-	private String username = "admin";
-	private String password = "changeme";
+	//private String username = "admin";
+	//private String password = "changeme";
 	private String filename = SPARKPLUG_TCKRESULTS_LOG;
 
 	private MqttTopic log_topic = null;
@@ -79,8 +69,6 @@ public class Results implements MqttCallbackExtended {
 	}
 
 	private Config config = new Config();
-
-	private String primary_host_application_id = null;
 
 	public void log(String message) {
 		try {
@@ -101,7 +89,7 @@ public class Results implements MqttCallbackExtended {
 		if (client != null && client.isConnected()) {
 			return;
 		}
-		logger.info("Initialize {} ", clientId);
+		logger.info("{} initializing", clientId);
 
 		executorService.schedule(() -> {
 			// check if broker is ready
@@ -136,7 +124,7 @@ public class Results implements MqttCallbackExtended {
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
-		logger.info(clientId + ": connected");
+		logger.debug(clientId + ": connected");
 
 		try {
 			client.subscribe(TCK_RESULTS_CONFIG_TOPIC, 2);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ian Craggs
+ * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -13,13 +13,9 @@
 
 package org.eclipse.sparkplug.tck.utility;
 
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
-
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -27,10 +23,6 @@ import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
-import org.eclipse.sparkplug.tck.test.common.StatePayload;
-import org.eclipse.sparkplug.tck.utility.EdgeNode.MessageListener;
-import org.eclipse.sparkplug.tck.test.TCKTest;
 
 /*
  * This the Sparkplug Host Application utility.
@@ -40,20 +32,13 @@ import org.eclipse.sparkplug.tck.test.TCKTest;
  */
 
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.tahu.message.SparkplugBPayloadDecoder;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.Topic;
-import org.eclipse.tahu.util.TopicUtil;
+import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
+import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -119,7 +104,8 @@ public class HostApplication {
 		MqttMessage online = new MqttMessage(birthPayload);
 		online.setQos(1);
 		online.setRetained(true);
-		stateTopic.publish(online);
+		MqttDeliveryToken token = stateTopic.publish(online);
+		token.waitForCompletion(1000L);
 		logger.info("Host " + host_application_id + " successfully created");
 	}
 
