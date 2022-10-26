@@ -132,7 +132,6 @@ public class EdgeSessionTerminationTest extends TCKTest {
 			// If no real edge node is available, we use a simulated one
 			state = TestStatus.CONNECTING_DEVICE;
 			try {
-				// utilities.getEdgeNode().controlOnline();
 				utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
