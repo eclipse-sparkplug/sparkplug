@@ -374,6 +374,80 @@ export default {
                         logging: [],
                     },
                 },
+                messageOrderingTest: {
+                    testValues: {
+                        testType: "HOSTAPPLICATION",
+                        name: "MessageOrderingTest",
+                        readableName: "Message Ordering Test",
+                        description:
+                            `To check that the Host Application behaves correctly when messages are received out of order.
+                            This will use a simulated Edge Node and Device to force the conditions.`,
+                        requirements: [
+                            "Start the Host Application, if it is not yet running.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Set a Host Application Id that is used by an Application.",
+                            "Start this test.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        parameters: {
+                            group_id: {
+                                parameterReadableName: "Group Id",
+                                parameterValue: "SparkplugTCK",
+                                parameterDescription: "The Group Id of the Edge Node",
+                            },
+                            edge_node_id: {
+                                parameterReadableName: "Edge Node Id",
+                                parameterValue: "MessageOrdering",
+                                parameterDescription: "The id of the Edge Node the Host Application will receive the death message from.",
+                            },
+                            device_id: {
+                                parameterReadableName: "Device Id",
+                                parameterValue: "MessageOrdering",
+                                parameterDescription: "The Device Id of a device connected to the Edge Node.",
+                            },
+                        },
+                        code: "",
+                        result: null,
+                        logging: [],
+                    },
+                },
+                multipleBrokerTest: {
+                    testValues: {
+                        testType: "HOSTAPPLICATION",
+                        name: "MultipleBrokerTest",
+                        readableName: "Multple MQTT Server (Broker) Test",
+                        description:
+                            `To check that the Host Application behaves correctly when multiple MQTT servers are used.
+                            `,
+                        requirements: [
+                            "Start the Host Application, if it is not yet running.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Set a Host Application Id that is used by an Application.",
+                            "Start this test.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        parameters: {
+                            group_id: {
+                                parameterReadableName: "Group Id",
+                                parameterValue: "SparkplugTCK",
+                                parameterDescription: "The Group Id of the Edge Node",
+                            },
+                            edge_node_id: {
+                                parameterReadableName: "Edge Node Id",
+                                parameterValue: "MessageOrdering",
+                                parameterDescription: "The id of the Edge Node the Host Application will receive the death message from.",
+                            },
+                            device_id: {
+                                parameterReadableName: "Device Id",
+                                parameterValue: "MessageOrdering",
+                                parameterDescription: "The Device Id of a device connected to the Edge Node.",
+                            },
+                        },
+                        code: "",
+                        result: null,
+                        logging: [],
+                    },
+                },
             },
 
             /**
@@ -505,6 +579,56 @@ export default {
                         name: "PayloadTest",
                         readableName: "Payload Validation Test",
                         description: "This is the Edge Node Sparkplug payload validation test.",
+                        requirements: [
+                            "Setup a MQTT Connection.",
+                            "Set Device Id that is used by the configured Group and Edge.",
+                            "Start this test.",
+                            "Connect the Device and send some Data",
+                            "The Edge Node and Devices should publish a DATA command.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        parameters: {
+                            device_id: {
+                                parameterReadableName: "Device Id",
+                                parameterValue: "",
+                                parameterDescription: "The Id of a device connected to the edge node",
+                            },
+                        },
+                        result: null,
+                        logging: [],
+                    },
+                },
+                primaryHostTest: {
+                    testValues: {
+                        testType: "EONNODE",
+                        name: "PrimaryHostTest",
+                        readableName: "Primary Host Test",
+                        description: "This checks that an Edge Node which is configured to wait for a Primary Host Application behaves correctly.",
+                        requirements: [
+                            "Setup a MQTT Connection.",
+                            "Set Device Id that is used by the configured Group and Edge.",
+                            "Start this test.",
+                            "Connect the Device and send some Data",
+                            "The Edge Node and Devices should publish a DATA command.",
+                            "Wait until Tests are finished and check Results."
+                        ],
+                        parameters: {
+                            device_id: {
+                                parameterReadableName: "Device Id",
+                                parameterValue: "",
+                                parameterDescription: "The Id of a device connected to the edge node",
+                            },
+                        },
+                        result: null,
+                        logging: [],
+                    },
+                },
+                multpleBrokerTest: {
+                    testValues: {
+                        testType: "EONNODE",
+                        name: "MultipleBrokerTest",
+                        readableName: "Multiple MQTT Server (Broker) Test",
+                        description: "This is the Sparkplug Edge Node test. It checks that an Edge Node behaves correctly when multiple Brokers are present.",
                         requirements: [
                             "Setup a MQTT Connection.",
                             "Set Device Id that is used by the configured Group and Edge.",

@@ -298,6 +298,20 @@ export default {
                         " " + testParameter.parameters["edge_node_id"].parameterValue +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "MessageOrderingTest") {
+                    const testParameters =
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + testParameter.parameters["group_id"].parameterValue +
+                        " " + testParameter.parameters["edge_node_id"].parameterValue +
+                        " " + testParameter.parameters["device_id"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "MultipleBrokerTest") {
+                    const testParameters =
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + testParameter.parameters["group_id"].parameterValue +
+                        " " + testParameter.parameters["edge_node_id"].parameterValue +
+                        " " + testParameter.parameters["device_id"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");
                 }
@@ -328,6 +342,18 @@ export default {
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (testType === "ReceiveCommandTest") {
+                    const testParameters =
+                        this.sparkplugClient.eonNode.groupId +
+                        " " + this.sparkplugClient.eonNode.edgeNodeId +
+                        " " + testParameter.parameters["device_id"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "PrimaryHostTest") {
+                    const testParameters =
+                        this.sparkplugClient.eonNode.groupId +
+                        " " + this.sparkplugClient.eonNode.edgeNodeId +
+                        " " + testParameter.parameters["device_id"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
+                } else if (testType === "MultipleBrokerTest") {
                     const testParameters =
                         this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
