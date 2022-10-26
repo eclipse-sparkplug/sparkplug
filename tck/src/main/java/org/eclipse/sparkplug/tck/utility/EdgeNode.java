@@ -38,8 +38,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -49,7 +47,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
-import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.tahu.SparkplugException;
 import org.eclipse.tahu.SparkplugInvalidTypeException;
 import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
@@ -77,7 +74,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
@@ -92,10 +88,6 @@ public class EdgeNode {
 	private static final String HW_VERSION = "Emulated Hardware";
 	private static final String SW_VERSION = "v1.0.0";
 	private String brokerURI = "tcp://localhost:1883";
-
-	private String controlId = "Sparkplug TCK edgeNode utility";
-	private MqttClient control = null;
-	private MessageListener control_listener = null;
 
 	private String group_id = null;
 	private String edge_node_id = null;
@@ -112,22 +104,20 @@ public class EdgeNode {
 	private int bdSeq = 0;
 	private long seq = 0;
 
-	private ScheduledExecutorService controlExecutor;
-	
 	public EdgeNode() {
 		logger.info(getName());
 	}
-	
+
 	public String getName() {
 		return "Sparkplug TCK Edge Node utility";
 	}
 
-	public void edgeNodeOnline(String hostApplicationId, String groupId, String edgeNodeId, String deviceId)
+	public boolean edgeNodeOnline(String hostApplicationId, String groupId, String edgeNodeId, String deviceId)
 			throws Exception {
 		if (edge != null) {
 			logger.info("Edge node already created");
 			logger.info("Edge Node " + groupId + "/" + edgeNodeId + " successfully created");
-			return;
+			return true;
 		}
 
 		edge_node_id = edgeNodeId;
@@ -172,7 +162,7 @@ public class EdgeNode {
 						break;
 					} else {
 						logger.info("Error: host application not online");
-						return;
+						return false;
 					}
 				} catch (Exception e) {
 					logger.info("Failed to handle state topic payload: " + new String(msg.getPayload()));
@@ -182,7 +172,7 @@ public class EdgeNode {
 			Thread.sleep(100);
 			if (++count >= 5) {
 				logger.info("Error: no host application state");
-				return;
+				return false;
 			}
 		}
 
@@ -197,7 +187,7 @@ public class EdgeNode {
 		logger.info("Edge Node " + group_id + "/" + edge_node_id + " successfully created");
 
 		// Create the device
-		deviceCreate(deviceId);
+		return deviceCreate(deviceId);
 	}
 
 	public void edgeOffline() throws Exception {
@@ -215,74 +205,14 @@ public class EdgeNode {
 		deviceId = null;
 		logger.info("Edge node " + edge_node_id + " disconnected");
 	}
-	
+
 	public void deviceDeath() throws Exception {
 		byte[] payload = createDeviceDeathPayload();
-		
-		logger.info("{} publishing DDEATH for device {}", controlId, deviceId);
-		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DDEATH/" + edge_node_id + "/" +deviceId, payload, 0, false);
+
+		logger.info("Publishing DDEATH for device {}", deviceId);
+		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DDEATH/" + edge_node_id + "/" + deviceId, payload, 0,
+				false);
 		deviceId = null;
-	}
-
-	public void controlOnline() {
-		System.out.println("*** Sparkplug TCK EdgeNode and Edge Node Utility ***");
-		try {
-			controlExecutor = Services.extensionExecutorService(); //Executors.newScheduledThreadPool(1);
-			
-			controlExecutor.schedule(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						MqttMessage msg = control_listener.getNextMessage();
-						if (msg != null) {
-							String[] words = Utils.tokenize(msg.toString());
-							if (words.length == 4 && words[0].toUpperCase().equals("SEND_EDGE_DATA")) {
-								/* SEND_EDGE_DATA host application id, edge node id, metric name */
-								logger.info("Publishing Edge Node data: " + words[3]);
-								publishEdgeData(words[3]);
-								logger.info("Published Edge Node data: " + words[3]);
-							} else if (words.length == 5 && words[0].toUpperCase().equals("SEND_DEVICE_DATA")) {
-								/* SEND_DEVICE_DATA host application id, edge node id, edgeNode id, metric name */
-								logger.info("Publishing Edge Node data: " + words[4]);
-								publishDeviceData(words[4]);
-								logger.info("Published Edge Node data: " + words[3]);
-							} else if (words.length == 3 && words[0].toUpperCase().equals("DISCONNECT_EDGE_NODE")) {
-								/* DISCONNECT_EDGE_NODE host application id, edge node id */
-								logger.info("Disconnecting Edge Node: host_app_id=" + words[1] + " edge_node_id=" + words[2]);
-								edgeOffline();
-							} else {
-								logger.info("Command not understood: " + msg + " " + words.length);
-							}
-						}
-					} catch (Exception e) {
-						logger.error("Failed to handle message", e);
-					}
-				}
-			}, 100, TimeUnit.MILLISECONDS);
-
-			MqttConnectOptions options = new MqttConnectOptions();
-			options.setAutomaticReconnect(true);
-			options.setCleanSession(true);
-			options.setConnectionTimeout(30);
-			options.setKeepAliveInterval(30);
-
-			control = new MqttClient(brokerURI, controlId);
-			control_listener = new MessageListener();
-			control.setCallback(control_listener);
-			control.connect(options);
-			logger.info("starting");
-			// control.subscribe("SPARKPLUG_TCK/DEVICE_CONTROL");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void controlOffline() throws Exception {
-		controlExecutor.shutdownNow();
-
-		control.disconnect(0);
-		control.close();
-		control = null;
 	}
 
 	// Used to add the birth/death sequence number
@@ -298,26 +228,28 @@ public class EdgeNode {
 		return payload;
 	}
 
-	private void deviceCreate(String aDeviceId) throws Exception {
+	private boolean deviceCreate(String deviceId) throws Exception {
 		if (edge == null) {
 			logger.info("No edge node");
-			return;
+			return false;
 		}
 
-		if (deviceId != null) {
-			logger.info("{} Device " + deviceId + " already created", controlId);
+		if (this.deviceId != null) {
+			logger.info("Device {} already created", deviceId);
+			return true;
 		} else {
-			deviceId = aDeviceId;
-			logger.info("{} Creating new edgeNode \"" + deviceId + "\"", controlId);
+			this.deviceId = deviceId;
 		}
 
 		// Publish edgeNode birth message
 		byte[] payload = createDeviceBirthPayload();
 		MqttMessage mqttmessage = new MqttMessage(payload);
-		device_topic = edge.getTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + deviceId);
+		device_topic =
+				edge.getTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + deviceId);
 		device_topic.publish(mqttmessage);
 
-		logger.info("{} Device " + deviceId + " successfully created", controlId);
+		logger.info("Device {} successfully created", deviceId);
+		return true;
 	}
 
 	private String newUUID() {
@@ -372,12 +304,12 @@ public class EdgeNode {
 
 		return bytes;
 	}
-	
+
 	private byte[] createDeviceDeathPayload() throws Exception {
 		SparkplugBPayloadBuilder deathPayload = new SparkplugBPayloadBuilder().setTimestamp(new Date());
 		deathPayload.setSeq(seq);
-		//deathPayload.addMetric(new MetricBuilder("bdSeq", Int64, (long)seq).createMetric());
-		
+		// deathPayload.addMetric(new MetricBuilder("bdSeq", Int64, (long)seq).createMetric());
+
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
 		// Compress payload (optional)
 		byte[] result = null;
@@ -391,7 +323,8 @@ public class EdgeNode {
 
 	private byte[] createDeviceBirthPayload() throws Exception {
 		// Create the payload and add some metrics
-		SparkplugBPayload payload = new SparkplugBPayload(new Date(), newMetrics(true), getNextSeqNum(), newUUID(), null);
+		SparkplugBPayload payload =
+				new SparkplugBPayload(new Date(), newMetrics(true), getNextSeqNum(), newUUID(), null);
 
 		payload.addMetric(new MetricBuilder("EdgeNode Control/Rebirth", Boolean, false).createMetric());
 
@@ -654,12 +587,6 @@ public class EdgeNode {
 		@Override
 		public void connectComplete(boolean reconnect, String serverURI) {
 			System.out.println("Connected!");
-
-			try {
-				//control.subscribe(Constants.TCK_DEVICE_CONTROL_TOPIC);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 
 		public void connectionLost(Throwable cause) {
