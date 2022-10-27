@@ -13,19 +13,27 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.tahu.message.model.MessageType;
+import org.eclipse.tahu.message.model.MetricDataType;
+import org.eclipse.tahu.message.model.Topic;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +56,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
@@ -69,12 +78,16 @@ public class ReceiveDataTest extends TCKTest {
 
 	private TestStatus state = TestStatus.NONE;
 	private TCK theTCK = null;
+	private @NotNull Utilities utilities = null;
 
 	private PublishService publishService = Services.publishService();
 
-	public ReceiveDataTest(TCK aTCK, String[] params) {
+	final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
+
+	public ReceiveDataTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("Primary host receive data test: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
 		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -95,20 +108,46 @@ public class ReceiveDataTest extends TCKTest {
 			return;
 		}
 
+		// The TCK_CONSOLE_TEST_CONTROL_TOPIC gets sent to the PublishInterceptor from the web ui - give it some time
+		// before starting the edge node
+		executorService.schedule(new Runnable() {
+			@Override
+			public void run() {
+				logger.info("Creating the Edge Node");
+				try {
+					boolean created =
+							utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
+					if (created) {
+						logger.info("{}: Device was created", getName());
+
+						// Now tell the EdgeNode simulator to send some data from the edge node
+						logger.info("Requesting data from edgeNodeId: {}  and metric: {} ", edgeNodeId, EDGE_METRIC);
+						utilities.getEdgeNode().publishEdgeData(EDGE_METRIC, MetricDataType.Int32,
+								new Random().nextInt());
+						state = TestStatus.REQUESTED_NODE_DATA;
+					} else {
+						logger.error("SendCommandTest: Failed to create the device");
+					}
+				} catch (Exception e) {
+					throw new IllegalStateException();
+				}
+			}
+		}, 2, TimeUnit.SECONDS);
+
 		// First we have to connect an edge node and device.
 		// We do this by sending an MQTT control message to the TCK EdgeNode utility.
 		// ONLY DO THIS IF THE EDGE/DEVICE haven't already been created!!
 		state = TestStatus.CONNECTING_DEVICE;
-		String payload = "NEW DEVICE " + hostApplicationId + " " + groupId + " " + edgeNodeId + " " + deviceId;
-		Publish message = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC).qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting new device creation. GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId,
-				deviceId);
-		publishService.publish(message);
 	}
 
 	@Override
 	public void endTest(Map<String, String> results) {
+		try {
+			utilities.getEdgeNode().edgeOffline();
+		} catch (Exception e) {
+			logger.error("endTest", e);
+		}
+
 		testResults.putAll(results);
 		state = TestStatus.NONE;
 		Utils.setEndTest(getName(), testIds, testResults);
@@ -146,71 +185,41 @@ public class ReceiveDataTest extends TCKTest {
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
 
-		String payload = null;
-		ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
-		if (byteBuffer != null) {
-			payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
-		}
+		try {
+			final Topic topic = Topic.parseTopic(packet.getTopic());
 
-		if (Constants.TCK_CONSOLE_REPLY_TOPIC.equals(packet.getTopic())) {
-
-			logger.info("{}: Payload contains: {} in state: {} ", getName(), payload, state);
-
-			if (state == TestStatus.PUBLISHED_NODE_DATA && Constants.PASS.equals(payload)) {
-				logger.info("Received node data confirmation from tester: {}", payload);
-
-				// Now tell the EdgeNode simulator to send some data from the device
-				logger.info("Requesting data from device id: " + deviceId + " metric: " + DEVICE_METRIC);
-				String message = "SEND_DEVICE_DATA " + hostApplicationId + " " + edgeNodeId + " " + deviceId + " "
-						+ DEVICE_METRIC;
-				Publish requestDeviceData = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC)
-						.qos(Qos.AT_LEAST_ONCE).payload(ByteBuffer.wrap(message.getBytes())).build();
-
-				publishService.publish(requestDeviceData);
-
-				logger.info("Requesting device data check for device id: " + deviceId);
-				state = TestStatus.REQUESTED_DEVICE_DATA;
-				String message2 = "Data is being sent from device " + deviceId + " metric " + DEVICE_METRIC + ".\n"
-						+ "Check that the value is updated on the host application";
-				Publish checkDeviceData = Builders.publish().topic(Constants.TCK_CONSOLE_PROMPT_TOPIC)
-						.qos(Qos.AT_LEAST_ONCE).payload(ByteBuffer.wrap(message2.getBytes())).build();
-				publishService.publish(checkDeviceData);
-			} else if (state == TestStatus.PUBLISHED_DEVICE_DATA && Constants.PASS.equals(payload)) {
-				logger.info("Received device data confirmation from tester: {}", payload);
-				theTCK.endTest();
-			}
-		} else if (Constants.TCK_LOG_TOPIC.equals(packet.getTopic())) {
-
-			if (payload == null) {
-				return;
+			String payload = null;
+			ByteBuffer byteBuffer = packet.getPayload().orElseGet(null);
+			if (byteBuffer != null) {
+				payload = StandardCharsets.UTF_8.decode(byteBuffer).toString();
+				if (payload == null) {
+					return;
+				}
 			}
 
-			if (state == TestStatus.CONNECTING_DEVICE
-					&& payload.equals("Device " + deviceId + " successfully created")) {
+			if (state == TestStatus.REQUESTED_NODE_DATA && topic.isType(MessageType.NDATA)) {
 
-				logger.info("{}: Device was created", getName());
-
-				// Now tell the EdgeNode simulator to send some data from the edge node
-				logger.info("Requesting data from edgeNodeId: {}  and metric: {} ", edgeNodeId, EDGE_METRIC);
-
-				String message = "SEND_EDGE_DATA " + hostApplicationId + " " + edgeNodeId + " " + EDGE_METRIC;
-				Publish requestEdgeNodeData = Builders.publish().topic(Constants.TCK_DEVICE_CONTROL_TOPIC)
-						.qos(Qos.AT_LEAST_ONCE).payload(ByteBuffer.wrap(message.getBytes())).build();
-				publishService.publish(requestEdgeNodeData);
-				state = TestStatus.REQUESTED_NODE_DATA;
-
-				String message2 = "Data is being sent from edge node " + edgeNodeId + " metric " + DEVICE_METRIC + ".\n"
-						+ "Check that the value is updated on the host application";
-				Publish requestUpdate = Builders.publish().topic(Constants.TCK_CONSOLE_PROMPT_TOPIC)
-						.qos(Qos.AT_LEAST_ONCE).payload(ByteBuffer.wrap(message2.getBytes())).build();
-				logger.info("Requesting edge node data check for edge id: " + edgeNodeId);
-				publishService.publish(requestUpdate);
-
-			} else if (state == TestStatus.REQUESTED_NODE_DATA && payload.startsWith("Published Edge Node data: ")) {
-				state = TestStatus.PUBLISHED_NODE_DATA;
-			} else if (state == TestStatus.REQUESTED_DEVICE_DATA && payload.startsWith("Published Device data: ")) {
+				logger.info("Requesting device data for device: {} and metric: {}" + deviceId, DEVICE_METRIC);
+				boolean pubSuccess = utilities.getEdgeNode().publishDeviceData(DEVICE_METRIC, MetricDataType.Boolean,
+						new Random().nextBoolean());
+				if (pubSuccess) {
+					state = TestStatus.REQUESTED_DEVICE_DATA;
+				} else {
+					throw new IllegalStateException();
+				}
+			} else if (state == TestStatus.REQUESTED_DEVICE_DATA && topic.isType(MessageType.DDATA)) {
 				state = TestStatus.PUBLISHED_DEVICE_DATA;
+				endTest(testResults);
 			}
+		} catch (Exception e) {
+			logger.error("Failed to execute receive data test", e);
 		}
+	}
+
+	private void publishToTckConsolePrompt(String payload) {
+		Publish message = Builders.publish().topic(TCK_CONSOLE_PROMPT_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(payload.getBytes())).build();
+		logger.info("Requesting command to edge node id:{}: {} ", edgeNodeId, payload);
+		publishService.publish(message);
 	}
 }
