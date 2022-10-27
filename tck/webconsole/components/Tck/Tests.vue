@@ -603,14 +603,16 @@ export default {
                         testType: "EONNODE",
                         name: "PrimaryHostTest",
                         readableName: "Primary Host Test",
-                        description: "This checks that an Edge Node which is configured to wait for a Primary Host Application behaves correctly.",
+                        description: `This checks that an Edge Node which is configured to wait for a Primary Host
+                                      Application behaves correctly. The test contains delays so can take 30 seconds
+                                      or more to run.`,
                         requirements: [
-                            "Setup a MQTT Connection.",
+                            "Connect this console to the HiveMQ broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
+                            "Start the edge node.",
                             "Start this test.",
-                            "Connect the Device and send some Data",
-                            "The Edge Node and Devices should publish a DATA command.",
-                            "Wait until Tests are finished and check Results."
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_id: {
@@ -628,7 +630,8 @@ export default {
                         testType: "EONNODE",
                         name: "MultipleBrokerTest",
                         readableName: "Multiple MQTT Server (Broker) Test",
-                        description: "This is the Sparkplug Edge Node test. It checks that an Edge Node behaves correctly when multiple Brokers are present.",
+                        description: `This is the Sparkplug Edge Node test. It checks that an Edge Node behaves 
+                                      correctly when multiple Brokers are present.`,
                         requirements: [
                             "Setup a MQTT Connection.",
                             "Set Device Id that is used by the configured Group and Edge.",

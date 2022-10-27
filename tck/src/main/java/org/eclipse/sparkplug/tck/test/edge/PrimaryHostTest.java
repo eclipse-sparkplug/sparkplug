@@ -415,6 +415,7 @@ public class PrimaryHostTest extends TCKTest {
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_NDEATH + "/"
 				+ edgeNodeId)) {
 
+			logger.info("Received NDEATH in state "+state.name());
 			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE);
@@ -422,6 +423,7 @@ public class PrimaryHostTest extends TCKTest {
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DDEATH + "/"
 				+ edgeNodeId + "/" + deviceId)) {
 
+			logger.info("Received DDEATH in state "+state.name());
 			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE);
