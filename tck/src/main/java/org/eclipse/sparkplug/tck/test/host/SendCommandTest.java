@@ -304,7 +304,7 @@ public class SendCommandTest extends TCKTest {
 				return;
 			}
 
-			// Example: spBv1.0/Group0/DBIRTH/Edge0/Device0
+			// Example: spBv1.0/Group0/NBIRTH/Edge0
 			if (topicLevels[2].equals(TOPIC_PATH_NBIRTH)) {
 				if (topicLevels[3].equals(edgeNodeId)) {
 					PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);

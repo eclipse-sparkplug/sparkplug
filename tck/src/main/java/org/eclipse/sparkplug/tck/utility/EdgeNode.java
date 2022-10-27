@@ -55,6 +55,7 @@ import org.eclipse.tahu.message.model.DataSet.DataSetBuilder;
 import org.eclipse.tahu.message.model.DataSetDataType;
 import org.eclipse.tahu.message.model.Metric;
 import org.eclipse.tahu.message.model.Metric.MetricBuilder;
+import org.eclipse.tahu.message.model.MetricDataType;
 import org.eclipse.tahu.message.model.Parameter;
 import org.eclipse.tahu.message.model.ParameterDataType;
 import org.eclipse.tahu.message.model.PropertyDataType;
@@ -101,7 +102,8 @@ public class EdgeNode {
 
 	private Calendar calendar = Calendar.getInstance();
 
-	private int bdSeq = 0;
+	private int deathBdSeq = 0;
+	private int birthBdSeq = 255;
 	private long seq = 0;
 
 	public EdgeNode() {
@@ -131,7 +133,7 @@ public class EdgeNode {
 		// payloads don't have a regular sequence number, and can have a timestamp,
 		// and MUST have a bdseq - that fits to the NBIRTH
 		SparkplugBPayloadBuilder deathPayload = new SparkplugBPayloadBuilder().setTimestamp(new Date());
-		deathPayload = addBdSeqNum(deathPayload);
+		deathPayload = addDeathBdSeqNum(deathPayload);
 		deathBytes = new SparkplugBPayloadEncoder().getBytes(deathPayload.createPayload());
 
 		MqttConnectOptions options = new MqttConnectOptions();
@@ -141,7 +143,7 @@ public class EdgeNode {
 		options.setKeepAliveInterval(30);
 		// options.setUserName(username);
 		// options.setPassword(password.toCharArray());
-		options.setWill(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 1, false);
+		options.setWill(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 0, false);
 
 		edge.connect(options);
 
@@ -198,9 +200,10 @@ public class EdgeNode {
 		// The intention here is to "disconnect" without sending the MQTT disconnect packet
 		// Will this work?
 		// Publishing NDEATH - cause we gracefully disconnect
-		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDEATH/" + edge_node_id, deathBytes, 1, false);
+		String deathTopic = TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDEATH/" + edge_node_id;
+		logger.debug("Disconnecting with NDEATH topic: {}", deathTopic);
+		edge.publish(deathTopic, deathBytes, 0, false);
 		edge.disconnect(0);
-		edge.close();
 		edge = null;
 		deviceId = null;
 		logger.info("Edge node " + edge_node_id + " disconnected");
@@ -215,16 +218,55 @@ public class EdgeNode {
 		deviceId = null;
 	}
 
+	public boolean publishEdgeData(String metricName, MetricDataType metricDataType, Object value) throws Exception {
+		List<Metric> nodeMetrics = new ArrayList<Metric>();
+
+		// Add a 'real time' metric
+		nodeMetrics
+				.add(new MetricBuilder(metricName, metricDataType, value).timestamp(calendar.getTime()).createMetric());
+
+		logger.info("Updating metric " + metricName + " to " + value);
+
+		SparkplugBPayload nodePayload = new SparkplugBPayload(new Date(), nodeMetrics, getNextSeqNum(), null, null);
+
+		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDATA/" + edge_node_id,
+				new SparkplugBPayloadEncoder().getBytes(nodePayload), 0, false);
+		return true;
+	}
+
+	public boolean publishDeviceData(String metricName, MetricDataType metricDataType, Object value) throws Exception {
+		List<Metric> deviceMetrics = new ArrayList<Metric>();
+
+		// Add a 'real time' metric
+		deviceMetrics
+				.add(new MetricBuilder(metricName, metricDataType, value).timestamp(calendar.getTime()).createMetric());
+
+		logger.info("Updating metric " + metricName + " to " + value);
+
+		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getNextSeqNum(), null, null);
+
+		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DDATA/" + edge_node_id + "/" + deviceId,
+				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
+		return true;
+	}
+
 	// Used to add the birth/death sequence number
-	private SparkplugBPayloadBuilder addBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
+	private SparkplugBPayloadBuilder addDeathBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
 		if (payload == null) {
 			payload = new SparkplugBPayloadBuilder();
 		}
-		if (bdSeq == 256) {
-			bdSeq = 0;
+		if (deathBdSeq == 256) {
+			deathBdSeq = 0;
 		}
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
-		bdSeq++;
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) deathBdSeq).createMetric());
+		deathBdSeq++;
+
+		// Handle the Birth BD seq number
+		birthBdSeq++;
+		if (birthBdSeq == 256) {
+			birthBdSeq = 0;
+		}
+
 		return payload;
 	}
 
@@ -273,7 +315,7 @@ public class EdgeNode {
 		SparkplugBPayload payload =
 				new SparkplugBPayload(new Date(), new ArrayList<Metric>(), getNextSeqNum(), newUUID(), null);
 
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) bdSeq).createMetric());
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) birthBdSeq).createMetric());
 		payload.addMetric(new MetricBuilder("Node Control/Rebirth", Boolean, false).createMetric());
 
 		payload.addMetric(new MetricBuilder("TCK_metric/Boolean", Boolean, true).createMetric());
@@ -308,7 +350,6 @@ public class EdgeNode {
 	private byte[] createDeviceDeathPayload() throws Exception {
 		SparkplugBPayloadBuilder deathPayload = new SparkplugBPayloadBuilder().setTimestamp(new Date());
 		deathPayload.setSeq(seq);
-		// deathPayload.addMetric(new MetricBuilder("bdSeq", Int64, (long)seq).createMetric());
 
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
 		// Compress payload (optional)
@@ -476,7 +517,7 @@ public class EdgeNode {
 		metrics.add(new MetricBuilder("MyInt64", Int64, random.nextLong()).createMetric());
 		metrics.add(new MetricBuilder("MyUInt8", UInt8, (short) random.nextInt()).createMetric());
 		metrics.add(new MetricBuilder("MyUInt16", UInt16, random.nextInt()).createMetric());
-		metrics.add(new MetricBuilder("MyUInt32", UInt32, random.nextLong()).createMetric());
+		metrics.add(new MetricBuilder("MyUInt32", UInt32, (long) random.nextInt()).createMetric());
 		metrics.add(new MetricBuilder("MyUInt64", UInt64, BigInteger.valueOf(random.nextLong())).createMetric());
 		metrics.add(new MetricBuilder("MyFloat", Float, random.nextFloat()).createMetric());
 		metrics.add(new MetricBuilder("MyDouble", Double, random.nextDouble()).createMetric());
@@ -507,7 +548,7 @@ public class EdgeNode {
 						.addValue(new Value<Long>(DataSetDataType.Int64, random.nextLong()))
 						.addValue(new Value<Short>(DataSetDataType.UInt8, (short) random.nextInt()))
 						.addValue(new Value<Integer>(DataSetDataType.UInt16, random.nextInt()))
-						.addValue(new Value<Long>(DataSetDataType.UInt32, random.nextLong()))
+						.addValue(new Value<Long>(DataSetDataType.UInt32, (long) random.nextInt()))
 						.addValue(new Value<BigInteger>(DataSetDataType.UInt64, BigInteger.valueOf(random.nextLong())))
 						.addValue(new Value<Float>(DataSetDataType.Float, random.nextFloat()))
 						.addValue(new Value<Double>(DataSetDataType.Double, random.nextDouble()))
@@ -521,7 +562,7 @@ public class EdgeNode {
 						.addValue(new Value<Long>(DataSetDataType.Int64, random.nextLong()))
 						.addValue(new Value<Short>(DataSetDataType.UInt8, (short) random.nextInt()))
 						.addValue(new Value<Integer>(DataSetDataType.UInt16, random.nextInt()))
-						.addValue(new Value<Long>(DataSetDataType.UInt32, random.nextLong()))
+						.addValue(new Value<Long>(DataSetDataType.UInt32, (long) random.nextInt()))
 						.addValue(new Value<BigInteger>(DataSetDataType.UInt64, BigInteger.valueOf(random.nextLong())))
 						.addValue(new Value<Float>(DataSetDataType.Float, random.nextFloat()))
 						.addValue(new Value<Double>(DataSetDataType.Double, random.nextDouble()))
@@ -530,42 +571,6 @@ public class EdgeNode {
 						.addValue(new Value<Date>(DataSetDataType.DateTime, new Date()))
 						.addValue(new Value<String>(DataSetDataType.Text, newUUID())).createRow())
 				.createDataSet();
-	}
-
-	private void publishEdgeData(String metric_name) throws Exception {
-		List<Metric> nodeMetrics = new ArrayList<Metric>();
-
-		Random random = new Random();
-		int value = random.nextInt(100) + 10;
-
-		// Add a 'real time' metric
-		nodeMetrics.add(new MetricBuilder(metric_name, Int32, value).timestamp(calendar.getTime()).createMetric());
-
-		logger.info("Updating metric " + metric_name + " to " + value);
-
-		SparkplugBPayload nodePayload = new SparkplugBPayload(new Date(), nodeMetrics, getNextSeqNum(), null, null);
-
-		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDATA/" + edge_node_id,
-				new SparkplugBPayloadEncoder().getBytes(nodePayload), 0, false);
-
-	}
-
-	private void publishDeviceData(String metric_name) throws Exception {
-		List<Metric> deviceMetrics = new ArrayList<Metric>();
-
-		Random random = new Random();
-		int value = random.nextInt(100) + 10;
-
-		// Add a 'real time' metric
-		deviceMetrics.add(new MetricBuilder(metric_name, Int32, value).timestamp(calendar.getTime()).createMetric());
-
-		logger.info("Updating metric " + metric_name + " to " + value);
-
-		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getNextSeqNum(), null, null);
-
-		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DDATA/" + edge_node_id + "/" + deviceId,
-				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
-
 	}
 
 	class MessageListener implements MqttCallbackExtended {
