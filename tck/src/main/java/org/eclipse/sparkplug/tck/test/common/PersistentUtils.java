@@ -15,8 +15,10 @@ package org.eclipse.sparkplug.tck.test.common;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,8 @@ public class PersistentUtils {
 		try {
 			File bdSeqNumFile = new File(HOST_BD_SEQ_NUM_FILE_NAME);
 			if (bdSeqNumFile.exists()) {
-				int bdSeqNum = Integer.parseInt(FileUtils.readFileToString(bdSeqNumFile, StandardCharsets.UTF_8));
+				int bdSeqNum = Integer
+						.parseInt(Files.readString(Paths.get(HOST_BD_SEQ_NUM_FILE_NAME), StandardCharsets.UTF_8));
 				logger.info("Next Host Death bdSeq number: {}", bdSeqNum);
 				return bdSeqNum;
 			} else {
@@ -51,8 +54,8 @@ public class PersistentUtils {
 
 	public static void setNextHostDeathBdSeqNum(int bdSeqNum) {
 		try {
-			File bdSeqNumFile = new File(HOST_BD_SEQ_NUM_FILE_NAME);
-			FileUtils.write(bdSeqNumFile, Long.toString(bdSeqNum), StandardCharsets.UTF_8, false);
+			Files.writeString(Paths.get(HOST_BD_SEQ_NUM_FILE_NAME), Long.toString(bdSeqNum),
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (Exception e) {
 			logger.error("Failed to write the Host bdSeq number to the persistent directory", e);
 		}
@@ -62,7 +65,8 @@ public class PersistentUtils {
 		try {
 			File bdSeqNumFile = new File(HOST_BD_SEQ_NUM_FILE_NAME + hostName);
 			if (bdSeqNumFile.exists()) {
-				int bdSeqNum = Integer.parseInt(FileUtils.readFileToString(bdSeqNumFile, StandardCharsets.UTF_8));
+				int bdSeqNum = Integer
+						.parseInt(Files.readString(Paths.get(HOST_BD_SEQ_NUM_FILE_NAME), StandardCharsets.UTF_8));
 				logger.info("Next Host Death bdSeq number: {}", bdSeqNum);
 				return bdSeqNum;
 			} else {
@@ -76,11 +80,10 @@ public class PersistentUtils {
 
 	public static void setNextHostDeathBdSeqNum(String hostName, int bdSeqNum) {
 		try {
-			File bdSeqNumFile = new File(HOST_BD_SEQ_NUM_FILE_NAME + hostName);
-			FileUtils.write(bdSeqNumFile, Long.toString(bdSeqNum), StandardCharsets.UTF_8, false);
+			Files.writeString(Paths.get(HOST_BD_SEQ_NUM_FILE_NAME), Long.toString(bdSeqNum),
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (Exception e) {
 			logger.error("Failed to write the Host bdSeq number to the persistent directory", e);
 		}
 	}
-
 }

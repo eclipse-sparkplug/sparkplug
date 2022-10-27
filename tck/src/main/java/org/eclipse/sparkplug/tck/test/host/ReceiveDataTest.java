@@ -25,15 +25,15 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sparkplug.impl.exception.model.MessageType;
+import org.eclipse.sparkplug.impl.exception.model.MetricDataType;
+import org.eclipse.sparkplug.impl.exception.model.Topic;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.tahu.message.model.MessageType;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.Topic;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
