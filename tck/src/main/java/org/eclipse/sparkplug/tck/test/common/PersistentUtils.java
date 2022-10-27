@@ -58,4 +58,29 @@ public class PersistentUtils {
 		}
 	}
 
+	public static int getNextHostDeathBdSeqNum(String hostName) {
+		try {
+			File bdSeqNumFile = new File(HOST_BD_SEQ_NUM_FILE_NAME + hostName);
+			if (bdSeqNumFile.exists()) {
+				int bdSeqNum = Integer.parseInt(FileUtils.readFileToString(bdSeqNumFile, StandardCharsets.UTF_8));
+				logger.info("Next Host Death bdSeq number: {}", bdSeqNum);
+				return bdSeqNum;
+			} else {
+				return -1;
+			}
+		} catch (Exception e) {
+			logger.error("Failed to get the bdSeq number from the persistent directory", e);
+			return -1;
+		}
+	}
+
+	public static void setNextHostDeathBdSeqNum(String hostName, int bdSeqNum) {
+		try {
+			File bdSeqNumFile = new File(HOST_BD_SEQ_NUM_FILE_NAME + hostName);
+			FileUtils.write(bdSeqNumFile, Long.toString(bdSeqNum), StandardCharsets.UTF_8, false);
+		} catch (Exception e) {
+			logger.error("Failed to write the Host bdSeq number to the persistent directory", e);
+		}
+	}
+
 }

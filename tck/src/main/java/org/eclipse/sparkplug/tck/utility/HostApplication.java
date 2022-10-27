@@ -67,7 +67,11 @@ public class HostApplication {
 		logger.info("Sparkplug TCK Host Application utility");
 	}
 
-	public void hostOnline(String host_application_id) throws MqttException {
+	
+	/*
+	 * prepare host messages but don't send
+	 */
+	public void hostPrepare (String host_application_id) throws MqttException {
 		if (host != null) {
 			logger.info("host application in use");
 			return;
@@ -99,14 +103,45 @@ public class HostApplication {
 		MqttConnectOptions connectOptions = new MqttConnectOptions();
 		connectOptions.setWill(stateTopic, deathPayload, 1, true);
 		host.connect(connectOptions);
-
+		logger.info("Host " + host_application_id + " successfully created");
+	}
+	
+	public void hostSendOnline() throws MqttException {
+		if (host == null) {
+			logger.error("hostOnlineSend: no host application");
+			return;
+		}
 		// send online state message
 		MqttMessage online = new MqttMessage(birthPayload);
 		online.setQos(1);
 		online.setRetained(true);
 		MqttDeliveryToken token = stateTopic.publish(online);
 		token.waitForCompletion(1000L);
-		logger.info("Host " + host_application_id + " successfully created");
+	}
+	
+	/* send offline message, but don't disconnect so we 
+	 * can send the online message if we want
+	 */
+	public void hostSendOffline() throws MqttException {
+		if (host == null) {
+			logger.error("hostOfflineSend: no host application");
+			return;
+		}
+		MqttMessage offline = new MqttMessage(deathPayload);
+		offline.setQos(1);
+		offline.setRetained(true);
+		MqttDeliveryToken token = stateTopic.publish(offline);
+		token.waitForCompletion(1000L);
+	}
+	
+	public void hostOnline(String host_application_id) throws MqttException {
+		if (host != null) {
+			logger.info("host application in use");
+			return;
+		}
+		hostPrepare(host_application_id);
+		hostSendOnline();
+		logger.info("Host " + host_application_id + " successfully online");
 	}
 
 	public void hostOffline() throws MqttException {
@@ -122,6 +157,7 @@ public class HostApplication {
 		host = null;
 	}
 
+		
 	class MessageListener implements MqttCallbackExtended {
 		ArrayList<MqttMessage> messages;
 
