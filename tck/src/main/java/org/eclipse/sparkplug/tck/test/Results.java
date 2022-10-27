@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2014, 2022 Cirrus Link Solutions and others
+ * Copyright (c) 2014-2022 Cirrus Link Solutions and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -57,8 +57,8 @@ public class Results implements MqttCallbackExtended {
 	// Configuration
 	private String serverUrl = "tcp://localhost:1883";
 	private String clientId = "Sparkplug TCK Results Collector";
-	//private String username = "admin";
-	//private String password = "changeme";
+	// private String username = "admin";
+	// private String password = "changeme";
 	private String filename = SPARKPLUG_TCKRESULTS_LOG;
 
 	private MqttTopic log_topic = null;

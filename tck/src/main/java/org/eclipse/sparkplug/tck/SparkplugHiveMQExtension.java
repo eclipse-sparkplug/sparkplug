@@ -1,13 +1,21 @@
-/*
- * Copyright © 2021, 2022 The Eclipse Foundation, Cirrus Link Solutions, and others
+/********************************************************************************
+ * Copyright (c) 2021-2022 Cirrus Link Solutions and others
  *
  * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * https://www.eclipse.org/legal/epl-2.0.
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0
- */
+ *
+ * Contributors:
+ *   Cirrus Link Solutions - initial implementation
+ ********************************************************************************/
+
 package org.eclipse.sparkplug.tck;
+
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -17,9 +25,6 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.intializer.ClientInitializer;
-import org.eclipse.sparkplug.tck.test.TCK;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Ian Craggs

@@ -1,4 +1,4 @@
-/* ******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
@@ -9,33 +9,36 @@
  *
  * Contributors:
  *    Ian Craggs - initial implementation and documentation
- ****************************************************************************** */
+ *******************************************************************************/
 
 package org.eclipse.sparkplug.tck.test;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
+
+import java.nio.ByteBuffer;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.events.client.parameters.*;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Date;
-import java.sql.Timestamp;
-import java.util.TreeMap;
-
-import org.eclipse.sparkplug.tck.test.common.Utils;
-
-import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 
 /**
  * @author Ian Craggs
@@ -68,7 +71,6 @@ public abstract class TCKTest {
 	public abstract Map<String, String> getResults();
 
 	public abstract String[] getTestIds();
-
 
 	public abstract void endTest(Map<String, String> results);
 

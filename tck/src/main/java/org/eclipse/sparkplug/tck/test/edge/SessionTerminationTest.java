@@ -13,6 +13,9 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH;
@@ -21,32 +24,31 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDEATH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDEATH_SEQ_NUMBER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDEATH_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_SEQ_NUM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_NUMBER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_TIMESTAMP;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDEATH_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDEATH_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_MQTT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_SEQ_NUM;
-
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
@@ -60,15 +62,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
+import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.events.client.parameters.*;
 
 /**
  * This is the edge node Sparkplug session termination test
@@ -88,8 +90,8 @@ public class SessionTerminationTest extends TCKTest {
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
 			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER, ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311,
-			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50,
-			ID_TOPICS_NDEATH_TOPIC, ID_TOPICS_DDEATH_TOPIC );
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50, ID_TOPICS_NDEATH_TOPIC,
+			ID_TOPICS_DDEATH_TOPIC);
 
 	private final @NotNull TCK theTCK;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
@@ -256,16 +258,16 @@ public class SessionTerminationTest extends TCKTest {
 				&& topicLevels[2].equals("NDEATH") && topicLevels[3].equals(edgeNodeId)) {
 			ndeathFound = true;
 			logger.info("Edge session termination test - publish - to topic: {} ", packet.getTopic());
-			
-			testResults.put(ID_TOPICS_NDEATH_TOPIC, setResult(ndeathFound, TOPICS_NDEATH_TOPIC));	
+
+			testResults.put(ID_TOPICS_NDEATH_TOPIC, setResult(ndeathFound, TOPICS_NDEATH_TOPIC));
 		}
 
 		if (topicLevels.length == 5 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
 				&& topicLevels[2].equals("DDEATH") && topicLevels[3].equals(edgeNodeId)
 				&& topicLevels[4].equals(deviceId)) {
 			ddeathFound = true;
-			
-			testResults.put(ID_TOPICS_DDEATH_TOPIC, setResult(ddeathFound, TOPICS_DDEATH_TOPIC));			
+
+			testResults.put(ID_TOPICS_DDEATH_TOPIC, setResult(ddeathFound, TOPICS_DDEATH_TOPIC));
 
 			// DDEATH messages MUST be published with MQTT QoS equal to 0 and retain equal to false.
 			boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);

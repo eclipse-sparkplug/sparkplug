@@ -13,15 +13,38 @@
 
 package org.eclipse.sparkplug.tck.test.broker;
 
-import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.services.Services;
+import static org.eclipse.sparkplug.tck.test.broker.CompliantBrokerTest.checkCompliance;
+import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.Constants.SPARKPLUG_AWARE_ROOT;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_BASIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_MQTT_AWARE_STORE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_BASIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_AWARE_STORE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_QOS0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_QOS1;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_RETAINED;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_WILL_MESSAGES;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
@@ -34,15 +57,15 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static org.eclipse.sparkplug.tck.test.broker.CompliantBrokerTest.checkCompliance;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.Constants.*;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
+import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",

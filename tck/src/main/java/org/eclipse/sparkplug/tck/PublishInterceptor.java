@@ -1,13 +1,29 @@
-/*
- * Copyright © 2021, 2022 Ian Craggs and others
+/********************************************************************************
+ * Copyright (c) 2021-2022 Cirrus Link Solutions and others
  *
  * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v. 2.0 which is available at
- * https://www.eclipse.org/legal/epl-2.0.
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0
- */
+ *
+ * Contributors:
+ *   Cirrus Link Solutions - initial implementation
+ ********************************************************************************/
+
 package org.eclipse.sparkplug.tck;
+
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_TEST_CONTROL_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Utils.tokenize;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.common.Constants.Profile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.interceptor.publish.PublishInboundInterceptor;
@@ -17,21 +33,6 @@ import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishInbound
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundInput;
 import com.hivemq.extension.sdk.api.interceptor.publish.parameter.PublishOutboundOutput;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.common.Constants.Profile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_TEST_CONTROL_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Utils.tokenize;
 
 /**
  * @author Ian Craggs

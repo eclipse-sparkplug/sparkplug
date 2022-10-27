@@ -15,25 +15,25 @@
  */
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class PayloadTestResults {
-    private final int payloadSize;
-    private final @NotNull List<@NotNull Tuple<Integer, ComplianceTestResult>> testResults;
+	private final int payloadSize;
+	private final @NotNull List<@NotNull Tuple<Integer, ComplianceTestResult>> testResults;
 
-    public PayloadTestResults(final int payloadSize, final @NotNull List<Tuple<Integer, ComplianceTestResult>> testResults) {
-        this.payloadSize = payloadSize;
-        this.testResults = testResults;
-    }
+	public PayloadTestResults(final int payloadSize,
+			final @NotNull List<Tuple<Integer, ComplianceTestResult>> testResults) {
+		this.payloadSize = payloadSize;
+		this.testResults = testResults;
+	}
 
-    public int getPayloadSize() {
-        return payloadSize;
-    }
+	public int getPayloadSize() {
+		return payloadSize;
+	}
 
-    public @NotNull List<@NotNull Tuple<Integer, ComplianceTestResult>> getTestResults() {
-        return testResults;
-    }
+	public @NotNull List<@NotNull Tuple<Integer, ComplianceTestResult>> getTestResults() {
+		return testResults;
+	}
 }

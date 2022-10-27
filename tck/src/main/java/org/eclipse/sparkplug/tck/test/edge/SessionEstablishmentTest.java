@@ -14,7 +14,6 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
 import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
 import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
@@ -27,10 +26,10 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,33 +45,27 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
-import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
+import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.StatePayload;
-import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import com.hivemq.extension.sdk.api.services.Services;
-import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 /**

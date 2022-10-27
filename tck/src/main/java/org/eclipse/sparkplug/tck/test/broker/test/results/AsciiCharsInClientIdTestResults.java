@@ -15,31 +15,30 @@
  */
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
-
-import jakarta.validation.constraints.NotNull;
-
 import java.util.LinkedList;
 import java.util.List;
 
+import jakarta.validation.constraints.NotNull;
+
 public class AsciiCharsInClientIdTestResults {
-    private final @NotNull List<@NotNull Tuple<Character, String>> testResults;
+	private final @NotNull List<@NotNull Tuple<Character, String>> testResults;
 
-    public AsciiCharsInClientIdTestResults(final @NotNull List<Tuple<Character, String>> testResults) {
-        this.testResults = testResults;
-    }
+	public AsciiCharsInClientIdTestResults(final @NotNull List<Tuple<Character, String>> testResults) {
+		this.testResults = testResults;
+	}
 
-    public @NotNull List<@NotNull Tuple<Character, String>> getTestResults() {
-        return testResults;
-    }
+	public @NotNull List<@NotNull Tuple<Character, String>> getTestResults() {
+		return testResults;
+	}
 
-    public @NotNull List<Character> getUnsupportedChars() {
-        final List<Character> unsupportedChars = new LinkedList<>();
-        for (Tuple<Character, String> tuple : testResults) {
-            if (tuple.getValue() == null || !("SUCCESS").equals(tuple.getValue())) {
-                unsupportedChars.add(tuple.getKey());
-            }
-        }
-        return unsupportedChars;
-    }
+	public @NotNull List<Character> getUnsupportedChars() {
+		final List<Character> unsupportedChars = new LinkedList<>();
+		for (Tuple<Character, String> tuple : testResults) {
+			if (tuple.getValue() == null || !("SUCCESS").equals(tuple.getValue())) {
+				unsupportedChars.add(tuple.getKey());
+			}
+		}
+		return unsupportedChars;
+	}
 
 }

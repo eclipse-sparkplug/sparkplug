@@ -16,5 +16,10 @@
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
 public enum SharedSubscriptionTestResult {
-    OK, NOT_SHARED, TIME_OUT, INTERRUPTED, PUBLISH_FAILED, SUBSCRIBE_FAILED;
+	OK,
+	NOT_SHARED,
+	TIME_OUT,
+	INTERRUPTED,
+	PUBLISH_FAILED,
+	SUBSCRIBE_FAILED;
 }
