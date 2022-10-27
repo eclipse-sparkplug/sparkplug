@@ -302,42 +302,6 @@ export default {
                         logging: [],
                     },
                 },
-                receiveDataTest: {
-                    testValues: {
-                        testType: "HOSTAPPLICATION",
-                        name: "ReceiveDataTest",
-                        readableName: "Receive Data Test",
-                        description:
-                            "To check that a data from an edge node (NDATA) and a device (DDATA) can be received and procesed by the Host Application.",
-                        requirements: [
-                            "Start the Host Application, if it is not yet running.",
-                            "Setup a MQTT Connection.",
-                            "Set a Host Application Id that is used by an Application.",
-                            "Start this test.",
-                            "Wait until Tests are finished and check Results."
-                        ],
-                        parameters: {
-                            group_id: {
-                                parameterReadableName: "Group Id",
-                                parameterValue: "",
-                                parameterDescription: "The Group Id of the Edge Node",
-                            },
-                            edge_node_id: {
-                                parameterReadableName: "Edge Node Id",
-                                parameterValue: "",
-                                parameterDescription: "The Edge Node Id the Host Application will receive data from.",
-                            },
-                            device_id: {
-                                parameterReadableName: "Device Id",
-                                parameterValue: "",
-                                parameterDescription: "The Device Id the Host Application will receive data from.",
-                            },
-                        },
-                        code: "",
-                        result: null,
-                        logging: [],
-                    },
-                },
                 edgeSessionTerminationTest: {
                     testValues: {
                         testType: "HOSTAPPLICATION",
