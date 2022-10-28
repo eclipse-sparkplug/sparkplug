@@ -104,11 +104,15 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
@@ -133,12 +137,12 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
-public class PayloadTest extends TCKTest {
+public class SendComplexDataTest extends TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	public static final String PROPERTY_KEY_QUALITY = "Quality";
 
-	private final @NotNull String testIds[] = { ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED,
+	private final @NotNull List<String> testIds = List.of(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED,
 			ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE, ID_PAYLOADS_METRIC_DATATYPE_VALUE,
 			ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE, ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE,
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE, ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,
@@ -155,7 +159,7 @@ public class PayloadTest extends TCKTest {
 			ID_PAYLOADS_TEMPLATE_VERSION, ID_PAYLOADS_TEMPLATE_REF_INSTANCE,
 			ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED, ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE,
 			ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE, ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE,
-			ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE };
+			ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE);
 
 	private final @NotNull TCK theTCK;
 
@@ -165,13 +169,13 @@ public class PayloadTest extends TCKTest {
 	private @NotNull String hostApplicationId;
 	private @NotNull long seqUnassigned = -1;
 
-	public PayloadTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
-		logger.info("Edge Node payload validation test. Parameters: {} ", Arrays.asList(parms));
+	public SendComplexDataTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
+		logger.info("{}. Parameters: {} ", getName(), Arrays.asList(parms));
 		theTCK = aTCK;
 
 		if (parms.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(parms));
-			log("Parameters to edge payload test must be: hostId groupId edgeNodeId deviceId");
+			log(getName() + " Parameters must be: hostId groupId edgeNodeId deviceId");
 			throw new IllegalArgumentException();
 		}
 		hostApplicationId = parms[0];
@@ -185,16 +189,16 @@ public class PayloadTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
-		Utils.setEndTest(getName(), new ArrayList<String>(Arrays.asList(testIds)), testResults);
+		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 	}
 
 	public String getName() {
-		return "Sparkplug Edge Payload Test";
+		return "Sparkplug Edge Send Complex Data Test";
 	}
 
 	public String[] getTestIds() {
-		return testIds;
+		return testIds.toArray(new String[0]);
 	}
 
 	public Map<String, String> getResults() {

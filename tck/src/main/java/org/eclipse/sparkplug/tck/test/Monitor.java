@@ -389,7 +389,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 							setResultIfNotFail(testResults, false,
 									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
 									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ);
-							log("Test failed for assertion "
+							log(TEST_FAILED_FOR_ASSERTION
 									+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ + ": host id: "
 									+ hostid + " with bdSeq=" + bdseqnode);
 							return;
@@ -759,7 +759,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
 							ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 							OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)) {
-						log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
+						log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
 								+ ": metric name: " + current.getName());
 					}
 					lastHistoricalTimestamp = current.getTimestamp();
@@ -876,12 +876,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				}
 
 				if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_METRIC_REQS, TOPICS_NBIRTH_METRIC_REQS)) {
-					log("Test failed for assertion " + ID_TOPICS_NBIRTH_METRIC_REQS + ": metric name: "
+					log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_METRIC_REQS + ": metric name: "
 							+ currentMetricName);
 				}
 				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH)) {
-					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH + ": metric name: "
+					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH + ": metric name: "
 							+ currentMetricName);
 				}
 			}
@@ -910,7 +910,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						}
 						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
 								TOPICS_NBIRTH_TEMPLATES)) {
-							log("Test failed for assertion " + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION  + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
 									+ currentMetricName);
 						}
 					}
@@ -921,7 +921,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
 						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)) {
-					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
+					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
 							+ ": metric name: " + currentMetricName);
 				}
 				lastHistoricalTimestamp = current.getTimestamp();
@@ -943,12 +943,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setShouldResultIfNotFail(testResults, current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
-							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
+							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
 								PRINCIPLES_RBE_RECOMMENDED)) {
-							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);
 						}
 						break;
@@ -1084,7 +1084,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
 							ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER,
 							OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)) {
-						log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
+						log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
 								+ ": metric name: " + current.getName());
 					}
 					lastHistoricalTimestamp = current.getTimestamp();
@@ -1197,12 +1197,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				}
 
 				if (!setResultIfNotFail(testResults, found, ID_TOPICS_DBIRTH_METRIC_REQS, TOPICS_DBIRTH_METRIC_REQS)) {
-					log("Test failed for assertion " + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
+					log(TEST_FAILED_FOR_ASSERTION  + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
 							+ currentMetricName);
 				}
 				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH)) {
-					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
+					log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
 							+ currentMetricName);
 				}
 			}
@@ -1232,7 +1232,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						}
 						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
 								TOPICS_NBIRTH_TEMPLATES)) {
-							log("Test failed for assertion " + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
 									+ currentMetricName);
 						}
 					}
@@ -1243,7 +1243,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
 						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)) {
-					log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
+					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
 							+ ": metric name: " + currentMetricName);
 				}
 				lastHistoricalTimestamp = current.getTimestamp();
@@ -1265,12 +1265,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setShouldResultIfNotFail(testResults, current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
-							log("Test failed for assertion " + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
+							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
 								PRINCIPLES_RBE_RECOMMENDED)) {
-							log("Test failed for assertion " + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);
 						}
 						break;

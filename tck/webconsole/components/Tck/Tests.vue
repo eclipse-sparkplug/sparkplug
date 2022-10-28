@@ -512,18 +512,20 @@ export default {
                         logging: [],
                     },
                 },
-                receiveCommandTest: {
+                sendComplexDataTest: {
                     testValues: {
                         testType: "EONNODE",
-                        name: "ReceiveCommandTest",
-                        readableName: "Receive Command Test",
-                        description: "This is the Edge Node Sparkplug receive command test. (NCMD)",
+                        name: "SendComplexDataTest",
+                        readableName: "Send Complex Data Test",
+                        description: `This is the Sparkplug test to validate the Edge Node sending complex
+                        data types: DataSets, Templates and Custom Properties.
+                        `,
                         requirements: [
                             "Setup a MQTT Connection.",
                             "Set Device Id that is used by the configured Group and Edge.",
                             "Start this test.",
-                            "Disconnect and Connect the Device.",
-                            "The Edge Node and Devices should receive a rebirth command.",
+                            "Connect the Device and send some Data",
+                            "The Edge Node and Devices should publish a DATA command.",
                             "Wait until Tests are finished and check Results."
                         ],
                         parameters: {
@@ -537,18 +539,18 @@ export default {
                         logging: [],
                     },
                 },
-                payloadTest: {
+                receiveCommandTest: {
                     testValues: {
                         testType: "EONNODE",
-                        name: "PayloadTest",
-                        readableName: "Payload Validation Test",
-                        description: "This is the Edge Node Sparkplug payload validation test.",
+                        name: "ReceiveCommandTest",
+                        readableName: "Receive Command Test",
+                        description: "This is the Edge Node Sparkplug receive command test. (NCMD)",
                         requirements: [
                             "Setup a MQTT Connection.",
                             "Set Device Id that is used by the configured Group and Edge.",
                             "Start this test.",
-                            "Connect the Device and send some Data",
-                            "The Edge Node and Devices should publish a DATA command.",
+                            "Disconnect and Connect the Device.",
+                            "The Edge Node and Devices should receive a rebirth command.",
                             "Wait until Tests are finished and check Results."
                         ],
                         parameters: {
