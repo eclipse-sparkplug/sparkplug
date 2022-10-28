@@ -18,27 +18,27 @@ package org.eclipse.sparkplug.tck.test.broker.test.results;
 import org.jetbrains.annotations.NotNull;
 
 public class WildcardSubscriptionsTestResult {
-    private final boolean success;
-    private final ComplianceTestResult plusWildcardTest;
-    private final ComplianceTestResult hashWildcardTest;
+	private final boolean success;
+	private final ComplianceTestResult plusWildcardTest;
+	private final ComplianceTestResult hashWildcardTest;
 
-    public @NotNull WildcardSubscriptionsTestResult(final @NotNull ComplianceTestResult plusWildcardTest,
-                                                    final @NotNull ComplianceTestResult hashWildcardTest) {
-        this.plusWildcardTest = plusWildcardTest;
-        this.hashWildcardTest = hashWildcardTest;
+	public @NotNull WildcardSubscriptionsTestResult(final @NotNull ComplianceTestResult plusWildcardTest,
+			final @NotNull ComplianceTestResult hashWildcardTest) {
+		this.plusWildcardTest = plusWildcardTest;
+		this.hashWildcardTest = hashWildcardTest;
 
-        success = (plusWildcardTest == ComplianceTestResult.OK) && (hashWildcardTest == ComplianceTestResult.OK);
-    }
+		success = (plusWildcardTest == ComplianceTestResult.OK) && (hashWildcardTest == ComplianceTestResult.OK);
+	}
 
-    public boolean isSuccess() {
-        return success;
-    }
+	public boolean isSuccess() {
+		return success;
+	}
 
-    public @NotNull ComplianceTestResult getPlusWildcardTest() {
-        return plusWildcardTest;
-    }
+	public @NotNull ComplianceTestResult getPlusWildcardTest() {
+		return plusWildcardTest;
+	}
 
-    public @NotNull ComplianceTestResult getHashWildcardTest() {
-        return hashWildcardTest;
-    }
+	public @NotNull ComplianceTestResult getHashWildcardTest() {
+		return hashWildcardTest;
+	}
 }

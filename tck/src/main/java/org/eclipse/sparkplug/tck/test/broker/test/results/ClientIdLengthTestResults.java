@@ -15,24 +15,25 @@
  */
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ClientIdLengthTestResults {
-    private final int maxClientIdLength;
-    private final @NotNull List<@NotNull Tuple<Integer, String>> testResults;
+	private final int maxClientIdLength;
+	private final @NotNull List<@NotNull Tuple<Integer, String>> testResults;
 
-    public ClientIdLengthTestResults(final int maxClientIdLength, final @NotNull List<@NotNull Tuple<Integer, String>> testResults) {
-        this.maxClientIdLength = maxClientIdLength;
-        this.testResults = testResults;
-    }
+	public ClientIdLengthTestResults(final int maxClientIdLength,
+			final @NotNull List<@NotNull Tuple<Integer, String>> testResults) {
+		this.maxClientIdLength = maxClientIdLength;
+		this.testResults = testResults;
+	}
 
-    public int getMaxClientIdLength() {
-        return maxClientIdLength;
-    }
+	public int getMaxClientIdLength() {
+		return maxClientIdLength;
+	}
 
-    public @NotNull List<@NotNull Tuple<Integer, String>> getTestResults() {
-        return testResults;
-    }
+	public @NotNull List<@NotNull Tuple<Integer, String>> getTestResults() {
+		return testResults;
+	}
 }

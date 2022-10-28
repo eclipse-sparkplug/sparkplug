@@ -15,19 +15,21 @@
  */
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.UUID;
+
+import org.jetbrains.annotations.NotNull;
 
 public class TopicUtils {
 
-    public static @NotNull String generateTopicUUID() {
-        final String uuid = UUID.randomUUID().toString();
-        return uuid.replace("-", "");
-    }
+	public static @NotNull String generateTopicUUID() {
+		final String uuid = UUID.randomUUID().toString();
+		return uuid.replace("-", "");
+	}
 
-    public static @NotNull String generateTopicUUID(final int maxLength) {
-        if (maxLength == -1 || maxLength > 32) return generateTopicUUID();
-        else return generateTopicUUID().substring(0, maxLength);
-    }
+	public static @NotNull String generateTopicUUID(final int maxLength) {
+		if (maxLength == -1 || maxLength > 32)
+			return generateTopicUUID();
+		else
+			return generateTopicUUID().substring(0, maxLength);
+	}
 }

@@ -85,7 +85,6 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api:${property("jakarta.annotation.version")}")
     implementation("jakarta.validation:jakarta.validation-api:${property("jakarta.validation.version")}")
 
-    implementation("org.eclipse.tahu:tahu-core:${property("tahu.version")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
@@ -183,7 +182,6 @@ tasks.check { dependsOn(integrationTest) }
                         <configuration>
                             <useMissingFile>true</useMissingFile>
                             <excludedScopes>test</excludedScopes>
-                            <excludedGroups> (org.eclipse.tahu*)</excludedGroups>
                             <licenseMerges>
                                 <licenseMerge>The Apache Software License, Version
                                     2.0|Apache License, Version 2.0|Apache Public License
@@ -301,7 +299,6 @@ downloadLicenses {
 
     dependencyConfiguration = "runtimeClasspath"
     excludeDependencies = listOf(
-        "org.eclipse.tahu:*:*"
     )
 
 

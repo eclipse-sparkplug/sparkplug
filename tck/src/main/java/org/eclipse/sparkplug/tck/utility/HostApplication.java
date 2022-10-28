@@ -67,11 +67,10 @@ public class HostApplication {
 		logger.info("Sparkplug TCK Host Application utility");
 	}
 
-	
 	/*
 	 * prepare host messages but don't send
 	 */
-	public void hostPrepare (String host_application_id) throws MqttException {
+	public void hostPrepare(String host_application_id) throws MqttException {
 		if (host != null) {
 			logger.info("host application in use");
 			return;
@@ -80,7 +79,7 @@ public class HostApplication {
 		hostApplicationId = host_application_id;
 		host = new MqttClient(brokerURI, "Sparkplug TCK host application " + host_application_id);
 		host_listener = new MessageListener();
-		//host.setCallback(host_listener);
+		// host.setCallback(host_listener);
 
 		stateTopic = host.getTopic(Constants.TOPIC_ROOT_STATE + "/" + host_application_id);
 
@@ -105,7 +104,7 @@ public class HostApplication {
 		host.connect(connectOptions);
 		logger.info("Host " + host_application_id + " successfully created");
 	}
-	
+
 	public void hostSendOnline() throws MqttException {
 		if (host == null) {
 			logger.error("hostOnlineSend: no host application");
@@ -118,7 +117,7 @@ public class HostApplication {
 		MqttDeliveryToken token = stateTopic.publish(online);
 		token.waitForCompletion(1000L);
 	}
-	
+
 	/* send offline message, but don't disconnect so we 
 	 * can send the online message if we want
 	 */
@@ -133,7 +132,7 @@ public class HostApplication {
 		MqttDeliveryToken token = stateTopic.publish(offline);
 		token.waitForCompletion(1000L);
 	}
-	
+
 	public void hostOnline(String host_application_id) throws MqttException {
 		if (host != null) {
 			logger.info("host application in use");
@@ -157,7 +156,6 @@ public class HostApplication {
 		host = null;
 	}
 
-		
 	class MessageListener implements MqttCallbackExtended {
 		ArrayList<MqttMessage> messages;
 
@@ -203,6 +201,5 @@ public class HostApplication {
 			}
 		}
 	}
-
 
 }

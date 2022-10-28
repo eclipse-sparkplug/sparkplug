@@ -16,5 +16,10 @@
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
 public enum ComplianceTestResult {
-    OK, PUBLISH_FAILED, SUBSCRIBE_FAILED, WRONG_PAYLOAD, TIME_OUT, INTERRUPTED
+	OK,
+	PUBLISH_FAILED,
+	SUBSCRIBE_FAILED,
+	WRONG_PAYLOAD,
+	TIME_OUT,
+	INTERRUPTED
 }

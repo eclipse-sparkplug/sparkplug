@@ -1,4 +1,4 @@
-/* ******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
@@ -9,7 +9,7 @@
  *
  * Contributors:
  *    Ian Craggs - initial implementation and documentation
- ****************************************************************************** */
+ *******************************************************************************/
 
 package org.eclipse.sparkplug.tck.test;
 

@@ -13,24 +13,24 @@
 
 package org.eclipse.sparkplug.tck.utility;
 
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Boolean;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.DataSet;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.DateTime;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Double;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Float;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Int16;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Int32;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Int64;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Int8;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.String;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Template;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Text;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt16;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt32;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt64;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt8;
+import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UUID;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.tahu.message.model.MetricDataType.Boolean;
-import static org.eclipse.tahu.message.model.MetricDataType.DataSet;
-import static org.eclipse.tahu.message.model.MetricDataType.DateTime;
-import static org.eclipse.tahu.message.model.MetricDataType.Double;
-import static org.eclipse.tahu.message.model.MetricDataType.Float;
-import static org.eclipse.tahu.message.model.MetricDataType.Int16;
-import static org.eclipse.tahu.message.model.MetricDataType.Int32;
-import static org.eclipse.tahu.message.model.MetricDataType.Int64;
-import static org.eclipse.tahu.message.model.MetricDataType.Int8;
-import static org.eclipse.tahu.message.model.MetricDataType.String;
-import static org.eclipse.tahu.message.model.MetricDataType.Template;
-import static org.eclipse.tahu.message.model.MetricDataType.Text;
-import static org.eclipse.tahu.message.model.MetricDataType.UInt16;
-import static org.eclipse.tahu.message.model.MetricDataType.UInt32;
-import static org.eclipse.tahu.message.model.MetricDataType.UInt64;
-import static org.eclipse.tahu.message.model.MetricDataType.UInt8;
-import static org.eclipse.tahu.message.model.MetricDataType.UUID;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -45,31 +45,29 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
+import org.eclipse.sparkplug.impl.exception.SparkplugException;
+import org.eclipse.sparkplug.impl.exception.SparkplugInvalidTypeException;
+import org.eclipse.sparkplug.impl.exception.message.SparkplugBPayloadEncoder;
+import org.eclipse.sparkplug.impl.exception.model.DataSet;
+import org.eclipse.sparkplug.impl.exception.model.DataSet.DataSetBuilder;
+import org.eclipse.sparkplug.impl.exception.model.DataSetDataType;
+import org.eclipse.sparkplug.impl.exception.model.Metric;
+import org.eclipse.sparkplug.impl.exception.model.Metric.MetricBuilder;
+import org.eclipse.sparkplug.impl.exception.model.MetricDataType;
+import org.eclipse.sparkplug.impl.exception.model.Parameter;
+import org.eclipse.sparkplug.impl.exception.model.ParameterDataType;
+import org.eclipse.sparkplug.impl.exception.model.PropertyDataType;
+import org.eclipse.sparkplug.impl.exception.model.PropertySet;
+import org.eclipse.sparkplug.impl.exception.model.PropertySet.PropertySetBuilder;
+import org.eclipse.sparkplug.impl.exception.model.PropertyValue;
+import org.eclipse.sparkplug.impl.exception.model.Row.RowBuilder;
+import org.eclipse.sparkplug.impl.exception.model.SparkplugBPayload;
+import org.eclipse.sparkplug.impl.exception.model.SparkplugBPayload.SparkplugBPayloadBuilder;
+import org.eclipse.sparkplug.impl.exception.model.Template;
+import org.eclipse.sparkplug.impl.exception.model.Template.TemplateBuilder;
+import org.eclipse.sparkplug.impl.exception.model.Value;
 import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
-import org.eclipse.tahu.SparkplugException;
-import org.eclipse.tahu.SparkplugInvalidTypeException;
-import org.eclipse.tahu.message.SparkplugBPayloadEncoder;
-import org.eclipse.tahu.message.model.DataSet;
-import org.eclipse.tahu.message.model.DataSet.DataSetBuilder;
-import org.eclipse.tahu.message.model.DataSetDataType;
-import org.eclipse.tahu.message.model.Metric;
-import org.eclipse.tahu.message.model.Metric.MetricBuilder;
-import org.eclipse.tahu.message.model.MetricDataType;
-import org.eclipse.tahu.message.model.Parameter;
-import org.eclipse.tahu.message.model.ParameterDataType;
-import org.eclipse.tahu.message.model.PropertyDataType;
-import org.eclipse.tahu.message.model.PropertySet;
-import org.eclipse.tahu.message.model.PropertySet.PropertySetBuilder;
-import org.eclipse.tahu.message.model.PropertyValue;
-import org.eclipse.tahu.message.model.Row.RowBuilder;
-import org.eclipse.tahu.message.model.SparkplugBPayload;
-import org.eclipse.tahu.message.model.SparkplugBPayload.SparkplugBPayloadBuilder;
-import org.eclipse.tahu.message.model.Template;
-import org.eclipse.tahu.message.model.Template.TemplateBuilder;
-import org.eclipse.tahu.message.model.Value;
-import org.eclipse.tahu.util.CompressionAlgorithm;
-import org.eclipse.tahu.util.PayloadUtil;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +82,6 @@ public class EdgeNode {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 
 	private static final boolean USING_COMPRESSION = false;
-	private static final CompressionAlgorithm compressionAlgorithm = CompressionAlgorithm.GZIP;
 
 	private static final String HW_VERSION = "Emulated Hardware";
 	private static final String SW_VERSION = "v1.0.0";
@@ -335,16 +332,7 @@ public class EdgeNode {
 
 		payload.setTimestamp(new Date());
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
-
-		// Compress payload (optional)
-		byte[] bytes = null;
-		if (USING_COMPRESSION) {
-			bytes = encoder.getBytes(PayloadUtil.compress(payload, compressionAlgorithm));
-		} else {
-			bytes = encoder.getBytes(payload);
-		}
-
-		return bytes;
+		return encoder.getBytes(payload);
 	}
 
 	private byte[] createDeviceDeathPayload() throws Exception {
@@ -352,14 +340,7 @@ public class EdgeNode {
 		deathPayload.setSeq(seq);
 
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
-		// Compress payload (optional)
-		byte[] result = null;
-		if (USING_COMPRESSION) {
-			result = encoder.getBytes(PayloadUtil.compress(deathPayload.createPayload(), compressionAlgorithm));
-		} else {
-			result = encoder.getBytes(deathPayload.createPayload());
-		}
-		return result;
+		return encoder.getBytes(deathPayload.createPayload());
 	}
 
 	private byte[] createDeviceBirthPayload() throws Exception {
@@ -397,16 +378,7 @@ public class EdgeNode {
 		payload.addMetric(new MetricBuilder("MyMetric", String, "My Value").properties(propertySet).createMetric());
 
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
-
-		// Compress payload (optional)
-		byte[] bytes = null;
-		if (USING_COMPRESSION) {
-			bytes = encoder.getBytes(PayloadUtil.compress(payload, compressionAlgorithm));
-		} else {
-			bytes = encoder.getBytes(payload);
-		}
-
-		return bytes;
+		return encoder.getBytes(payload);
 	}
 
 	private List<Metric> newMetrics(boolean isBirth) throws SparkplugException {
