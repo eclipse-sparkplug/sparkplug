@@ -56,14 +56,12 @@ public class Utils {
 	 */
 	public static @NotNull void setEndTest(final String name, final List<String> testIds,
 			final Map<String, String> testResults) {
-		if (!(testIds.size() == testResults.size())) {
-			testIds.forEach(test -> {
-				if (!testResults.containsKey(test)) {
-					// logger.info("Test {} - {} not yet executed. ", name, test);
-					testResults.put(test, NOT_EXECUTED);
-				}
-			});
-		}
+		testIds.forEach(test -> {
+			if (!testResults.containsKey(test)) {
+				// logger.info("Test {} - {} not yet executed. ", name, test);
+				testResults.put(test, NOT_EXECUTED);
+			}
+		});
 	}
 
 	public static @NotNull String setResult(boolean bValid, String requirement) {
