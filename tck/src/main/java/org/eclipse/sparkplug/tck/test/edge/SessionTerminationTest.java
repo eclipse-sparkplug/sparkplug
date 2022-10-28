@@ -252,8 +252,6 @@ public class SessionTerminationTest extends TCKTest {
 		String topic = packet.getTopic();
 		String[] topicLevels = topic.split("/");
 
-		logger.info("HERE: topic={} from {}", topic, clientId);
-
 		if (topicLevels.length == 4 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
 				&& topicLevels[2].equals("NDEATH") && topicLevels[3].equals(edgeNodeId)) {
 			ndeathFound = true;
@@ -301,7 +299,5 @@ public class SessionTerminationTest extends TCKTest {
 		if (ndeathFound && ddeathFound) {
 			endTest(testResults);
 		}
-
 	}
-
 }
