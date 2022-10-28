@@ -93,9 +93,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
@@ -153,14 +155,19 @@ public class SendDataTest extends TCKTest {
 	private String hostApplicationId;
 	private String state = null;
 	private TCK theTCK = null;
+	private @NotNull Utilities utilities = null;
 	private String groupId = null;
 	private String edgeNodeId = null;
 	private String deviceId = null;
 	private boolean isEdgeNodeChecked = false, isDeviceChecked = false;
 
-	public SendDataTest(TCK aTCK, String[] params, Results.Config config) {
+	// Host Application variables
+	private boolean hostCreated = false;
+
+	public SendDataTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.utilities = utilities;
 		this.config = config;
 		testIds.addAll(Arrays.asList(testId));
 
@@ -181,11 +188,30 @@ public class SendDataTest extends TCKTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			logger.info("Host Application is online, so using that");
+		} else {
+			logger.info("Creating host application");
+			try {
+				utilities.getHostApps().hostOnline(hostApplicationId);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
+		}
 	}
 
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
+		if (hostCreated) {
+			try {
+				utilities.getHostApps().hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 		definitions.clear();
