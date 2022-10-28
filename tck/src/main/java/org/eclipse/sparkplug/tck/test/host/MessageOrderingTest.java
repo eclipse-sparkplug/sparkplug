@@ -30,6 +30,10 @@ package org.eclipse.sparkplug.tck.test.host;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH;
@@ -43,8 +47,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sparkplug.impl.exception.model.MetricDataType;
+import org.eclipse.sparkplug.impl.exception.model.SparkplugBPayload;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
@@ -65,6 +72,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
@@ -74,11 +82,6 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class MessageOrderingTest extends TCKTest {
-
-	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
-	private static final String EDGE_METRIC = "TCK_metric/Boolean";
-	private static final String DEVICE_METRIC = "Inputs/0";
-
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
 	private final @NotNull List<String> testIds =
@@ -88,33 +91,34 @@ public class MessageOrderingTest extends TCKTest {
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
 	private @NotNull String hostApplicationId;
+	private @NotNull int reorderTimeout;
 
-	private String edgeNodeTestClientId = null;
-	private List<Metric> edgeBirthMetrics = null;
-	private List<Metric> deviceBirthMetrics = null;
-
+	private @NotNull String testClientId;
 	private TestStatus state = null;
 	private TCK theTCK = null;
 	private @NotNull Utilities utilities = null;
 
 	private PublishService publishService = Services.publishService();
+	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 
 	public MessageOrderingTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
-		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
+		logger.info("{}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
 		this.utilities = utilities;
 
-		if (params.length < 4) {
+		if (params.length < 5) {
 			log("Not enough parameters: " + Arrays.toString(params));
-			log("Parameters to host send command test must be: hostApplicationId, groupId edgeNodeId deviceId");
+			log(getName() + "Parameters must be: hostApplicationId, groupId edgeNodeId deviceId reorderTimeout");
 			throw new IllegalArgumentException();
 		}
 		hostApplicationId = params[0];
 		groupId = params[1];
 		edgeNodeId = params[2];
 		deviceId = params[3];
-		logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}",
-				hostApplicationId, groupId, edgeNodeId, deviceId);
+		reorderTimeout = Integer.valueOf(params[4]); // in milliseconds
+		logger.info(
+				"Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {} Reorder Timeout: {}",
+				hostApplicationId, groupId, edgeNodeId, deviceId, reorderTimeout);
 
 		final AtomicBoolean hostOnline = checkHostApplicationIsOnline(hostApplicationId);
 
@@ -122,6 +126,21 @@ public class MessageOrderingTest extends TCKTest {
 			log(String.format("HostApplication %s not online - test not started.", hostApplicationId));
 			throw new IllegalStateException();
 		}
+
+		// First start the simulated edge node
+		// Delay the start because
+		executorService.schedule(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId, edgeNodeId, deviceId);
+				} catch (Exception e) {
+					logger.error("Failed to start simulated edge node", e);
+					theTCK.endTest();
+				}
+			}
+		}, 1, TimeUnit.SECONDS);
+		state = TestStatus.EXPECT_NODE_BIRTH;
 	}
 
 	@Override
@@ -139,7 +158,7 @@ public class MessageOrderingTest extends TCKTest {
 
 	@Override
 	public String getName() {
-		return "Host SendCommand";
+		return "Host Message Ordering Test";
 	}
 
 	@Override
@@ -166,39 +185,104 @@ public class MessageOrderingTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
-		/* Determine if this the connect packet for the Edge node under test.
-		 * Set the clientid if so. */
+
+		/* Get the simulated edge node connecting - set the clientid if so. */
 		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
 		if (willPublishPacketOptional.isPresent()) {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
 			String willTopic = willPublishPacket.getTopic();
 			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
-				edgeNodeTestClientId = clientId;
-				logger.info("Host Application send command test - connect - client id is " + clientId);
+				testClientId = clientId;
+				logger.info("{} Connect - edge client id is {} ", getName(), clientId);
 			}
 		}
 	}
 
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
-		logger.info("Host - {} - DISCONNECT {}, {} ", getName(), clientId, state);
+		logger.info("{} - DISCONNECT {}, {} ", getName(), clientId, state);
 	}
 
 	@Override
 	public void subscribe(String clientId, SubscribePacket packet) {
-		logger.info("Host - {} - SUBSCRIBE {}, {} ", getName(), clientId, state);
-	}
-
-	private void publishToTckConsolePrompt(String payload) {
-		Publish message = Builders.publish().topic(TCK_CONSOLE_PROMPT_TOPIC).qos(Qos.AT_LEAST_ONCE)
-				.payload(ByteBuffer.wrap(payload.getBytes())).build();
-		logger.info("Requesting command to edge node id:{}: {} ", edgeNodeId, payload);
-		publishService.publish(message);
+		logger.info("{} - SUBSCRIBE {}, {} ", getName(), clientId, state);
 	}
 
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
-		logger.info("Host - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
+		logger.info("{} - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
 
+		if (packet.getTopic()
+				.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NBIRTH + "/" + edgeNodeId)) {
+			// the edge node birth
+			if (state == TestStatus.EXPECT_NODE_BIRTH) {
+				logger.info("{} node birth received", getName());
+				state = TestStatus.EXPECT_DEVICE_BIRTH;
+			} else {
+				logger.error("{} node birth received at wrong time", getName());
+				theTCK.endTest();
+			}
+		} else if (packet.getTopic().equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DBIRTH + "/" + edgeNodeId + "/" + deviceId)) {
+			// device id birth
+			if (state == TestStatus.EXPECT_DEVICE_BIRTH) {
+				logger.info("{} device birth received", getName());
+				state = TestStatus.PUBLISH_DEVICE_DATA;
+				executorService.schedule(new Runnable() {
+					@Override
+					public void run() {
+						sendDeviceData(3); // end a good data sequence
+					}
+				}, 1, TimeUnit.SECONDS);
+			} else {
+				logger.error("{} device birth received at wrong time", getName());
+				theTCK.endTest();
+			}
+		} else if (packet.getTopic().equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DDATA + "/" + edgeNodeId + "/" + deviceId)) {
+
+		} else if (packet.getTopic().equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId)) {
+			
+		}
+	}
+
+	public void sendDeviceData(int count) {
+		int mycount = count - 1;
+		try {
+			utilities.getEdgeNode().publishDeviceData("Temperature", MetricDataType.Int16, (short) count);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		executorService.schedule(new Runnable() {
+			@Override
+			public void run() {
+				if (mycount > 0) {
+					sendDeviceData(mycount);
+				} else {
+					sendMissingDeviceData();
+				}
+			}
+		}, 1, TimeUnit.SECONDS);
+	}
+	
+	private SparkplugBPayload delayed = null; 
+	
+	public void sendMissingDeviceData() {
+		try {
+			SparkplugBPayload delayed = utilities.getEdgeNode().getNextDeviceData("Temperature", MetricDataType.Int16, (short)23);
+			utilities.getEdgeNode().publishDeviceData("Temperature", MetricDataType.Int16, (short) 24);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		// wait long enough to get a REBIRTH
+		executorService.schedule(new Runnable() {
+			@Override
+			public void run() {
+				theTCK.endTest();
+			}
+		}, reorderTimeout*4, TimeUnit.MILLISECONDS);
 	}
 }
