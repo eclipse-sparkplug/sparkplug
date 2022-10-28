@@ -277,35 +277,8 @@ export default {
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["client_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "SendCommandTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + testParameter.parameters["group_id"].parameterValue +
-                        " " + testParameter.parameters["edge_node_id"].parameterValue +
-                        " " + testParameter.parameters["device_id"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "ReceiveDataTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + testParameter.parameters["group_id"].parameterValue +
-                        " " + testParameter.parameters["edge_node_id"].parameterValue +
-                        " " + testParameter.parameters["device_id"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "EdgeSessionTerminationTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + testParameter.parameters["group_id"].parameterValue +
-                        " " + testParameter.parameters["edge_node_id"].parameterValue +
-                        " " + testParameter.parameters["device_id"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "MessageOrderingTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + testParameter.parameters["group_id"].parameterValue +
-                        " " + testParameter.parameters["edge_node_id"].parameterValue +
-                        " " + testParameter.parameters["device_id"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "MultipleBrokerTest") {
+                } else if (["SendCommandTest", "ReceiveDataTest", "EdgeSessionTerminationTest", 
+                            "MessageOrderingTest", "MultipleBrokerTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["group_id"].parameterValue +
@@ -320,41 +293,21 @@ export default {
             if (this.sparkplugClient.testType === "EONNODE") {
                 const profile = "edge";
                 const testType = testParameter.name;
-                if (testType === "SessionEstablishmentTest") {
+                if (["SessionEstablishmentTest", "SessionTerminationTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_ids"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "SessionTerminationTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + this.sparkplugClient.eonNode.groupId +
-                        " " + this.sparkplugClient.eonNode.edgeNodeId +
-                        " " + testParameter.parameters["device_ids"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "SendDataTest" || testType === "PayloadTest") {
+                } else if (["SendDataTest", "SendComplexDataTest", "PrimaryHostTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "ReceiveCommandTest") {
-                    const testParameters =
-                        this.sparkplugClient.eonNode.groupId +
-                        " " + this.sparkplugClient.eonNode.edgeNodeId +
-                        " " + testParameter.parameters["device_id"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "PrimaryHostTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + this.sparkplugClient.eonNode.groupId +
-                        " " + this.sparkplugClient.eonNode.edgeNodeId +
-                        " " + testParameter.parameters["device_id"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "MultipleBrokerTest") {
+                } else if (["ReceiveCommandTest", "MultipleBrokerTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
@@ -369,7 +322,9 @@ export default {
                 const profile = "broker";
                 const testType = testParameter.name;
                 if (testType === "CompliantBrokerTest") {
-                    const testParameters = this.sparkplugClient.broker.host + " " + this.sparkplugClient.broker.port;
+                    const testParameters = 
+                        this.sparkplugClient.broker.host +
+                        " " + this.sparkplugClient.broker.port;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (testType === "AwareBrokerTest") {
                     const testParameters =
