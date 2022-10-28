@@ -247,6 +247,26 @@ public class EdgeNode {
 		return true;
 	}
 
+	public boolean publishDeviceData(SparkplugBPayload devicePayload) throws Exception {
+		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DDATA/" + edge_node_id + "/" + deviceId,
+				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
+		return true;
+	}
+
+	public SparkplugBPayload getNextDeviceData(String metricName, MetricDataType metricDataType, Object value)
+			throws Exception {
+		List<Metric> deviceMetrics = new ArrayList<Metric>();
+
+		// Add a 'real time' metric
+		deviceMetrics
+				.add(new MetricBuilder(metricName, metricDataType, value).timestamp(calendar.getTime()).createMetric());
+
+		logger.info("Updating metric " + metricName + " to " + value);
+
+		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getNextSeqNum(), null, null);
+		return devicePayload;
+	}
+
 	// Used to add the birth/death sequence number
 	private SparkplugBPayloadBuilder addDeathBdSeqNum(SparkplugBPayloadBuilder payload) throws Exception {
 		if (payload == null) {
@@ -357,6 +377,8 @@ public class EdgeNode {
 		payload.addMetric(new MetricBuilder("Outputs/0", Boolean, true).createMetric());
 		payload.addMetric(new MetricBuilder("Outputs/1", Int32, 0).createMetric());
 		payload.addMetric(new MetricBuilder("Outputs/2", Double, 1.23d).createMetric());
+
+		payload.addMetric(new MetricBuilder("Temperature", Int16, (short) 0).createMetric());
 
 		// payload.addMetric(new MetricBuilder("New_1", Int32, 0).createMetric());
 		// payload.addMetric(new MetricBuilder("New_2", Double, 1.23d).createMetric());

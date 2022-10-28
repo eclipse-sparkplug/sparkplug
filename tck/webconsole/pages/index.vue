@@ -278,12 +278,20 @@ export default {
                         " " + testParameter.parameters["client_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (["SendCommandTest", "ReceiveDataTest", "EdgeSessionTerminationTest", 
-                            "MessageOrderingTest", "MultipleBrokerTest"].includes(testType)) {
+                            "MultipleBrokerTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["group_id"].parameterValue +
                         " " + testParameter.parameters["edge_node_id"].parameterValue +
                         " " + testParameter.parameters["device_id"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
+                } else if (["MessageOrderingTest"].includes(testType)) {
+                    const testParameters =
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + testParameter.parameters["group_id"].parameterValue +
+                        " " + testParameter.parameters["edge_node_id"].parameterValue +
+                        " " + testParameter.parameters["device_id"].parameterValue +
+                        " " + testParameter.parameters["reorder_timeout"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");

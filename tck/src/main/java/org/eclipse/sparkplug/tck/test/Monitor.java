@@ -1262,13 +1262,13 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 					if (lastMetricName.equals(currentMetricName)) {
 						found = true;
-						if (!setShouldResultIfNotFail(testResults, current.equals(last),
+						if (!setShouldResultIfNotFail(testResults, !current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
 							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
-						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
+						if (!setShouldResultIfNotFail(testResults, !current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
 								PRINCIPLES_RBE_RECOMMENDED)) {
 							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);

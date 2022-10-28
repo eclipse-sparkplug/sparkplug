@@ -356,18 +356,23 @@ export default {
                         parameters: {
                             group_id: {
                                 parameterReadableName: "Group Id",
-                                parameterValue: "SparkplugTCK",
+                                parameterValue: "",
                                 parameterDescription: "The Group Id of the Edge Node",
                             },
                             edge_node_id: {
                                 parameterReadableName: "Edge Node Id",
-                                parameterValue: "MessageOrdering",
+                                parameterValue: "",
                                 parameterDescription: "The id of the Edge Node the Host Application will receive the death message from.",
                             },
                             device_id: {
                                 parameterReadableName: "Device Id",
-                                parameterValue: "MessageOrdering",
+                                parameterValue: "",
                                 parameterDescription: "The Device Id of a device connected to the Edge Node.",
+                            },
+                            reorder_timeout: {
+                                parameterReadableName: "Reorder Timeout (ms)",
+                                parameterValue: "5000",
+                                parameterDescription: "The Reorder Timeout value in ms of the Host Application.",
                             },
                         },
                         code: "",
