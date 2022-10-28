@@ -209,6 +209,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private HashMap<String, List<Metric>> edgeLastMetrics = new HashMap<String, List<Metric>>();
 	private HashMap<String, List<Metric>> deviceLastMetrics = new HashMap<String, List<Metric>>();
 
+	private HashMap<String, Map<Long, String>> edgeAliasMaps = new HashMap<>();
+
 	// host application id to sequence number
 	private HashMap<String, Long> hostBdSeqs = new HashMap<String, Long>();
 
@@ -737,8 +739,21 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			long lastHistoricalTimestamp = 0L;
 			List<Metric> metrics = payload.getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
+			boolean aliasMapInitialized = false;
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
+
+				if (current.hasAlias()) {
+					Map<Long, String> aliasMap = edgeAliasMaps.get(id);
+					if (!aliasMapInitialized) {
+						aliasMap = edgeAliasMaps.computeIfAbsent(id, (k) -> new HashMap<>());
+						aliasMap.clear();
+						aliasMapInitialized = true;
+					}
+
+					logger.debug("Creating alias: {} -> {}", current.getAlias(), current.getName());
+					aliasMap.put(current.getAlias(), current.getName());
+				}
 
 				if (current.hasIsHistorical() && current.getIsHistorical() == false) {
 					if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
@@ -842,6 +857,13 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		while (metricIterator.hasNext()) {
 			Metric current = metricIterator.next();
 
+			// Get the metric name if aliases are used and set it as needed
+			String currentMetricName = current.getName();
+			if (!current.hasName() && current.hasAlias()) {
+				currentMetricName = edgeAliasMaps.get(id).get(current.getAlias());
+				logger.debug("Got currentMetricName from alias: {} -> {}", current.getAlias(), currentMetricName);
+			}
+
 			List<Metric> birthMetrics = edgeBirthMetrics.get(id);
 			if (birthMetrics != null) {
 				boolean found = false;
@@ -855,12 +877,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 				if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_METRIC_REQS, TOPICS_NBIRTH_METRIC_REQS)) {
 					log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_METRIC_REQS + ": metric name: "
-							+ current.getName());
+							+ currentMetricName);
 				}
 				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH)) {
 					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH + ": metric name: "
-							+ current.getName());
+							+ currentMetricName);
 				}
 			}
 
@@ -888,8 +910,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						}
 						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
 								TOPICS_NBIRTH_TEMPLATES)) {
-							log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
-									+ current.getName());
+							log(TEST_FAILED_FOR_ASSERTION  + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
+									+ currentMetricName);
 						}
 					}
 				}
@@ -900,7 +922,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER)) {
 					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER
-							+ ": metric name: " + current.getName());
+							+ ": metric name: " + currentMetricName);
 				}
 				lastHistoricalTimestamp = current.getTimestamp();
 			}
@@ -910,18 +932,24 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				boolean found = false;
 				// look for the current metric name in the last metrics
 				for (Metric last : lastMetrics) {
-					if (last.getName().equals(current.getName())) {
+					// Get the metric name if aliases are used and set it as needed
+					String lastMetricName = last.getName();
+					if (!last.hasName() && last.hasAlias()) {
+						lastMetricName = edgeAliasMaps.get(id).get(last.getAlias());
+					}
+
+					if (lastMetricName.equals(currentMetricName)) {
 						found = true;
 						if (!setShouldResultIfNotFail(testResults, current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
-							log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
-									+ ": metric name: " + current.getName());
+							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
+									+ ": metric name: " + currentMetricName);
 						}
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
-								ID_PRINCIPLES_RBE_RECOMMENDED)) {
-							log(TEST_FAILED_FOR_ASSERTION + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
-									+ current.getName());
+								PRINCIPLES_RBE_RECOMMENDED)) {
+							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+									+ currentMetricName);
 						}
 						break;
 					}
@@ -1036,8 +1064,21 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			long lastHistoricalTimestamp = 0L;
 			List<Metric> metrics = payload.getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
+			boolean aliasMapInitialized = false;
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
+
+				if (current.hasAlias()) {
+					Map<Long, String> aliasMap = edgeAliasMaps.get(id);
+					if (!aliasMapInitialized) {
+						aliasMap = edgeAliasMaps.computeIfAbsent(id, (k) -> new HashMap<>());
+						aliasMap.clear();
+						aliasMapInitialized = true;
+					}
+
+					logger.debug("Creating alias: {} -> {}", current.getAlias(), current.getName());
+					aliasMap.put(current.getAlias(), current.getName());
+				}
 
 				if (current.hasIsHistorical() && current.getIsHistorical() == false) {
 					if (!setResultIfNotFail(testResults, current.getTimestamp() >= lastHistoricalTimestamp,
@@ -1137,25 +1178,32 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		while (metricIterator.hasNext()) {
 			Metric current = metricIterator.next();
 
+			// Get the metric name if aliases are used and set it as needed
+			String currentMetricName = current.getName();
+			if (!current.hasName() && current.hasAlias()) {
+				currentMetricName = edgeAliasMaps.get(id).get(current.getAlias());
+				logger.debug("Got currentMetricName from alias: {} -> {}", current.getAlias(), currentMetricName);
+			}
+
 			List<Metric> birthMetrics = deviceBirthMetrics.get(id);
 			if (birthMetrics != null) {
 				boolean found = false;
 				// look for the current metric name in the birth metrics
 				for (Metric birth : birthMetrics) {
-					if (birth.getName().equals(current.getName())) {
+					if (birth.getName().equals(currentMetricName)) {
 						found = true;
 						break;
 					}
 				}
 
 				if (!setResultIfNotFail(testResults, found, ID_TOPICS_DBIRTH_METRIC_REQS, TOPICS_DBIRTH_METRIC_REQS)) {
-					log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
-							+ current.getName());
+					log(TEST_FAILED_FOR_ASSERTION  + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
+							+ currentMetricName);
 				}
 				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH)) {
-					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
-							+ current.getName());
+					log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
+							+ currentMetricName);
 				}
 			}
 
@@ -1185,7 +1233,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
 								TOPICS_NBIRTH_TEMPLATES)) {
 							log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
-									+ current.getName());
+									+ currentMetricName);
 						}
 					}
 				}
@@ -1196,7 +1244,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER)) {
 					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER
-							+ ": metric name: " + current.getName());
+							+ ": metric name: " + currentMetricName);
 				}
 				lastHistoricalTimestamp = current.getTimestamp();
 			}
@@ -1206,18 +1254,24 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				boolean found = false;
 				// look for the current metric name in the last metrics
 				for (Metric last : lastMetrics) {
-					if (last.getName().equals(current.getName())) {
+					// Get the metric name if aliases are used and set it as needed
+					String lastMetricName = last.getName();
+					if (!last.hasName() && last.hasAlias()) {
+						lastMetricName = edgeAliasMaps.get(id).get(last.getAlias());
+					}
+
+					if (lastMetricName.equals(currentMetricName)) {
 						found = true;
 						if (!setShouldResultIfNotFail(testResults, current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
-							log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
-									+ ": metric name: " + current.getName());
+							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
+									+ ": metric name: " + currentMetricName);
 						}
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
 								PRINCIPLES_RBE_RECOMMENDED)) {
-							log(TEST_FAILED_FOR_ASSERTION + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
-									+ current.getName());
+							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+									+ currentMetricName);
 						}
 						break;
 					}
