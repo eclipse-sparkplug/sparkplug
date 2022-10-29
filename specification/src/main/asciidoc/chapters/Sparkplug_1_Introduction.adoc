@@ -208,10 +208,11 @@ plantuml::{assetsdir}assets/plantuml/infrastructure-components.puml[format=svg, 
 [[introduction_mqtt_servers]]
 ===== MQTT Server(s)
 
-MQTT enabled infrastructure requires that one or more MQTT Servers are present in the
-infrastructure. An MQTT Server must be compatible with the requirements outlined in the
-link:#conformance[Conformance Section]. In addition, it must be sized to properly manage all MQTT
-message traffic.
+Program or device that acts as an intermediary between Clients which publish Application Messages 
+and Clients which have made Subscriptions[MQTTV5-1.2]. MQTT enabled infrastructure requires that one 
+or more MQTT Servers are present in the infrastructure. An MQTT Server must be compatible with the 
+requirements outlined in the link:#conformance[Conformance Section]. In addition, it must be sized 
+to properly manage all MQTT message traffic.
 
 One can implement the use (if required) of multiple MQTT servers for redundancy, high availability,
 and scalability within any given infrastructure.
@@ -219,7 +220,7 @@ and scalability within any given infrastructure.
 [[introduction_sparkplug_group]]
 ===== Sparkplug Group
 
-A 'Sparkplug Group' is a logical or physical group of Edge Nodes that makes sense in the context of
+Logical or physical group of Edge Nodes that makes sense in the context of
 a distributed Sparkplug application. Groups can represent physical groups of Edge Nodes. For
 example, a Sparkplug Group could represent a set of Edge Nodes at a particular location, facility,
 or along a specific oil pipeline. Alternatively, a Sparkplug Group could represent group of similar
@@ -230,27 +231,26 @@ their particular application.
 [[introduction_sparkplug_edge_node]]
 ===== Sparkplug Edge Node
 
-In the context of this specification, a Sparkplug Edge Node is any v3.1.1 or v5.0 compliant MQTT
-Client application that manages an MQTT Session and provides the physical and/or logical gateway
-functions required to participate in the Topic Namespace and Payload definitions described in
-this document. The Edge Node is responsible for any local protocol interface to existing devices
-(PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete I/O, and/or any logical
-internal process variables (PVs).
+Any v3.1.1 or v5.0 compliant MQTT Client application that manages an MQTT Session and provides the 
+physical and/or logical gateway functions required to participate in the Topic Namespace and Payload 
+definitions described in this document. The Edge Node is responsible for any local protocol 
+interface to existing devices (PLCs, RTUs, Flow Computers, Sensors, etc.) and/or any local discrete 
+I/O, and/or any logical internal process variables (PVs).
 
 [[introduction_sparkplug_device]]
 ===== Sparkplug Device
 
-A Sparkplug Device represents a physical or logical device that makes sense in the context of a
-distributed Sparkplug application. Often times a Sparkplug Device will be a physical PLC, RTU, Flow
-Computer, Sensor, etc. However, a Sparkplug device could also represent a logical grouping of data
-points as makes sense for the specific Sparkplug Application being developed. For example, it could
-represent a set of data points across multiple PLCs that make up a logical device that makes sense
-within the context of that application.
+Physical or logical device that makes sense in the context of a distributed Sparkplug application. 
+Often times a Sparkplug Device will be a physical PLC, RTU, Flow Computer, Sensor, etc. However, a 
+Sparkplug device could also represent a logical grouping of data  points as makes sense for the 
+specific Sparkplug Application being developed. For example, it could represent a set of data points 
+across multiple PLCs that make up a logical device that makes sense within the context of that 
+application.
 
 [[introduction_mqtt_sparkplug_enabled_device]]
 ===== MQTT/Sparkplug Enabled Device
 
-This represents any device, sensor, or hardware that directly connects to MQTT infrastructure using
+Any device, sensor, or hardware that directly connects to MQTT infrastructure using
 a compliant MQTT v3.1.1 or v5.0 connection with the payload and topic notation as outlined in this
 Sparkplug Specification. With MQTT/Sparkplug enabled directly in the device this could bypass the
 use of a Sparkplug Edge Node in the infrastructure. In this case, the physical device or sensor is
@@ -260,12 +260,12 @@ Device' is to be used within their application.
 [[introduction_host_applications]]
 ===== Host Applications
 
-A Host Application is defined as an application that consumes data from Sparkplug Edge Nodes.
-Depending on the nature of the Host Application it may consume Edge Node data and display it in a
-dashboard, it may historize the data in a database, or it may analyze the data in some way.
-SCADA/IIoT Hosts, MES, Historians, and Analytics applications are all examples of potential
-Sparkplug Host Applications. A Host Application may perform many different functions in handling the
-data. In addition, Host Applications may also send Sparkplug NCMD or DCMD messages to Edge Nodes.
+Application that consumes data from Sparkplug Edge Nodes. Depending on the nature of the Host 
+Application it may consume Edge Node data and display it in a dashboard, it may historize the data 
+in a database, or it may analyze the data in some way. SCADA/IIoT Hosts, MES, Historians, and 
+Analytics applications are all examples of potential Sparkplug Host Applications. A Host Application 
+may perform many different functions in handling the data. In addition, Host Applications may also 
+send Sparkplug NCMD or DCMD messages to Edge Nodes.
 
 A Sparkplug Edge Node may specify one Host Application as its 'Primary Host Application'. This is
 handled by the Edge Node waiting to publish its NBIRTH and DBIRTH messages until the Host
@@ -280,6 +280,8 @@ Host Applications MUST publish STATE messages denoting their online and offline 
 
 [[introduction_primary_host_application]]
 ===== Primary Host Application
+Most important consumer of Sparkplug Edge Node data. The Primary Host Application must be online 
+to keep operations running.
 
 A Primary Host Application may be defined by an Edge Node. The Edge Node's behavior may change
 based on the status of its configured Primary Host. It is not required that an Edge Node must have
@@ -289,9 +291,9 @@ an Edge Node may store data at the edge until a Primary Host Application comes b
 Primary Host Application publishes a new STATE message denoting it is online, the Edge Node can
 resume publishing data and also flush any historical data that it may have stored while offline.
 
-In a traditional SCADA system the SCADA Host would be the Primary Host Application. It is the most
-important consumer of data to keep operations running. With this same concept in mind, there can
-only be one Primary Host Application configured in an Edge Node as a result.
+In a traditional SCADA system the SCADA Host would be the Primary Host Application. With this same 
+concept in mind, there can only be one Primary Host Application configured in an Edge Node as a 
+result.
 
 [[introduction_sparkplug_ids]]
 ===== Sparkplug Identifiers
@@ -340,12 +342,11 @@ context of the Edge Node ID under which it exists.
 [[introduction_sparkplug_metrics]]
 ===== Sparkplug Metric
 
-A Sparkplug Metric is the term used for a single 'tag change event' in the Sparkplug Payload. It
-represents an event that occurred at the Edge Node or Device such as a value or quality of a data
-point changing. For example, it could represent the value of an analog or boolean changing at a
-Sparkplug Device. A Sparkplug Metric typically includes a name, value, and timestamp. Sparkplug
-Metrics are also used in NCMD and DCMD messages to send messages to Edge Nodes and Devices to
-change values at the Edge.
+Identifies a single 'tag change event' in the Sparkplug Payload. It represents an event that 
+occurred at the Edge Node or Device such as a value or quality of a data point changing. For 
+example, it could represent the value of an analog or boolean changing at a Sparkplug Device. A 
+Sparkplug Metric typically includes a name, value, and timestamp. Sparkplug Metrics are also used in 
+NCMD and DCMD messages to send messages to Edge Nodes and Devices to change values at the Edge.
 
 [[introduction_datatypes]]
 ===== Data Types
@@ -434,7 +435,7 @@ Although this document will not specify any TCP/IP security schema it will provi
 to secure an MQTT infrastructure using TLS security.
 
 [[introduction_editing_convention]]
-=== Editing Convention
+=== Normative Keywords
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
 "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14
