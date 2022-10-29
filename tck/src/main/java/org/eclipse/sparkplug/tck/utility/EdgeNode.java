@@ -232,19 +232,7 @@ public class EdgeNode {
 	}
 
 	public boolean publishDeviceData(String metricName, MetricDataType metricDataType, Object value) throws Exception {
-		List<Metric> deviceMetrics = new ArrayList<Metric>();
-
-		// Add a 'real time' metric
-		deviceMetrics
-				.add(new MetricBuilder(metricName, metricDataType, value).timestamp(calendar.getTime()).createMetric());
-
-		logger.info("Updating metric " + metricName + " to " + value);
-
-		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getNextSeqNum(), null, null);
-
-		edge.publish(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DDATA/" + edge_node_id + "/" + deviceId,
-				new SparkplugBPayloadEncoder().getBytes(devicePayload), 0, false);
-		return true;
+		return publishDeviceData(getNextDeviceData(metricName, metricDataType, value));
 	}
 
 	public boolean publishDeviceData(SparkplugBPayload devicePayload) throws Exception {

@@ -33,12 +33,16 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_REORDERING_START;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 
 import java.nio.ByteBuffer;
@@ -58,6 +62,9 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
@@ -97,6 +104,9 @@ public class MessageOrderingTest extends TCKTest {
 	private TestStatus state = null;
 	private TCK theTCK = null;
 	private @NotNull Utilities utilities = null;
+
+	private boolean rebirth_received = false;
+	private int reorder_count = 0;
 
 	private PublishService publishService = Services.publishService();
 	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
@@ -171,18 +181,6 @@ public class MessageOrderingTest extends TCKTest {
 		return testResults;
 	}
 
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 
@@ -208,6 +206,18 @@ public class MessageOrderingTest extends TCKTest {
 		logger.info("{} - SUBSCRIBE {}, {} ", getName(), clientId, state);
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS)
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
 		logger.info("{} - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);
@@ -218,6 +228,9 @@ public class MessageOrderingTest extends TCKTest {
 			if (state == TestStatus.EXPECT_NODE_BIRTH) {
 				logger.info("{} node birth received", getName());
 				state = TestStatus.EXPECT_DEVICE_BIRTH;
+			} else if (state == TestStatus.EXPECT_NODE_REBIRTH) {
+				logger.info("{} node birth received", getName());
+				state = TestStatus.EXPECT_DEVICE_REBIRTH;
 			} else {
 				logger.error("{} node birth received at wrong time", getName());
 				theTCK.endTest();
@@ -234,6 +247,15 @@ public class MessageOrderingTest extends TCKTest {
 						sendDeviceData(3); // end a good data sequence
 					}
 				}, 1, TimeUnit.SECONDS);
+			} else if (state == TestStatus.EXPECT_DEVICE_REBIRTH) {
+				logger.info("{} device birth received", getName());
+				state = TestStatus.PUBLISH_DEVICE_DATA;
+				executorService.schedule(new Runnable() {
+					@Override
+					public void run() {
+						sendDeviceData(3); // end a good data sequence
+					}
+				}, 1, TimeUnit.SECONDS);
 			} else {
 				logger.error("{} device birth received at wrong time", getName());
 				theTCK.endTest();
@@ -241,9 +263,52 @@ public class MessageOrderingTest extends TCKTest {
 		} else if (packet.getTopic().equals(
 				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DDATA + "/" + edgeNodeId + "/" + deviceId)) {
 
-		} else if (packet.getTopic().equals(
-				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId)) {
-			
+		} else if (packet.getTopic()
+				.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId)) {
+			if (state == TestStatus.EXPECT_NODE_REBIRTH) {
+				// this should be a device rebirth as a result of a missing message
+
+				// look through metrics
+				final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+
+				for (Metric metric : sparkplugPayload.getMetricsList()) {
+					if (metric.hasName() && metric.getName().equals("Node Control/Rebirth")) {
+						if (reorder_count == 1) {
+							// should not get rebirth here
+							Utils.setShouldResult(testResults, false, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS,
+									OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS);
+						} else {
+							rebirth_received = true;
+							reorder_count++;
+							Utils.setShouldResult(testResults, true, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM,
+									OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM);
+							Utils.setShouldResult(testResults, true, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START,
+									OPERATIONAL_BEHAVIOR_HOST_REORDERING_START);
+							Utils.setShouldResult(testResults, true, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH,
+									OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH);
+							logger.info("{} rebirth for Edge Node", getName());
+							try {
+								utilities.getEdgeNode().edgeOffline();
+								// in a short while do a rebirth
+								executorService.schedule(new Runnable() {
+									@Override
+									public void run() {
+										try {
+											utilities.getEdgeNode().edgeNodeOnline(hostApplicationId, groupId,
+													edgeNodeId, deviceId);
+										} catch (Exception e) {
+											logger.error("Failed to start simulated edge node", e);
+											theTCK.endTest();
+										}
+									}
+								}, 1, TimeUnit.SECONDS);
+							} catch (Exception e) {
+								theTCK.endTest();
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -266,23 +331,69 @@ public class MessageOrderingTest extends TCKTest {
 			}
 		}, 1, TimeUnit.SECONDS);
 	}
-	
-	private SparkplugBPayload delayed = null; 
-	
+
+	SparkplugBPayload delayed = null;
+
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MESSAGE_ORDERING,
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS)
 	public void sendMissingDeviceData() {
 		try {
-			SparkplugBPayload delayed = utilities.getEdgeNode().getNextDeviceData("Temperature", MetricDataType.Int16, (short)23);
+			delayed = utilities.getEdgeNode().getNextDeviceData("Temperature", MetricDataType.Int16, (short) 23);
 			utilities.getEdgeNode().publishDeviceData("Temperature", MetricDataType.Int16, (short) 24);
+			state = TestStatus.EXPECT_NODE_REBIRTH;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		// wait long enough to get a REBIRTH
-		executorService.schedule(new Runnable() {
-			@Override
-			public void run() {
-				theTCK.endTest();
-			}
-		}, reorderTimeout*4, TimeUnit.MILLISECONDS);
+
+		if (reorder_count == 1) {
+			// send the missing data within the reorder interval
+			executorService.schedule(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						utilities.getEdgeNode().publishDeviceData(delayed);
+						state = TestStatus.PUBLISHED_DEVICE_DATA;
+						executorService.schedule(new Runnable() {
+							@Override
+							public void run() {
+								Utils.setShouldResultIfNotFail(testResults, true,
+										ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS,
+										OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS);
+								theTCK.endTest();
+							}
+						}, reorderTimeout * 2, TimeUnit.MILLISECONDS);
+					} catch (Exception e) {
+						logger.error("Error publishing device data", e);
+						theTCK.endTest();
+					}
+				}
+			}, reorderTimeout / 2, TimeUnit.MILLISECONDS);
+		} else {
+			// wait long enough to get a REBIRTH
+			executorService.schedule(new Runnable() {
+				@Override
+				public void run() {
+					if (!rebirth_received) {
+						Utils.setShouldResult(testResults, false, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM,
+								OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM);
+						Utils.setShouldResult(testResults, false, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START,
+								OPERATIONAL_BEHAVIOR_HOST_REORDERING_START);
+						Utils.setShouldResult(testResults, false, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH,
+								OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH);
+						theTCK.endTest();
+					}
+				}
+			}, reorderTimeout * 2, TimeUnit.MILLISECONDS);
+		}
 	}
 }

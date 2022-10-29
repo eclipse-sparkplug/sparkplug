@@ -82,8 +82,34 @@ public class Utils {
 		return PASS;
 	}
 
+	private static @NotNull String setShouldResultWithStackTrace(boolean bValid, String requirement, int element) {
+		if (!bValid) {
+			StackTraceElement[] elements = (new Exception()).getStackTrace();
+			if (elements != null && elements.length > element) {
+				final String result = MAYBE + " " + requirement + " (" + elements[element] + ")";
+				logger.debug(result);
+				return result;
+			} else {
+				return MAYBE + " " + requirement;
+			}
+		}
+		return PASS;
+	}
+
 	public static @NotNull String setShouldResult(boolean bValid, String requirement) {
 		return bValid ? PASS : MAYBE + " " + requirement;
+	}
+
+	public static @NotNull boolean setShouldResult(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
+		results.put(req_id, setShouldResultWithStackTrace(result, req_desc, 2));
+		return result;
+	}
+
+	public static @NotNull boolean setResult(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
+		results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
+		return result;
 	}
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
