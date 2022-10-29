@@ -18,7 +18,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.COMPONENTS_PH_S
 import static org.eclipse.sparkplug.tck.test.common.Requirements.CONFORMANCE_PRIMARY_HOST;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_MESSAGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_RETAIN;
@@ -33,7 +33,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_COMPONENTS_P
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_PRIMARY_HOST;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_MESSAGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_REQUIRED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_RETAIN;
@@ -50,11 +50,10 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_TOPIC;
@@ -65,7 +64,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_SUBSCRIBE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD;
@@ -78,11 +76,10 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_TOPIC;
@@ -92,7 +89,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_RETAINED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_SUBSCRIBE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD;
@@ -101,11 +97,11 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -179,11 +175,11 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD,
 			ID_HOST_TOPIC_PHID_BIRTH_QOS, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS,
 			ID_HOST_TOPIC_PHID_BIRTH_RETAIN, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_RETAINED,
-			ID_PAYLOADS_STATE_BIRTH, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
-			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
-			ID_PAYLOADS_STATE_BIRTH_PAYLOAD, ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
-			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
-			ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED, ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED);
+			ID_PAYLOADS_STATE_BIRTH, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP,
+			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD,
+			ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP,
+			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED,
+			ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED);
 
 	private @NotNull String hostApplicationId;
 
@@ -193,7 +189,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private TCK theTCK = null;
 	private Results.Config config = null;
 
-	private short deathBdSeq = -1;
+	private long deathTimestamp = -1;
 
 	private PublishService publishService = Services.publishService();
 
@@ -501,7 +497,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 				boolean isValidPayload = false;
 				if (deathPayload != null) {
-					deathBdSeq = deathPayload.getBdSeq().shortValue();
+					deathTimestamp = deathPayload.getTimestamp().longValue();
 					isValidPayload = true;
 				}
 
@@ -635,7 +631,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-			id = ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ)
+			id = ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD)
@@ -645,16 +641,10 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_PAYLOADS_STATE_BIRTH)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_STATE,
-			id = ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_STATE,
 			id = ID_PAYLOADS_STATE_BIRTH_PAYLOAD)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_STATE_BIRTH,
-			id = ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ)
+			id = ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP)
 
 	private boolean checkBirthMessage(final @NotNull PublishPacket packet) {
 
@@ -677,7 +667,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		overallResult &= payloadExists;
 
 		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD, HOST_TOPIC_PHID_BIRTH_PAYLOAD);
-		testResults.put(ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD, setResult(payloadExists, HOST_TOPIC_PHID_BIRTH_PAYLOAD));
+		setResultIfNotFail(testResults, payloadExists, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD, HOST_TOPIC_PHID_BIRTH_PAYLOAD);
 
 		logger.debug("Check Req: {}:{}.", ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, HOST_TOPIC_PHID_BIRTH_MESSAGE);
 		testResults.put(ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, setResult(payloadExists, HOST_TOPIC_PHID_BIRTH_MESSAGE));
@@ -714,45 +704,6 @@ public class SessionEstablishmentTest extends TCKTest {
 					isValidPayload = false;
 				}
 
-				if (json.has("bdSeq")) {
-					JsonNode bdseq = json.get("bdSeq");
-					if (bdseq.isShort() && bdseq.shortValue() >= 0 || bdseq.shortValue() <= 255) {
-						testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
-								setResult(bdseq.shortValue() == deathBdSeq,
-										MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ));
-
-						testResults.put(ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
-								setResult(bdseq.shortValue() == deathBdSeq, PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ));
-
-						testResults.put(ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
-								setResult(bdseq.shortValue() == deathBdSeq, HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ));
-
-						testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
-								setResult(bdseq.shortValue() == deathBdSeq,
-										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ));
-					} else if (bdseq.isInt() && bdseq.intValue() >= 0 || bdseq.intValue() <= 255) {
-						testResults.put(ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ,
-								setResult(bdseq.intValue() == deathBdSeq,
-										MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_BDSEQ));
-
-						testResults.put(ID_PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ,
-								setResult(bdseq.intValue() == deathBdSeq, PAYLOADS_STATE_BIRTH_PAYLOAD_BDSEQ));
-
-						testResults.put(ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ,
-								setResult(bdseq.intValue() == deathBdSeq, HOST_TOPIC_PHID_BIRTH_PAYLOAD_BDSEQ));
-
-						testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ,
-								setResult(bdseq.intValue() == deathBdSeq,
-										OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD_BDSEQ));
-					} else {
-						logger.info("StatePayload is invalid - bdSeq is invalid: {}", bdseq);
-						isValidPayload = false;
-					}
-				} else {
-					logger.info("StatePayload is invalid - bdSeq field is missing");
-					isValidPayload = false;
-				}
-
 				if (json.has("online")) {
 					JsonNode online = json.get("online");
 					if (online.isBoolean() && online.booleanValue() == true) {
@@ -763,6 +714,35 @@ public class SessionEstablishmentTest extends TCKTest {
 					}
 				} else {
 					logger.info("StatePayload is invalid - online field is missing");
+					isValidPayload = false;
+				}
+
+				if (json.has("timestamp")) {
+					JsonNode timestamp = json.get("timestamp");
+					if (timestamp.isLong() && timestamp.longValue() > 0) {
+						boolean validUTC = Utils.checkUTC(timestamp.longValue(), config.UTCwindow);
+
+						setResultIfNotFail(testResults, validUTC, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD,
+								HOST_TOPIC_PHID_BIRTH_PAYLOAD);
+
+						setResultIfNotFail(testResults, timestamp.longValue() == deathTimestamp,
+								ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP,
+								MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP);
+
+						setResultIfNotFail(testResults, timestamp.longValue() == deathTimestamp,
+								ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP, HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP);
+
+						setResultIfNotFail(testResults, timestamp.longValue() == deathTimestamp,
+								ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD,
+								OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD);
+					} else {
+						logger.info("Failed to validate the timestamp in the STATE payload");
+						setResultIfNotFail(testResults, false, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD,
+								HOST_TOPIC_PHID_BIRTH_PAYLOAD);
+						isValidPayload = false;
+					}
+				} else {
+					logger.info("StatePayload is invalid - timestamp field is missing");
 					isValidPayload = false;
 				}
 			}
@@ -818,10 +798,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private void sendOfflineStateMessage() {
 		String topicName = TOPIC_ROOT_STATE + "/" + hostApplicationId;
 
-		String now = String.valueOf(Instant.now().toEpochMilli());
-		String bdseq = String.valueOf(deathBdSeq);
-
-		String json = "{ \"online\": false, \"bdSeq\" : " + bdseq + ", \"timestamp\": " + now + "}";
+		String json = "{ \"online\" : false, \"timestamp\" : " + deathTimestamp + " }";
 
 		ByteBuffer bytebuf = null;
 		try {

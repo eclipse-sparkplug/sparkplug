@@ -32,7 +32,6 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
  */
 
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.PersistentUtils;
 import org.eclipse.sparkplug.tck.test.common.StatePayload;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -61,7 +60,6 @@ public class HostApplication {
 
 	private byte[] birthPayload = null;
 	private byte[] deathPayload = null;
-	private int bdSeq;
 
 	public HostApplication() {
 		logger.info("Sparkplug TCK Host Application utility");
@@ -84,19 +82,16 @@ public class HostApplication {
 		stateTopic = host.getTopic(Constants.TOPIC_ROOT_STATE + "/" + host_application_id);
 
 		// Set up the BIRTH and DEATH payloads
-		bdSeq = PersistentUtils.getNextHostDeathBdSeqNum();
 		try {
+			long now = System.currentTimeMillis();
 			ObjectMapper mapper = new ObjectMapper();
-			StatePayload birthStatePayload = new StatePayload(true, bdSeq, System.currentTimeMillis());
+			StatePayload birthStatePayload = new StatePayload(true, now);
 			birthPayload = mapper.writeValueAsString(birthStatePayload).getBytes();
-			StatePayload deathStatePayload = new StatePayload(false, bdSeq, System.currentTimeMillis());
+			StatePayload deathStatePayload = new StatePayload(false, now);
 			deathPayload = mapper.writeValueAsString(deathStatePayload).getBytes();
 		} catch (Exception e) {
 			logger.error("Failed to construct Host ID payloads - not starting", e);
 			return;
-		} finally {
-			bdSeq++;
-			PersistentUtils.setNextHostDeathBdSeqNum(bdSeq);
 		}
 
 		MqttConnectOptions connectOptions = new MqttConnectOptions();

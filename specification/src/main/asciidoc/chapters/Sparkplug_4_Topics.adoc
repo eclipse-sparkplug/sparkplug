@@ -560,13 +560,12 @@ Server immediately after successfully subscribing its own spBv1.0/STATE/sparkplu
 ====== Birth Certificate Payload (STATE)
 
 * [tck-testable tck-id-host-topic-phid-birth-payload]#[yellow-background]*[tck-id-host-topic-phid-birth-payload] The
-Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
-one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a
-numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
-a numeric value representing the current UTC time in milliseconds since Epoch.*#
-* [tck-testable tck-id-host-topic-phid-birth-payload-bdseq]#[yellow-background]*[tck-id-host-topic-phid-birth-payload-bdseq] The
-bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will
-Message payload.*#
+Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value pairs where the
+one key MUST be 'online' and it's value is a boolean 'true'. The other key MUST be 'timestamp' and
+the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-host-topic-phid-birth-payload-timestamp]#[yellow-background]*[tck-id-host-topic-phid-birth-payload-timestamp] The
+timestamp metric value MUST be the same timestamp value set in the immediately prior MQTT CONNECT
+packet's Will Message payload.*#
 
 Sparkplug B payloads are not used for encoding in this payload. This allows Host Applications to
 work across Sparkplug payload types.
@@ -598,11 +597,13 @@ Sparkplug Host Application MUST provide a Will message in the MQTT CONNECT packe
 ====== Death Certificate Payload (STATE)
 
 * [tck-testable tck-id-host-topic-phid-death-payload]#[yellow-background]*[tck-id-host-topic-phid-death-payload] The
-Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
-one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a
-numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
-a numeric value representing the current UTC time in milliseconds since Epoch.*#
-* [tck-testable tck-id-host-topic-phid-death-payload-bdseq]#[yellow-background]*[tck-id-host-topic-phid-death-payload-bdseq] The
-Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value
-sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255.
-In this case the new bdSeq number value MUST be 0.*#
+STATE Death Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value pairs where
+one key MUST be 'online' and it's value is a boolean 'false'. The other key MUST be 'timestamp' and
+the value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-host-topic-phid-death-payload-timestamp-connect]#[yellow-background]*[tck-id-host-topic-phid-death-payload-connect] The
+Death Certificate's used in the MQTT CONNECT packet Will message MUST use a timestamp value that
+represents the current UTC time at the time of the CONNECT packet is sent to the MQTT Server.*#
+* [tck-testable tck-id-host-topic-phid-death-payload-timestamp-disconnect-clean]#[yellow-background]*[tck-id-host-topic-phid-death-payload-disconnect-clean] If
+a Host Application is disconnecting cleanly using MQTT DISCONNECT packet, the Host Application MUST
+publish a Death Certificate payload before sending the MQTT DISCONNECT packet with the timestamp set
+to the current UTC time the disconnect is occurring.*#

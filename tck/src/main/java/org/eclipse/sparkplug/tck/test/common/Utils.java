@@ -272,7 +272,6 @@ public class Utils {
 
 		boolean isValidPayload = false;
 		boolean retOnline = false;
-		int retBdSeq = -1;
 		long retTimestamp = -1;
 
 		if (json != null) {
@@ -289,23 +288,6 @@ public class Utils {
 						logger.warn("StatePayload is invalid - Timestamp diff " + diff);
 					}
 				}
-			}
-
-			if (json.has("bdSeq")) {
-				JsonNode bdseq = json.get("bdSeq");
-				if (bdseq.isShort() && bdseq.shortValue() >= 0 || bdseq.shortValue() <= 255) {
-					// valid - don't set isValidPayload as it might be false
-					retBdSeq = bdseq.shortValue();
-				} else if (bdseq.isInt() && bdseq.intValue() >= 0 || bdseq.intValue() <= 255) {
-					// valid - don't set isValidPayload as it might be false
-					retBdSeq = bdseq.intValue();
-				} else {
-					isValidPayload = false;
-					logger.warn("StatePayload is invalid - bdSeq is invalid: {}", bdseq);
-				}
-			} else {
-				isValidPayload = false;
-				logger.warn("StatePayload is invalid - bdSeq field is missing");
 			}
 
 			if (json.has("online")) {
@@ -327,9 +309,8 @@ public class Utils {
 		}
 
 		if (isValidPayload) {
-			logger.debug("Returning StatePaload with online={} bdSeq={} timestamp={}", retOnline, retBdSeq,
-					retTimestamp);
-			return new StatePayload(retOnline, retBdSeq, retTimestamp);
+			logger.debug("Returning StatePaload with online={} timestamp={}", retOnline, retTimestamp);
+			return new StatePayload(retOnline, retTimestamp);
 		} else {
 			return null;
 		}

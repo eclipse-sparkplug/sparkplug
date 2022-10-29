@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  * Copyright (c) 2021, 2022 Ian Craggs
  *
@@ -11,21 +10,22 @@
  * Contributors:
  *    Ian Craggs - initial implementation and documentation
  *******************************************************************************/
+
 package org.eclipse.sparkplug.tck.test.edge;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT;
 
@@ -73,11 +73,11 @@ public class PrimaryHostTest extends TCKTest {
 	private final @NotNull String testIds[] =
 			{ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID,
 					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE,
-					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ,
+					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
 					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
-					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_BDSEQ };
+					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP };
 
 	private final @NotNull TCK theTCK;
 	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
@@ -208,7 +208,7 @@ public class PrimaryHostTest extends TCKTest {
 
 		// send the online message but without increasing the bdseq - should be wrong
 		try {
-			state = TestStatus.HOST_WRONG_BDSEQ;
+			state = TestStatus.HOST_WRONG_TIMESTAMP;
 			utilities.getHostApps().hostSendOnline();
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
@@ -217,13 +217,13 @@ public class PrimaryHostTest extends TCKTest {
 		executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
-				wrongBdSeq();
+				wrongTimestamp();
 			}
 		}, 3, TimeUnit.SECONDS);
 	}
 
-	private void wrongBdSeq() {
-		logger.info("{} wrongBdSeq", getName());
+	private void wrongTimestamp() {
+		logger.info("{} wrongTimestamp", getName());
 		// should not have received re-birth messages
 
 		// Set the host online properly again
@@ -308,7 +308,7 @@ public class PrimaryHostTest extends TCKTest {
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ)
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP)
 	/*@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE)*/
@@ -346,10 +346,11 @@ public class PrimaryHostTest extends TCKTest {
 				Utils.setResultIfNotFail(testResults, false, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE,
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE);
 
-			} else if (state == TestStatus.HOST_WRONG_BDSEQ) {
+			} else if (state == TestStatus.HOST_WRONG_TIMESTAMP) {
 				// received NBIRTH for wrong host bdseq
-				Utils.setResultIfNotFail(testResults, false, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ,
-						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ);
+				Utils.setResultIfNotFail(testResults, false,
+						ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
 
 			} else if (state == TestStatus.HOST_ONLINE) {
 
@@ -362,8 +363,8 @@ public class PrimaryHostTest extends TCKTest {
 
 			} else if (state == TestStatus.HOST_ONLINE_AGAIN) {
 
-				Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ,
-						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ);
+				Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
 				Utils.setResultIfNotFail(testResults, true,
 						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT);
@@ -382,10 +383,11 @@ public class PrimaryHostTest extends TCKTest {
 				Utils.setResultIfNotFail(testResults, false, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE,
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE);
 
-			} else if (state == TestStatus.HOST_WRONG_BDSEQ) {
+			} else if (state == TestStatus.HOST_WRONG_TIMESTAMP) {
 				// received DBIRTH for wrong host bdseq
-				Utils.setResultIfNotFail(testResults, false, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ,
-						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ);
+				Utils.setResultIfNotFail(testResults, false,
+						ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
 
 			} else if (state == TestStatus.HOST_ONLINE) {
 
@@ -398,8 +400,8 @@ public class PrimaryHostTest extends TCKTest {
 
 			} else if (state == TestStatus.HOST_ONLINE_AGAIN) {
 
-				Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ,
-						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_BDSEQ);
+				Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
 				Utils.setResultIfNotFail(testResults, true,
 						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT);

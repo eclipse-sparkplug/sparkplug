@@ -24,9 +24,12 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.CASE_SENSITIVITY_SPARKPLUG_IDS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_BIRTH_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CASE_SENSITIVITY_SPARKPLUG_IDS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_DEVICE_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_DEVICE_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_NODE_ID_CHARS;
@@ -35,15 +38,13 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_N
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_GROUP_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_GROUP_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DBIRTH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DDATA_SEQ_INC;
@@ -53,7 +54,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NBI
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TIMESTAMP_IN_UTC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DBIRTH_METRIC_REQS;
@@ -77,15 +78,13 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_GROUP_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_GROUP_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DBIRTH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDATA_SEQ_INC;
@@ -95,7 +94,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NBIRTH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_INCREMENTING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_BIRTH_PAYLOAD;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TIMESTAMP_IN_UTC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PRINCIPLES_RBE_RECOMMENDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DBIRTH_METRIC_REQS;
@@ -134,6 +133,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -172,10 +172,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
 			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,
 			ID_TOPICS_NBIRTH_METRIC_REQS, ID_TOPICS_NBIRTH_TEMPLATES, ID_TOPICS_NBIRTH_BDSEQ_INCREMENT,
-			ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ, ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ,
-			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
+			ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD, ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT,
+			ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN,
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE, ID_PRINCIPLES_RBE_RECOMMENDED,
@@ -212,7 +211,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private HashMap<String, Map<Long, String>> edgeAliasMaps = new HashMap<>();
 
 	// host application id to sequence number
-	private HashMap<String, Long> hostBdSeqs = new HashMap<String, Long>();
+	private HashMap<String, Long> hostTimestamps = new HashMap<String, Long>();
 
 	// host application id to MQTT client id
 	HashMap<String, String> hostClientids = new HashMap<String, String>();
@@ -318,19 +317,16 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			id = ID_TOPICS_NBIRTH_BDSEQ_INCREMENT)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_STATE,
-			id = ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)
+			id = ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_STATE_DEATH,
-			id = ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)
+			id = ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT)
 	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)
+			section = Sections.PAYLOADS_DESC_STATE_BIRTH,
+			id = HOST_TOPIC_PHID_BIRTH_PAYLOAD)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 
@@ -378,63 +374,50 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					setResultIfNotFail(testResults, isValidPayload, ID_PAYLOADS_STATE_BIRTH_PAYLOAD,
 							PAYLOADS_STATE_BIRTH_PAYLOAD);
 				} else {
-					if (json.has("bdSeq")) {
-						JsonNode bdseqnode = json.get("bdSeq");
-						int bdseq = -1;
-						if (bdseqnode.isShort()) {
-							bdseq = bdseqnode.shortValue();
-						} else if (bdseqnode.isInt()) {
-							bdseq = bdseqnode.intValue();
+					if (json.has("timestamp")) {
+						JsonNode timestampNode = json.get("timestamp");
+						long timestamp = -1;
+						if (timestampNode.isLong()
+								&& Utils.checkUTC(timestampNode.longValue(), results.getConfig().UTCwindow)) {
+							timestamp = timestampNode.longValue();
 						} else {
-							setResultIfNotFail(testResults, false,
-									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
-									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ);
-							log(TEST_FAILED_FOR_ASSERTION
-									+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ + ": host id: "
-									+ hostid + " with bdSeq=" + bdseqnode);
+							setResultIfNotFail(testResults, false, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD,
+									HOST_TOPIC_PHID_BIRTH_PAYLOAD);
+							log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD + ": host id: " + hostid
+									+ " with timestamp=" + timestamp);
 							return;
 						}
 
-						if (hostBdSeqs.get(hostid) != null) {
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-									ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ,
-									PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
-								log(TEST_FAILED_FOR_ASSERTION + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD_BDSEQ
-										+ ": host id: " + hostid + " received bdSeq=" + bdseq + " expected="
-										+ getNextSeq(hostBdSeqs.get(hostid)));
+						if (hostTimestamps.get(hostid) != null) {
+							if (!setResultIfNotFail(testResults, timestamp >= hostTimestamps.get(hostid),
+									ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD, PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD)) {
+								log(TEST_FAILED_FOR_ASSERTION + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD + ": host id: "
+										+ hostid + " received timestamp=" + timestamp + " expected >= "
+										+ hostTimestamps.get(hostid));
 							}
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-									ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ, HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ)) {
-								log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_BDSEQ + ": host id: "
-										+ hostid + " received bdSeq=" + bdseq + " expected="
-										+ getNextSeq(hostBdSeqs.get(hostid)));
+							if (!setResultIfNotFail(testResults, timestamp >= hostTimestamps.get(hostid),
+									ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD,
+									HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT)) {
+								log(TEST_FAILED_FOR_ASSERTION + ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD + ": host id: "
+										+ hostid + " received timestamp=" + timestamp + " expected >= "
+										+ hostTimestamps.get(hostid));
 							}
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
-									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+							if (!setResultIfNotFail(testResults, timestamp >= hostTimestamps.get(hostid),
+									ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD, HOST_TOPIC_PHID_BIRTH_PAYLOAD)) {
+								log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD + ": host id: "
+										+ hostid + " received timestamp=" + timestamp + " expected >= "
+										+ hostTimestamps.get(hostid));
+							}
+							if (!setResultIfNotFail(testResults, timestamp >= hostTimestamps.get(hostid),
+									ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD,
+									OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD)) {
 								log(TEST_FAILED_FOR_ASSERTION
-										+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
-										+ ": host id: " + hostid + " received bdSeq=" + bdseq + " expected="
-										+ getNextSeq(hostBdSeqs.get(hostid)));
-							}
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-									ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ,
-									OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ)) {
-								log(TEST_FAILED_FOR_ASSERTION
-										+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD_BDSEQ
-										+ ": host id: " + hostid + " received bdSeq=" + bdseq + " expected="
-										+ getNextSeq(hostBdSeqs.get(hostid)));
-							}
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(hostBdSeqs.get(hostid)),
-									ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ,
-									OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ)) {
-								log(TEST_FAILED_FOR_ASSERTION
-										+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD_BDSEQ + ": host id: "
-										+ hostid + " received bdSeq=" + bdseq + " expected="
-										+ getNextSeq(hostBdSeqs.get(hostid)));
+										+ ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD + ": host id: "
+										+ hostid + " received timestamp=" + timestamp + " expected >= "
+										+ hostTimestamps.get(hostid));
 							}
 						}
-						hostBdSeqs.put(hostid, (long) bdseq);
+						hostTimestamps.put(hostid, (long) timestamp);
 
 					}
 				}
@@ -910,7 +893,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						}
 						if (!setResultIfNotFail(testResults, found, ID_TOPICS_NBIRTH_TEMPLATES,
 								TOPICS_NBIRTH_TEMPLATES)) {
-							log(TEST_FAILED_FOR_ASSERTION  + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_TEMPLATES + ": metric name: "
 									+ currentMetricName);
 						}
 					}
@@ -943,12 +926,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setShouldResultIfNotFail(testResults, current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
-							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
+							log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
 						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
 								PRINCIPLES_RBE_RECOMMENDED)) {
-							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);
 						}
 						break;
@@ -1197,12 +1180,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				}
 
 				if (!setResultIfNotFail(testResults, found, ID_TOPICS_DBIRTH_METRIC_REQS, TOPICS_DBIRTH_METRIC_REQS)) {
-					log(TEST_FAILED_FOR_ASSERTION  + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
+					log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_DBIRTH_METRIC_REQS + ": metric name: "
 							+ currentMetricName);
 				}
 				if (!setResultIfNotFail(testResults, found, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH,
 						OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH)) {
-					log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
+					log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH + ": metric name: "
 							+ currentMetricName);
 				}
 			}
@@ -1265,12 +1248,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						if (!setShouldResultIfNotFail(testResults, !current.equals(last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
-							log(TEST_FAILED_FOR_ASSERTION  + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
+							log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
 						if (!setShouldResultIfNotFail(testResults, !current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
 								PRINCIPLES_RBE_RECOMMENDED)) {
-							log(TEST_FAILED_FOR_ASSERTION  + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
+							log(TEST_FAILED_FOR_ASSERTION + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);
 						}
 						break;
