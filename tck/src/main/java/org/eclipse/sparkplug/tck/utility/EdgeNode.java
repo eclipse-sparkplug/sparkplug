@@ -222,7 +222,7 @@ public class EdgeNode {
 		nodeMetrics
 				.add(new MetricBuilder(metricName, metricDataType, value).timestamp(calendar.getTime()).createMetric());
 
-		logger.info("Updating metric " + metricName + " to " + value);
+		logger.info("{} Updating metric " + metricName + " to " + value, getName());
 
 		SparkplugBPayload nodePayload = new SparkplugBPayload(new Date(), nodeMetrics, getNextSeqNum(), null, null);
 
@@ -249,7 +249,7 @@ public class EdgeNode {
 		deviceMetrics
 				.add(new MetricBuilder(metricName, metricDataType, value).timestamp(calendar.getTime()).createMetric());
 
-		logger.info("Updating metric " + metricName + " to " + value);
+		logger.info("{} Updating metric " + metricName + " to " + value, getName());
 
 		SparkplugBPayload devicePayload = new SparkplugBPayload(new Date(), deviceMetrics, getNextSeqNum(), null, null);
 		return devicePayload;
@@ -573,11 +573,11 @@ public class EdgeNode {
 
 		@Override
 		public void connectComplete(boolean reconnect, String serverURI) {
-			System.out.println("Connected!");
+			logger.debug("{} Connected!", getName());
 		}
 
 		public void connectionLost(Throwable cause) {
-			logger.info("connection lost: " + cause.getMessage());
+			logger.debug("{} connection lost: {}", getName(),cause.getMessage());
 		}
 
 		public void deliveryComplete(IMqttDeliveryToken token) {
@@ -585,7 +585,7 @@ public class EdgeNode {
 		}
 
 		public void messageArrived(String topic, MqttMessage message) throws Exception {
-			logger.debug("message arrived: " + new String(message.getPayload()));
+			logger.debug("{} message arrived: {}", getName(), new String(message.getPayload()));
 
 			synchronized (messages) {
 				messages.add(message);
