@@ -71,6 +71,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCT
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_DEVICE_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_STRING;
@@ -111,6 +112,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
@@ -119,6 +121,7 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -185,7 +188,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
-			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID };
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -323,10 +326,13 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			id = ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_STATE_BIRTH,
-			id = HOST_TOPIC_PHID_BIRTH_PAYLOAD)
+			id = ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 
@@ -351,6 +357,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
 									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
 								log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: " + id);
+								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
+										+ getNextSeq(edgeBdSeqs.get(id)));
+							}
+							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
+									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+								log(TEST_FAILED_FOR_ASSERTION
+										+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
+										+ ": edge id: " + id);
 								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
 										+ getNextSeq(edgeBdSeqs.get(id)));
 							}
@@ -501,6 +516,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				handleDDEATH(group_id, edge_node_id, device_id, payload);
 			} else if (message_type.equals(TOPIC_PATH_DDATA)) {
 				handleDDATA(group_id, edge_node_id, device_id, payload);
+			} else {
+				logger.info("Monitor: *** {} *** {}/{} {}", message_type, group_id, edge_node_id,
+						(device_id == null) ? "" : device_id);
 			}
 		}
 	}
@@ -1270,11 +1288,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private void handleSTATE(String clientId, String topic, String payload) {
 		String hostid = null;
 		String[] topicParts = topic.split("/");
-		if (topicParts.length > 1) {
-			hostid = topicParts[1];
+		if (topicParts.length == 3) {
+			hostid = topicParts[2];
 		} else {
 			return;
 		}
+		logger.info("Monitor: *** STATE *** {} {}", hostid, payload);
 
 		ObjectMapper mapper = new ObjectMapper();
 		boolean isValidPayload = true;

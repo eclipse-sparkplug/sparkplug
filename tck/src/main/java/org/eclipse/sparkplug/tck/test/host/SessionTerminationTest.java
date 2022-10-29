@@ -20,6 +20,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS;
@@ -27,6 +28,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.nio.charset.StandardCharsets;
@@ -79,7 +81,8 @@ public class SessionTerminationTest extends TCKTest {
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_TOPIC,
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_QOS,
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DEATH_RETAINED,
-			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION);
+			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION,
+			ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN);
 
 	private final @NotNull TCK theTCK;
 	private @NotNull String hostApplicationId;
@@ -159,6 +162,9 @@ public class SessionTerminationTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_TERMINATION,
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_DESC_STATE_DEATH,
+			id = ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN)
 	@Override
 	public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
 		logger.info("Host - {} test - DISCONNECT - clientId: {}, state: {} ", getName(), clientId, state);
@@ -174,6 +180,9 @@ public class SessionTerminationTest extends TCKTest {
 			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL,
 					setResult(testStatus == TestStatus.DEATH_RECEIVED,
 							OPERATIONAL_BEHAVIOR_HOST_APPLICATION_DISCONNECT_INTENTIONAL));
+
+			testResults.put(ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN, setResult(
+					testStatus == TestStatus.DEATH_RECEIVED, HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN));
 
 			testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION, setResult(
 					testStatus == TestStatus.DEATH_RECEIVED, OPERATIONAL_BEHAVIOR_HOST_APPLICATION_TERMINATION));
