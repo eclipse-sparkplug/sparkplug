@@ -119,6 +119,7 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -501,6 +502,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				handleDDEATH(group_id, edge_node_id, device_id, payload);
 			} else if (message_type.equals(TOPIC_PATH_DDATA)) {
 				handleDDATA(group_id, edge_node_id, device_id, payload);
+			} else {
+				logger.info("Monitor: *** {} *** {}/{} {}", message_type, group_id, edge_node_id, 
+					(device_id == null) ? "" : device_id);
 			}
 		}
 	}
@@ -1270,11 +1274,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	private void handleSTATE(String clientId, String topic, String payload) {
 		String hostid = null;
 		String[] topicParts = topic.split("/");
-		if (topicParts.length > 1) {
-			hostid = topicParts[1];
+		if (topicParts.length == 3) {
+			hostid = topicParts[2];
 		} else {
 			return;
 		}
+		logger.info("Monitor: *** STATE *** {} {}", hostid, payload);
 
 		ObjectMapper mapper = new ObjectMapper();
 		boolean isValidPayload = true;
