@@ -24,7 +24,7 @@ package org.eclipse.sparkplug.tck.test.host;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_BDSEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
@@ -75,7 +75,7 @@ public class MultipleBrokerTest extends TCKTest {
 	private final @NotNull List<String> testIds =
 			List.of(ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS,
 					ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE,
-					ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_BDSEQ);
+					ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP);
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
@@ -150,7 +150,7 @@ public class MultipleBrokerTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_BDSEQ)
+			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP)
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
 		/* Determine if this the connect packet for the Edge node under test.

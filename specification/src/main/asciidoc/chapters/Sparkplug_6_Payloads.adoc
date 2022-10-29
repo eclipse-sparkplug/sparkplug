@@ -1630,14 +1630,9 @@ Sparkplug Host Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNE
 * [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*[tck-id-payloads-state-will-message-retain] The
 Sparkplug Host Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-will-message-payload]#[yellow-background]*[tck-id-payloads-state-will-message-payload] The
-Death Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
-one key MUST be 'online' and it's value is a boolean 'false'. Another key MUST be 'bdSeq' and have a
-numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
-a numeric value representing the current UTC time in milliseconds since Epoch.*#
-* [tck-testable tck-id-payloads-state-will-message-payload-bdseq]#[yellow-background]*[tck-id-payloads-state-will-message-payload-bdseq] The
-Death Certificate's bdSeq number value MUST have a value of one more than the bdSeq number value
-sent in the prior MQTT CONNECT packet from the Host Application unless the previous value was 255.
-In this case the new bdSeq number value MUST be 0.*#
+Death Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value pairs where one key
+MUST be 'online' and it's value is a boolean 'false'. The other key MUST be 'timestamp' and the
+value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.*#
 * [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*[tck-id-payloads-state-subscribe] After
 establishing an MQTT connection, the Sparkplug Host Application MUST subscribe on it's own
 'spBv1.0/STATE/[sparkplug_host_id]' topic.*#
@@ -1653,10 +1648,7 @@ retain flag set to true.*#
 ** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
 any UTF-8 string.
 * [tck-testable tck-id-payloads-state-birth-payload]#[yellow-background]*[tck-id-payloads-state-birth-payload] The
-Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include three key/value pairs where the
-one key MUST be 'online' and it's value is a boolean 'true'. Another key MUST be 'bdSeq' and have a
-numeric value between 0 and 255 (inclusive). The final key MUST be 'timestamp' and the value MUST be
-a numeric value representing the current UTC time in milliseconds since Epoch.*#
-* [tck-testable tck-id-payloads-state-birth-payload-bdseq]#[yellow-background]*[tck-id-payloads-state-birth-payload-bdseq] The
-bdSeq metric value MUST be be the same value set in the immediately prior MQTT CONNECT packet's Will
+Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value pairs where one key
+MUST be 'online' and it's value is a boolean 'true'. The other key MUST be 'timestamp' and the value
+MUST match the timestamp value that was used in the immediately prior MQTT CONNECT packet Will
 Message payload.*#

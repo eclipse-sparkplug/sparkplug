@@ -88,7 +88,7 @@ public class SessionTerminationTest extends TCKTest {
 	private @Nullable String hostClientId = null;
 
 	private TestStatus testStatus = TestStatus.STARTED;
-	private short deathBdSeq = -1;
+	private long deathTimestamp = -1;
 
 	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
@@ -142,7 +142,7 @@ public class SessionTerminationTest extends TCKTest {
 			logger.debug("Will message STATE payload={}", payloadString);
 			StatePayload statePayload = Utils.getHostPayload(payloadString, false, true);
 			if (statePayload != null && testStatus == TestStatus.STARTED) {
-				deathBdSeq = statePayload.getBdSeq().shortValue();
+				deathTimestamp = statePayload.getTimestamp().longValue();
 				testStatus = TestStatus.CONNECT_RECEIVED;
 				hostClientId = clientId;
 				logger.info("{} : setting clientid to {}", getName(), hostClientId);
@@ -276,7 +276,8 @@ public class SessionTerminationTest extends TCKTest {
 		StatePayload statePayload =
 				Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false, false);
 		boolean payloadIsOffline = false;
-		if (statePayload != null && !statePayload.isOnline() && statePayload.getBdSeq() == deathBdSeq) {
+		if (statePayload != null && !statePayload.isOnline()
+				&& statePayload.getTimestamp().longValue() >= deathTimestamp) {
 			payloadIsOffline = true;
 		}
 		overallResult &= payloadIsOffline;
@@ -314,8 +315,8 @@ public class SessionTerminationTest extends TCKTest {
 				ObjectMapper mapper = new ObjectMapper();
 				StatePayload statePayload = mapper.readValue(payload, StatePayload.class);
 				if (statePayload != null && statePayload.isOnline()) {
-					deathBdSeq = statePayload.getBdSeq().shortValue();
-					logger.info("{} setting bdseq to {}", getName(), deathBdSeq);
+					deathTimestamp = statePayload.getTimestamp().longValue();
+					logger.info("{} setting timestamp to {}", getName(), deathTimestamp);
 				}
 			} catch (Exception e) {
 				logger.error("Failed to handle state topic payload: {}", payload);
