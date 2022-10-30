@@ -57,13 +57,21 @@ public class HostApplication {
 
 	private MqttClient host = null;
 	private MqttTopic stateTopic = null;
-	private MessageListener host_listener = null;
+	private MessageListener listener = null;
 
 	private byte[] birthPayload = null;
 	private byte[] deathPayload = null;
 
+	public String getName() {
+		return "Sparkplug TCK Host Application utility";
+	}
+
 	public HostApplication() {
-		logger.info("Sparkplug TCK Host Application utility");
+		logger.info("{} starting", getName());
+	}
+
+	public HostApplication(String brokerURI) {
+		this.brokerURI = brokerURI;
 	}
 
 	/*
@@ -77,8 +85,8 @@ public class HostApplication {
 		logger.info("Creating new host \"" + host_application_id + "\"");
 		hostApplicationId = host_application_id;
 		host = new MqttClient(brokerURI, "Sparkplug TCK host application " + host_application_id);
-		host_listener = new MessageListener();
-		// host.setCallback(host_listener);
+		listener = new MessageListener();
+		host.setCallback(listener);
 
 		stateTopic = host.getTopic(Constants.TOPIC_ROOT_STATE + "/" + host_application_id);
 
@@ -170,6 +178,10 @@ public class HostApplication {
 	}
 
 	public void hostOffline() throws MqttException {
+		if (host == null) {
+			logger.info("no host application");
+			return;
+		}
 		// send OFFLINE state message
 		send(deathPayload);
 		logger.info("Host " + hostApplicationId + " successfully stopped");
@@ -178,14 +190,38 @@ public class HostApplication {
 		host = null;
 	}
 
-	class MessageListener implements MqttCallbackExtended {
-		ArrayList<MqttMessage> messages;
+	public class Message {
+		private String topic;
+		private MqttMessage message;
 
-		public MessageListener() {
-			messages = new ArrayList<MqttMessage>();
+		public Message(String topic, MqttMessage message) {
+			this.topic = topic;
+			this.message = message;
 		}
 
-		public MqttMessage getNextMessage() {
+		public String getTopic() {
+			return topic;
+		}
+
+		public MqttMessage getMqttMessage() {
+			return message;
+		}
+
+	}
+
+	public Message getNextMessage() {
+		return listener.getNextMessage();
+	}
+
+	class MessageListener implements MqttCallbackExtended {
+
+		ArrayList<Message> messages;
+
+		public MessageListener() {
+			messages = new ArrayList<Message>();
+		}
+
+		public Message getNextMessage() {
 			synchronized (messages) {
 				if (messages.size() == 0) {
 					return null;
@@ -196,7 +232,7 @@ public class HostApplication {
 
 		@Override
 		public void connectComplete(boolean reconnect, String serverURI) {
-			System.out.println("Connected!");
+			logger.info("{} connected to {}", getName(), brokerURI);
 
 			try {
 				// subscribe to Sparkplug namespace
@@ -218,7 +254,7 @@ public class HostApplication {
 			// log("message arrived: " + new String(message.getPayload()));
 
 			synchronized (messages) {
-				messages.add(message);
+				messages.add(new Message(topic, message));
 				messages.notifyAll();
 			}
 		}

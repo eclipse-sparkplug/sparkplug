@@ -308,19 +308,20 @@ export default {
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_ids"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (["SendDataTest", "SendComplexDataTest", "PrimaryHostTest"].includes(testType)) {
+                } else if (["SendDataTest", "SendComplexDataTest", "PrimaryHostTest", "ReceiveCommandTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (["ReceiveCommandTest", "MultipleBrokerTest"].includes(testType)) {
+                } else if ([ "MultipleBrokerTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
-                        " " + testParameter.parameters["device_id"].parameterValue;
+                        " " + testParameter.parameters["device_id"].parameterValue +
+                        " " + testParameter.parameters["broker_uri"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");

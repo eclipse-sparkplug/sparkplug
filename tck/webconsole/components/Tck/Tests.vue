@@ -398,18 +398,23 @@ export default {
                         parameters: {
                             group_id: {
                                 parameterReadableName: "Group Id",
-                                parameterValue: "SparkplugTCK",
+                                parameterValue: "",
                                 parameterDescription: "The Group Id of the Edge Node",
                             },
                             edge_node_id: {
                                 parameterReadableName: "Edge Node Id",
-                                parameterValue: "MessageOrdering",
+                                parameterValue: "",
                                 parameterDescription: "The id of the Edge Node the Host Application will receive the death message from.",
                             },
                             device_id: {
                                 parameterReadableName: "Device Id",
-                                parameterValue: "MessageOrdering",
+                                parameterValue: "",
                                 parameterDescription: "The Device Id of a device connected to the Edge Node.",
+                            },
+                            broker_uri: {
+                                parameterReadableName: "Broker URI",
+                                parameterValue: "tcp://localhost:1884",
+                                parameterDescription: "The connection URI of the second MQTT broker",
                             },
                         },
                         code: "",
@@ -607,18 +612,26 @@ export default {
                         description: `This is the Sparkplug Edge Node test. It checks that an Edge Node behaves 
                                       correctly when multiple Brokers are present.`,
                         requirements: [
-                            "Setup a MQTT Connection.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Start a second MQTT broker listening on a different port.",
+                            "Ensure no Host Application is connected to either broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
+                            "Set the broker URI of the second broker.",
+                            "Start the Edge Node implementation to test.",
                             "Start this test.",
-                            "Connect the Device and send some Data",
-                            "The Edge Node and Devices should publish a DATA command.",
-                            "Wait until Tests are finished and check Results."
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_id: {
                                 parameterReadableName: "Device Id",
                                 parameterValue: "",
                                 parameterDescription: "The Id of a device connected to the edge node",
+                            },
+                            broker_uri: {
+                                parameterReadableName: "Broker URI",
+                                parameterValue: "tcp://localhost:1884",
+                                parameterDescription: "The connection URI of the second MQTT broker",
                             },
                         },
                         result: null,
