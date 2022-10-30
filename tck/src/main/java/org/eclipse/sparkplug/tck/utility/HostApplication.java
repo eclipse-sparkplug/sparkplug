@@ -47,13 +47,8 @@ public class HostApplication {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-	private String state = null;
-
-	private String group_id = "SparkplugTCK";
 	private String brokerURI = "tcp://localhost:1883";
 	private String hostApplicationId = null;
-
-	private MqttTopic log_topic = null;
 
 	private MqttClient host = null;
 	private MqttTopic stateTopic = null;
@@ -72,6 +67,32 @@ public class HostApplication {
 
 	public HostApplication(String brokerURI) {
 		this.brokerURI = brokerURI;
+	}
+
+	/*
+	 * Connect as an MQTT client but not as a Host Application
+	 * Subscribe to Sparkplug messages so that they can be observed
+	 */
+	public void connect() throws MqttException {
+		if (host != null) {
+			logger.info("client application in use");
+			return;
+		}
+		host = new MqttClient(brokerURI, "Sparkplug TCK 2nd broker");
+		listener = new MessageListener();
+		host.setCallback(listener);
+		MqttConnectOptions connectOptions = new MqttConnectOptions();
+		host.connect(connectOptions);
+	}
+
+	public void disconnect() throws MqttException {
+		if (host == null) {
+			logger.info("nothing to disconnect from");
+			return;
+		}
+		host.disconnect(200);
+		host.close();
+		host = null;
 	}
 
 	/*

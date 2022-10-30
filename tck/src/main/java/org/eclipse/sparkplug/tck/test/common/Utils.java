@@ -287,6 +287,11 @@ public class Utils {
 	}
 
 	public static StatePayload getHostPayload(String payloadString, boolean expectOnline, boolean logMismatchErrors) {
+		return getHostPayload(payloadString, expectOnline, logMismatchErrors, 60000L);
+	}
+
+	public static StatePayload getHostPayload(String payloadString, boolean expectOnline, boolean logMismatchErrors,
+			long UTCWindow) {
 		logger.debug("Incoming potential Host STATE payload: {}", payloadString);
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode json = null;
@@ -304,14 +309,11 @@ public class Utils {
 			if (json.has("timestamp")) {
 				JsonNode timestamp = json.get("timestamp");
 				if (timestamp.isLong()) {
-					int timestamp_max_diff = 60000; // milliseconds difference allowed
-					Date now = new Date();
-					long diff = now.getTime() - timestamp.longValue();
-					if (diff >= 0 && diff <= timestamp_max_diff) {
+					if (checkUTC(timestamp.longValue(), UTCWindow)) {
 						isValidPayload = true;
 						retTimestamp = timestamp.longValue();
 					} else {
-						logger.warn("StatePayload is invalid - Timestamp diff " + diff);
+						logger.warn("StatePayload is invalid - Timestamp diff");
 					}
 				}
 			}
