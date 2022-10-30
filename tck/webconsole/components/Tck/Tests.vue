@@ -576,11 +576,14 @@ export default {
                         readableName: "Primary Host Test",
                         description: `This checks that an Edge Node which is configured to wait for a Primary Host
                                       Application behaves correctly. The test contains delays so can take 30 seconds
-                                      or more to run.`,
+                                      or more to run.
+                                      This test uses a simulated Host Application, so no Host Application should be
+                                      connected to the broker as this will confuse the test.`,
                         requirements: [
                             "Connect this console to the HiveMQ broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
-                            "Start the edge node.",
+                            "Ensure no Host Application is connected to the HiveMQ broker.",
+                            "Start the edge node to test.",
                             "Start this test.",
                             "Wait until Tests are finished and check Results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."

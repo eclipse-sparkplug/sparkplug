@@ -37,6 +37,7 @@ import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpecVersion(
@@ -100,17 +101,51 @@ public class HostApplication {
 		logger.info("Host " + host_application_id + " successfully created");
 	}
 
+	private void send(byte[] payload) throws MqttException {
+		MqttMessage msg = new MqttMessage(payload);
+		msg.setQos(1);
+		msg.setRetained(true);
+		MqttDeliveryToken token = stateTopic.publish(msg);
+		token.waitForCompletion(1000L);
+	}
+
+	private byte[] getOldMessage(boolean online) {
+		ObjectMapper mapper = new ObjectMapper();
+		StatePayload oldonline = new StatePayload(online, 16671135L);
+		byte[] payload = null;
+		try {
+			payload = mapper.writeValueAsString(oldonline).getBytes();
+		} catch (JsonProcessingException e) {
+			logger.error("Failed to construct Host ID payloads", e);
+		}
+		return payload;
+	}
+
+	public void hostSendOldOnline() throws MqttException {
+		if (host == null) {
+			logger.error("hostSendOldOnline: no host application");
+			return;
+		}
+		// send old online state message
+		send(getOldMessage(true));
+	}
+
+	public void hostSendOldOffline() throws MqttException {
+		if (host == null) {
+			logger.error("hostSendOldOffline: no host application");
+			return;
+		}
+		// send old offline state message
+		send(getOldMessage(false));
+	}
+
 	public void hostSendOnline() throws MqttException {
 		if (host == null) {
 			logger.error("hostOnlineSend: no host application");
 			return;
 		}
 		// send online state message
-		MqttMessage online = new MqttMessage(birthPayload);
-		online.setQos(1);
-		online.setRetained(true);
-		MqttDeliveryToken token = stateTopic.publish(online);
-		token.waitForCompletion(1000L);
+		send(birthPayload);
 	}
 
 	/* send offline message, but don't disconnect so we 
@@ -121,11 +156,7 @@ public class HostApplication {
 			logger.error("hostOfflineSend: no host application");
 			return;
 		}
-		MqttMessage offline = new MqttMessage(deathPayload);
-		offline.setQos(1);
-		offline.setRetained(true);
-		MqttDeliveryToken token = stateTopic.publish(offline);
-		token.waitForCompletion(1000L);
+		send(deathPayload);
 	}
 
 	public void hostOnline(String host_application_id) throws MqttException {
@@ -140,11 +171,7 @@ public class HostApplication {
 
 	public void hostOffline() throws MqttException {
 		// send OFFLINE state message
-		MqttMessage offline = new MqttMessage(deathPayload);
-		offline.setQos(1);
-		offline.setRetained(true);
-		MqttDeliveryToken token = stateTopic.publish(offline);
-		token.waitForCompletion(1000L);
+		send(deathPayload);
 		logger.info("Host " + hostApplicationId + " successfully stopped");
 		host.disconnect();
 		host.close();

@@ -11,6 +11,22 @@
  *    Ian Craggs - initial implementation and documentation
  *******************************************************************************/
 
+/**
+ * This is the Sparkplug edge node test when dependent on a primary host application
+ *
+ * States:
+ *  1. WRONG_HOST_ONLINE - set another host online, make sure the edge doesn't send births
+ *  2. HOST_OFFLINE - set the correct host offline, make sure the edge doesn't send births
+ *  3. HOST_ONLINE - set the correct host online, expect the edge births
+ *  4. DONT_EXPECT_DEATHS - send an old timestamp offline message - ensure the edge doesn't send deaths
+ *  5. EXPECT_DEATHS - set the correct host offline, expect deaths
+ *  6. HOST_WRONG_TIMESTAMP - send an online message with the wrong timestamp, ensure the edge doesn't send births
+ *  7. HOST_ONLINE_AGAIN - set the host online properly, expect births
+ *  8. HOST_OFFLINE - set the host offline again, to end
+ *
+ * @author Ian Craggs
+ **/
+
 package org.eclipse.sparkplug.tck.test.edge;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
@@ -22,12 +38,14 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,11 +75,6 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 
-/**
- * This is the Sparkplug edge node test when dependent on a primary host application
- *
- * @author Ian Craggs
- */
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
@@ -115,7 +128,8 @@ public class PrimaryHostTest extends TCKTest {
 				utilities.getHostApps().hostPrepare(hostApplicationId);
 				utilities.getHostApps().hostSendOffline();
 			} catch (Exception e) {
-
+				logger.error("{} error", getName(), e);
+				theTCK.endTest();
 			}
 		}
 
@@ -146,6 +160,7 @@ public class PrimaryHostTest extends TCKTest {
 	private void wrongHostOnline() {
 		logger.info("{} wrongHostOffline", getName());
 		// now set the wrong host offline, and set the right one offline explicitly
+		// no births should arrive when the (correct) host is marked offline
 		try {
 			utilities.getHostApps().hostOffline();
 			utilities.getHostApps().hostPrepare(hostApplicationId);
@@ -185,6 +200,31 @@ public class PrimaryHostTest extends TCKTest {
 		logger.info("{} rightHostOnline", getName());
 		// now we should have received the birth messages
 
+		// send an offline message with an old timestamp (less than previous)
+		state = TestStatus.DONT_EXPECT_DEATHS;
+
+		// this will be set to false if any deaths are received in this state
+		Utils.setResult(testResults, true, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP,
+				OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP);
+		try {
+			utilities.getHostApps().hostSendOldOffline();
+		} catch (Exception e) {
+			logger.error("{} error", getName(), e);
+			theTCK.endTest();
+		}
+		// we should get death message(s)
+		executorService.schedule(new Runnable() {
+			@Override
+			public void run() {
+				dontExpectDeaths();
+			}
+		}, 3, TimeUnit.SECONDS);
+	}
+
+	private void dontExpectDeaths() {
+		logger.info("{} dontExpectDeaths", getName());
+		// no deaths should have been received
+
 		// set the host offline again
 		state = TestStatus.EXPECT_DEATHS;
 		try {
@@ -206,10 +246,14 @@ public class PrimaryHostTest extends TCKTest {
 		logger.info("{} expectDeathMessages", getName());
 		// now we should have received the death messages
 
-		// send the online message but without increasing the bdseq - should be wrong
+		// send the online message but with a lower timestamp - should be wrong
+
+		// should not get any births in this state
+		Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+				MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
 		try {
 			state = TestStatus.HOST_WRONG_TIMESTAMP;
-			utilities.getHostApps().hostSendOnline();
+			utilities.getHostApps().hostSendOldOnline();
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();
@@ -226,13 +270,21 @@ public class PrimaryHostTest extends TCKTest {
 		logger.info("{} wrongTimestamp", getName());
 		// should not have received re-birth messages
 
+		// this will not set the condition to true if it has already failed
+		Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+				MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
+
+		// this will be set to true if the births arrive
+		Utils.setResult(testResults, false, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
+				OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT);
+
 		// Set the host online properly again
 		try {
 			state = TestStatus.HOST_ONLINE_AGAIN;
 			utilities.getHostApps().hostOffline();
 			utilities.getHostApps().hostOnline(hostApplicationId);
 		} catch (Exception e) {
-			logger.error("{} wrongBdSeq error", getName(), e);
+			logger.error("{} wrongTimestamp error", getName(), e);
 			theTCK.endTest();
 		}
 		executorService.schedule(new Runnable() {
@@ -309,9 +361,9 @@ public class PrimaryHostTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP)
-	/*@SpecAssertion(
+	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
-			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE)*/
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE)
 
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
@@ -319,9 +371,9 @@ public class PrimaryHostTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
 			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT)
-	/*@SpecAssertion(
+	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
-			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_BDSEQ)*/
+			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP)
 	@Override
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		final String topic = packet.getTopic();
@@ -347,7 +399,7 @@ public class PrimaryHostTest extends TCKTest {
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE);
 
 			} else if (state == TestStatus.HOST_WRONG_TIMESTAMP) {
-				// received NBIRTH for wrong host bdseq
+				// received NBIRTH for wrong host timestamp
 				Utils.setResultIfNotFail(testResults, false,
 						ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
@@ -365,9 +417,11 @@ public class PrimaryHostTest extends TCKTest {
 
 				Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
-				Utils.setResultIfNotFail(testResults, true,
-						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
+				Utils.setResult(testResults, true, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT);
+			} else {
+				// any other state is wrong
+				logger.error("{} error received NBIRTH in state {}", getName(), state.toString());
 			}
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DBIRTH + "/"
 				+ edgeNodeId + "/" + deviceId)) {
@@ -384,7 +438,7 @@ public class PrimaryHostTest extends TCKTest {
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE);
 
 			} else if (state == TestStatus.HOST_WRONG_TIMESTAMP) {
-				// received DBIRTH for wrong host bdseq
+				// received DBIRTH for wrong host timestamp
 				Utils.setResultIfNotFail(testResults, false,
 						ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
@@ -405,6 +459,9 @@ public class PrimaryHostTest extends TCKTest {
 				Utils.setResultIfNotFail(testResults, true,
 						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT);
+			} else {
+				// any other state is wrong
+				logger.error("{} error received DBIRTH in state {}", getName(), state.toString());
 			}
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_NDEATH + "/"
 				+ edgeNodeId)) {
@@ -414,6 +471,16 @@ public class PrimaryHostTest extends TCKTest {
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE);
 
+			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
+					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE,
+					MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE);
+
+			if (state == TestStatus.DONT_EXPECT_DEATHS) {
+				Utils.setResult(testResults, false,
+						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP,
+						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP);
+			}
+
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DDEATH + "/"
 				+ edgeNodeId + "/" + deviceId)) {
 
@@ -421,6 +488,12 @@ public class PrimaryHostTest extends TCKTest {
 			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE);
+
+			if (state == TestStatus.DONT_EXPECT_DEATHS) {
+				Utils.setResult(testResults, false,
+						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP,
+						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP);
+			}
 		}
 	}
 }

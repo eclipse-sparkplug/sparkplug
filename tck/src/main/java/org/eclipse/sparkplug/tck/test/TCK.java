@@ -101,7 +101,7 @@ public class TCK {
 
 	}
 
-	public void newTest(final @NotNull Profile profile, final @NotNull String test, final @NotNull String[] params) {
+	public void newTest(final @NotNull Profile profile, final @NotNull String test, final @NotNull String[] parms) {
 
 		logger.info("Test requested " + profile.name().toLowerCase() + " " + test);
 
@@ -112,18 +112,18 @@ public class TCK {
 			try {
 				final Class[] types = { this.getClass(), String[].class };
 				final Constructor constructor = testClass.getConstructor(types);
-				final Object[] parameters = { this, params };
+				final Object[] parameters = { this, parms };
 				current = (TCKTest) constructor.newInstance(parameters);
 			} catch (NoSuchMethodException e) {
 				try {
 					final Class[] types = { this.getClass(), String[].class, Results.Config.class };
 					final Constructor constructor = testClass.getConstructor(types);
-					final Object[] parameters = { this, params, results.getConfig() };
+					final Object[] parameters = { this, parms, results.getConfig() };
 					current = (TCKTest) constructor.newInstance(parameters);
 				} catch (NoSuchMethodException f) {
 					final Class[] types = { this.getClass(), Utilities.class, String[].class, Results.Config.class };
 					final Constructor constructor = testClass.getConstructor(types);
-					final Object[] parameters = { this, utilities, params, results.getConfig() };
+					final Object[] parameters = { this, utilities, parms, results.getConfig() };
 					current = (TCKTest) constructor.newInstance(parameters);
 				}
 			}
