@@ -278,7 +278,8 @@ export default {
                             "Setup a MQTT Connection.",
                             "Set a Host Application Id that is used by an Application.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results."
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             group_id: {
@@ -314,7 +315,8 @@ export default {
                             "Connect this console to the HiveMQ broker.",
                             "Set a Host Application Id that is used by an Application.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results."
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             group_id: {
@@ -351,7 +353,8 @@ export default {
                             "Connect this console to the HiveMQ broker.",
                             "Set a Host Application Id that is used by an Application.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results."
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             group_id: {
@@ -389,28 +392,16 @@ export default {
                             `To check that the Host Application behaves correctly when multiple MQTT servers are used.
                             `,
                         requirements: [
-                            "Start the Host Application, if it is not yet running.",
                             "Connect this console to the HiveMQ broker.",
-                            "Set a Host Application Id that is used by an Application.",
+                            "Ensure all Host Applications are disconnected from both brokers.",
+                            "Set the broker URI of the second broker.",
+                            "Configure the Host Application to connect to the two brokers.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results."
+                            "Start the Host Application implementation to test.",
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
-                            group_id: {
-                                parameterReadableName: "Group Id",
-                                parameterValue: "",
-                                parameterDescription: "The Group Id of the Edge Node",
-                            },
-                            edge_node_id: {
-                                parameterReadableName: "Edge Node Id",
-                                parameterValue: "",
-                                parameterDescription: "The id of the Edge Node the Host Application will receive the death message from.",
-                            },
-                            device_id: {
-                                parameterReadableName: "Device Id",
-                                parameterValue: "",
-                                parameterDescription: "The Device Id of a device connected to the Edge Node.",
-                            },
                             broker_uri: {
                                 parameterReadableName: "Broker URI",
                                 parameterValue: "tcp://localhost:1884",

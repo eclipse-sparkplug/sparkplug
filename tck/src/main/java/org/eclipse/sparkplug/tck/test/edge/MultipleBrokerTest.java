@@ -48,7 +48,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
@@ -72,17 +71,11 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
-import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 @SpecVersion(
 		spec = "sparkplug",
 		version = "3.0.0-SNAPSHOT")
 public class MultipleBrokerTest extends TCKTest {
-
-	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
-	private static final String EDGE_METRIC = "TCK_metric/Boolean";
-	private static final String DEVICE_METRIC = "Inputs/0";
-
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
 	private final @NotNull List<String> testIds =
@@ -101,10 +94,9 @@ public class MultipleBrokerTest extends TCKTest {
 
 	private TestStatus state = null;
 	private TCK theTCK = null;
-	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 	private @NotNull Utilities utilities = null;
+	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 
-	private PublishService publishService = Services.publishService();
 	private int births_on;
 	private String edgeNodeTestClientId;
 
@@ -123,8 +115,8 @@ public class MultipleBrokerTest extends TCKTest {
 		edgeNodeId = parms[2];
 		deviceId = parms[3];
 		brokerURL = parms[4];
-		logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}",
-				hostApplicationId, groupId, edgeNodeId, deviceId);
+		logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {} BrokerURL: {}",
+				hostApplicationId, groupId, edgeNodeId, deviceId, brokerURL);
 
 		broker2 = new HostApplication(brokerURL);
 
