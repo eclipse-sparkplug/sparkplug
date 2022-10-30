@@ -796,6 +796,9 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC)
 	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD)
+	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDATA,
 			id = ID_PAYLOADS_NDATA_ORDER)
 	@SpecAssertion(
@@ -958,6 +961,12 @@ public class SessionEstablishmentTest extends TCKTest {
 					}
 				}
 			}
+
+			testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
+					setResult(true, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD));
+		} else {
+			testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
+					setResult(false, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD));
 		}
 
 		// if this was the final dbirth to check, then we can end the test

@@ -317,7 +317,8 @@ export default {
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (["ReceiveCommandTest", "MultipleBrokerTest"].includes(testType)) {
                     const testParameters =
-                        this.sparkplugClient.eonNode.groupId +
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
