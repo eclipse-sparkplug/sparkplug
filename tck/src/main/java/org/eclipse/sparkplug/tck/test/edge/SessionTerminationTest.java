@@ -51,8 +51,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
@@ -94,6 +97,7 @@ public class SessionTerminationTest extends TCKTest {
 			ID_TOPICS_DDEATH_TOPIC);
 
 	private final @NotNull TCK theTCK;
+	private @NotNull Utilities utilities = null;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
 
 	private @NotNull String testClientId = null;
@@ -106,9 +110,13 @@ public class SessionTerminationTest extends TCKTest {
 	private @NotNull boolean ndeathFound = false;
 	private @NotNull boolean ddeathFound = false;
 
-	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+	// Host Application variables
+	private boolean hostCreated = false;
+
+	public SessionTerminationTest(final @NotNull TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("Edge Node session termination test. Parameters: {} ", Arrays.asList(parms));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
 		if (parms.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(parms));
@@ -123,6 +131,18 @@ public class SessionTerminationTest extends TCKTest {
 
 		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device id: {}", hostApplicationId,
 				groupId, edgeNodeId, deviceId);
+
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			logger.info("Host Application is online, so using that");
+		} else {
+			logger.info("Creating host application");
+			try {
+				utilities.getHostApps().hostOnline(hostApplicationId);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
+		}
 	}
 
 	public String getName() {
@@ -146,6 +166,13 @@ public class SessionTerminationTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
+		if (hostCreated) {
+			try {
+				utilities.getHostApps().hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
 		testClientId = null;
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
@@ -249,15 +276,19 @@ public class SessionTerminationTest extends TCKTest {
 		// topics namespace/group_id/NDEATH/edge_node_id
 		// namespace/group_id/DDEATH/edge_node_id/device_id
 
+		logger.info("Edge session termination test - publish - to topic: {} ", packet.getTopic());
+
 		String topic = packet.getTopic();
 		String[] topicLevels = topic.split("/");
 
 		if (topicLevels.length == 4 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
 				&& topicLevels[2].equals("NDEATH") && topicLevels[3].equals(edgeNodeId)) {
 			ndeathFound = true;
-			logger.info("Edge session termination test - publish - to topic: {} ", packet.getTopic());
-
 			testResults.put(ID_TOPICS_NDEATH_TOPIC, setResult(ndeathFound, TOPICS_NDEATH_TOPIC));
+
+			if (ndeathFound && ddeathFound) {
+				endTest(testResults);
+			}
 		}
 
 		if (topicLevels.length == 5 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
@@ -294,10 +325,9 @@ public class SessionTerminationTest extends TCKTest {
 
 			testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
 
-		}
-
-		if (ndeathFound && ddeathFound) {
-			endTest(testResults);
+			if (ndeathFound && ddeathFound) {
+				endTest(testResults);
+			}
 		}
 	}
 }

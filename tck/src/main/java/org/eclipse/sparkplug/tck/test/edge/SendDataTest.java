@@ -257,8 +257,11 @@ public class SendDataTest extends TCKTest {
 
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
+		logger.info("Edge send data test - publish - to topic: {} ", packet.getTopic());
+
 		// ignore messages from clients we're not interested in
 		if (!clientId.equals(testClientId)) {
+			logger.info("Ignoring message from {} when expecting {}", clientId, testClientId);
 			return;
 		}
 
@@ -266,6 +269,7 @@ public class SendDataTest extends TCKTest {
 		String[] levels = packet.getTopic().split("/");
 		if (levels.length >= 3) {
 			cmd = levels[2];
+			logger.info("Looking for {}", cmd);
 		}
 
 		if (cmd.equals(TOPIC_PATH_NBIRTH)) {

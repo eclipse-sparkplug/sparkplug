@@ -38,6 +38,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_EDGE_N
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_GROUP_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_GROUP_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
@@ -71,7 +72,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCT
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_DEVICE_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE_ID_STRING;
@@ -79,6 +79,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_EDGE_NODE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_GROUP_ID_CHARS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_GROUP_ID_STRING;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER;
@@ -112,7 +113,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkUTC;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getNextSeq;
 import static org.eclipse.sparkplug.tck.test.common.Utils.getSparkplugPayload;
@@ -121,7 +121,6 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -188,7 +187,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
-			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ };
+			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ };
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -870,7 +870,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				boolean found = false;
 				// look for the current metric name in the birth metrics
 				for (Metric birth : birthMetrics) {
-					if (birth.getName().equals(current.getName())) {
+					if (birth.getName().equals(currentMetricName)) {
 						found = true;
 						break;
 					}
@@ -1111,7 +1111,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 		}
 
-		if (payload.hasSeq()) {
+		if (payload != null && payload.hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {

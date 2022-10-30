@@ -39,8 +39,11 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
@@ -93,6 +96,7 @@ public class ReceiveCommandTest extends TCKTest {
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull TCK theTCK;
+	private @NotNull Utilities utilities = null;
 
 	private final @NotNull List<String> testIds = List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,
@@ -108,21 +112,27 @@ public class ReceiveCommandTest extends TCKTest {
 	private boolean bNBirth = false, bDBirth = false;
 	private PublishService publishService = Services.publishService();
 
-	public ReceiveCommandTest(TCK aTCK, String[] params) {
+	// Host Application variables
+	private boolean hostCreated = false;
+
+	public ReceiveCommandTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("{} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
-		if (params.length < 3) {
+		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
-			log("Parameters to edge receive command test must be: groupId edgeNodeId deviceId");
+			log("Parameters to edge receive command test must be: hostApplicationId groupId edgeNodeId deviceId");
 			throw new IllegalArgumentException();
 		}
 		state = status.START;
 		deathBdSeq = -1;
-		groupId = params[0];
-		edgeNodeId = params[1];
-		deviceId = params[2];
-		logger.info("Parameters are  GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
+		hostApplicationId = params[0];
+		groupId = params[1];
+		edgeNodeId = params[2];
+		deviceId = params[3];
+		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device id: {}", hostApplicationId,
+				groupId, edgeNodeId, deviceId);
 
 		sendCommand(true);
 
@@ -134,6 +144,18 @@ public class ReceiveCommandTest extends TCKTest {
 
 		// this will fail if we receive a data message
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, PASS);
+
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			logger.info("Host Application is online, so using that");
+		} else {
+			logger.info("Creating host application");
+			try {
+				utilities.getHostApps().hostOnline(hostApplicationId);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
+		}
 	}
 
 	private void disconnectClient(String clientId) {
@@ -190,6 +212,13 @@ public class ReceiveCommandTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
+		if (hostCreated) {
+			try {
+				utilities.getHostApps().hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
 		state = status.END;
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
