@@ -286,8 +286,27 @@ public class Utils {
 		return rc;
 	}
 
-	public static StatePayload getHostPayload(String payloadString, boolean expectOnline, boolean logMismatchErrors) {
-		return getHostPayload(payloadString, expectOnline, logMismatchErrors, 60000L);
+	public static StatePayload getHostPayload(String payloadString) {
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode json = null;
+		try {
+			json = mapper.readTree(payloadString);
+			long retTimestamp = -1;
+			if (json.has("timestamp")) {
+				JsonNode timestamp = json.get("timestamp");
+				if (timestamp.isLong()) {
+					retTimestamp = timestamp.longValue();
+					if (json.has("online")) {
+						JsonNode online = json.get("online");
+						if (online.isBoolean()) {
+							return new StatePayload(online.booleanValue(), retTimestamp);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+		}
+		return null;
 	}
 
 	public static StatePayload getHostPayload(String payloadString, boolean expectOnline, boolean logMismatchErrors,

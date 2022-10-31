@@ -226,13 +226,15 @@ export default {
                         testType: "HOSTAPPLICATION",
                         name: "SessionEstablishmentTest",
                         readableName: "Session Establishment Test",
-                        description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
+                        description: `"This is the Host Application Sparkplug session establishment test.
+                        It also tests session re-establishment after an offline state message is received.`,
                         requirements: [
-                            "Setup a MQTT Connection ",
-                            "Set a Host Application Id that is used by an Application",
+                            "Connect this console to the HiveMQ broker.",
+                            "Ensure the Host Application implementation to be tested is not running.",
                             "Start this test.",
-                            "Start the Host Application to trigger events of MQTT messages.",
-                            "Wait until Tests are finished and check Results."
+                            "Start the Host Application.",
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         result: null,
                         logging: [],

@@ -167,18 +167,27 @@ public class TCK {
 	}
 
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+		if (current != null) {
+			current.onMqttConnectionStart(connectionStartInput);
+		}
 		if (hasMonitor) {
 			monitor.onMqttConnectionStart(connectionStartInput);
 		}
 	}
 
 	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+		if (current != null) {
+			current.onAuthenticationSuccessful(authenticationSuccessfulInput);
+		}
 		if (hasMonitor) {
 			monitor.onAuthenticationSuccessful(authenticationSuccessfulInput);
 		}
 	}
 
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
+		if (current != null) {
+			current.onDisconnect(disconnectEventInput);
+		}
 		if (hasMonitor) {
 			monitor.onDisconnect(disconnectEventInput);
 		}

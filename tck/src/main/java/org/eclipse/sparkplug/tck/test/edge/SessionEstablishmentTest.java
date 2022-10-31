@@ -283,12 +283,16 @@ public class SessionEstablishmentTest extends TCKTest {
 
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 		logger.info("Edge session establishment test - subscribe");
+
+		if (testClientId == null || !testClientId.equals(clientId)) {
+			return; // ignore subscriptions from any other client
+		}
+
 		// Example: spBv1.0/Group1/DBIRTH/Edge1/Device1
 		List<Subscription> subscriptions = packet.getSubscriptions();
 		for (Subscription s : subscriptions) {
@@ -597,7 +601,6 @@ public class SessionEstablishmentTest extends TCKTest {
 		long millisReceivedBirth = receivedBirth.getTime();
 		long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
 
-		// TODO: if the edge node is configured to wait for a primary host application:
 		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT,
 				setResult(stateFound, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT));
 

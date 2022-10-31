@@ -310,6 +310,17 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						edge_node_id);
 			}
 		}
+
+		if (hostClientids.values().contains(clientid)) {
+			// remove hostid - clientid relation
+			String hostId = null;
+			for (String hostid : hostClientids.keySet()) {
+				if (hostClientids.get(hostid).equals(clientid)) {
+					hostClientids.remove(hostid);
+					break;
+				}
+			}
+		}
 	}
 
 	@SpecAssertion(
@@ -1294,7 +1305,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		} else {
 			return;
 		}
-		logger.info("Monitor: *** STATE *** {} {}", hostid, payload);
+		logger.info("Monitor: clientid {} *** STATE *** {} {}", clientId, hostid, payload);
 
 		ObjectMapper mapper = new ObjectMapper();
 		boolean isValidPayload = true;
