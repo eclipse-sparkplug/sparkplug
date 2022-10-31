@@ -249,7 +249,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 	@Override
 	public void disconnect(final @NotNull String clientId, final @NotNull DisconnectPacket packet) {
-		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -363,7 +363,6 @@ public class SessionEstablishmentTest extends TCKTest {
 					return;
 				}
 
-				// TODO: test reconnect
 				logger.debug("Check Req: {}:{}.", ID_COMPONENTS_PH_STATE, COMPONENTS_PH_STATE);
 				testResults.put(ID_COMPONENTS_PH_STATE, setResult(true, COMPONENTS_PH_STATE));
 
@@ -493,7 +492,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 			if (payloadExists) {
 				String payloadString = StandardCharsets.UTF_8.decode(willPublishPacket.getPayload().get()).toString();
-				StatePayload deathPayload = Utils.getHostPayload(payloadString, false, true);
+				StatePayload deathPayload = Utils.getHostPayload(payloadString, false, true, config.UTCwindow);
 
 				boolean isValidPayload = false;
 				if (deathPayload != null) {

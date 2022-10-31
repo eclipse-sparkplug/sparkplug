@@ -226,13 +226,15 @@ export default {
                         testType: "HOSTAPPLICATION",
                         name: "SessionEstablishmentTest",
                         readableName: "Session Establishment Test",
-                        description: "This is the Host Application Sparkplug session establishment, and re-establishment test.",
+                        description: `"This is the Host Application Sparkplug session establishment test.
+                        It also tests session re-establishment after an offline state message is received.`,
                         requirements: [
-                            "Setup a MQTT Connection ",
-                            "Set a Host Application Id that is used by an Application",
+                            "Connect this console to the HiveMQ broker.",
+                            "Ensure the Host Application implementation to be tested is not running.",
                             "Start this test.",
-                            "Start the Host Application to trigger events of MQTT messages.",
-                            "Wait until Tests are finished and check Results."
+                            "Start the Host Application.",
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         result: null,
                         logging: [],
@@ -245,7 +247,8 @@ export default {
                         readableName: "Session Termination Test",
                         description: `This is the Sparkplug Host Application session termination test. There are 
                         two ways of running it. Either set the MQTT Client id of an already connected Host Application,
-                        or connect the Host Application while the test is running.`,
+                        or connect the Host Application while the test is running. This tests a deliberate disconnection
+                        preceded by the sending of a STATE message, not abnormal termination firing a will message.`,
                         requirements: [
                             "Connect this console to the HiveMQ broker.",
                             "Enter the MQTT Client id if the Host Application is already running.",
@@ -309,13 +312,20 @@ export default {
                         name: "EdgeSessionTerminationTest",
                         readableName: "Edge Session Termination Test",
                         description:
-                            "To check that the Host Application behaves correctly when death messages are received from an Edge Node.",
+                            `To check that the Host Application behaves correctly when death messages are received from an Edge Node.
+                            This is mainly a manual check, as there is no programmatic way to query Sparkplug host applications. You
+                            will be presented with a sequence of questions, to which you should respond with OK or FAIL.
+
+                            This test use a simulated Edge Node and Device, so ensure the Group, Edge Node and Device IDs you use are
+                            not being used already.
+                            `,
                         requirements: [
-                            "Start the Host Application, if it is not yet running.",
                             "Connect this console to the HiveMQ broker.",
-                            "Set a Host Application Id that is used by an Application.",
+                            "Start the Host Application, if it is not yet running.",
+                            "Set the Group, Edge Node and Device Id of the Edge Node/Device to be used.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Answer each of the questions, having checked the Host Application responses.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -494,13 +504,18 @@ export default {
                         testType: "EONNODE",
                         name: "SendDataTest",
                         readableName: "Send Data Test",
-                        description: "This is the Edge Node Sparkplug send data test.",
+                        description: `"This is the Edge Node Sparkplug send data test.
+                            It determines the MQTT client ID of the Edge Node from the MQTT connect,
+                            so you must connect the Edge Node after the test has started.
+                        `,
                         requirements: [
-                            "Setup a MQTT Connection.",
+                            "Connect this console to the HiveMQ broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
+                            "Ensure the Edge Node is not connected to the broker.",
                             "Start this test.",
-                            "Send some data by Edge Node and Devices.",
-                            "Wait until Tests are finished and check Results."
+                            "Connect the Edge Node and send data from the Edge Node and Device.",
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_id: {

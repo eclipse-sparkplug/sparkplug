@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
@@ -87,15 +88,17 @@ public class SessionTerminationTest extends TCKTest {
 	private final @NotNull TCK theTCK;
 	private @NotNull String hostApplicationId;
 	private Constants.TestStatus state = Constants.TestStatus.NONE;
+	private Results.Config config = null;
 
 	private @Nullable String hostClientId = null;
 
 	private TestStatus testStatus = TestStatus.STARTED;
 	private long deathTimestamp = -1;
 
-	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params) {
+	public SessionTerminationTest(final @NotNull TCK aTCK, final @NotNull String[] params, Results.Config config) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.config = config;
 
 		if (params.length < 1) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -109,7 +112,7 @@ public class SessionTerminationTest extends TCKTest {
 
 		logger.info("Parameters are HostApplicationId: {}, HostClientId: {}", hostApplicationId, hostClientId);
 
-		setBdSeq();
+		setTimestamp();
 	}
 
 	@Override
@@ -143,7 +146,7 @@ public class SessionTerminationTest extends TCKTest {
 			String payloadString =
 					StandardCharsets.UTF_8.decode(packet.getWillPublish().get().getPayload().get()).toString();
 			logger.debug("Will message STATE payload={}", payloadString);
-			StatePayload statePayload = Utils.getHostPayload(payloadString, false, true);
+			StatePayload statePayload = Utils.getHostPayload(payloadString);
 			if (statePayload != null && testStatus == TestStatus.STARTED) {
 				deathTimestamp = statePayload.getTimestamp().longValue();
 				testStatus = TestStatus.CONNECT_RECEIVED;
@@ -211,7 +214,7 @@ public class SessionTerminationTest extends TCKTest {
 				// Looking for a BIRTH - see if this is the original online STATE message after the connect and return
 				// early
 				StatePayload statePayload = Utils.getHostPayload(
-						StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), true, false);
+						StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
 
 				boolean receivedBirthAfterConnect = statePayload != null;
 				testResults.put(ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
@@ -226,7 +229,7 @@ public class SessionTerminationTest extends TCKTest {
 				}
 			} else if (testStatus == TestStatus.BIRTH_RECEIVED || testStatus == TestStatus.STARTED) {
 				StatePayload statePayload = Utils.getHostPayload(
-						StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false, false);
+						StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
 				if (statePayload == null || statePayload.isOnline()) {
 					logger.debug("Ignoring birth/online STATE message: {}",
 							StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
@@ -283,7 +286,7 @@ public class SessionTerminationTest extends TCKTest {
 
 		// Payload message exists
 		StatePayload statePayload =
-				Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString(), false, false);
+				Utils.getHostPayload(StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString());
 		boolean payloadIsOffline = false;
 		if (statePayload != null && !statePayload.isOnline()
 				&& statePayload.getTimestamp().longValue() >= deathTimestamp) {
@@ -317,7 +320,7 @@ public class SessionTerminationTest extends TCKTest {
 		return overallResult;
 	}
 
-	private void setBdSeq() {
+	private void setTimestamp() {
 		String payload = Utils.getRetained(Constants.TOPIC_ROOT_STATE + '/' + hostApplicationId);
 		if (payload != null) {
 			try {

@@ -92,6 +92,7 @@ public class MultipleBrokerTest extends TCKTest {
 	private final ClientService clientService = Services.clientService();
 	private String hostClientId = null;
 	private long deathTimestamp = -1;
+	private boolean checkHostIsOnLine_hasRun = false;
 
 	public MultipleBrokerTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("Primary host {}: Parameters: {} ", getName(), Arrays.asList(parms));
@@ -161,10 +162,9 @@ public class MultipleBrokerTest extends TCKTest {
 		while (msg != null) {
 			String topic = msg.getTopic();
 			if (topic.equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId)) {
-				StatePayload statePayload = Utils.getHostPayload(new String(msg.getMqttMessage().getPayload()), true,
-						true, config.UTCwindow);
+				StatePayload statePayload = Utils.getHostPayload(new String(msg.getMqttMessage().getPayload()));
 
-				Utils.setResult(testResults, statePayload.getTimestamp() != deathTimestamp,
+				Utils.setResult(testResults, statePayload.isOnline() && (statePayload.getTimestamp() != deathTimestamp),
 						ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP,
 						OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP);
 
@@ -174,7 +174,6 @@ public class MultipleBrokerTest extends TCKTest {
 			}
 			msg = broker2.getNextMessage();
 		}
-
 	}
 
 	@Override
@@ -191,7 +190,7 @@ public class MultipleBrokerTest extends TCKTest {
 
 	@Override
 	public String getName() {
-		return "Host SendCommand";
+		return "Host Multiple Broker Test";
 	}
 
 	@Override
@@ -212,7 +211,7 @@ public class MultipleBrokerTest extends TCKTest {
 			String payloadString =
 					StandardCharsets.UTF_8.decode(packet.getWillPublish().get().getPayload().get()).toString();
 			logger.debug("Will message STATE payload={}", payloadString);
-			StatePayload statePayload = Utils.getHostPayload(payloadString, false, true);
+			StatePayload statePayload = Utils.getHostPayload(payloadString);
 			if (statePayload != null
 					&& (state == TestStatus.HOST_ONLINE || state == TestStatus.EXPECT_HOST_RECONNECT)) {
 				deathTimestamp = statePayload.getTimestamp().longValue();
@@ -254,9 +253,11 @@ public class MultipleBrokerTest extends TCKTest {
 		if (hostClientId.equals(clientId) && topic.equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId)) {
 			if (packet.getPayload().isPresent()) {
 				String payloadString = StandardCharsets.UTF_8.decode(packet.getPayload().get()).toString();
-				StatePayload statePayload = Utils.getHostPayload(payloadString, true, true);
+				StatePayload statePayload = Utils.getHostPayload(payloadString);
 
-				if (state == TestStatus.HOST_ONLINE) {
+				if (statePayload == null) {
+
+				} else if (state == TestStatus.HOST_ONLINE) {
 					Utils.setResultIfNotFail(testResults, statePayload.isOnline(),
 							ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE,
 							OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE);
@@ -265,15 +266,17 @@ public class MultipleBrokerTest extends TCKTest {
 							ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS,
 							OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS);
 
-					// now we've received the subscribe messages on this broker, schedule the check
-					// for the other broker
-					executorService.schedule(new Runnable() {
-						@Override
-						public void run() {
-							checkHostIsOnline();
-						}
-					}, 1, TimeUnit.SECONDS);
-
+					if (!checkHostIsOnLine_hasRun) {
+						checkHostIsOnLine_hasRun = true;
+						// now we've received the subscribe messages on this broker, schedule the check
+						// for the other broker
+						executorService.schedule(new Runnable() {
+							@Override
+							public void run() {
+								checkHostIsOnline();
+							}
+						}, 1, TimeUnit.SECONDS);
+					}
 				} else if (state == TestStatus.EXPECT_HOST_RECONNECT) {
 					// we should get an offline, followed by an online
 
