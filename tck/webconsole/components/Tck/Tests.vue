@@ -312,13 +312,17 @@ export default {
                         name: "EdgeSessionTerminationTest",
                         readableName: "Edge Session Termination Test",
                         description:
-                            "To check that the Host Application behaves correctly when death messages are received from an Edge Node.",
+                            `To check that the Host Application behaves correctly when death messages are received from an Edge Node.
+                            This is mainly a manual check, as there is no programmatic way to query Sparkplug host applications. You
+                            will be presented with a sequence of questions, to which you should respond with OK or FAIL.
+                            `,
                         requirements: [
-                            "Start the Host Application, if it is not yet running.",
                             "Connect this console to the HiveMQ broker.",
-                            "Set a Host Application Id that is used by an Application.",
+                            "Start the Host Application, if it is not yet running.",
+                            "Set the Group, Edge Node and Device Id of the Edge Node/Device to be used.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Answer each of the questions, having checked the Host Application responses.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
