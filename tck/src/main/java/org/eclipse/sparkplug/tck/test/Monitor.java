@@ -941,14 +941,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 					if (lastMetricName.equals(currentMetricName)) {
 						found = true;
-						if (!setShouldResultIfNotFail(testResults, current.equals(last),
+
+						if (!setShouldResultIfNotFail(testResults, !metricsEqual(current, last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE)) {
 							log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
-						if (!setShouldResultIfNotFail(testResults, current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
-								PRINCIPLES_RBE_RECOMMENDED)) {
+						if (!setShouldResultIfNotFail(testResults, !metricsEqual(current, last),
+								ID_PRINCIPLES_RBE_RECOMMENDED, PRINCIPLES_RBE_RECOMMENDED)) {
 							log(TEST_FAILED_FOR_ASSERTION + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);
 						}
@@ -1263,14 +1264,14 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 					if (lastMetricName.equals(currentMetricName)) {
 						found = true;
-						if (!setShouldResultIfNotFail(testResults, !current.equals(last),
+						if (!setShouldResultIfNotFail(testResults, !metricsEqual(current, last),
 								ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE,
 								OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE)) {
 							log(TEST_FAILED_FOR_ASSERTION + ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_CHANGE
 									+ ": metric name: " + currentMetricName);
 						}
-						if (!setShouldResultIfNotFail(testResults, !current.equals(last), ID_PRINCIPLES_RBE_RECOMMENDED,
-								PRINCIPLES_RBE_RECOMMENDED)) {
+						if (!setShouldResultIfNotFail(testResults, !metricsEqual(current, last),
+								ID_PRINCIPLES_RBE_RECOMMENDED, PRINCIPLES_RBE_RECOMMENDED)) {
 							log(TEST_FAILED_FOR_ASSERTION + ID_PRINCIPLES_RBE_RECOMMENDED + ": metric name: "
 									+ currentMetricName);
 						}
@@ -1329,6 +1330,38 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					setShouldResultIfNotFail(testResults, check, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID,
 							OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID);
 				}
+			}
+		}
+	}
+
+	private boolean metricsEqual(Metric metricOne, Metric metricTwo) {
+		if (metricOne == null && metricTwo == null) {
+			logger.debug("metricOne and metricTwo are null");
+			return true;
+		} else if (metricOne != null && metricTwo == null) {
+			logger.debug("metricOne is not null and metricTwo is null");
+			return false;
+		} else if (metricOne == null && metricTwo != null) {
+			logger.debug("metricOne is null and metricTwo is not null");
+			return false;
+		} else {
+			logger.debug("metricOne and metricTwo are not null");
+			if (metricOne.getAlias() == metricTwo.getAlias() && metricOne.getName() == metricTwo.getName()
+					&& metricOne.getBooleanValue() == metricTwo.getBooleanValue()
+					&& metricOne.getBytesValue() == metricTwo.getBytesValue()
+					&& metricOne.getDatasetValue() == metricTwo.getDatasetValue()
+					&& metricOne.getDoubleValue() == metricTwo.getDoubleValue()
+					&& metricOne.getFloatValue() == metricTwo.getFloatValue()
+					&& metricOne.getIntValue() == metricTwo.getIntValue()
+					&& metricOne.getLongValue() == metricTwo.getLongValue()
+					&& metricOne.getStringValue() == metricTwo.getStringValue()
+					&& metricOne.getTemplateValue() == metricTwo.getTemplateValue()) {
+				// Metrics are considered equal if the name, alias, and values are equal
+				logger.trace("Metrics match...");
+				return true;
+			} else {
+				logger.trace("Metrics don't match...");
+				return false;
 			}
 		}
 	}

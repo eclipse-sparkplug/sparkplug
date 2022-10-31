@@ -137,7 +137,7 @@ public class SessionTerminationTest extends TCKTest {
 		} else {
 			logger.info("Creating host application");
 			try {
-				utilities.getHostApps().hostOnline(hostApplicationId);
+				utilities.getHostApps().hostOnline(hostApplicationId, true);
 			} catch (MqttException m) {
 				throw new IllegalStateException();
 			}

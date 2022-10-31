@@ -118,8 +118,6 @@ public class MultipleBrokerTest extends TCKTest {
 		logger.info("Parameters are HostApplicationId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {} BrokerURL: {}",
 				hostApplicationId, groupId, edgeNodeId, deviceId, brokerURL);
 
-		broker2 = new HostApplication(brokerURL);
-
 		// check host is offline
 		final AtomicBoolean hostOnline = checkHostApplicationIsOnline(hostApplicationId);
 		if (hostOnline.get()) {
@@ -144,6 +142,7 @@ public class MultipleBrokerTest extends TCKTest {
 		} catch (Exception e) {
 			logger.error("endTest", e);
 		}
+
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
@@ -158,8 +157,8 @@ public class MultipleBrokerTest extends TCKTest {
 					ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS,
 					OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS);
 			state = TestStatus.HOST_ONLINE;
-			utilities.getHostApps().hostOnline(hostApplicationId);
-			broker2.hostOnline(hostApplicationId);
+			utilities.getHostApps().hostOnline(hostApplicationId, false);
+			broker2.hostOnline(hostApplicationId, false);
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();
@@ -204,7 +203,7 @@ public class MultipleBrokerTest extends TCKTest {
 		// send online host application to server 1
 		state = TestStatus.DONT_EXPECT_BIRTHS;
 		try {
-			utilities.getHostApps().hostOnline(hostApplicationId);
+			utilities.getHostApps().hostOnline(hostApplicationId, false);
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();
