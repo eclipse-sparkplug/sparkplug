@@ -247,7 +247,8 @@ export default {
                         readableName: "Session Termination Test",
                         description: `This is the Sparkplug Host Application session termination test. There are 
                         two ways of running it. Either set the MQTT Client id of an already connected Host Application,
-                        or connect the Host Application while the test is running.`,
+                        or connect the Host Application while the test is running. This tests a deliberate disconnection
+                        preceded by the sending of a STATE message, not abnormal termination firing a will message.`,
                         requirements: [
                             "Connect this console to the HiveMQ broker.",
                             "Enter the MQTT Client id if the Host Application is already running.",

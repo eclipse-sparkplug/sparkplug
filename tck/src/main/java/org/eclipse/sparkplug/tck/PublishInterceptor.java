@@ -38,7 +38,7 @@ import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
  * @author Ian Craggs
  * @author Lukas Brand
  */
-public class PublishInterceptor implements PublishInboundInterceptor, PublishOutboundInterceptor {
+public class PublishInterceptor implements PublishInboundInterceptor {
 
 	private final static @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
@@ -91,15 +91,5 @@ public class PublishInterceptor implements PublishInboundInterceptor, PublishOut
 		} catch (final Exception e) {
 			logger.error("Publish Exception", e);
 		}
-	}
-
-	@Override
-	public void onOutboundPublish(@NotNull PublishOutboundInput publishOutboundInput,
-			@NotNull PublishOutboundOutput publishOutboundOutput) {
-		final String clientId = publishOutboundInput.getClientInformation().getClientId();
-		final PublishPacket packet = publishOutboundInput.getPublishPacket();
-		final String topic = packet.getTopic();
-		logger.debug("Outbound publish from '{}' at {} ", clientId, topic);
-		theTCK.publish(clientId, packet);
 	}
 }
