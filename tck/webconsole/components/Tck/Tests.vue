@@ -315,6 +315,9 @@ export default {
                             `To check that the Host Application behaves correctly when death messages are received from an Edge Node.
                             This is mainly a manual check, as there is no programmatic way to query Sparkplug host applications. You
                             will be presented with a sequence of questions, to which you should respond with OK or FAIL.
+
+                            This test use a simulated Edge Node and Device, so ensure the Group, Edge Node and Device IDs you use are
+                            not being used already.
                             `,
                         requirements: [
                             "Connect this console to the HiveMQ broker.",
