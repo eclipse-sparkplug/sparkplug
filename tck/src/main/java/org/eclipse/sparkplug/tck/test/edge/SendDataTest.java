@@ -194,7 +194,7 @@ public class SendDataTest extends TCKTest {
 		} else {
 			logger.info("Creating host application");
 			try {
-				utilities.getHostApps().hostOnline(hostApplicationId);
+				utilities.getHostApps().hostOnline(hostApplicationId, true);
 			} catch (MqttException m) {
 				throw new IllegalStateException();
 			}
@@ -663,8 +663,9 @@ public class SendDataTest extends TCKTest {
 						// now check parameters for values
 						if (template.getParametersCount() > 0) {
 							for (Parameter parm : template.getParametersList()) {
-								setResultIfNotFail(testResults, hasValue(parm),
-										ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT,
+								logger.debug("Parameter hasValue(): {}->{}", parm.getName(), hasValue(parm));
+								// Whether or not there are parameter values this test should pass
+								setResult(testResults, true, ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT,
 										PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT);
 							}
 						}

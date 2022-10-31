@@ -98,10 +98,16 @@ public class HostApplication {
 	/*
 	 * prepare host messages but don't send
 	 */
-	public void hostPrepare(String host_application_id) throws MqttException {
+	public void hostPrepare(String host_application_id, boolean forceReset) throws MqttException {
 		if (host != null) {
 			logger.info("host application in use");
-			return;
+
+			if (forceReset) {
+				logger.error("Forcing host reset");
+				hostOffline();
+			} else {
+				return;
+			}
 		}
 		logger.info("Creating new host \"" + host_application_id + "\"");
 		hostApplicationId = host_application_id;
@@ -188,12 +194,12 @@ public class HostApplication {
 		send(deathPayload);
 	}
 
-	public void hostOnline(String host_application_id) throws MqttException {
+	public void hostOnline(String host_application_id, boolean forceReset) throws MqttException {
 		if (host != null) {
 			logger.info("host application in use");
 			return;
 		}
-		hostPrepare(host_application_id);
+		hostPrepare(host_application_id, forceReset);
 		hostSendOnline();
 		logger.info("Host " + host_application_id + " successfully online");
 	}

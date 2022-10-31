@@ -125,7 +125,7 @@ public class PrimaryHostTest extends TCKTest {
 		AtomicBoolean hostOnline = Utils.checkHostApplicationIsOnline(hostApplicationId);
 		if (hostOnline.get()) {
 			try {
-				utilities.getHostApps().hostPrepare(hostApplicationId);
+				utilities.getHostApps().hostPrepare(hostApplicationId, false);
 				utilities.getHostApps().hostSendOffline();
 			} catch (Exception e) {
 				logger.error("{} error", getName(), e);
@@ -142,7 +142,7 @@ public class PrimaryHostTest extends TCKTest {
 		// set the wrong host online to ensure the edge node doesn't send an NBIRTH
 		try {
 			state = TestStatus.WRONG_HOST_ONLINE;
-			utilities.getHostApps().hostOnline(hostApplicationId + "_WRONG");
+			utilities.getHostApps().hostOnline(hostApplicationId + "_WRONG", false);
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();
@@ -163,7 +163,7 @@ public class PrimaryHostTest extends TCKTest {
 		// no births should arrive when the (correct) host is marked offline
 		try {
 			utilities.getHostApps().hostOffline();
-			utilities.getHostApps().hostPrepare(hostApplicationId);
+			utilities.getHostApps().hostPrepare(hostApplicationId, false);
 			state = TestStatus.HOST_OFFLINE;
 			utilities.getHostApps().hostSendOffline();
 		} catch (Exception e) {
@@ -282,7 +282,7 @@ public class PrimaryHostTest extends TCKTest {
 		try {
 			state = TestStatus.HOST_ONLINE_AGAIN;
 			utilities.getHostApps().hostOffline();
-			utilities.getHostApps().hostOnline(hostApplicationId);
+			utilities.getHostApps().hostOnline(hostApplicationId, false);
 		} catch (Exception e) {
 			logger.error("{} wrongTimestamp error", getName(), e);
 			theTCK.endTest();
@@ -467,11 +467,11 @@ public class PrimaryHostTest extends TCKTest {
 				+ edgeNodeId)) {
 
 			logger.info("Received NDEATH in state " + state.name());
-			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
+			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS || state == TestStatus.HOST_OFFLINE,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE);
 
-			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
+			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS || state == TestStatus.HOST_OFFLINE,
 					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE,
 					MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE);
 
@@ -485,7 +485,7 @@ public class PrimaryHostTest extends TCKTest {
 				+ edgeNodeId + "/" + deviceId)) {
 
 			logger.info("Received DDEATH in state " + state.name());
-			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS,
+			Utils.setResultIfNotFail(testResults, state == TestStatus.EXPECT_DEATHS || state == TestStatus.HOST_OFFLINE,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
 					OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE);
 

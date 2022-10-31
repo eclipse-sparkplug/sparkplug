@@ -350,7 +350,7 @@ the Edge Node is configured to use a Primary Host Application, it MUST disconnec
 MQTT Server if the online JSON value is false and the timestamp value is greater than or equal to
 the previous online STATE message timestamp value.*#
 ** [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline-reconnect]#[yellow-background]*[tck-id-operational-behavior-edge-node-termination-host-offline-reconnect] If the Edge
-Node disconnects after being in a Sparkplug session due to an 'offline STATE message', it MUST
+Node disconnects after being in a Sparkplug session due to a valid 'offline STATE message', it MUST
 attempt to connect to the next MQTT Server in its connection list to start the session establishment
 procedure over again.*#
 * [tck-testable tck-id-operational-behavior-edge-node-termination-host-offline-timestamp]#[yellow-background]*[tck-id-operational-behavior-edge-node-termination-host-offline-timestamp] Consider
