@@ -504,13 +504,18 @@ export default {
                         testType: "EONNODE",
                         name: "SendDataTest",
                         readableName: "Send Data Test",
-                        description: "This is the Edge Node Sparkplug send data test.",
+                        description: `"This is the Edge Node Sparkplug send data test.
+                            It determines the MQTT client ID of the Edge Node from the MQTT connect,
+                            so you must connect the Edge Node after the test has started.
+                        `,
                         requirements: [
-                            "Setup a MQTT Connection.",
+                            "Connect this console to the HiveMQ broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
+                            "Ensure the Edge Node is not connected to the broker.",
                             "Start this test.",
-                            "Send some data by Edge Node and Devices.",
-                            "Wait until Tests are finished and check Results."
+                            "Connect the Edge Node and send data from the Edge Node and Device.",
+                            "Wait until Tests are finished and check Results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_id: {
