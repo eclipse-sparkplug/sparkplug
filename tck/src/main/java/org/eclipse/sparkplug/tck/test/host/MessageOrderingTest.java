@@ -28,12 +28,11 @@
 
 package org.eclipse.sparkplug.tck.test.host;
 
-import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
-import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH;
@@ -45,7 +44,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS;
 import static org.eclipse.sparkplug.tck.test.common.Utils.checkHostApplicationIsOnline;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -62,10 +60,8 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -76,13 +72,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
-import com.hivemq.extension.sdk.api.services.builder.Builders;
-import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 @SpecVersion(
@@ -115,6 +108,9 @@ public class MessageOrderingTest extends TCKTest {
 		logger.info("{}: Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
 		this.utilities = utilities;
+
+		// Ignore sequence number failures because we're intentionally triggering out of order messages
+		utilities.getMonitor().setIgnoreSeqNumCheck(true);
 
 		if (params.length < 5) {
 			log("Not enough parameters: " + Arrays.toString(params));
@@ -161,6 +157,7 @@ public class MessageOrderingTest extends TCKTest {
 			logger.error("endTest", e);
 		}
 
+		utilities.getMonitor().setIgnoreSeqNumCheck(false);
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);

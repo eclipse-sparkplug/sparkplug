@@ -78,7 +78,7 @@ public class HostApplication {
 			logger.info("client application in use");
 			return;
 		}
-		host = new MqttClient(brokerURI, "Sparkplug TCK 2nd broker");
+		host = new MqttClient(brokerURI, "Sparkplug_TCK_Second");
 		listener = new MessageListener();
 		host.setCallback(listener);
 		MqttConnectOptions connectOptions = new MqttConnectOptions();
@@ -111,7 +111,7 @@ public class HostApplication {
 		}
 		logger.info("Creating new host \"" + host_application_id + "\"");
 		hostApplicationId = host_application_id;
-		host = new MqttClient(brokerURI, "Sparkplug TCK host application " + host_application_id);
+		host = new MqttClient(brokerURI, "Sparkplug_TCK_" + host_application_id);
 		listener = new MessageListener();
 		host.setCallback(listener);
 
