@@ -621,7 +621,9 @@ export default {
                         name: "MultipleBrokerTest",
                         readableName: "Multiple MQTT Server (Broker) Test",
                         description: `This is the Sparkplug Edge Node test. It checks that an Edge Node behaves 
-                                      correctly when multiple Brokers are present.`,
+                                      correctly when multiple Brokers are present. The Edge Node can be started
+                                      before the test, or the test before the Edge Node, as long as no Host Application
+                                      is online. A simulated Host Application will be used.`,
                         requirements: [
                             "Connect this console to the HiveMQ broker.",
                             "Start a second MQTT broker listening on a different port.",
