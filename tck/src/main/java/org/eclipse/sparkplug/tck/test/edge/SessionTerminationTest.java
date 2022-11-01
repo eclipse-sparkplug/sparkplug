@@ -14,6 +14,7 @@
 package org.eclipse.sparkplug.tck.test.edge;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
@@ -32,6 +33,8 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEAT
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_DDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_TOPICS_NDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_INC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DDEATH_SEQ_NUMBER;
@@ -45,6 +48,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_DDEATH_T
 import static org.eclipse.sparkplug.tck.test.common.Requirements.TOPICS_NDEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +61,7 @@ import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
@@ -74,6 +79,10 @@ import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.publish.Publish;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 /**
  * This is the edge node Sparkplug session termination test
@@ -112,6 +121,9 @@ public class SessionTerminationTest extends TCKTest {
 
 	// Host Application variables
 	private boolean hostCreated = false;
+
+	private PublishService publishService = Services.publishService();
+	private TestStatus state = null;
 
 	public SessionTerminationTest(final @NotNull TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("Edge Node session termination test. Parameters: {} ", Arrays.asList(parms));
@@ -178,6 +190,13 @@ public class SessionTerminationTest extends TCKTest {
 		reportResults(testResults);
 	}
 
+	private void publishToTckConsolePrompt(String payload) {
+		Publish message = Builders.publish().topic(TCK_CONSOLE_PROMPT_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(payload.getBytes())).build();
+		logger.info("Requesting action to Edge Node id:{}: {} ", edgeNodeId, payload);
+		publishService.publish(message);
+	}
+
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
 		/* Determine if this the connect packet for the Edge node under test.
 		 * Set the clientid if so. */
@@ -193,11 +212,20 @@ public class SessionTerminationTest extends TCKTest {
 						setResult(true, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC));
 			}
 		}
+
+		publishToTckConsolePrompt("Disconnect a Device from the Edge Node to trigger a DDEATH");
+		state = TestStatus.EXPECT_DEVICE_DEATH;
 	}
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311)
@@ -206,16 +234,19 @@ public class SessionTerminationTest extends TCKTest {
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50)
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
-		if (testClientId == null || !clientId.equals(testClientId)) {
-			// ignore messages we're not asked to look at
-			return;
-		}
+		logger.info("Disconnect from clientId={}", clientId);
 
 		// An NDEATH must be received - whether by publish or retained message
 		// If we get a disconnect packet, the NDEATH should already have been received (MQTT 3.1.1)
 
 		testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER,
 				setResult(ndeathFound, PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER));
+
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
+				setResult(ndeathFound, OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH));
+
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET,
+				setResult(ndeathFound, OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET));
 
 		if (testMqttVersion == MqttVersion.V_5) {
 			testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50,
@@ -224,6 +255,10 @@ public class SessionTerminationTest extends TCKTest {
 		} else {
 			testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311,
 					setResult(ndeathFound, PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311));
+		}
+
+		if (ndeathFound && ddeathFound) {
+			endTest(testResults);
 		}
 	}
 
@@ -261,14 +296,6 @@ public class SessionTerminationTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DDEATH,
 			id = ID_PAYLOADS_DDEATH_SEQ_NUMBER)
-
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
-			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
-			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET)
-
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_TERMINATION,
 			id = ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH)
@@ -292,41 +319,52 @@ public class SessionTerminationTest extends TCKTest {
 		}
 
 		if (topicLevels.length == 5 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
+				&& topicLevels[2].equals("DBIRTH") && topicLevels[3].equals(edgeNodeId)
+				&& topicLevels[4].equals(deviceId)) {
+			// This means it was successful - just set the state back to mull
+			state = null;
+		}
+
+		if (topicLevels.length == 5 && topicLevels[0].equals(TOPIC_ROOT_SP_BV_1_0) && topicLevels[1].equals(groupId)
 				&& topicLevels[2].equals("DDEATH") && topicLevels[3].equals(edgeNodeId)
 				&& topicLevels[4].equals(deviceId)) {
-			ddeathFound = true;
+			if (state == TestStatus.EXPECT_DEVICE_DEATH) {
+				publishToTckConsolePrompt("Connect the Device back to the Edge Node to trigger a DBIRTH" + edgeNodeId);
+				state = TestStatus.EXPECT_DEVICE_BIRTH;
+			} else {
+				// This is the final DDEATH
 
-			testResults.put(ID_TOPICS_DDEATH_TOPIC, setResult(ddeathFound, TOPICS_DDEATH_TOPIC));
+				ddeathFound = true;
 
-			// DDEATH messages MUST be published with MQTT QoS equal to 0 and retain equal to false.
-			boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
-			testResults.put(ID_TOPICS_DDEATH_MQTT, setResult(isValidMQTT, TOPICS_DDEATH_MQTT));
+				testResults.put(ID_TOPICS_DDEATH_TOPIC, setResult(ddeathFound, TOPICS_DDEATH_TOPIC));
 
-			// payload related tests
-			PayloadOrBuilder payload = Utils.getSparkplugPayload(packet);
+				// DDEATH messages MUST be published with MQTT QoS equal to 0 and retain equal to false.
+				boolean isValidMQTT = (packet.getQos() == Qos.AT_MOST_ONCE && packet.getRetain() == false);
+				testResults.put(ID_TOPICS_DDEATH_MQTT, setResult(isValidMQTT, TOPICS_DDEATH_MQTT));
 
-			// The DDEATH MUST include a sequence number in the payload and it MUST have a value of one
-			// greater than the previous MQTT message from the Edge Node contained unless the previous
-			// MQTT message contained a value of 255. In this case the sequence number MUST be 0.
+				// payload related tests
+				PayloadOrBuilder payload = Utils.getSparkplugPayload(packet);
 
-			boolean isValidSeq = false; // TODO check sequence increment
-			if (payload.hasSeq()) {
-				long seq = payload.getSeq();
-				if (seq >= 0 && seq <= 255) {
-					isValidSeq = true;
+				// The DDEATH MUST include a sequence number in the payload and it MUST have a value of one
+				// greater than the previous MQTT message from the Edge Node contained unless the previous
+				// MQTT message contained a value of 255. In this case the sequence number MUST be 0.
+
+				boolean isValidSeq = false; // TODO check sequence increment
+				if (payload.hasSeq()) {
+					long seq = payload.getSeq();
+					if (seq >= 0 && seq <= 255) {
+						isValidSeq = true;
+					}
 				}
-			}
-			testResults.put(ID_TOPICS_DDEATH_SEQ_NUM, setResult(isValidSeq, TOPICS_DDEATH_SEQ_NUM));
-			testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(isValidSeq, PAYLOADS_DDEATH_SEQ_INC));
+				testResults.put(ID_TOPICS_DDEATH_SEQ_NUM, setResult(isValidSeq, TOPICS_DDEATH_SEQ_NUM));
+				testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(isValidSeq, PAYLOADS_DDEATH_SEQ_INC));
 
-			testResults.put(ID_PAYLOADS_DDEATH_TIMESTAMP, setResult(payload.hasTimestamp(), PAYLOADS_DDEATH_TIMESTAMP));
+				testResults.put(ID_PAYLOADS_DDEATH_TIMESTAMP,
+						setResult(payload.hasTimestamp(), PAYLOADS_DDEATH_TIMESTAMP));
 
-			testResults.put(ID_PAYLOADS_DDEATH_SEQ, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ));
+				testResults.put(ID_PAYLOADS_DDEATH_SEQ, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ));
 
-			testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
-
-			if (ndeathFound && ddeathFound) {
-				endTest(testResults);
+				testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
 			}
 		}
 	}
