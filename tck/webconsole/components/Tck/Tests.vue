@@ -461,7 +461,7 @@ export default {
                             "Ensure the Host App is started, if you are using a real one.",
                             "Start this test.",
                             "Connect the Edge Node and Device.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -480,13 +480,18 @@ export default {
                         testType: "EONNODE",
                         name: "SessionTerminationTest",
                         readableName: "Session Termination Test",
-                        description: "This is the Edge Node Sparkplug session termination test.",
+                        description: `This is the Sparkplug Edge Node session termination test.
+                        It tests deliberate session termination, where NDEATH and DDEATH
+                        packets are sent before disconnecting. A simulated Host Application will
+                        be used if the named one is not already connected. `,
                         requirements: [
-                            "Setup a MQTT Connection to the HiveMQ Sparkplug test server.",
-                            "Set a Group, Edge and Device Ids to be checked.",
+                            "Connect this console to the HiveMQ broker.",
+                            "Set the Device Id that is used by the configured Host, Group and Edge.",
+                            "Connect the Host Application to the broker, if you are using one.",
                             "Start this test.",
-                            "Terminate the edge node and device named.",
-                            "Wait until Tests are finished and check Results."
+                            "Stop the edge node and device named.",
+                            "Wait until the test is finished and check the results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_ids: {
