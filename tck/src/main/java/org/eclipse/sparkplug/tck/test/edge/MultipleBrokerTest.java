@@ -90,7 +90,7 @@ public class MultipleBrokerTest extends TCKTest {
 	private @NotNull String hostApplicationId;
 	private @NotNull String brokerURL;
 
-	private HostApplication broker2 = null;
+	private HostApplication broker2 = new HostApplication("tcp://localhost:1884");
 
 	private TestStatus state = null;
 	private TCK theTCK = null;
@@ -157,8 +157,8 @@ public class MultipleBrokerTest extends TCKTest {
 					ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS,
 					OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS);
 			state = TestStatus.HOST_ONLINE;
-			utilities.getHostApps().hostOnline(hostApplicationId, false);
-			broker2.hostOnline(hostApplicationId, false);
+			utilities.getHostApps().hostOnline(hostApplicationId, true);
+			broker2.hostOnline(hostApplicationId, true);
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();
@@ -203,7 +203,7 @@ public class MultipleBrokerTest extends TCKTest {
 		// send online host application to server 1
 		state = TestStatus.DONT_EXPECT_BIRTHS;
 		try {
-			utilities.getHostApps().hostOnline(hostApplicationId, false);
+			utilities.getHostApps().hostOnline(hostApplicationId, true);
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();

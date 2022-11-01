@@ -226,6 +226,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private Results results = null;
 
+	private boolean ignoreSeqNumCheck = false;
+
 	public Monitor(Results results) {
 		logger.info("Sparkplug TCK message monitor 1.0");
 		this.results = results;
@@ -252,6 +254,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public String[] getTestIds() {
 		return testIds;
+	}
+
+	public void setIgnoreSeqNumCheck(boolean ignoreSeqNumCheck) {
+		this.ignoreSeqNumCheck = ignoreSeqNumCheck;
 	}
 
 	public boolean hasEdgeNode(String groupId, String edgeNodeId) {
@@ -858,9 +864,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 			edgeSeqs.put(id, payload.getSeq());
 		}
-		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
-		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
-				PAYLOADS_SEQUENCE_NUM_INCREMENTING);
+		if (ignoreSeqNumCheck) {
+			setResultIfNotFail(testResults, true, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
+			setResultIfNotFail(testResults, true, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+					PAYLOADS_SEQUENCE_NUM_INCREMENTING);
+		} else {
+			setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
+			setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+					PAYLOADS_SEQUENCE_NUM_INCREMENTING);
+		}
 
 		long lastHistoricalTimestamp = 0L;
 		List<Metric> metrics = payload.getMetricsList();
@@ -1180,9 +1192,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 			edgeSeqs.put(id, payload.getSeq());
 		}
-		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_DDATA_SEQ_INC, PAYLOADS_DDATA_SEQ_INC);
-		setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
-				PAYLOADS_SEQUENCE_NUM_INCREMENTING);
+		if (ignoreSeqNumCheck) {
+			setResultIfNotFail(testResults, true, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
+			setResultIfNotFail(testResults, true, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+					PAYLOADS_SEQUENCE_NUM_INCREMENTING);
+		} else {
+			setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_DDATA_SEQ_INC, PAYLOADS_DDATA_SEQ_INC);
+			setResultIfNotFail(testResults, correct_seq, ID_PAYLOADS_SEQUENCE_NUM_INCREMENTING,
+					PAYLOADS_SEQUENCE_NUM_INCREMENTING);
+		}
 
 		long lastHistoricalTimestamp = 0L;
 		List<Metric> metrics = payload.getMetricsList();
