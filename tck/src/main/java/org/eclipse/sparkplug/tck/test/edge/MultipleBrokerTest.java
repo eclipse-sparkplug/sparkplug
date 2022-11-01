@@ -97,8 +97,10 @@ public class MultipleBrokerTest extends TCKTest {
 	private @NotNull Utilities utilities = null;
 	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 
-	private int births_on;
+	private int births_on = 0;
 	private String edgeNodeTestClientId;
+	private boolean nbirthReceived = false;
+	private boolean dbirthReceived = false;
 
 	public MultipleBrokerTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("{}: Parameters: {} ", getName(), Arrays.asList(parms));
@@ -125,13 +127,17 @@ public class MultipleBrokerTest extends TCKTest {
 			throw new IllegalStateException();
 		}
 
+		// subscribe to second server, and check Host is online on both
+		broker2 = new HostApplication(brokerURL);
+
+		state = TestStatus.NONE;
 		// start fake host on server 1 and 2, check that edge node connects and subscribes
 		executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
-				setHostsOnline();
+				setHost1Online();
 			}
-		}, 2, TimeUnit.SECONDS);
+		}, 1, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -149,15 +155,38 @@ public class MultipleBrokerTest extends TCKTest {
 		edgeNodeTestClientId = null;
 	}
 
-	public void setHostsOnline() {
-		logger.info("{} setHostsOnline", getName());
-		// start fake host on server 1 and 2, check that edge node connects and subscribes
+	public void setHost1Online() {
+		logger.info("{} setHost1Online", getName());
+		// start fake host on server 1 check that edge node connects and subscribes
 		try {
 			Utils.setResult(testResults, false,
 					ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS,
 					OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS);
 			state = TestStatus.HOST_ONLINE;
 			utilities.getHostApps().hostOnline(hostApplicationId, true);
+		} catch (Exception e) {
+			logger.error("{} error", getName(), e);
+			theTCK.endTest();
+		}
+	}
+
+	public void setHost2Online() {
+		logger.info("{} setHost2Online", getName());
+		// now we should have received the birth messages for server 1
+		if (nbirthReceived == false) {
+			logger.info("{} no NBIRTH received in state {}", getName(), state.toString());
+		} else {
+			nbirthReceived = false;
+		}
+		if (dbirthReceived == false) {
+			logger.info("{} no DBIRTH received in state {}", getName(), state.toString());
+		} else {
+			dbirthReceived = false;
+		}
+
+		// start fake host on server 2 - edge node should not connect
+		try {
+			state = TestStatus.HOSTS_ONLINE;
 			broker2.hostOnline(hostApplicationId, true);
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
@@ -166,14 +195,13 @@ public class MultipleBrokerTest extends TCKTest {
 		executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
-				hostOnline();
+				hostsOnline();
 			}
 		}, 2, TimeUnit.SECONDS);
 	}
 
-	private void hostOnline() {
-		logger.info("{} HostOnline", getName());
-		// now we should have received the birth messages
+	private void hostsOnline() {
+		logger.info("{} HostsOnline", getName());
 
 		// after a while send a host application offline message,
 		// check for node deaths on server 1
@@ -181,6 +209,7 @@ public class MultipleBrokerTest extends TCKTest {
 		births_on = 2;
 		state = TestStatus.EXPECT_DEATHS_AND_BIRTHS;
 		try {
+			logger.info("{} setting host 1 offline", getName());
 			utilities.getHostApps().hostOffline();
 		} catch (Exception e) {
 			logger.error("{} error", getName(), e);
@@ -220,7 +249,7 @@ public class MultipleBrokerTest extends TCKTest {
 		logger.info("{} Host1Online", getName());
 		// now we should have received the death and birth messages
 
-		Utils.setResultIfNotFail(testResults, false,
+		Utils.setResultIfNotFail(testResults, true,
 				ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_SINGLE_SERVER,
 				OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_SINGLE_SERVER);
 
@@ -235,12 +264,7 @@ public class MultipleBrokerTest extends TCKTest {
 			logger.error("{} error", getName(), e);
 			theTCK.endTest();
 		}
-		executorService.schedule(new Runnable() {
-			@Override
-			public void run() {
-				theTCK.endTest();
-			}
-		}, 2, TimeUnit.SECONDS);
+		// the test will end when DBIRTH is received on server 1
 	}
 
 	@Override
@@ -324,6 +348,7 @@ public class MultipleBrokerTest extends TCKTest {
 		if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_NBIRTH + "/"
 				+ edgeNodeId)) {
 			// found the edge NBIRTH
+			nbirthReceived = true;
 			if (state == TestStatus.HOST_ONLINE) {
 				Utils.setResultIfNotFail(testResults, true, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT);
@@ -346,13 +371,30 @@ public class MultipleBrokerTest extends TCKTest {
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DBIRTH + "/"
 				+ edgeNodeId + "/" + deviceId)) {
 			// found the device DBIRTH
+			dbirthReceived = true;
 			if (state == TestStatus.HOST_ONLINE) {
 				Utils.setResultIfNotFail(testResults, true, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT);
 
+				// we've received NBIRTH and DBIRTH so set the second host online
+				executorService.schedule(new Runnable() {
+					@Override
+					public void run() {
+						setHost2Online();
+					}
+				}, 1, TimeUnit.SECONDS);
+
 			} else if (state == TestStatus.EXPECT_DEATHS_AND_BIRTHS && births_on == 1) {
 				Utils.setResultIfNotFail(testResults, true, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT);
+
+				// the edge node has reconnected to server 1 so that's the end of the test
+				executorService.schedule(new Runnable() {
+					@Override
+					public void run() {
+						theTCK.endTest();
+					}
+				}, 1, TimeUnit.SECONDS);
 
 			} else {
 				// any other state is wrong
@@ -402,20 +444,19 @@ public class MultipleBrokerTest extends TCKTest {
 		boolean dbirth_found = false;
 		HostApplication.Message msg = broker2.getNextMessage();
 		while (msg != null) {
+			logger.info("Message found {}", msg.getTopic()); // , new String(msg.getMqttMessage().getPayload()));
 			String topic = msg.getTopic();
 			if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_NBIRTH + "/"
 					+ edgeNodeId)) {
 				nbirth_found = true;
-			} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DDEATH
+			} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DBIRTH
 					+ "/" + edgeNodeId + "/" + deviceId)) {
 				dbirth_found = true;
 			}
 			msg = broker2.getNextMessage();
 		}
-
 		Utils.setResultIfNotFail(testResults, nbirth_found && dbirth_found,
 				ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK,
 				OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK);
-
 	}
 }
