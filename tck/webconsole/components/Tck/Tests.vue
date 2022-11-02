@@ -574,12 +574,16 @@ export default {
                         testType: "EONNODE",
                         name: "ReceiveCommandTest",
                         readableName: "Receive Command Test",
-                        description: "This is the Edge Node Sparkplug receive command test. (NCMD)",
+                        description: `This is the Edge Node Sparkplug receive command test. A rebirth
+                                      command will be sent to the Edge Node, and the proper rebirth
+                                      sequence checked. Do not connect the Host Application and 
+                                      start the Edge node only once the test has been started.`,
                         requirements: [
-                            "Setup a MQTT Connection.",
+                            "Connect this console to the HiveMQ broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
+                            "Ensure the Host Application and Edge Node are not connected.",
                             "Start this test.",
-                            "Disconnect and Connect the Device.",
+                            "Start the Edge Node.",
                             "The Edge Node and Devices should receive a rebirth command.",
                             "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."

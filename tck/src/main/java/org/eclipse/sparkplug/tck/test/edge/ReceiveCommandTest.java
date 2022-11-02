@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -50,6 +51,7 @@ import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
@@ -81,6 +83,7 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
@@ -102,15 +105,16 @@ public class ReceiveCommandTest extends TCKTest {
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3, ID_PAYLOADS_NDEATH_WILL_MESSAGE);
 
-	private @NotNull status state;
+	private @NotNull TestStatus state;
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
 	private @NotNull String hostApplicationId;
-	private @NotNull long deathBdSeq;
+	private @NotNull long deathBdSeq = -1;
 	private String edgeNodeClientId;
 	private boolean bNBirth = false, bDBirth = false;
 	private PublishService publishService = Services.publishService();
+	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 
 	// Host Application variables
 	private boolean hostCreated = false;
@@ -125,7 +129,7 @@ public class ReceiveCommandTest extends TCKTest {
 			log("Parameters to edge receive command test must be: hostApplicationId groupId edgeNodeId deviceId");
 			throw new IllegalArgumentException();
 		}
-		state = status.START;
+		state = TestStatus.NONE;
 		deathBdSeq = -1;
 		hostApplicationId = params[0];
 		groupId = params[1];
@@ -134,27 +138,32 @@ public class ReceiveCommandTest extends TCKTest {
 		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device id: {}", hostApplicationId,
 				groupId, edgeNodeId, deviceId);
 
-		sendCommand(true);
-
 		// indicate we are testing the receipt of NBIRTH and DBIRTH messages after a rebirth command
 		// set this assertion value to false by default, then track the receipt of both NBIRTH and DBIRTH messages for
 		// device attached to an edge node.
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,
 				setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2));
 
-		// this will fail if we receive a data message
+		// this will fail if we receive a data message at the wrong time
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, PASS);
 
 		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
-			logger.info("Host Application is online, so using that");
+			log("Host Application is online, so using that");
+
+			// send the node rebirth command, expecting the edge node to be online already
+			log("Sending rebirth command, expecting the Edge and Device to be online already");
+			sendRebirth(true);
 		} else {
-			logger.info("Creating host application");
+			log("Host application not online. Creating simulated host application");
 			try {
 				utilities.getHostApps().hostOnline(hostApplicationId, true);
 			} catch (MqttException m) {
 				throw new IllegalStateException();
 			}
 			hostCreated = true;
+			state = TestStatus.EXPECT_NODE_BIRTH;
+			// wait for the edge and device to come online
+			log("Waiting for the Edge and Device to come online");
 		}
 	}
 
@@ -176,17 +185,19 @@ public class ReceiveCommandTest extends TCKTest {
 						logger.error("Original error:", throwable);
 					}
 				}
+				state = TestStatus.ENDING;
+				theTCK.endTest();
 			}
 		});
 	}
 
-	private void sendCommand(boolean isNode) {
+	private void sendRebirth(boolean isNode) {
 		String topicName = TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/";
 		if (isNode) {
-			state = status.SENDING_NODE_REBIRTH;
+			state = TestStatus.SENDING_NODE_REBIRTH;
 			topicName += TOPIC_PATH_NCMD + "/" + edgeNodeId;
 		} else {
-			state = status.SENDING_DEVICE_REBIRTH;
+			state = TestStatus.SENDING_DEVICE_REBIRTH;
 			topicName = TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId;
 		}
 
@@ -219,7 +230,7 @@ public class ReceiveCommandTest extends TCKTest {
 				logger.error("endTest", m);
 			}
 		}
-		state = status.END;
+		state = TestStatus.ENDING;
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 	}
@@ -279,13 +290,12 @@ public class ReceiveCommandTest extends TCKTest {
 
 	@Override
 	public void disconnect(final String clientId, final DisconnectPacket packet) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void subscribe(final String clientId, final SubscribePacket packet) {
-		// TODO Auto-generated method stub
+
 	}
 
 	@SpecAssertion(
@@ -299,16 +309,27 @@ public class ReceiveCommandTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3)
 	@Override
 	public void publish(final String clientId, final PublishPacket packet) {
+		String topic = packet.getTopic();
+		logger.info("Edge - Receive Command test - PUBLISH - topic: {}, state: {} ", topic, state);
 
-		logger.info("Edge - Receive Command test - PUBLISH - topic: {}, state: {} ", packet.getTopic(), state);
-		if (state == status.SENDING_NODE_REBIRTH || state == status.DISCONNECTING_CLIENT) {
-			String[] levels = packet.getTopic().split("/");
+		if (state == TestStatus.EXPECT_NODE_BIRTH
+				&& topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NBIRTH + "/" + edgeNodeId)) {
+			log("Edge " + edgeNodeId + " is now online");
+			state = TestStatus.EXPECT_DEVICE_BIRTH;
+		} else if (state == TestStatus.EXPECT_DEVICE_BIRTH && topic.equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DBIRTH + "/" + edgeNodeId + "/" + deviceId)) {
+			log("Device " + deviceId + " is now online, sending rebirth");
+			sendRebirth(true);
+		} else if (state == TestStatus.SENDING_NODE_REBIRTH) {
+			String[] levels = topic.split("/");
+
 			if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(groupId) && levels[3].equals(edgeNodeId)) {
 				if (levels.length == 4 && levels[2].equals(TOPIC_PATH_NBIRTH)) {
-					logger.info("Node birth received - ClientId {} on Topic {} ", clientId, packet.getTopic());
+					log("Node birth received - ClientId  " + clientId);
 					edgeNodeClientId = clientId;
 					bNBirth = true;
-					if (state == status.DISCONNECTING_CLIENT) {
+
+					if (deathBdSeq != -1) {
 						// check bdSeq
 						ByteBuffer payload = packet.getPayload().orElseGet(null);
 						long birthSeq = getBdSeq(payload);
@@ -322,9 +343,8 @@ public class ReceiveCommandTest extends TCKTest {
 									deathBdSeq, birthSeq);
 						}
 					}
-
 				} else if (levels.length == 5 && levels[2].equals(TOPIC_PATH_DBIRTH)) {
-					logger.debug("Device birth received for device: {}", levels[4]);
+					log("Device birth received for device: " + levels[4]);
 					bDBirth = true;
 
 				} else if (levels[2].equals(TOPIC_PATH_NDATA)) {
@@ -343,30 +363,17 @@ public class ReceiveCommandTest extends TCKTest {
 							setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1));
 				}
 
-				if (bNBirth && bDBirth && state == status.SENDING_NODE_REBIRTH) {
+				if (bNBirth && bDBirth && state == TestStatus.SENDING_NODE_REBIRTH) {
 					logger.debug(
 							"Check Req: {} After an Edge Node stops sending DATA messages, it MUST send a complete BIRTH sequence including the NBIRTH and DBIRTH(s) if applicable.",
 							ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2);
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, PASS);
-					state = status.DISCONNECTING_CLIENT;
+					state = TestStatus.DISCONNECTING_CLIENT;
 					bNBirth = false;
 					bDBirth = false;
 					disconnectClient(clientId);
 				}
-
-				if (bNBirth && bDBirth && state == status.DISCONNECTING_CLIENT) {
-					state = status.END;
-					theTCK.endTest();
-				}
 			}
 		}
-	}
-
-	private enum status {
-		START,
-		DISCONNECTING_CLIENT,
-		SENDING_NODE_REBIRTH,
-		SENDING_DEVICE_REBIRTH,
-		END
 	}
 }
