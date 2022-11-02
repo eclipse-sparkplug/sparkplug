@@ -111,8 +111,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
+import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
@@ -162,6 +162,7 @@ public class SendComplexDataTest extends TCKTest {
 			ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE);
 
 	private final @NotNull TCK theTCK;
+	private @NotNull Utilities utilities = null;
 
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
@@ -169,9 +170,13 @@ public class SendComplexDataTest extends TCKTest {
 	private @NotNull String hostApplicationId;
 	private @NotNull long seqUnassigned = -1;
 
+	// Host Application variables
+	private boolean hostCreated = false;
+
 	public SendComplexDataTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("{}. Parameters: {} ", getName(), Arrays.asList(parms));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
 		if (parms.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(parms));
@@ -184,11 +189,30 @@ public class SendComplexDataTest extends TCKTest {
 		deviceId = parms[3];
 		logger.info("Parameters are HostId: {}, GroupId: {}, EdgeNodeId: {}, DeviceId: {}", hostApplicationId, groupId,
 				edgeNodeId, deviceId);
+
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			logger.info("Host Application is online, so using that");
+		} else {
+			logger.info("Creating host application");
+			try {
+				utilities.getHostApps().hostOnline(hostApplicationId, true);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
+		}
 	}
 
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
+		if (hostCreated) {
+			try {
+				utilities.getHostApps().hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 	}

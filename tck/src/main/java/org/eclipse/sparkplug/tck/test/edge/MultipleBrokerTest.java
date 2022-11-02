@@ -107,6 +107,10 @@ public class MultipleBrokerTest extends TCKTest {
 		theTCK = aTCK;
 		this.utilities = utilities;
 
+		// Ignore BD sequence number failures because we're connecting to two MQTT Servers and the monitor will only see
+		// a portion of the bdSeq numbers
+		utilities.getMonitor().setIgnoreBdSeqNumCheck(true);
+
 		if (parms.length < 5) {
 			log("Not enough parameters: " + Arrays.toString(parms));
 			log("Parameters to edge multiple broker test must be: hostApplicationId, groupId edgeNodeId deviceId brokerURL");
@@ -149,6 +153,7 @@ public class MultipleBrokerTest extends TCKTest {
 			logger.error("endTest", e);
 		}
 
+		utilities.getMonitor().setIgnoreSeqNumCheck(false);
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
