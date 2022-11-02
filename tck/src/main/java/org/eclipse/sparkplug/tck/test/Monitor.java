@@ -226,6 +226,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private Results results = null;
 
+	private boolean ignoreBdSeqNumCheck = false;
+
 	private boolean ignoreSeqNumCheck = false;
 
 	public Monitor(Results results) {
@@ -254,6 +256,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public String[] getTestIds() {
 		return testIds;
+	}
+
+	public void setIgnoreBdSeqNumCheck(boolean ignoreBdSeqNumCheck) {
+		this.ignoreBdSeqNumCheck = ignoreBdSeqNumCheck;
 	}
 
 	public void setIgnoreSeqNumCheck(boolean ignoreSeqNumCheck) {
@@ -371,20 +377,23 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					if (current.getName().equals("bdSeq") && current.hasLongValue()) {
 						long bdseq = current.getLongValue();
 						if (edgeBdSeqs.get(id) != null) {
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
-									ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
-								log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: " + id);
-								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
-										+ getNextSeq(edgeBdSeqs.get(id)));
-							}
-							if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
-									ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
-									MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
-								log(TEST_FAILED_FOR_ASSERTION
-										+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
-										+ ": edge id: " + id);
-								log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
-										+ getNextSeq(edgeBdSeqs.get(id)));
+							if (!ignoreBdSeqNumCheck) {
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
+										ID_TOPICS_NBIRTH_BDSEQ_INCREMENT, TOPICS_NBIRTH_BDSEQ_INCREMENT)) {
+									log(TEST_FAILED_FOR_ASSERTION + ID_TOPICS_NBIRTH_BDSEQ_INCREMENT + ": edge id: "
+											+ id);
+									log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
+											+ getNextSeq(edgeBdSeqs.get(id)));
+								}
+								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
+										ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ,
+										MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ)) {
+									log(TEST_FAILED_FOR_ASSERTION
+											+ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ
+											+ ": edge id: " + id);
+									log("INFO: Actual bdseq: " + bdseq + " expected bdseq: "
+											+ getNextSeq(edgeBdSeqs.get(id)));
+								}
 							}
 						}
 						edgeBdSeqs.put(id, bdseq);

@@ -164,6 +164,8 @@ public class SendDataTest extends TCKTest {
 	// Host Application variables
 	private boolean hostCreated = false;
 
+	private HashMap<String, Map<Long, String>> edgeAliasMaps = new HashMap<>();
+
 	public SendDataTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("Edge Node: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
@@ -376,15 +378,21 @@ public class SendDataTest extends TCKTest {
 		testResults.put(ID_TOPICS_NDATA_TOPIC, setResult(goodTopic, TOPICS_NDATA_TOPIC));
 
 		// check templates
-		for (Metric m : inboundPayload.getMetricsList()) {
-			if (m.hasDatatype()) {
-				DataType datatype = DataType.forNumber(m.getDatatype());
-				if (datatype == DataType.Template && m.hasTemplateValue()) {
-					checkInstance(m.getTemplateValue(), TOPIC_PATH_DDATA);
+		String sparkplugDescriptor = groupId + "/" + edgeNodeId;
+		for (Metric metric : inboundPayload.getMetricsList()) {
+			String currentMetricName = metric.getName();
+			if (!metric.hasName() && metric.hasAlias()) {
+				currentMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(metric.getAlias());
+				logger.debug("Got currentMetricName from alias: {} -> {}", metric.getAlias(), currentMetricName);
+			}
+			if (metric.hasDatatype()) {
+				DataType datatype = DataType.forNumber(metric.getDatatype());
+				if (datatype == DataType.Template && metric.hasTemplateValue()) {
+					checkInstance(sparkplugDescriptor, currentMetricName, metric.getTemplateValue(), TOPIC_PATH_DDATA);
 				}
 			}
-			if (m.hasTimestamp()) {
-				setResultIfNotFail(testResults, checkUTC(m.getTimestamp(), config.UTCwindow),
+			if (metric.hasTimestamp()) {
+				setResultIfNotFail(testResults, checkUTC(metric.getTimestamp(), config.UTCwindow),
 						ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC, PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
 			}
 		}
@@ -478,15 +486,21 @@ public class SendDataTest extends TCKTest {
 		testResults.put(ID_TOPICS_DDATA_TOPIC, setResult(goodTopic, TOPICS_DDATA_TOPIC));
 
 		// check templates
-		for (Metric m : inboundPayload.getMetricsList()) {
-			if (m.hasDatatype()) {
-				DataType datatype = DataType.forNumber(m.getDatatype());
-				if (datatype == DataType.Template && m.hasTemplateValue()) {
-					checkInstance(m.getTemplateValue(), TOPIC_PATH_DDATA);
+		String sparkplugDescriptor = groupId + "/" + edgeNodeId + "/" + deviceId;
+		for (Metric metric : inboundPayload.getMetricsList()) {
+			String currentMetricName = metric.getName();
+			if (!metric.hasName() && metric.hasAlias()) {
+				currentMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(metric.getAlias());
+				logger.debug("Got currentMetricName from alias: {} -> {}", metric.getAlias(), currentMetricName);
+			}
+			if (metric.hasDatatype()) {
+				DataType datatype = DataType.forNumber(metric.getDatatype());
+				if (datatype == DataType.Template && metric.hasTemplateValue()) {
+					checkInstance(sparkplugDescriptor, metric.getName(), metric.getTemplateValue(), TOPIC_PATH_DDATA);
 				}
 			}
-			if (m.hasTimestamp()) {
-				setResultIfNotFail(testResults, checkUTC(m.getTimestamp(), config.UTCwindow),
+			if (metric.hasTimestamp()) {
+				setResultIfNotFail(testResults, checkUTC(metric.getTimestamp(), config.UTCwindow),
 						ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC, PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
 			}
 		}
@@ -544,7 +558,8 @@ public class SendDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS)
-	private void checkInstance(Payload.Template instance, String msgtype) {
+	private void checkInstance(String sparkplugDescriptor, String instanceName, Payload.Template instance,
+			String msgtype) {
 		Payload.Template definition = null;
 		if (instance.hasIsDefinition() && instance.getIsDefinition()) {
 			setResultIfNotFail(testResults, !msgtype.equals(TOPIC_PATH_NBIRTH),
@@ -574,8 +589,17 @@ public class SendDataTest extends TCKTest {
 			List<Metric> defmetrics = definition.getMetricsList();
 			for (Metric metric : instance.getMetricsList()) {
 				boolean found = false;
+				String currentMetricName = metric.getName();
+				if (!metric.hasName() && metric.hasAlias()) {
+					currentMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(metric.getAlias());
+					logger.debug("Got currentMetricName from alias: {} -> {}", metric.getAlias(), currentMetricName);
+				}
 				for (Metric defmetric : defmetrics) {
-					if (metric.getName().equals(defmetric.getName())) {
+					String defMetricName = defmetric.getName();
+					if (!defmetric.hasName() && defmetric.hasAlias()) {
+						defMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(defmetric.getAlias());
+					}
+					if (currentMetricName.equals(defMetricName)) {
 						found = true; // found instance metric in definition
 						break;
 					}
@@ -587,28 +611,36 @@ public class SendDataTest extends TCKTest {
 						PAYLOADS_TEMPLATE_INSTANCE_MEMBERS);
 			}
 
-			if (msgtype.equals(TOPIC_PATH_NBIRTH)) {
+			if (msgtype.equals(TOPIC_PATH_NBIRTH) || msgtype.equals(TOPIC_PATH_NDATA)
+					|| msgtype.equals(TOPIC_PATH_DDATA)) {
 				// check the definition metrics are in the instance
 				for (Metric defmetric : defmetrics) {
 					boolean found = false;
 					for (Metric metric : instance.getMetricsList()) {
-						if (metric.getName().equals(defmetric.getName())) {
+						String currentMetricName = metric.getName();
+						if (!metric.hasName() && metric.hasAlias()) {
+							currentMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(metric.getAlias());
+							logger.debug("Got currentMetricName from alias: {} -> {}", metric.getAlias(),
+									currentMetricName);
+						}
+						if (currentMetricName.equals(defmetric.getName())) {
 							found = true; // found definition metric in instance
 							break;
 						}
 					}
+
 					setResultIfNotFail(testResults,
 							found || msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH);
-
 					setResultIfNotFail(testResults,
-							!found && (msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA)),
+							found && (msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA)),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA);
 				}
 			}
 
 			// now check parameters
 			if (instance.getParametersCount() > 0) {
+				logger.debug("Found parameters in {}: {}", instanceName, instance.getParametersCount());
 				for (Parameter parm : instance.getParametersList()) {
 					if (parm.hasName()) {
 						String instance_parm_name = parm.getName();
@@ -628,6 +660,8 @@ public class SendDataTest extends TCKTest {
 					}
 				}
 			}
+		} else {
+			logger.warn("Definition is null for {}", instanceName);
 		}
 	}
 
@@ -648,7 +682,21 @@ public class SendDataTest extends TCKTest {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 
 		// record definitions
+		String id = groupId + "/" + edgeNodeId;
+		boolean aliasMapInitialized = false;
 		for (Metric metric : sparkplugPayload.getMetricsList()) {
+			if (metric.hasAlias()) {
+				Map<Long, String> aliasMap = edgeAliasMaps.get(id);
+				if (!aliasMapInitialized) {
+					aliasMap = edgeAliasMaps.computeIfAbsent(id, (k) -> new HashMap<>());
+					aliasMap.clear();
+					aliasMapInitialized = true;
+				}
+
+				logger.debug("Creating alias: {} -> {}", metric.getAlias(), metric.getName());
+				aliasMap.put(metric.getAlias(), metric.getName());
+			}
+
 			if (metric.hasDatatype()) {
 				DataType datatype = DataType.forNumber(metric.getDatatype());
 				if (datatype == DataType.Template && metric.hasTemplateValue()) {
@@ -681,7 +729,7 @@ public class SendDataTest extends TCKTest {
 				if (datatype == DataType.Template && metric.hasTemplateValue()) {
 					Payload.Template template = metric.getTemplateValue();
 					if (!template.hasIsDefinition() || !template.getIsDefinition()) {
-						checkInstance(template, TOPIC_PATH_NBIRTH);
+						checkInstance(id, metric.getName(), template, TOPIC_PATH_NBIRTH);
 					}
 				}
 			}
@@ -692,11 +740,25 @@ public class SendDataTest extends TCKTest {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 
 		// check templates
+		String id = groupId + "/" + edgeNodeId + "/" + deviceId;
+		boolean aliasMapInitialized = false;
 		for (Metric m : sparkplugPayload.getMetricsList()) {
+			if (m.hasAlias()) {
+				Map<Long, String> aliasMap = edgeAliasMaps.get(id);
+				if (!aliasMapInitialized) {
+					aliasMap = edgeAliasMaps.computeIfAbsent(id, (k) -> new HashMap<>());
+					aliasMap.clear();
+					aliasMapInitialized = true;
+				}
+
+				logger.debug("Creating alias: {} -> {}", m.getAlias(), m.getName());
+				aliasMap.put(m.getAlias(), m.getName());
+			}
+
 			if (m.hasDatatype()) {
 				DataType datatype = DataType.forNumber(m.getDatatype());
 				if (datatype == DataType.Template && m.hasTemplateValue()) {
-					checkInstance(m.getTemplateValue(), TOPIC_PATH_DBIRTH);
+					checkInstance(id, m.getName(), m.getTemplateValue(), TOPIC_PATH_DBIRTH);
 				}
 			}
 		}
