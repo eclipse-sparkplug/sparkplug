@@ -262,7 +262,7 @@ public class SendDataTest extends TCKTest {
 		logger.info("Edge send data test - publish - to topic: {} ", packet.getTopic());
 
 		// ignore messages from clients we're not interested in
-		if (!clientId.equals(testClientId)) {
+		if (testClientId != null && !clientId.equals(testClientId)) {
 			logger.info("Ignoring message from {} when expecting {}", clientId, testClientId);
 			return;
 		}

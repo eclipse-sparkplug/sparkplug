@@ -36,7 +36,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_MET
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAME_CMD_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAME_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE;
@@ -75,7 +74,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_CMD_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE;
@@ -101,11 +99,11 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_VERSION;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
@@ -125,6 +123,7 @@ import org.slf4j.LoggerFactory;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
@@ -148,10 +147,10 @@ public class SendComplexDataTest extends TCKTest {
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE, ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ, ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE,
 			ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE, ID_PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT,
-			ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ, ID_PAYLOADS_NAME_REQUIREMENT, ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT,
-			ID_PAYLOADS_NAME_CMD_REQUIREMENT, ID_PAYLOADS_DATASET_COLUMN_SIZE, ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS,
-			ID_PAYLOADS_DATASET_TYPES_DEF, ID_PAYLOADS_DATASET_TYPES_TYPE, ID_PAYLOADS_DATASET_TYPES_VALUE,
-			ID_PAYLOADS_DATASET_TYPES_NUM, ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_DATASET_VALUE,
+			ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ, ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT, ID_PAYLOADS_NAME_REQUIREMENT,
+			ID_PAYLOADS_DATASET_COLUMN_SIZE, ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS, ID_PAYLOADS_DATASET_TYPES_DEF,
+			ID_PAYLOADS_DATASET_TYPES_TYPE, ID_PAYLOADS_DATASET_TYPES_VALUE, ID_PAYLOADS_DATASET_TYPES_NUM,
+			ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_DATASET_VALUE,
 			ID_PAYLOADS_TEMPLATE_IS_DEFINITION, ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION,
 			ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION, ID_PAYLOADS_TEMPLATE_DEFINITION_REF,
 			ID_PAYLOADS_TEMPLATE_INSTANCE_REF, ID_PAYLOADS_TEMPLATE_REF_DEFINITION,
@@ -172,6 +171,7 @@ public class SendComplexDataTest extends TCKTest {
 
 	// Host Application variables
 	private boolean hostCreated = false;
+	private @NotNull String testClientId = null;
 
 	public SendComplexDataTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("{}. Parameters: {} ", getName(), Arrays.asList(parms));
@@ -231,24 +231,39 @@ public class SendComplexDataTest extends TCKTest {
 
 	@Override
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
-		// TODO Auto-generated method stub
+		/* Determine if this the connect packet for the Edge node under test.
+		 * Set the clientid if so. */
+		Optional<WillPublishPacket> willPublishPacketOptional = packet.getWillPublish();
+		if (willPublishPacketOptional.isPresent()) {
+			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
+			String willTopic = willPublishPacket.getTopic();
+			if (willTopic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NDEATH + "/" + edgeNodeId)) {
+				testClientId = clientId;
+				logger.info("Send data test - connect - client id is " + clientId);
+			}
+		}
 	}
 
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
-		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		final String topic = packet.getTopic();
 		logger.info("Edge - Payload validation test - publish - topic: {}", topic);
+
+		// ignore messages from clients we're not interested in
+		if (testClientId != null && !clientId.equals(testClientId)) {
+			logger.info("Ignoring message from {} when expecting {}", clientId, testClientId);
+			return;
+		}
 
 		boolean isSparkplugTopic = topic.startsWith(TOPIC_ROOT_SP_BV_1_0);
 		if (!isSparkplugTopic) {
@@ -259,21 +274,26 @@ public class SendComplexDataTest extends TCKTest {
 				isSparkplugTopic && (topic.contains(TOPIC_PATH_DDATA) || topic.contains(TOPIC_PATH_NDATA));
 		boolean isCommandTopic =
 				isSparkplugTopic && (topic.contains(TOPIC_PATH_NCMD) || topic.contains(TOPIC_PATH_DCMD));
-		try {
-			checkDatatypeValidType(packet);
-			checkPropertiesValidType(packet, topic);
-			checkSequenceNumberIncluded(packet, topic);
 
-			if (isDataTopic) {
-				checkDataTopicPayload(clientId, packet, topic);
-			} else if (isCommandTopic) {
-				checkCommandTopicPayload(clientId, packet, topic);
-			}
+		checkDatatypeValidType(packet);
+		checkPropertiesValidType(packet, topic);
+		checkSequenceNumberIncluded(packet, topic);
 
-			checkDataSet(packet);
-			checkTemplate(packet);
-		} finally {
+		if (isDataTopic) {
+			checkDataTopicPayload(clientId, packet, topic);
+		} else if (isCommandTopic) {
+			checkCommandTopicPayload(clientId, packet, topic);
+		}
+
+		checkDataSet(packet);
+		checkTemplate(packet);
+
+		// if we have results for every assertion, end the test
+		// otherwise the user will have to end it
+		if (testResults.size() == testIds.size()) {
 			theTCK.endTest();
+		} else {
+			log(getName() + " " + testResults.size() + " results obtained out of " + testIds.size() + " total.");
 		}
 	}
 
@@ -300,7 +320,6 @@ public class SendComplexDataTest extends TCKTest {
 				checkAliasInData(sparkplugPayload, topic);
 				checkMetricsDataTypeNotRec(sparkplugPayload, topic);
 				checkPayloadsNameRequirement(sparkplugPayload);
-				checkPayloadsTimestampCommand(sparkplugPayload, topic);
 			} else {
 				logger.error("Skip Edge payload validation - no sparkplug payload.");
 			}
@@ -531,7 +550,8 @@ public class SendComplexDataTest extends TCKTest {
 					break;
 				}
 			}
-			testResults.put(ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ, setResult(isValid, PAYLOADS_METRIC_DATATYPE_NOT_REQ));
+			testResults.put(ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ,
+					Utils.setShouldResult(isValid, PAYLOADS_METRIC_DATATYPE_NOT_REQ));
 		}
 	}
 
@@ -567,24 +587,6 @@ public class SendComplexDataTest extends TCKTest {
 				setResult(isValid, PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT));
 	}
 
-	// TODO - To Be Discussed - what we should check for MAY
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_METRIC,
-			id = ID_PAYLOADS_NAME_CMD_REQUIREMENT)
-	public void checkPayloadsTimestampCommand(final @NotNull PayloadOrBuilder sparkplugPayload, String topic) {
-		logger.debug("Check Req: The timestamp MAY be included with metrics in NCMD and DCMD messages.");
-		boolean isValid = true;
-		if (topic.contains(TOPIC_PATH_NCMD) || topic.contains(TOPIC_PATH_DCMD)) {
-			for (Metric m : sparkplugPayload.getMetricsList()) {
-				if (!m.hasTimestamp()) {
-					isValid = false;
-					break;
-				}
-			}
-		}
-		testResults.put(ID_PAYLOADS_NAME_CMD_REQUIREMENT, setResult(true, PAYLOADS_NAME_CMD_REQUIREMENT));
-	}
-
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DATASET,
 			id = ID_PAYLOADS_DATASET_COLUMN_SIZE)
@@ -609,13 +611,15 @@ public class SendComplexDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_DATASET_DATASETVALUE,
 			id = ID_PAYLOADS_TEMPLATE_DATASET_VALUE)
-	public void checkDataSet(final @NotNull PublishPacket packet) {
+	public boolean checkDataSet(final @NotNull PublishPacket packet) {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+		boolean hasDataSet = false;
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
 				DataType datatype = DataType.forNumber(m.getDatatype());
 
 				if (datatype == DataType.DataSet && m.hasDatasetValue()) {
+					hasDataSet = true;
 					Payload.DataSet d = m.getDatasetValue();
 
 					testResults.put(ID_PAYLOADS_DATASET_COLUMN_SIZE,
@@ -629,7 +633,7 @@ public class SendComplexDataTest extends TCKTest {
 							DataType.Float, DataType.Double, DataType.Boolean, DataType.String));
 
 					// check that the types are valid
-					ArrayList<Integer> types = (ArrayList<Integer>) d.getTypesList();
+					List<Integer> types = (List<Integer>) d.getTypesList();
 					boolean validtypes = true;
 					boolean uint32types = true;
 					if (types.size() == d.getTypesCount()) {
@@ -677,7 +681,7 @@ public class SendComplexDataTest extends TCKTest {
 				}
 			}
 		}
-
+		return hasDataSet;
 	}
 
 	@SpecAssertion(
@@ -729,14 +733,17 @@ public class SendComplexDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE)
-	public void checkTemplate(final @NotNull PublishPacket packet) {
+	public boolean checkTemplate(final @NotNull PublishPacket packet) {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
+		boolean hasTemplate = false;
 		for (Metric m : sparkplugPayload.getMetricsList()) {
 			if (m.hasDatatype()) {
 				DataType datatype = DataType.forNumber(m.getDatatype());
 
 				if (datatype == DataType.Template && m.hasTemplateValue()) {
 					Payload.Template t = m.getTemplateValue();
+
+					hasTemplate = true;
 
 					// Template definitions must be in NBIRTH messages
 					testResults.put(ID_PAYLOADS_TEMPLATE_IS_DEFINITION,
@@ -799,7 +806,7 @@ public class SendComplexDataTest extends TCKTest {
 								}
 								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
 										setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
-								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
+								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE,
 										setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
 
 							}
@@ -827,7 +834,6 @@ public class SendComplexDataTest extends TCKTest {
 				}
 			}
 		}
-
+		return hasTemplate;
 	}
-
 }

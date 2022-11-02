@@ -233,7 +233,7 @@ export default {
                             "Ensure the Host Application implementation to be tested is not running.",
                             "Start this test.",
                             "Start the Host Application.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         result: null,
@@ -275,13 +275,19 @@ export default {
                         name: "SendCommandTest",
                         readableName: "Send Command Test",
                         description:
-                            "To check that a command from a Host Application under test is correct to both an edge node (NCMD) and a device (DCMD).",
+                            `To check that a command from a Host Application under test is correct to
+                            both an Edge Node (NCMD) and a Device (DCMD). You will be asked to send a
+                            rebirth and a metric value update command to an Edge Node and a Device in
+                            sequence. If you don't connect the Edge Node before the test runs, a 
+                            simulated Edge Node will be used.`,
                         requirements: [
+                            "Connect this console to the HiveMQ broker.",
+                            "Set the Group, Edge Node and Device Id of the Edge Node/Device to be used.",
                             "Start the Host Application, if it is not yet running.",
-                            "Setup a MQTT Connection.",
-                            "Set a Host Application Id that is used by an Application.",
+                            "Optionally start your Edge Node implementation.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Follow the instructions in the sequence of dialogs. Press OK to move forward.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -363,7 +369,7 @@ export default {
                             "Connect this console to the HiveMQ broker.",
                             "Set a Host Application Id that is used by an Application.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -408,7 +414,7 @@ export default {
                             "Configure the Host Application to connect to the two brokers.",
                             "Start this test.",
                             "Start the Host Application implementation to test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -509,7 +515,7 @@ export default {
                         testType: "EONNODE",
                         name: "SendDataTest",
                         readableName: "Send Data Test",
-                        description: `"This is the Edge Node Sparkplug send data test.
+                        description: `This is the Edge Node Sparkplug send data test.
                             It determines the MQTT client ID of the Edge Node from the MQTT connect,
                             so you must connect the Edge Node after the test has started.
                         `,
@@ -519,7 +525,7 @@ export default {
                             "Ensure the Edge Node is not connected to the broker.",
                             "Start this test.",
                             "Connect the Edge Node and send data from the Edge Node and Device.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -539,15 +545,18 @@ export default {
                         name: "SendComplexDataTest",
                         readableName: "Send Complex Data Test",
                         description: `This is the Sparkplug test to validate the Edge Node sending complex
-                        data types: DataSets, Templates and Custom Properties.
+                        data types: DataSets, Templates and Custom Properties. It determines the MQTT client
+                        ID of the Edge Node from the MQTT connect, so you must connect the Edge Node after
+                        the test has started.
                         `,
                         requirements: [
-                            "Setup a MQTT Connection.",
+                            "Connect this console to the HiveMQ broker.",
                             "Set Device Id that is used by the configured Group and Edge.",
+                            "Ensure the Edge Node is not connected to the broker.",
                             "Start this test.",
-                            "Connect the Device and send some Data",
-                            "The Edge Node and Devices should publish a DATA command.",
-                            "Wait until Tests are finished and check Results."
+                            "Connect the Edge Node and send data from the Edge Node and Device.",
+                            "Wait until the test is finished and check the results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_id: {
@@ -572,7 +581,8 @@ export default {
                             "Start this test.",
                             "Disconnect and Connect the Device.",
                             "The Edge Node and Devices should receive a rebirth command.",
-                            "Wait until Tests are finished and check Results."
+                            "Wait until the test is finished and check the results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             device_id: {
@@ -601,7 +611,7 @@ export default {
                             "Ensure no Host Application is connected to the HiveMQ broker.",
                             "Start the edge node to test.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
@@ -632,7 +642,7 @@ export default {
                             "Set the broker URI of the second broker.",
                             "Start the Edge Node implementation to test.",
                             "Start this test.",
-                            "Wait until Tests are finished and check Results.",
+                            "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
