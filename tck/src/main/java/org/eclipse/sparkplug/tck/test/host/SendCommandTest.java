@@ -34,6 +34,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCM
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAME_CMD_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NCMD_SEQ;
@@ -60,6 +61,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_Q
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_TIMESTAMP;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_CMD_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_QOS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NCMD_SEQ;
@@ -137,23 +139,22 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 public class SendCommandTest extends TCKTest {
 
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
-	private static final String EDGE_METRIC = "TCK_metric/Boolean";
-	private static final String DEVICE_METRIC = "Inputs/0";
 
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
-	private final @NotNull List<String> testIds = List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB,
-			ID_TOPICS_NCMD_MQTT, ID_PAYLOADS_NCMD_QOS, ID_PAYLOADS_NCMD_RETAIN, ID_TOPICS_NCMD_TIMESTAMP,
-			ID_PAYLOADS_NCMD_SEQ, ID_PAYLOADS_NCMD_TIMESTAMP, ID_TOPICS_NCMD_PAYLOAD,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB,
-			ID_TOPICS_DCMD_MQTT, ID_PAYLOADS_DCMD_QOS, ID_PAYLOADS_DCMD_RETAIN, ID_TOPICS_DCMD_TIMESTAMP,
-			ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ, ID_TOPICS_DCMD_PAYLOAD,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE, ID_TOPICS_NCMD_TOPIC, ID_TOPICS_DCMD_TOPIC);
+	private final @NotNull List<String> testIds =
+			List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB, ID_TOPICS_NCMD_MQTT, ID_PAYLOADS_NCMD_QOS,
+					ID_PAYLOADS_NCMD_RETAIN, ID_TOPICS_NCMD_TIMESTAMP, ID_PAYLOADS_NCMD_SEQ, ID_PAYLOADS_NCMD_TIMESTAMP,
+					ID_TOPICS_NCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
+					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
+					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
+					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB, ID_TOPICS_DCMD_MQTT, ID_PAYLOADS_DCMD_QOS,
+					ID_PAYLOADS_DCMD_RETAIN, ID_TOPICS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ,
+					ID_TOPICS_DCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
+					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
+					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
+					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE, ID_TOPICS_NCMD_TOPIC, ID_TOPICS_DCMD_TOPIC,
+					ID_PAYLOADS_NAME_CMD_REQUIREMENT);
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
@@ -328,7 +329,8 @@ public class SendCommandTest extends TCKTest {
 		if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId)) {
 			if (state == TestStatus.EXPECT_NODE_REBIRTH) {
 				checkNodeCommand(clientId, packet);
-				publishToTckConsolePrompt("Send an edge command to edge node " + edgeNodeId + " metric " + EDGE_METRIC);
+				publishToTckConsolePrompt(
+						"Send an edge command to edge node " + edgeNodeId + " to update a metric value");
 				state = TestStatus.EXPECT_NODE_COMMAND;
 			} else if (state == TestStatus.EXPECT_NODE_COMMAND) {
 				checkNodeCommand(clientId, packet);
@@ -341,7 +343,7 @@ public class SendCommandTest extends TCKTest {
 			if (state == TestStatus.EXPECT_DEVICE_REBIRTH) {
 				checkDeviceCommand(clientId, packet);
 				publishToTckConsolePrompt("Send a device command to device " + deviceId + " at edge node " + edgeNodeId
-						+ " metric " + DEVICE_METRIC);
+						+ " to update a metric value");
 				state = Constants.TestStatus.EXPECT_DEVICE_COMMAND;
 			} else if (state == TestStatus.EXPECT_DEVICE_COMMAND) {
 				checkDeviceCommand(clientId, packet);
@@ -417,6 +419,8 @@ public class SendCommandTest extends TCKTest {
 		boolean goodTopic =
 				topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NCMD + "/" + edgeNodeId);
 		testResults.put(ID_TOPICS_NCMD_TOPIC, setResult(goodTopic, TOPICS_NCMD_TOPIC));
+
+		checkPayloadsTimestampCommand(inboundPayload, topic);
 	}
 
 	@SpecAssertion(
@@ -486,6 +490,8 @@ public class SendCommandTest extends TCKTest {
 		boolean goodTopic = topic.equals(
 				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId);
 		testResults.put(ID_TOPICS_DCMD_TOPIC, setResult(goodTopic, TOPICS_DCMD_TOPIC));
+
+		checkPayloadsTimestampCommand(inboundPayload, topic);
 	}
 
 	@SpecAssertion(
@@ -495,8 +501,6 @@ public class SendCommandTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE)
 	private Boolean[] checkValidDeviceCommandPayload(PayloadOrBuilder payload) {
-		logger.info("Host - {}  - PUBLISH - checkValidDeviceCommandPayload {}, {} ", getName(), payload, state);
-
 		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
 		if (payload != null) {
@@ -507,7 +511,7 @@ public class SendCommandTest extends TCKTest {
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
-				if (current.getName().equals(DEVICE_METRIC)) {
+				if (current.hasName()) {
 					bValidPayload[2] = true;
 				}
 
@@ -544,8 +548,6 @@ public class SendCommandTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE)
 	private Boolean[] checkValidCommandPayload(PayloadOrBuilder payload) {
-		logger.info("Host - {}  - PUBLISH - checkValidCommandPayload {}, {} ", getName(), payload, state);
-
 		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
 		if (payload != null) {
@@ -556,11 +558,10 @@ public class SendCommandTest extends TCKTest {
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
 				Metric current = metricIterator.next();
-				if (current.getName().equals(EDGE_METRIC)) {
+				if (current.hasName()) {
 					bValidPayload[2] = true;
-				} else if (current.getName().equals(NODE_CONTROL_REBIRTH)) {
-					bValidPayload[2] = true;
-
+				}
+				if (current.getName().equals(NODE_CONTROL_REBIRTH)) {
 					logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
 							OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB);
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
@@ -595,5 +596,28 @@ public class SendCommandTest extends TCKTest {
 			}
 		}
 		return bValidPayload;
+	}
+
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_METRIC,
+			id = ID_PAYLOADS_NAME_CMD_REQUIREMENT)
+	public void checkPayloadsTimestampCommand(final @NotNull PayloadOrBuilder sparkplugPayload, String topic) {
+		logger.debug("Check Req: The timestamp MAY be included with metrics in NCMD and DCMD messages.");
+		boolean hasTimestamp = false;
+		if (topic.contains(TOPIC_PATH_NCMD) || topic.contains(TOPIC_PATH_DCMD)) {
+			for (Metric m : sparkplugPayload.getMetricsList()) {
+				if (!m.hasTimestamp()) {
+					hasTimestamp = true;
+					break;
+				}
+			}
+		}
+		// TODO: consider handling of MAY requirement
+		if (hasTimestamp) {
+			log(getName() + " timestamp IS included in command message " + topic);
+		} else {
+			log(getName() + " timestamp IS NOT included in command message " + topic);
+		}
+		testResults.put(ID_PAYLOADS_NAME_CMD_REQUIREMENT, setResult(true, PAYLOADS_NAME_CMD_REQUIREMENT));
 	}
 }
