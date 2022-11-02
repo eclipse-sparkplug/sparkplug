@@ -394,6 +394,7 @@ public class MultipleBrokerTest extends TCKTest {
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_BIRTH_SEQUENCE_WAIT);
 
 				// the edge node has reconnected to server 1 so that's the end of the test
+				state = TestStatus.ENDING;
 				executorService.schedule(new Runnable() {
 					@Override
 					public void run() {
@@ -415,11 +416,13 @@ public class MultipleBrokerTest extends TCKTest {
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_NDEATH + "/"
 				+ edgeNodeId)) {
 
-			if (state == TestStatus.EXPECT_DEATHS_AND_BIRTHS && births_on == 2) {
+			if (state == TestStatus.ENDING) {
+
+			} else if (state == TestStatus.EXPECT_DEATHS_AND_BIRTHS && births_on == 2) {
 
 			} else {
 				// any other state is wrong
-				logger.error("{} error received DBIRTH in state {}", getName(), state.toString());
+				logger.error("{} error received NDEATH in state {}", getName(), state.toString());
 
 				Utils.setResult(testResults, false,
 						ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK,
@@ -427,11 +430,14 @@ public class MultipleBrokerTest extends TCKTest {
 			}
 		} else if (topic.equals(Constants.TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + Constants.TOPIC_PATH_DDEATH + "/"
 				+ edgeNodeId + "/" + deviceId)) {
-			if (state == TestStatus.EXPECT_DEATHS_AND_BIRTHS && births_on == 2) {
+
+			if (state == TestStatus.ENDING) {
+
+			} else if (state == TestStatus.EXPECT_DEATHS_AND_BIRTHS && births_on == 2) {
 
 			} else {
 				// any other state is wrong
-				logger.error("{} error received DBIRTH in state {}", getName(), state.toString());
+				logger.error("{} error received DDEATH in state {}", getName(), state.toString());
 
 				Utils.setResult(testResults, false,
 						ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_WALK,
