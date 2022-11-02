@@ -639,10 +639,12 @@ public class SendComplexDataTest extends TCKTest {
 					if (types.size() == d.getTypesCount()) {
 						for (int i = 0; i < types.size(); ++i) {
 							int curtype = d.getTypes(i);
-							if (curtype >= 0 && curtype <= DataType.Text.getNumber()) {
+							if (curtype <= 0 && curtype >= DataType.Text.getNumber()) {
+								logger.warn("Bad uint32type DataSet type '{}' in Types: {}", curtype, types);
 								uint32types = false;
 							}
-							if (!valueTypes.contains(DataType.forNumber(curtype))) {
+							if (!types.contains(curtype)) {
+								logger.warn("Invalid DataSet type '{}' in Types: {}", curtype, types);
 								validtypes = false;
 							}
 						}
