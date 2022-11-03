@@ -230,6 +230,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private boolean ignoreSeqNumCheck = false;
 
+	private boolean ignoreDupHostCheck = false;
+
 	public Monitor(Results results) {
 		logger.info("Sparkplug TCK message monitor 1.0");
 		this.results = results;
@@ -264,6 +266,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public void setIgnoreSeqNumCheck(boolean ignoreSeqNumCheck) {
 		this.ignoreSeqNumCheck = ignoreSeqNumCheck;
+	}
+
+	public void setIgnoreDupHostCheck(boolean ignoreDupHostCheck) {
+		this.ignoreDupHostCheck = ignoreDupHostCheck;
 	}
 
 	public boolean hasEdgeNode(String groupId, String edgeNodeId) {
@@ -1325,6 +1331,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			section = Sections.OPERATIONAL_BEHAVIOR_SPARKPLUG_HOST_APPLICATION_SESSION_ESTABLISHMENT,
 			id = ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_HOST_ID)
 	private void handleSTATE(String clientId, String topic, String payload) {
+		if (ignoreDupHostCheck) {
+			return;
+		}
+
 		String hostid = null;
 		String[] topicParts = topic.split("/");
 		if (topicParts.length == 3) {

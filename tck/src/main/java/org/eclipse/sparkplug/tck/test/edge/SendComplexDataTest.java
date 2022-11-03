@@ -275,7 +275,6 @@ public class SendComplexDataTest extends TCKTest {
 		boolean isCommandTopic =
 				isSparkplugTopic && (topic.contains(TOPIC_PATH_NCMD) || topic.contains(TOPIC_PATH_DCMD));
 
-		checkDatatypeValidType(packet);
 		checkPropertiesValidType(packet, topic);
 		checkSequenceNumberIncluded(packet, topic);
 
@@ -283,6 +282,8 @@ public class SendComplexDataTest extends TCKTest {
 			checkDataTopicPayload(clientId, packet, topic);
 		} else if (isCommandTopic) {
 			checkCommandTopicPayload(clientId, packet, topic);
+		} else {
+			checkDatatypeValidType(packet);
 		}
 
 		checkDataSet(packet);
@@ -546,6 +547,7 @@ public class SendComplexDataTest extends TCKTest {
 				|| topic.contains(TOPIC_PATH_DCMD)) {
 			for (Metric m : sparkplugPayload.getMetricsList()) {
 				if (m.hasDatatype()) {
+					logger.info("On topic={} - Invalid payload: {}", topic, sparkplugPayload);
 					isValid = false;
 					break;
 				}
