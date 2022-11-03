@@ -153,7 +153,7 @@ public class MultipleBrokerTest extends TCKTest {
 			logger.error("endTest", e);
 		}
 
-		utilities.getMonitor().setIgnoreSeqNumCheck(false);
+		utilities.getMonitor().setIgnoreBdSeqNumCheck(false);
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
