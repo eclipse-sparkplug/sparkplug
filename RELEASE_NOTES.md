@@ -15,5 +15,6 @@
 * Incorprated a 'coverage report' to show which assertions in the spec are covered by the TCK
 ![alt text](https://github.com/eclipse/sparkplug/raw/develop/release_notes_images/3.0.0_coverage.png)
 * Created an interactive web UI for using the TCK
+![alt text](https://github.com/eclipse/sparkplug/raw/develop/release_notes_images/3.0.0_webui.png)
 * Added automated tests for all 298 testable assertions in the specification
 * Added output reporting for users when exercising the TCK
