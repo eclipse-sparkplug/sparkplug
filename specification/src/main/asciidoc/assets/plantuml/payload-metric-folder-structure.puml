@@ -1,0 +1,16 @@
+@startsalt
+scale 2
+{
+{T!
++**__Metric__**       | **__Value__**       | **__Data Type__**
++ **group_id**        | ""               "" | ""               "" 
+++ edge_node_id       | ""               "" | ""               ""
++++ device_id         | ""               "" | ""               ""
+++++ Metric Level 1   | ""               "" | ""               ""
++++++ Metric Level 2  | ""               "" | ""               ""
+++++++ Metric Name    | ""               "" | ""               ""
+}
+}
+@endsalt
+
+

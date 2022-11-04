@@ -14,32 +14,59 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
-import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
-import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
-import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
-import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+import static org.eclipse.sparkplug.tck.test.common.Constants.FAIL;
+import static org.eclipse.sparkplug.tck.test.common.Constants.NOT_EXECUTED;
+import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_STATE;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setShouldResultIfNotFail;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.TopicConstants;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
+import com.hivemq.extension.sdk.api.packets.connect.WillPublishPacket;
+import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
+import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
+import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
+import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 /**
  * This is the edge node Sparkplug session establishment.
@@ -49,26 +76,26 @@ import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+		version = "3.0.0-rc1")
 public class SessionEstablishmentTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
-
 	private final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
-			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION, ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ,
-			ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD, ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN,
-			ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS, ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ,
-			ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH, ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP,
-			ID_PAYLOADS_NBIRTH_REBIRTH_REQ, ID_PAYLOADS_NDEATH_BDSEQ, ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE,
-			ID_TOPICS_NBIRTH_MQTT, ID_TOPICS_NBIRTH_SEQ_NUM, ID_TOPICS_NBIRTH_TIMESTAMP,
-			ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, ID_TOPICS_NBIRTH_BDSEQ_MATCHING, ID_TOPICS_NBIRTH_REBIRTH_METRIC,
-			ID_PAYLOADS_DBIRTH_QOS, ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT, ID_TOPICS_DBIRTH_TIMESTAMP,
-			ID_PAYLOADS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ, ID_PAYLOADS_DBIRTH_SEQ_INC,
-			ID_PAYLOADS_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE,
-			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
-			ID_TOPICS_NBIRTH_METRICS, ID_TOPICS_DBIRTH_METRICS, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS,
+			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311, ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50,
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ, ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD,
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN, ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS,
+			ID_PAYLOADS_NBIRTH_RETAIN, ID_PAYLOADS_NBIRTH_SEQ, ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
+			ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP, ID_PAYLOADS_NBIRTH_REBIRTH_REQ,
+			ID_PAYLOADS_NDEATH_BDSEQ, ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE, ID_TOPICS_NBIRTH_MQTT,
+			ID_TOPICS_NBIRTH_SEQ_NUM, ID_TOPICS_NBIRTH_TIMESTAMP, ID_TOPICS_NBIRTH_BDSEQ_INCLUDED,
+			ID_TOPICS_NBIRTH_BDSEQ_MATCHING, ID_TOPICS_NBIRTH_REBIRTH_METRIC, ID_PAYLOADS_DBIRTH_QOS,
+			ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT, ID_TOPICS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_TIMESTAMP,
+			ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ, ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_DBIRTH_ORDER,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES,
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
+			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES, ID_TOPICS_NBIRTH_METRICS,
+			ID_TOPICS_DBIRTH_METRICS, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS,
 			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
 			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD,
@@ -83,9 +110,12 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_QOS, ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
-			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC);
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC, ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
+			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS, ID_TOPICS_NBIRTH_TOPIC,
+			ID_TOPICS_DBIRTH_TOPIC, ID_CASE_SENSITIVITY_METRIC_NAMES);
 
 	private final @NotNull TCK theTCK;
+	private @NotNull Utilities utilities = null;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
 
 	private @NotNull String testClientId = null;
@@ -102,16 +132,22 @@ public class SessionEstablishmentTest extends TCKTest {
 	private @NotNull long seq = -1;
 	private @NotNull long deathBdSeq = -1;
 	private @NotNull long birthBdSeq = -1;
+	private @NotNull HashSet<Long> aliases = new HashSet<Long>();
 
-	public SessionEstablishmentTest(final @NotNull TCK aTCK, final @NotNull String[] parms) {
+	// Host Application variables
+	private boolean hostCreated = false;
+
+	private PublishService publishService = Services.publishService();
+
+	public SessionEstablishmentTest(TCK aTCK, Utilities utilities, String[] parms, Results.Config config) {
 		logger.info("Edge Node session establishment test. Parameters: {} ", Arrays.asList(parms));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
 		if (parms.length < 3) {
-			String errmsg = "Parameters to edge session establishment test must be: hostApplicationId groupId edgeNodeId [deviceIds]"; 
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+			log("Not enough parameters: " + Arrays.toString(parms));
+			log("Parameters to edge session establishment test must be: hostApplicationId groupId edgeNodeId [deviceIds]");
+			throw new IllegalArgumentException();
 		}
 
 		hostApplicationId = parms[0];
@@ -135,6 +171,18 @@ public class SessionEstablishmentTest extends TCKTest {
 		}
 		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device ids: {}", hostApplicationId,
 				groupId, edgeNodeId, deviceIds.keySet());
+
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			logger.info("Host Application is online, so using that");
+		} else {
+			logger.info("Creating host application");
+			try {
+				utilities.getHostApps().hostOnline(hostApplicationId, true);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
+		}
 	}
 
 	public String getName() {
@@ -152,6 +200,13 @@ public class SessionEstablishmentTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
+		if (hostCreated) {
+			try {
+				utilities.getHostApps().hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
 		testClientId = null;
 		nbirthFound = false;
 		nbirthTopic = false;
@@ -162,7 +217,10 @@ public class SessionEstablishmentTest extends TCKTest {
 
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_PERSISTENT_VS_NON_PERSISTENT_CONNECTIONS,
-			id = ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION)
+			id = ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311)
+	@SpecAssertion(
+			section = Sections.PRINCIPLES_PERSISTENT_VS_NON_PERSISTENT_CONNECTIONS,
+			id = ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
@@ -197,9 +255,17 @@ public class SessionEstablishmentTest extends TCKTest {
 				setResult(testClientId != null, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_CONNECT));
 
 		if (testClientId != null) {
-			logger.debug("Check Req: Clean session should be set to true.");
-			testResults.put(ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION,
-					setResult(packet.getCleanStart(), PRINCIPLES_PERSISTENCE_CLEAN_SESSION));
+
+			if (packet.getMqttVersion() == MqttVersion.V_5) {
+				logger.debug("Check Req: Clean start = true, session expiry interval = 0.");
+				testResults.put(ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50,
+						setResult(packet.getCleanStart() && (packet.getSessionExpiryInterval() == 0),
+								PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50));
+			} else {
+				logger.debug("Check Req: Clean session should be set to true.");
+				testResults.put(ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311,
+						setResult(packet.getCleanStart(), PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311));
+			}
 
 			try {
 				willPublishPacketOptional = checkWillMessage(packet);
@@ -217,18 +283,23 @@ public class SessionEstablishmentTest extends TCKTest {
 
 	@Override
 	public void disconnect(String clientId, DisconnectPacket packet) {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void subscribe(final @NotNull String clientId, final @NotNull SubscribePacket packet) {
 		logger.info("Edge session establishment test - subscribe");
+
+		if (testClientId == null || !testClientId.equals(clientId)) {
+			return; // ignore subscriptions from any other client
+		}
+
 		// Example: spBv1.0/Group1/DBIRTH/Edge1/Device1
 		List<Subscription> subscriptions = packet.getSubscriptions();
 		for (Subscription s : subscriptions) {
 			String[] levels = s.getTopicFilter().split("/");
 
-			if (levels[0].equals(TOPIC_ROOT_STATE) && levels[1].equals(hostApplicationId)) {
+			if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(TOPIC_PATH_STATE)
+					&& levels[2].equals(hostApplicationId)) {
 				stateFound = true;
 			} else if (testClientId != null && testClientId.equals(clientId)) {
 				if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(groupId)) {
@@ -246,6 +317,13 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PRINCIPLES_BIRTH_AND_DEATH_CERTIFICATES,
 			id = ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDATA,
+			id = ID_PAYLOADS_NDATA_ORDER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_ORDER)
+
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 		if (testClientId != null && testClientId.equals(clientId)) {
 			logger.info("Edge session establishment test - publish -  to topic: {} ", packet.getTopic());
@@ -265,6 +343,11 @@ public class SessionEstablishmentTest extends TCKTest {
 					boolean bValid = !(ndataFound || ddataFound);
 					testResults.put(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
 							setResult(bValid, PRINCIPLES_BIRTH_CERTIFICATES_ORDER));
+
+					testResults.put(ID_PAYLOADS_NDATA_ORDER, setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
+
+					testResults.put(ID_PAYLOADS_DDATA_ORDER, setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
+
 					nbirthFound = true;
 				}
 			}
@@ -310,6 +393,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_METRIC,
 			id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_METRIC,
+			id = ID_PAYLOADS_ALIAS_UNIQUENESS)
 	public void checkPayloadsAliasAndNameRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug("Check Req: "
 				+ "if alias is included, NBIRTH and DBIRTH messages MUST include both a metric name and alias.");
@@ -322,6 +408,12 @@ public class SessionEstablishmentTest extends TCKTest {
 			if (current.hasAlias() && !current.hasName()) {
 				isValid = false;
 				break;
+			}
+			if (current.hasAlias()) {
+				Long alias = current.getAlias();
+				testResults.put(ID_PAYLOADS_ALIAS_UNIQUENESS,
+						setResult(!aliases.contains(alias), PAYLOADS_ALIAS_UNIQUENESS));
+				aliases.add(alias);
 			}
 		}
 		testResults.put(ID_PAYLOADS_NAME_REQUIREMENT, setResult(isValid, PAYLOADS_ALIAS_BIRTH_REQUIREMENT));
@@ -363,10 +455,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			WillPublishPacket willPublishPacket = willPublishPacketOptional.get();
 			boolean bValid = (willPublishPacket.getQos().getQosNumber() == 1);
 			testResults.put(ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, setResult(bValid, PAYLOADS_NDEATH_WILL_MESSAGE_QOS));
-
-			// TODO: conflicts with above
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS,
-					setResult((willPublishPacket.getQos().getQosNumber() == 0),
+					setResult((willPublishPacket.getQos().getQosNumber() == 1),
 							MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_QOS));
 
 			PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(willPublishPacket);
@@ -387,7 +477,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
 
 				logger.debug("Check Req: NDEATH must not include a sequence number");
-				bValid = sparkplugPayload.hasSeq();
+				bValid = !sparkplugPayload.hasSeq();
 				testResults.put(ID_PAYLOADS_NDEATH_SEQ, setResult(bValid, PAYLOADS_NDEATH_SEQ));
 				testResults.put(ID_TOPICS_NDEATH_SEQ, setResult(bValid, TOPICS_NDEATH_SEQ));
 				testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
@@ -435,6 +525,9 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
+			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES)
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_METRIC,
@@ -456,7 +549,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_PAYLOAD,
-			id = ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH)
+			id = ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_TIMESTAMP)
@@ -494,12 +587,20 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NBIRTH,
+			id = ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT)
+	@SpecAssertion(
+			section = Sections.TOPICS_BIRTH_MESSAGE_NBIRTH,
+			id = ID_TOPICS_NBIRTH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
+			id = ID_CASE_SENSITIVITY_METRIC_NAMES)
 	public void checkNBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
 		long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
 
-		// TODO: if the edge node is configured to wait for a primary host application:
 		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT,
 				setResult(stateFound, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT));
 
@@ -521,6 +622,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		nbirthTopic = topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NBIRTH + "/" + edgeNodeId);
 		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC,
 				setResult(nbirthTopic, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_TOPIC));
+		testResults.put(ID_TOPICS_NBIRTH_TOPIC, setResult(nbirthTopic, TOPICS_NBIRTH_TOPIC));
 
 		// Payload checks
 		PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
@@ -535,8 +637,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			seq = sparkplugPayload.getSeq();
 			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((seq == 0), PAYLOADS_NBIRTH_SEQ));
 			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((seq == 0), TOPICS_NBIRTH_SEQ_NUM));
-			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH,
-					setResult((seq == 0), PAYLOADS_SEQUENCE_NUM_ZERO_NBIRTH));
+			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
+					setResult((seq >= 0 && seq <= 255), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
 
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
 					setResult((seq >= 0 && seq <= 255), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
@@ -559,14 +661,24 @@ public class SessionEstablishmentTest extends TCKTest {
 			boolean rebirthVal = true;
 			DataType datatype = null;
 			List<Metric> metrics = sparkplugPayload.getMetricsList();
+			Set<String> metric_names = new HashSet<String>();
 			for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
 					bdSeqFound = true;
 					birthBdSeq = m.getLongValue();
 				} else if (m.getName().equals("Node Control/Rebirth")) {
 					rebirthFound = true;
-					datatype = DataType.valueOf(m.getDatatype());
+					datatype = DataType.forNumber(m.getDatatype());
 					rebirthVal = m.getBooleanValue();
+					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES,
+							setResult(m.hasAlias() == false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES));
+				}
+
+				if (m.hasName()) {
+					String name = m.getName().toLowerCase();
+					setShouldResultIfNotFail(testResults, !metric_names.contains(name),
+							ID_CASE_SENSITIVITY_METRIC_NAMES, CASE_SENSITIVITY_METRIC_NAMES);
+					metric_names.add(name);
 				}
 
 				if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
@@ -587,11 +699,15 @@ public class SessionEstablishmentTest extends TCKTest {
 
 			testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ, setResult(birthBdSeq != -1, PAYLOADS_NBIRTH_BDSEQ));
 			testResults.put(ID_TOPICS_NBIRTH_BDSEQ_INCLUDED, setResult(birthBdSeq != -1, TOPICS_NBIRTH_BDSEQ_INCLUDED));
+
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ,
 					setResult(birthBdSeq == deathBdSeq, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ));
 
+			testResults.put(ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
+					setResult(birthBdSeq == deathBdSeq, PAYLOADS_NBIRTH_BDSEQ_REPEAT));
+
 			if (testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ) == null
-					|| testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(TopicConstants.PASS)) {
+					|| testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(Constants.PASS)) {
 				logger.debug(
 						"Check req: The datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.");
 				int hasDataTypeCnt = countDataType(metrics);
@@ -682,6 +798,21 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_NDATA,
+			id = ID_PAYLOADS_NDATA_ORDER)
+	@SpecAssertion(
+			section = Sections.PAYLOADS_B_DDATA,
+			id = ID_PAYLOADS_DDATA_ORDER)
+	@SpecAssertion(
+			section = Sections.TOPICS_BIRTH_MESSAGE_DBIRTH,
+			id = ID_TOPICS_DBIRTH_TOPIC)
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
+			id = ID_CASE_SENSITIVITY_METRIC_NAMES)
 	public void checkDBirth(final @NotNull PublishPacket packet) {
 		Date receivedBirth = new Date();
 		long millisReceivedBirth = receivedBirth.getTime();
@@ -734,6 +865,8 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC,
 				setResult(goodTopic && nbirthTopic, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_TOPIC));
+
+		testResults.put(ID_TOPICS_DBIRTH_TOPIC, setResult(goodTopic && nbirthTopic, TOPICS_DBIRTH_TOPIC));
 
 		// Payload checks
 		PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
@@ -805,12 +938,20 @@ public class SessionEstablishmentTest extends TCKTest {
 			checkPayloadsNameInDataRequirement(sparkplugPayload);
 			checkPayloadsAliasAndNameRequirement(sparkplugPayload);
 
+			Set<String> metric_names = new HashSet<String>();
 			List<Metric> metrics = sparkplugPayload.getMetricsList();
 			for (Metric m : metrics) {
 				if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
 					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(false, TOPICS_DBIRTH_METRICS));
 				} else if (testResults.get(ID_TOPICS_DBIRTH_METRICS) == null) {
 					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(true, TOPICS_DBIRTH_METRICS));
+				}
+
+				if (m.hasName()) {
+					String name = m.getName().toLowerCase();
+					setShouldResultIfNotFail(testResults, !metric_names.contains(name),
+							ID_CASE_SENSITIVITY_METRIC_NAMES, CASE_SENSITIVITY_METRIC_NAMES);
+					metric_names.add(name);
 				}
 
 				if (!Utils.hasValue(m)) {
@@ -823,6 +964,12 @@ public class SessionEstablishmentTest extends TCKTest {
 					}
 				}
 			}
+
+			testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
+					setResult(true, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD));
+		} else {
+			testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD,
+					setResult(false, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD));
 		}
 
 		// if this was the final dbirth to check, then we can end the test
@@ -832,6 +979,11 @@ public class SessionEstablishmentTest extends TCKTest {
 					"Check Req: DBIRTH must be sent before any NDATA/DDATA messages are published by the edge node");
 			boolean bValid = !(ndataFound || ddataFound);
 			testResults.put(ID_PAYLOADS_DBIRTH_ORDER, setResult(bValid, PAYLOADS_DBIRTH_ORDER));
+
+			testResults.put(ID_PAYLOADS_NDATA_ORDER, setResult(!ndataFound, PAYLOADS_NDATA_ORDER));
+
+			testResults.put(ID_PAYLOADS_DDATA_ORDER, setResult(!ddataFound, PAYLOADS_DDATA_ORDER));
+
 			checkSubscribeTopics();
 			theTCK.endTest();
 		}

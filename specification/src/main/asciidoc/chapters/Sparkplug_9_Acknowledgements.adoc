@@ -10,5 +10,35 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[acknowledgements]]
 == Acknowledgements
+
+The specification would not exist without the initial contribution of the Sparkplug specification by
+Cirrus Link Solutions, Wes Johnson, Chad Kienle, and Arlen Nipper. They have also continued to
+be involved in promoting, developing, and contributing to the Sparkplug community.
+
+The following individuals are members of the Eclipse Sparkplug Working Group, the Eclipse Sparkplug
+Specification project, the Eclipse Tahu project, or otherwise contributed in a meaningful way to the
+Sparkplug Specification.
+
+* Lukas Brand (HiveMQ)
+* Ilya Binshtok (Cirrus Link Solutions)
+* Justin Brzozoski (SignalFire)
+* Travis Cox (Inductive Automation)
+* Ian Craggs (individual)
+* Nathan Davenport (Cirrus Link Solutions)
+* Frédéric Desbiens (Eclipse Foundation)
+* Alex Godbehere (AMRC)
+* Anja Helmbrecht-Schaar (HiveMQ)
+* Benson Hougland (Opto 22)
+* Wes Johnson (Cirrus Link Solutions)
+* Chad Kienle (Cirrus Link Solutions)
+* Mitchell McPartland (Inductive Automation)
+* Bryce Nakatani (Opto 22)
+* Arlen Nipper (Cirrus Link Solutions)
+* Dominik Obermaier (HiveMQ)
+* Alexander Schwartz (individual)
+* Josh Wolf (Canary Labs)

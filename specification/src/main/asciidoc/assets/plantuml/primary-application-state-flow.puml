@@ -1,0 +1,76 @@
+@startuml
+!pragma teoz true
+participant "Primary Host Application" as PrimApp #lightblue
+database "MQTT Server #1" as Server1 #lightblue
+database "MQTT Server #2" as Server2 #lightblue
+database "MQTT Server #n" as ServerN #lightblue
+participant "Edge Node" as EdgeNode #lightblue
+
+activate PrimApp
+activate EdgeNode
+
+note left of PrimApp
+Establish a session with all defined
+MQTT servers in the infrastructure
+and publish a STATE Birth Certificate
+end note
+
+note right of EdgeNode
+**(1)**
+Establish an MQTT Session with 
+server and then subscribe to the
+STATE message. If payload is
+"OFFLINE" walk to the next server.
+end note
+
+& Server1 <-[#Black]-> EdgeNode
+
+PrimApp <-[#Black]> Server1 : **(2)** STATE="ONLINE"
+activate Server1 #LightGreen
+
+PrimApp <-[#Black]> Server2 : STATE="ONLINE"
+activate Server2 #LightGreen
+
+PrimApp <-[#Black]> ServerN : STATE="ONLINE"
+activate ServerN #LightGreen
+
+|||
+
+Server2 <-[#Black]> EdgeNode : **(3)**
+note right 
+STATE for this server is currently
+"ONLINE" so stay connected here.
+end note
+
+Server2-[hidden]->Server2
+
+PrimApp <-[#Red]-> Server2 : Network issues and MQTT session terminated
+note left
+All tags for all Edge Nodes and
+Devices connected to server #2
+set to a data quality of "STALE".
+All connection metrics updated.
+end note
+deactivate Server2 #Red
+& Server2 <-[#Black]> EdgeNode : **(4)** STATE="OFFLINE"
+/note right of EdgeNode
+STATE for this server changed to
+"OFFLINE". Connect to next 
+available server.
+end note
+
+
+note left of PrimApp
+Primary Application keeps trying to
+reestablish a session to server #2.
+Upon success, the STATE is 
+updated with a new publish.
+end note
+
+ServerN <-[#Black]> EdgeNode : **(5)**
+PrimApp <-[#Black]> Server2 : **(6)** STATE="ONLINE"
+activate Server2 #LightGreen
+
+PrimApp-[hidden]->PrimApp
+
+@enduml

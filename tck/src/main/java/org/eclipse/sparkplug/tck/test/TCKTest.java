@@ -1,4 +1,4 @@
-/* ******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2021, 2022 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
@@ -9,11 +9,27 @@
  *
  * Contributors:
  *    Ian Craggs - initial implementation and documentation
- ****************************************************************************** */
+ *******************************************************************************/
 
 package org.eclipse.sparkplug.tck.test;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_CONSOLE_PROMPT_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
+
+import java.nio.ByteBuffer;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
@@ -23,17 +39,6 @@ import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Date;
-import java.sql.Timestamp;
-
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.eclipse.sparkplug.tck.test.Monitor;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 
 /**
  * @author Ian Craggs
@@ -42,6 +47,16 @@ import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
 public abstract class TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	protected final @NotNull Map<String, String> testResults = new TreeMap<>();
+
+	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
+	}
+
+	public void onAuthenticationSuccessful(AuthenticationSuccessfulInput authenticationSuccessfulInput) {
+	}
+
+	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
+	}
 
 	public abstract void connect(String clientId, ConnectPacket packet);
 
@@ -60,7 +75,7 @@ public abstract class TCKTest {
 	public abstract void endTest(Map<String, String> results);
 
 	public void log(String message) {
-		logger.info("TCKTest log " + message);
+		logger.info("TCKTest log: " + message);
 		final PublishService publishService = Services.publishService();
 		final Publish payload = Builders.publish().topic(TCK_LOG_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(message.getBytes())).build();
@@ -77,7 +92,7 @@ public abstract class TCKTest {
 	public void reportResults(final @NotNull Map<String, String> results) {
 		logger.info("Summary Test Results for {} ", getName());
 
-		final StringBuilder summary = Utils.getSummary(results);
+		final StringBuilder summary = Results.getSummary(results);
 		logger.info(summary.toString());
 		summary.insert(0, new Timestamp(new Date().getTime()) + " Summary Test Results for " + getName()
 				+ System.lineSeparator());

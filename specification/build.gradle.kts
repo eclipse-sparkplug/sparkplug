@@ -54,7 +54,7 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
     baseDirFollowsSourceDir()
     sourceDirProperty.set(file("build/spec"))
     sources {
-        include("*.adoc", "chapters/*.adoc")
+        include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/pdf"))
 
@@ -95,7 +95,9 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
                 "pdf-theme" to "sparkplug"
         ))
     }
-
+    asciidoctorj {
+        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    }
 }
 
 val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
@@ -105,7 +107,7 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
     baseDirFollowsSourceDir()
     sourceDirProperty.set(file("build/spec"))
     sources {
-        include("*.adoc", "chapters/*.adoc")
+        include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/html"))
 
@@ -135,6 +137,9 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
                 "imagesdir" to "assets/images"
         ))
     }
+    asciidoctorj {
+        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    }
 }
 
 val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
@@ -144,7 +149,7 @@ val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::c
     baseDirFollowsSourceDir()
     sourceDirProperty.set(file("build/spec"))
     sources {
-        include("*.adoc", "chapters/*.adoc")
+        include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/docbook"))
     outputs.file(buildDir.resolve("docs/docbook/sparkplug_spec.xml"))
@@ -172,6 +177,9 @@ val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::c
                 "project-version" to version,
                 "imagesdir" to "assets/images"
         ))
+    }
+    asciidoctorj {
+        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
     }
 }
 

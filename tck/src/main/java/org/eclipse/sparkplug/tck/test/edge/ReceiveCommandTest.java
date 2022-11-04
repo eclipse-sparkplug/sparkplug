@@ -13,6 +13,50 @@
 
 package org.eclipse.sparkplug.tck.test.edge;
 
+import static org.eclipse.sparkplug.tck.test.common.Constants.PASS;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_DDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NBIRTH;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NCMD;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDEATH_WILL_MESSAGE;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3;
+import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDEATH_WILL_MESSAGE;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.sparkplug.tck.sparkplug.Sections;
+import org.eclipse.sparkplug.tck.test.Results;
+import org.eclipse.sparkplug.tck.test.TCK;
+import org.eclipse.sparkplug.tck.test.TCK.Utilities;
+import org.eclipse.sparkplug.tck.test.TCKTest;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
+import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.sparkplug.tck.test.common.Utils;
+import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
+import org.jboss.test.audit.annotations.SpecAssertion;
+import org.jboss.test.audit.annotations.SpecVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * This is the edge node Sparkplug receive command test.
  *
@@ -39,76 +83,60 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectPacket;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
+import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.builder.Builders;
 import com.hivemq.extension.sdk.api.services.publish.Publish;
 import com.hivemq.extension.sdk.api.services.publish.PublishService;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
-import org.eclipse.sparkplug.tck.sparkplug.Sections;
-import org.eclipse.sparkplug.tck.test.TCK;
-import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
-import org.eclipse.sparkplug.tck.test.common.Utils;
-import org.jboss.test.audit.annotations.SpecAssertion;
-import org.jboss.test.audit.annotations.SpecVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-
-import static org.eclipse.sparkplug.tck.test.common.Requirements.*;
-import static org.eclipse.sparkplug.tck.test.common.TopicConstants.*;
-import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+		version = "3.0.0-rc1")
 public class ReceiveCommandTest extends TCKTest {
 
 	private static final String BD_SEQ = "bdSeq";
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull TCK theTCK;
-	private final @NotNull Map<String, String> testResults = new HashMap<>();
+	private @NotNull Utilities utilities = null;
 
 	private final @NotNull List<String> testIds = List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,
 			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3, ID_PAYLOADS_NDEATH_WILL_MESSAGE);
 
-	private @NotNull status state;
+	private @NotNull TestStatus state;
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;
 	private @NotNull String hostApplicationId;
-	private @NotNull long deathBdSeq;
+	private @NotNull long deathBdSeq = -1;
 	private String edgeNodeClientId;
 	private boolean bNBirth = false, bDBirth = false;
 	private PublishService publishService = Services.publishService();
+	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
 
-	public ReceiveCommandTest(TCK aTCK, String[] params) {
+	// Host Application variables
+	private boolean hostCreated = false;
+
+	public ReceiveCommandTest(TCK aTCK, Utilities utilities, String[] params, Results.Config config) {
 		logger.info("{} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
+		this.utilities = utilities;
 
-		if (params.length < 3) {
-			String errmsg = "Parameters to edge receive command test must be: groupId edgeNodeId deviceId";
-			logger.error(errmsg);
-			prompt(errmsg);
-			throw new IllegalArgumentException(errmsg);
+		if (params.length < 4) {
+			log("Not enough parameters: " + Arrays.toString(params));
+			log("Parameters to edge receive command test must be: hostApplicationId groupId edgeNodeId deviceId");
+			throw new IllegalArgumentException();
 		}
-		state = status.START;
+		state = TestStatus.NONE;
 		deathBdSeq = -1;
-		groupId = params[0];
-		edgeNodeId = params[1];
-		deviceId = params[2];
-		logger.info("Parameters are  GroupId: {}, EdgeNodeId: {}, DeviceId: {}", groupId, edgeNodeId, deviceId);
-
-		sendCommand(true);
+		hostApplicationId = params[0];
+		groupId = params[1];
+		edgeNodeId = params[2];
+		deviceId = params[3];
+		logger.info("Host application id: {}, Group id: {}, Edge node id: {}, Device id: {}", hostApplicationId,
+				groupId, edgeNodeId, deviceId);
 
 		// indicate we are testing the receipt of NBIRTH and DBIRTH messages after a rebirth command
 		// set this assertion value to false by default, then track the receipt of both NBIRTH and DBIRTH messages for
@@ -116,8 +144,27 @@ public class ReceiveCommandTest extends TCKTest {
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2,
 				setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2));
 
-		// this will fail if we receive a data message
+		// this will fail if we receive a data message at the wrong time
 		testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1, PASS);
+
+		if (Utils.checkHostApplicationIsOnline(hostApplicationId).get()) {
+			log("Host Application is online, so using that");
+
+			// send the node rebirth command, expecting the edge node to be online already
+			log("Sending rebirth command, expecting the Edge and Device to be online already");
+			sendRebirth(true);
+		} else {
+			log("Host application not online. Creating simulated host application");
+			try {
+				utilities.getHostApps().hostOnline(hostApplicationId, true);
+			} catch (MqttException m) {
+				throw new IllegalStateException();
+			}
+			hostCreated = true;
+			state = TestStatus.EXPECT_NODE_BIRTH;
+			// wait for the edge and device to come online
+			log("Waiting for the Edge and Device to come online");
+		}
 	}
 
 	private void disconnectClient(String clientId) {
@@ -138,17 +185,19 @@ public class ReceiveCommandTest extends TCKTest {
 						logger.error("Original error:", throwable);
 					}
 				}
+				state = TestStatus.ENDING;
+				theTCK.endTest();
 			}
 		});
 	}
 
-	private void sendCommand(boolean isNode) {
+	private void sendRebirth(boolean isNode) {
 		String topicName = TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/";
 		if (isNode) {
-			state = status.SENDING_NODE_REBIRTH;
+			state = TestStatus.SENDING_NODE_REBIRTH;
 			topicName += TOPIC_PATH_NCMD + "/" + edgeNodeId;
 		} else {
-			state = status.SENDING_DEVICE_REBIRTH;
+			state = TestStatus.SENDING_DEVICE_REBIRTH;
 			topicName = TOPIC_PATH_DCMD + "/" + edgeNodeId + "/" + deviceId;
 		}
 
@@ -174,7 +223,14 @@ public class ReceiveCommandTest extends TCKTest {
 	@Override
 	public void endTest(Map<String, String> results) {
 		testResults.putAll(results);
-		state = status.END;
+		if (hostCreated) {
+			try {
+				utilities.getHostApps().hostOffline();
+			} catch (MqttException m) {
+				logger.error("endTest", m);
+			}
+		}
+		state = TestStatus.ENDING;
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 	}
@@ -234,13 +290,12 @@ public class ReceiveCommandTest extends TCKTest {
 
 	@Override
 	public void disconnect(final String clientId, final DisconnectPacket packet) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void subscribe(final String clientId, final SubscribePacket packet) {
-		// TODO Auto-generated method stub
+
 	}
 
 	@SpecAssertion(
@@ -254,16 +309,27 @@ public class ReceiveCommandTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_3)
 	@Override
 	public void publish(final String clientId, final PublishPacket packet) {
+		String topic = packet.getTopic();
+		logger.info("Edge - Receive Command test - PUBLISH - topic: {}, state: {} ", topic, state);
 
-		logger.info("Edge - Receive Command test - PUBLISH - topic: {}, state: {} ", packet.getTopic(), state);
-		if (state == status.SENDING_NODE_REBIRTH || state == status.DISCONNECTING_CLIENT) {
-			String[] levels = packet.getTopic().split("/");
+		if (state == TestStatus.EXPECT_NODE_BIRTH
+				&& topic.equals(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_NBIRTH + "/" + edgeNodeId)) {
+			log("Edge " + edgeNodeId + " is now online");
+			state = TestStatus.EXPECT_DEVICE_BIRTH;
+		} else if (state == TestStatus.EXPECT_DEVICE_BIRTH && topic.equals(
+				TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/" + TOPIC_PATH_DBIRTH + "/" + edgeNodeId + "/" + deviceId)) {
+			log("Device " + deviceId + " is now online, sending rebirth");
+			sendRebirth(true);
+		} else if (state == TestStatus.SENDING_NODE_REBIRTH) {
+			String[] levels = topic.split("/");
+
 			if (levels[0].equals(TOPIC_ROOT_SP_BV_1_0) && levels[1].equals(groupId) && levels[3].equals(edgeNodeId)) {
 				if (levels.length == 4 && levels[2].equals(TOPIC_PATH_NBIRTH)) {
-					logger.info("Node birth received - ClientId {} on Topic {} ", clientId, packet.getTopic());
+					log("Node birth received - ClientId  " + clientId);
 					edgeNodeClientId = clientId;
 					bNBirth = true;
-					if (state == status.DISCONNECTING_CLIENT) {
+
+					if (deathBdSeq != -1) {
 						// check bdSeq
 						ByteBuffer payload = packet.getPayload().orElseGet(null);
 						long birthSeq = getBdSeq(payload);
@@ -277,9 +343,8 @@ public class ReceiveCommandTest extends TCKTest {
 									deathBdSeq, birthSeq);
 						}
 					}
-
 				} else if (levels.length == 5 && levels[2].equals(TOPIC_PATH_DBIRTH)) {
-					logger.debug("Device birth received for device: {}", levels[4]);
+					log("Device birth received for device: " + levels[4]);
 					bDBirth = true;
 
 				} else if (levels[2].equals(TOPIC_PATH_NDATA)) {
@@ -298,30 +363,17 @@ public class ReceiveCommandTest extends TCKTest {
 							setResult(false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_1));
 				}
 
-				if (bNBirth && bDBirth && state == status.SENDING_NODE_REBIRTH) {
+				if (bNBirth && bDBirth && state == TestStatus.SENDING_NODE_REBIRTH) {
 					logger.debug(
 							"Check Req: {} After an Edge Node stops sending DATA messages, it MUST send a complete BIRTH sequence including the NBIRTH and DBIRTH(s) if applicable.",
 							ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2);
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_ACTION_2, PASS);
-					state = status.DISCONNECTING_CLIENT;
+					state = TestStatus.DISCONNECTING_CLIENT;
 					bNBirth = false;
 					bDBirth = false;
 					disconnectClient(clientId);
 				}
-
-				if (bNBirth && bDBirth && state == status.DISCONNECTING_CLIENT) {
-					state = status.END;
-					theTCK.endTest();
-				}
 			}
 		}
-	}
-
-	private enum status {
-		START,
-		DISCONNECTING_CLIENT,
-		SENDING_NODE_REBIRTH,
-		SENDING_DEVICE_REBIRTH,
-		END
 	}
 }

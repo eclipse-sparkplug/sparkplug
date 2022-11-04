@@ -1,0 +1,3 @@
+// provide hints were to find images when rendering in an IDE
+// see: https://intellij-asciidoc-plugin.ahus1.de/docs/users-guide/features/advanced/asciidoctorconfig-file.html
+:imagesdir: ../assets/images

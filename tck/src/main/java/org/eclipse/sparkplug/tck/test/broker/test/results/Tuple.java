@@ -19,29 +19,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Tuple<A, B> {
-    private @NotNull
-    final A key;
-    private @Nullable
-    final B value;
+	private @NotNull final A key;
+	private @Nullable final B value;
 
-    public Tuple(final @NotNull A key, final @Nullable B value) {
-        this.key = key;
-        this.value = value;
-    }
+	public Tuple(final @NotNull A key, final @Nullable B value) {
+		this.key = key;
+		this.value = value;
+	}
 
-    public @NotNull A getKey() {
-        return key;
-    }
+	public @NotNull A getKey() {
+		return key;
+	}
 
-    public @Nullable B getValue() {
-        return value;
-    }
+	public @Nullable B getValue() {
+		return value;
+	}
 
-    @Override
-    public String toString() {
-        return "Tuple{" +
-                "key=" + key +
-                ", value=" + value +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "Tuple{" + "key=" + key + ", value=" + value + '}';
+	}
 }

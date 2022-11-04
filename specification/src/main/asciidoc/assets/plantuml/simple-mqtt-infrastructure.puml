@@ -1,0 +1,40 @@
+@startuml
+hide stereotype
+skinparam linetype polyline
+skinparam nodesep 90
+skinparam ranksep 10
+skinparam defaultTextAlignment center
+skinparam monochrome true
+
+skinparam rectangle {
+	BackgroundColor #white
+	FontSize 28
+}
+
+skinparam rectangle<<textBlock>> {
+	BackgroundColor #white
+	BorderThickness 0
+	BorderColor transparent
+	FontSize 32
+	Shadowing false
+}
+
+rectangle MQTTServer [
+		==""MQTT Server""
+	]
+together {
+
+	rectangle Node1 [
+	"" ""
+	===""Sparkplug Edge Node""
+	"" ""
+	]
+	rectangle "MQTT Client" <<textBlock>> as MQTTClient
+}
+
+
+
+[MQTTServer] <-right-----> [Node1]
+[Node1] -[hidden]up- [MQTTClient]
+
+@enduml

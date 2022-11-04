@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[security]]
 == Security
 
@@ -42,8 +45,10 @@ MQTT Client credentials and some considerations on setting up proper ACL’s on 
 [[security_implementation_notes_mqtt]]
 ==== Underlying MQTT Security
 All aspects specified in the MQTT Specification's
-link:++http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718111++[Security Section]
-should be considered when implementing a Sparkplug solution.
+link:++http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718111++[Security Section] 
+[MQTTV3.1.1-5] should be considered when implementing a Sparkplug solution. If using MQTT v5, please
+refer to link:++https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901261++[this 
+section] [MQTTV5-5] instead.
 
 [[security_implementation_notes_encryption]]
 ==== Encrypted Sockets
@@ -75,7 +80,7 @@ Publish: spBv1.0/G1/NDEATH/E1
 Publish: spBv1.0/G1/DBIRTH/E1/D1
 Publish: spBv1.0/G1/DDATA/E1/D1
 Publish: spBv1.0/G1/DDEATH/E1/D1
-Subscribe: STATE/my_primary_host
+Subscribe: spBv1.0/STATE/my_primary_host
 Subscribe: spBv1.0/G1/NCMD/E1
 Subscribe: spBv1.0/G1/DCMD/E1/D1
 ```
@@ -90,7 +95,7 @@ Publish: spBv1.0/G1/NDEATH/E1
 Publish: spBv1.0/G1/DBIRTH/E1/+
 Publish: spBv1.0/G1/DDATA/E1/+
 Publish: spBv1.0/G1/DDEATH/E1/+
-Subscribe: STATE/my_primary_host
+Subscribe: spBv1.0/STATE/my_primary_host
 Subscribe: spBv1.0/G1/NCMD/E1
 Subscribe: spBv1.0/G1/DCMD/E1/+
 ```
@@ -104,7 +109,7 @@ Publish: spBv1.0/G1/NDEATH/E1
 Publish: spBv1.0/G1/DBIRTH/E1/+
 Publish: spBv1.0/G1/DDATA/E1/+
 Publish: spBv1.0/G1/DDEATH/E1/+
-Subscribe: STATE/my_primary_host
+Subscribe: spBv1.0/STATE/my_primary_host
 Subscribe: spBv1.0/G1/NCMD/E1
 ```
 

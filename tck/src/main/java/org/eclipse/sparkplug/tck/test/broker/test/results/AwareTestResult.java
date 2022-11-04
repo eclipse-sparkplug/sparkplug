@@ -16,5 +16,9 @@
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
 public enum AwareTestResult {
-    NOT_SUBSCRIBED, SUBSCRIBE_FAILED, TIME_OUT, INTERRUPTED, OK;
+	NOT_SUBSCRIBED,
+	SUBSCRIBE_FAILED,
+	TIME_OUT,
+	INTERRUPTED,
+	OK;
 }

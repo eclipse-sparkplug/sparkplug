@@ -1,4 +1,16 @@
-<!-- @author Lukas Brand -->
+<!--****************************************************************************
+ * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Lukas Brand - initial implementation and documentation
+ *    Ian Craggs - updates for usability and features
+ ****************************************************************************-->
 
 <template>
   <div>
@@ -7,7 +19,7 @@
         <b-container fluid="xs">
             <b-row  >
                 <b-col sm="3">
-                    <label size="sm" description="The identifiers of the Edge of Network node">Edge of Network Node ID:</label>
+                    <label size="sm" description="The identifiers of the Edge Node">Group ID/Edge Node ID:</label>
                 </b-col>
                 <b-col sm="9">
                     <b-input-group class="mb-2">

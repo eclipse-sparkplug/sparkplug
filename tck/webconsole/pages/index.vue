@@ -23,9 +23,9 @@
             <div>
                 <b-card no-body>
                     <b-tabs v-model="activeTab" card>
-                        <b-tab
-                            :title-link-class="mqttClient.connected ? 'bg-success text-white' : 'bg-danger text-white'"
-                            @click="changeMqttConnectFun(0)"
+                        <b-tab id="connection"
+                               :title-link-class="mqttClient.connected ? 'bg-success text-white' : 'bg-danger text-white'"
+                               @click="changeMqttConnectFun(0)"
                         >
                             <template #title>
                                 <span class="mr-2">MQTT Configuration</span>
@@ -35,15 +35,15 @@
                             </template>
                             <MqttConnect :change="tabOpen" class="mt-3" @on-connect="mqttConnected"/>
                         </b-tab>
-                        <b-tab
-                            :title-link-class="
+                        <b-tab id="profile"
+                               :title-link-class="
                   (sparkplugClient.hostApplication.complete && sparkplugClient.testType === 'HOSTAPPLICATION') ||
                   (sparkplugClient.eonNode.complete && sparkplugClient.testType === 'EONNODE')||
-                  (sparkplugClient.broker.complete && sparkplugClient.testType === 'BROKER')
+                  (sparkplugClient.testType === 'BROKER' && sparkplugClient.broker.host.length>0 && sparkplugClient.broker.port >0)
                     ? 'bg-success text-white'
                     : 'bg-danger text-white'
                 "
-                            @click="changeMqttConnectFun(1)"
+                               @click="changeMqttConnectFun(1)"
                         >
                             <template #title> Sparkplug Conformance Profile Test</template>
                             <SparkplugClientConnect
@@ -53,24 +53,41 @@
                                 class="mt-3"
                             />
                         </b-tab>
+                        <b-tab id="log"
+                               @click="changeMqttConnectFun(2)"
+                               :title-link-class="'bg-secondary text-white'"
+                        >
+                            <template #title>
+                                <span class="mr-2">Results Overview</span>
+                            </template>
+                            <TckTestResultSetup
+                                v-model="testResultSetup"
+                                :change="tabOpen"
+                                :currentTest="currentTest"
+                                :filename="filename"
+                                class="mt-3"
+                                @reset-log="resetLogging"
+                            />
+                        </b-tab>
 
                     </b-tabs>
                 </b-card>
             </div>
-
-            <TckTests
-                :currentTest="this.currentTest"
-                :currentTestLogging="this.currentTestLogging"
-                :testType="this.sparkplugClient.testType"
-                class="mt-3"
-                @start-all-tests="(hostTests, eonTests, brokerTests) => startAllTestsFun(hostTests, eonTests, brokerTests)"
-                @abort-all-tests="(hostTests, eonTests, brokerTests) => abortAllTestsFun(hostTests, eonTests, brokerTests)"
-                @reset-all-tests="(hostTests, eonTests, brokerTests) => resetAllTestsFun(hostTests, eonTests, brokerTests)"
-                @start-single-test="(testParameters) => startTestFun(testParameters)"
-                @abort-single-test="(testParameters) => abortTestFun(testParameters)"
-                @reset-single-test="(testParameters) => resetTestFun(testParameters)"
-                @reset-current-test="resetCurrentTest()"
-            />
+            <div v-if="activeTab === 1">
+                <TckTests
+                    :currentTest="this.currentTest"
+                    :currentTestLogging="this.currentTestLogging"
+                    :testType="this.sparkplugClient.testType"
+                    class="mt-3"
+                    @start-all-tests="(hostTests, eonTests, brokerTests) => startAllTestsFun(hostTests, eonTests, brokerTests)"
+                    @abort-all-tests="(hostTests, eonTests, brokerTests) => abortAllTestsFun(hostTests, eonTests, brokerTests)"
+                    @reset-all-tests="(hostTests, eonTests, brokerTests) => resetAllTestsFun(hostTests, eonTests, brokerTests)"
+                    @start-single-test="(testParameters) => startTestFun(testParameters)"
+                    @abort-single-test="(testParameters) => abortTestFun(testParameters)"
+                    @reset-single-test="(testParameters) => resetTestFun(testParameters)"
+                    @reset-current-test="resetCurrentTest()"
+                />
+            </div>
 
             <TckLogging :logging="this.logging" class="mt-3"/>
         </div>
@@ -90,14 +107,15 @@
 
 
 <script>
-import MqttConnect from "@/components/MqttConnect";
 
-let loggingCreated = false;
 let interactionListenerCreated = false;
+let loggingCreated = false;
 
 export default {
     data: function () {
         return {
+            filename: "",
+
             /**
              * Controls visibility of the user interactions popup.
              */
@@ -157,6 +175,7 @@ export default {
                 },
             },
 
+            testResultSetup: {},
             /**
              * List of all received logging information about the tests.
              */
@@ -258,19 +277,25 @@ export default {
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["client_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "SendCommandTest") {
+                } else if (["SendCommandTest", "ReceiveDataTest", "EdgeSessionTerminationTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["group_id"].parameterValue +
                         " " + testParameter.parameters["edge_node_id"].parameterValue +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "ReceiveDataTest") {
+                } else if (["MessageOrderingTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["group_id"].parameterValue +
                         " " + testParameter.parameters["edge_node_id"].parameterValue +
-                        " " + testParameter.parameters["device_id"].parameterValue;
+                        " " + testParameter.parameters["device_id"].parameterValue +
+                        " " + testParameter.parameters["reorder_timeout"].parameterValue;
+                    this.createTestRequest(profile, testType, testParameters);
+                } else if ([ "MultipleBrokerTest"].includes(testType)) {
+                    const testParameters =
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + testParameter.parameters["broker_uri"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");
@@ -280,32 +305,27 @@ export default {
             if (this.sparkplugClient.testType === "EONNODE") {
                 const profile = "edge";
                 const testType = testParameter.name;
-                if (testType === "SessionEstablishmentTest") {
+                if (["SessionEstablishmentTest", "SessionTerminationTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_ids"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "SessionTerminationTest") {
-                    const testParameters =
-                        this.sparkplugClient.hostApplication.hostId +
-                        " " + this.sparkplugClient.eonNode.groupId +
-                        " " + this.sparkplugClient.eonNode.edgeNodeId +
-                        " " + testParameter.parameters["device_ids"].parameterValue;
-                    this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "SendDataTest" || testType === "PayloadTest") {
+                } else if (["SendDataTest", "SendComplexDataTest", "PrimaryHostTest", "ReceiveCommandTest"].includes(testType)) {
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
-                } else if (testType === "ReceiveCommandTest") {
+                } else if ([ "MultipleBrokerTest"].includes(testType)) {
                     const testParameters =
-                        this.sparkplugClient.eonNode.groupId +
+                        this.sparkplugClient.hostApplication.hostId +
+                        " " + this.sparkplugClient.eonNode.groupId +
                         " " + this.sparkplugClient.eonNode.edgeNodeId +
-                        " " + testParameter.parameters["device_id"].parameterValue;
+                        " " + testParameter.parameters["device_id"].parameterValue +
+                        " " + testParameter.parameters["broker_uri"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");
@@ -316,7 +336,9 @@ export default {
                 const profile = "broker";
                 const testType = testParameter.name;
                 if (testType === "CompliantBrokerTest") {
-                    const testParameters = this.sparkplugClient.broker.host + " " + this.sparkplugClient.broker.port;
+                    const testParameters = 
+                        this.sparkplugClient.broker.host +
+                        " " + this.sparkplugClient.broker.port;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (testType === "AwareBrokerTest") {
                     const testParameters =
@@ -362,18 +384,12 @@ export default {
          **********************/
 
         /**
-         * Create logging for the tests.
+         * Create subscription to log topic for the tests.
          */
-        createLogback: function () {
-            if (loggingCreated) {
-                return;
-            }
-            loggingCreated = true;
-            console.log("index: createLogback");
-
+        createResultLogTopic: function () {
             const resultTopic = "SPARKPLUG_TCK/RESULT";
             const logTopic = "SPARKPLUG_TCK/LOG";
-
+            console.log("index: createLogback - subscribe to: ", resultTopic, logTopic);
             this.mqttClient.subscribe([resultTopic, logTopic], (error) => {
                 if (error) {
                     console.log("Subscribe error", error);
@@ -382,14 +398,17 @@ export default {
 
             this.mqttClient.on("message", (topic, message) => {
                 if (topic === resultTopic || topic === logTopic ) {
+                    if (this.logging.length > 100) {
+                        this.logging.shift()
+                    }
                     const logMessage = {
-                        id: this.logging.length,
                         logLevel: "INFO",
                         logValue: message.toString(),
+                        id: this.logging.length,
                     };
+
                     console.log("logging:", logMessage);
                     this.logging.push(logMessage);
-
                     this.currentTestLogging = logMessage;
                 }
             });
@@ -429,6 +448,10 @@ export default {
             this.currentTestLogging = null;
         },
 
+        resetLogging: function () {
+            this.logging = [];
+        },
+
         /**********************
          * MQTT functions
          **********************/
@@ -436,11 +459,37 @@ export default {
         /**
          * Handles a successful MQTT connection.
          */
-        mqttConnected: function (mqttClient) {
-            this.activeTab = 1;
+        mqttConnected: function (mqttClient, filename, UTCwindow) {
             this.mqttClient = mqttClient;
+            this.filename = filename;
+            this.UTCwindow = UTCwindow;
             this.createInteractionListener();
-            this.createLogback();
+            this.createResultLogTopic();
+            this.createResultLog();
+            this.setTCKParms();
+            this.activeTab = 1;
+        },
+
+        createResultLog: function () {
+            let topic = "SPARKPLUG_TCK/RESULT_CONFIG";
+            let payload = "NEW_RESULT-LOG " + this.filename;
+            console.log("index: createResultLog - write into: ", this.filename);
+            this.mqttClient.publish(topic, payload, {qos: 1, retain: true}, (error) => {
+                if (error) {
+                    console.log("Publish error", error);
+                }
+            });
+        },
+
+        setTCKParms: function () {
+            let topic = "SPARKPLUG_TCK/CONFIG";
+            let payload = "UTCwindow " + this.UTCwindow;
+            console.log("index: setTCKParms - UTCwindow: ", this.UTCwindow);
+            this.mqttClient.publish(topic, payload, {qos: 1, retain: true}, (error) => {
+                if (error) {
+                    console.log("Publish error", error);
+                }
+            });
         },
 
         /**

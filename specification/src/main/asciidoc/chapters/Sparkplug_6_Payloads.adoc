@@ -10,6 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Sparkplug®, Sparkplug Compatible, and the Sparkplug Logo are trademarks of the Eclipse Foundation.
 ////
 
+// set default value if assetsdir hasn't been defined
+ifndef::assetsdir[:assetsdir:]
+
 [[payloads]]
 == Payloads
 
@@ -65,9 +68,9 @@ deprecated and is not included in this document.
 [[payloads_sparkplug_b_mqtt_payload_definition]]
 === Sparkplug B MQTT Payload Definition
 
-The goal of the Sparkplug is to provide a specification that both OEM device manufactures and
+The goal of Sparkplug is to provide a specification that both OEM device manufactures and
 application developers can use to create rich and interoperable SCADA/IIoT solutions using MQTT as a
-base messaging technology. In Sparkplug B message payload definition, the goal was to create a
+base messaging technology. In the Sparkplug B message payload definition, the goal was to create a
 simple and straightforward binary message encoding that could be used primarily for legacy register
 based process variables (Modbus register value for example).
 
@@ -76,18 +79,18 @@ integrators and end users who wanted to be able to natively support a much riche
 the MQTT infrastructures that they were designing and deploying. Using the feedback from the user
 community Sparkplug B provides support for:
 
-* Complex data types using templates.
-* Datasets.
-* Richer metrics with the ability to add property metadata for each metric.
-* Metric alias support to maintain rich metric naming while keeping bandwidth usage to a minimum.
-* Historical data.
-* File data.
+* Complex data types using templates
+* Datasets
+* Richer metrics with the ability to add property metadata for each metric
+* Metric alias support to maintain rich metric naming while keeping bandwidth usage to a minimum
+* Historical data
+* File data
 
-Sparkplug B definition creates a bandwidth efficient data transport for real time device data. For
-WAN based SCADA/IIoT infrastructures this equates to lower latency data updates while minimizing the
-amount of traffic and therefore cellular and/or VSAT bandwidth required. In situations where
-bandwidth savings is not the primary concern, the efficient use enables higher throughput of more
-and interesting data eliminating sensor data that may have previously been left stranded in the
+The Sparkplug B payload definition creates a bandwidth efficient data transport for real time device
+data. For WAN based SCADA/IIoT infrastructures this equates to lower latency data updates while
+minimizing the amount of traffic and therefore cellular and/or VSAT bandwidth required. In
+situations where bandwidth savings is not the primary concern, the efficient use enables higher
+throughput of more data eliminating sensor data that may have previously been left stranded in the
 field. It is also ideal for LAN based SCADA infrastructures equating to higher throughput of real
 time data to consumer applications without requiring extreme networking topologies and/or equipment.
 
@@ -380,9 +383,8 @@ Using this convention in conjunction with the *group_id*, *edge_node_id* and *de
 defined in the Topic Namespace, consuming applications can organize metrics in the same hierarchical
 fashion:
 
-image:extracted-media/media/image12.png[image,width=638,height=139]
-
-Figure 8 – Payload Metric Folder Structure
+.Figure 9 – Payload Metric Folder Structure
+plantuml::{assetsdir}assets/plantuml/payload-metric-folder-structure.puml[format=svg, alt="Payload Metric Folder Structure"]
 
 [[payloads_b_sparkplug_bv1_0_payload_components]]
 ==== Sparkplug B v1.0 Payload Components
@@ -410,21 +412,24 @@ components.
 ** _timestamp_
 *** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
 milliseconds since epoch (Jan 1, 1970).
-[tck-not-testable tck-id-payloads_timestamp_in_UTC]#[yellow-background]*This timestamp MUST be in
-UTC.*#
-This timestamp represents the time at which the message was published.
+*** [tck-testable tck-id-payloads-timestamp-in-UTC]#[yellow-background]*[tck-id-payloads-timestamp-in-UTC] This
+timestamp MUST be in UTC.*#
+*** This timestamp represents the time at which the message was published.
 ** _metrics_
 *** This is an array of metrics representing key/value/datatype values. Metrics are further defined 
 link:#payloads_b_metric[here].
 ** _seq_
 *** This is the sequence number which is an unsigned 64-bit integer.
-[tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*A sequence number
-MUST be included in the payload of every Sparkplug MQTT message except NDEATH messages.*#
-[tck-testable tck-id-payloads-sequence-num-zero-nbirth]#[yellow-background]*A NBIRTH message MUST
-always contain a sequence number of zero.*#
-[tck-testable tck-id-payloads-sequence-num-incrementing]#[yellow-background]*All subsequent messages
-MUST contain a sequence number that is continually increasing by one in each message until a value
-of 255 is reached. At that point, the sequence number of the following message MUST be zero.*#
+**** [tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*[tck-id-payloads-sequence-num-always-included] A
+sequence number MUST be included in the payload of every Sparkplug MQTT message from an Edge Node
+except NDEATH messages.*#
+**** [tck-testable tck-id-payloads-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-sequence-num-zero-nbirth] A
+NBIRTH message from an Edge Node MUST always contain a sequence number between 0 and 255
+(inclusive).*#
+**** [tck-testable tck-id-payloads-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-sequence-num-incrementing] All
+subsequent messages after an NBIRTH from an Edge Node MUST contain a sequence number that is
+continually increasing by one in each message from that Edge Node until a value of 255 is reached.
+At that point, the sequence number of the following message MUST be zero.*#
 ** _uuid_
 *** This is a field which can be used to represent a schema or some other specific form of the
 message. Example usage would be to supply a UUID which represents an encoding mechanism of the
@@ -445,8 +450,8 @@ UTF-8 string. The slashes in the string represent folders of the metric to repre
 data structures. For example, ‘outputs/A’ would be a metric with a unique identifier of ‘A’ in the
 ‘outputs’ folder. There is no limit to the number of folders. However, across the infrastructure of
 MQTT publishers a defined folder should always remain a folder.
-** [tck-testable tck-id-payloads-name-requirement]#[yellow-background]*The name MUST be
-included with every metric unless aliases are being used.*#
+** [tck-testable tck-id-payloads-name-requirement]#[yellow-background]*[tck-id-payloads-name-requirement] The
+name MUST be included with every metric unless aliases are being used.*#
 ** All UTF-8 characters are allowed in the metric name. However, special characters including but
 not limited to the following are discouraged: . , \ @ # $ % ^ & * ( ) [ ] { } | ! ` ~ : ; ' " < > ?.
 This is because many Sparkplug Host Applications may have issues handling them.
@@ -454,35 +459,37 @@ This is because many Sparkplug Host Applications may have issues handling them.
 * *alias*
 ** This is an unsigned 64-bit integer representing an optional alias for a Sparkplug B payload.
 Aliases are optional and not required. *If aliases are used, the following rules apply.*
-*** [tck-testable tck-id-payloads-alias-uniqueness]#[yellow-background]*If supplied in an NBIRTH or
-DBIRTH it MUST be a unique number across this Edge Node's entire set of metrics.*#
+*** [tck-testable tck-id-payloads-alias-uniqueness]#[yellow-background]*[tck-id-payloads-alias-uniqueness] If
+supplied in an NBIRTH or DBIRTH it MUST be a unique number across this Edge Node's entire set of
+metrics.*#
 **** Non-normative comment: no two metrics for the same Edge Node can have the same alias. Upon being
 defined in the NBIRTH or DBIRTH, subsequent messages can supply only the alias instead of the metric
 friendly name to reduce overall message size.
-*** [tck-testable tck-id-payloads-alias-birth-requirement]#[yellow-background]*NBIRTH and DBIRTH
-messages MUST include both a metric name and alias.*#
-*** [tck-testable tck-id-payloads-alias-data-cmd-requirement]#[yellow-background]*NDATA, DDATA,
-NCMD, and DCMD messages MUST only include an alias and the metric name MUST be excluded.*#
+*** [tck-testable tck-id-payloads-alias-birth-requirement]#[yellow-background]*[tck-id-payloads-alias-birth-requirement] NBIRTH
+and DBIRTH messages MUST include both a metric name and alias.*#
+*** [tck-testable tck-id-payloads-alias-data-cmd-requirement]#[yellow-background]*[tck-id-payloads-alias-data-cmd-requirement] NDATA,
+DDATA, NCMD, and DCMD messages MUST only include an alias and the metric name MUST be excluded.*#
 * *timestamp*
 ** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
 milliseconds since epoch (Jan 1, 1970).
-** [tck-testable tck-id-payloads-name-birth-data-requirement]#[yellow-background]*The timestamp MUST
-be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.*#
-** [tck-testable tck-id-payloads-name-cmd-requirement]#[yellow-background]*The timestamp MAY be
-included with metrics in NCMD and DCMD messages.*#
-** [tck-not-testable tck-id-payloads_metric_timestamp_in_UTC]#[yellow-background]*The timestamp
-MUST be in UTC.*#
+** [tck-testable tck-id-payloads-name-birth-data-requirement]#[yellow-background]*[tck-id-payloads-name-birth-data-requirement] The
+timestamp MUST be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.*#
+** [tck-testable tck-id-payloads-name-cmd-requirement]#[yellow-background]*[tck-id-payloads-name-cmd-requirement] The
+timestamp MAY be included with metrics in NCMD and DCMD messages.*#
+** [tck-testable tck-id-payloads-metric-timestamp-in-UTC]#[yellow-background]*[tck-id-payloads-metric-timestamp-in-UTC] The
+timestamp MUST be in UTC.*#
 *** Non-normative comment: This timestamp represents the time at which the value of a metric was
 captured.
 * *datatype*
-** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*The datatype MUST be an
-unsigned 32-bit integer representing the datatype.*#
-** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*The datatype MUST be one
-of the enumerated values as shown in the link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
-** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*The datatype MUST be included with
-each metric definition in NBIRTH and DBIRTH messages.*#
-** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*The datatype SHOULD NOT be
-included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*[tck-id-payloads-metric-datatype-value-type] The
+datatype MUST be an unsigned 32-bit integer representing the datatype.*#
+** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*[tck-id-payloads-metric-datatype-value] The
+datatype MUST be one of the enumerated values as shown in the
+link:#payloads_b_datatypes[valid Sparkplug Data Types].*#
+** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*[tck-id-payloads-metric-datatype-req] The
+datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*[tck-id-payloads-metric-datatype-not-req] The
+datatype SHOULD NOT be included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *is_historical*
 ** This is a Boolean flag which denotes whether this metric represents a historical value. In some
 cases, it may be desirable to send metrics after they were acquired from a device or Edge Node. This
@@ -506,24 +513,18 @@ link:#payloads_b_propertyset[property set section].
 * *value*
 ** The value of a metric utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
 supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
-to true the value can be omitted altogether.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bytes_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _DataSet_
+to true the value can be omitted altogether. More information on the Google Protocol Buffer types
+can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+*** Google Protocol Buffer Type: _uint32_
+*** Google Protocol Buffer Type: _uint64_
+*** Google Protocol Buffer Type: _float_
+*** Google Protocol Buffer Type: _double_
+*** Google Protocol Buffer Type: _bool_
+*** Google Protocol Buffer Type: _string_
+*** Google Protocol Buffer Type: _bytes_
+*** Sparkplug _DataSet_
 **** Defined link:#payloads_b_dataset[here].
-*** _Template_
+*** Sparkplug _Template_
 **** Defined link:#payloads_b_template[here].
 
 [[payloads_b_metadata]]
@@ -566,14 +567,14 @@ containing the values. It includes the following components.
 
 * *keys*
 ** This is an array of UTF-8 strings representing the names of the properties in this PropertySet.
-[tck-testable tck-id-payloads-propertyset-keys-array-size]#[yellow-background]*The array of keys in
-a PropertySet MUST contain the same number of values included in the array of PropertyValue
-objects.*#
+** [tck-testable tck-id-payloads-propertyset-keys-array-size]#[yellow-background]*[tck-id-payloads-propertyset-keys-array-size] The
+array of keys in a PropertySet MUST contain the same number of values included in the array of
+PropertyValue objects.*#
 * *values*
 ** This is an array of PropertyValue objects representing the values of the properties in the
 PropertySet.
-[tck-testable tck-id-payloads-propertyset-values-array-size]#[yellow-background]*The array of values
-in a PropertySet MUST contain the same number of items that are in the keys array.*#
+** [tck-testable tck-id-payloads-propertyset-values-array-size]#[yellow-background]*[tck-id-payloads-propertyset-values-array-size] The
+array of values in a PropertySet MUST contain the same number of items that are in the keys array.*#
 
 [[payloads_b_propertyvalue]]
 ==== PropertyValue
@@ -582,36 +583,32 @@ A Sparkplug B PropertyValue object is used to encode the value and datatype of t
 property in a PropertySet. It includes the following components.
 
 * *type*
-** [tck-testable tck-id-payloads-metric-propertyvalue-type-type]#[yellow-background]*This MUST be an
-unsigned 32-bit integer representing the datatype.*#
-[tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*This value MUST
-be one of the enumerated values as shown in the
-link:#payloads_b_datatype_basic[Sparkplug Basic Data Types] or the
+** [tck-testable tck-id-payloads-metric-propertyvalue-type-type]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-type] This
+MUST be an unsigned 32-bit integer representing the datatype.*#
+** [tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-value] This
+value MUST be one of the enumerated values as shown in the
+link:#payloads_b_datatype_basic[Sparkplug Basic Data Types]
+or the
 link:#payloads_b_datatype_propertyvalue[Sparkplug Property Value Data Types].*#
-[tck-testable tck-id-payloads-metric-propertyvalue-type-req]#[yellow-background]*This MUST be
-included in Property Value Definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-metric-propertyvalue-type-req]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-req] This
+MUST be included in Property Value Definitions in NBIRTH and DBIRTH messages.*#
 * *is_null*
 ** This is a Boolean flag which denotes whether this property has a null value. This is Sparkplug
 B’s mechanism of explicitly denoting a property’s value is actually null.
 * *value*
 ** The value of a property utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
 supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
-to true the value can be omitted altogether.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _PropertySet_
+to true the value can be omitted altogether. More information on the Google Protocol Buffer types
+can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+*** Google Protocol Buffer Type: _uint32_
+*** Google Protocol Buffer Type: _uint64_
+*** Google Protocol Buffer Type: _float_
+*** Google Protocol Buffer Type: _double_
+*** Google Protocol Buffer Type: _bool_
+*** Google Protocol Buffer Type: _string_
+*** Sparkplug _PropertySet_
 **** Defined link:#payloads_b_propertyset[here].
-*** _PropertySetList_
+*** Sparkplug _PropertySetList_
 **** Defined link:#payloads_b_propertysetlist[here].
 
 [[payloads_b_quality_codes]]
@@ -631,11 +628,12 @@ meanings.
 * *500*
 ** STALE
 
-[tck-testable tck-id-payloads-propertyset-quality-value-type]#[yellow-background]*The 'type' of the
-Property Value MUST be a value of 3 which represents a Signed 32-bit Integer.*#
+[tck-testable tck-id-payloads-propertyset-quality-value-type]#[yellow-background]*[tck-id-payloads-propertyset-quality-value-type] The
+'type' of the Property Value MUST be a value of 3 which represents a Signed 32-bit Integer.*#
 
-[tck-testable tck-id-payloads-propertyset-quality-value-value]#[yellow-background]*The 'value' of
-the Property Value MUST be an int_value and be one of the valid quality codes of 0, 192, or 500.*#
+[tck-testable tck-id-payloads-propertyset-quality-value-value]#[yellow-background]*[tck-id-payloads-propertyset-quality-value-value] The
+'value' of the Property Value MUST be an int_value and be one of the valid quality codes of 0, 192,
+or 500.*#
 
 [[payloads_b_propertysetlist]]
 ==== PropertySetList
@@ -653,25 +651,24 @@ A Sparkplug B DataSet object is used to encode matrices of data. It includes the
 components.
 
 * *num_of_columns*
-** [tck-testable tck-id-payloads-dataset-column-size]#[yellow-background]*This MUST be an unsigned
-64-bit integer representing the number of columns in this DataSet.*#
+** [tck-testable tck-id-payloads-dataset-column-size]#[yellow-background]*[tck-id-payloads-dataset-column-size] This
+MUST be an unsigned 64-bit integer representing the number of columns in this DataSet.*#
 * *columns*
 ** This is an array of strings representing the column headers of this DataSet.
-[tck-testable tck-id-payloads-dataset-column-num-headers]#[yellow-background]*The size of the array
-MUST have the same number of elements that the types array contains.*#
+** [tck-testable tck-id-payloads-dataset-column-num-headers]#[yellow-background]*[tck-id-payloads-dataset-column-num-headers] The
+size of the array MUST have the same number of elements that the types array contains.*#
 * *types*
-** [tck-testable tck-id-payloads-dataset-types-def]#[yellow-background]*This MUST be an array of
-unsigned 32 bit integers representing the datatypes of the columns.*#
-[tck-testable tck-id-payloads-dataset-types-num]#[yellow-background]*The array of types MUST have
-the same number of elements that the columns array contains.*#
-[tck-testable tck-id-payloads-dataset-types-type]#[yellow-background]*The values in the types array
-MUST be a unsigned 32-bit integer representing the datatype.*#
-[tck-testable tck-id-payloads-dataset-types-value]#[yellow-background]*This values in the types
-array MUST be one of the enumerated values as shown in the
-link:#payloads_b_datatypes_basic[Sparkplug Basic Data Types].*#
-// FIXME: Is this correct?
-[tck-testable tck-id-payloads-dataset-parameter-type-req]#[yellow-background]*This MUST be included
-in DataSet Definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-dataset-types-def]#[yellow-background]*[tck-id-payloads-dataset-types-def] This
+MUST be an array of unsigned 32 bit integers representing the datatypes of the columns.*#
+** [tck-testable tck-id-payloads-dataset-types-num]#[yellow-background]*[tck-id-payloads-dataset-types-num] The
+array of types MUST have the same number of elements that the columns array contains.*#
+** [tck-testable tck-id-payloads-dataset-types-type]#[yellow-background]*[tck-id-payloads-dataset-types-type] The
+values in the types array MUST be a unsigned 32-bit integer representing the datatype.*#
+** [tck-testable tck-id-payloads-dataset-types-value]#[yellow-background]*[tck-id-payloads-dataset-types-value] This
+values in the types array MUST be one of the enumerated values as shown in the
+link:#payloads_b_datatype_basic[Sparkplug Basic Data Types].*#
+** [tck-testable tck-id-payloads-dataset-parameter-type-req]#[yellow-background]*[tck-id-payloads-dataset-parameter-type-req] The
+types array MUST be included in all DataSets.*#
 * *rows*
 ** This is an array of DataSet.Row objects. It contains the data that makes up the data rows of this 
 DataSet.
@@ -691,21 +688,12 @@ of a DataSet.
 
 * *value*
 ** The value of a DataSet.DataSetValue utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
-[tck-testable tck-id-payloads-template-dataset-value]#[yellow-background]*The value supplied MUST be
-one of the following types: _uint32_, _uint64_, _float_, _double_, _bool_, or _string_.*#
-More information on these types can be found below.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+** [tck-testable tck-id-payloads-template-dataset-value]#[yellow-background]*[tck-id-payloads-template-dataset-value] The
+value supplied MUST be one of the following Google Protobuf types: _uint32_, _uint64_, _float_,
+_double_, _bool_, or _string_.*#
+
+More information on the types above can be found here:
+https://developers.google.com/protocol-buffers/docs/proto#scalar
 
 [[payloads_b_template]]
 ==== Template
@@ -716,24 +704,58 @@ referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 
 * *Template Definition*
 ** This is the definition of a Sparkplug Template.
-[tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*A Template
-Definition MUST have is_definition set to true.*#
-[tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*A Template Definition
-MUST omit the template_ref field.*#
+*** [tck-testable tck-id-payloads-template-definition-nbirth-only]#[yellow-background]*[tck-id-payloads-template-definition-nbirth-only] Template
+Definitions MUST only be included in NBIRTH messages.*#
+*** [tck-testable tck-id-payloads-template-definition-is-definition]#[yellow-background]*[tck-id-payloads-template-definition-is-definition] A
+Template Definition MUST have is_definition set to true.*#
+*** [tck-testable tck-id-payloads-template-definition-ref]#[yellow-background]*[tck-id-payloads-template-definition-ref] A
+Template Definition MUST omit the template_ref field.*#
+*** [tck-testable tck-id-payloads-template-definition-members]#[yellow-background]*[tck-id-payloads-template-definition-members] A
+Template Definition MUST include all member metrics that will ever be included in corresponding
+template instances.*#
+*** [tck-testable tck-id-payloads-template-definition-nbirth]#[yellow-background]*[tck-id-payloads-template-definition-nbirth] A
+Template Definition MUST be included in the NBIRTH for all Template Instances that are included in
+the NBIRTH and DBIRTH messages.*#
+**** A Template Instance can not reference a Template Definition that was not included in the
+NBIRTH.
+*** [tck-testable tck-id-payloads-template-definition-parameters]#[yellow-background]*[tck-id-payloads-template-definition-parameters] A
+Template Definition MUST include all parameters that will be included in the corresponding Template
+Instances.*#
+*** [tck-testable tck-id-payloads-template-definition-parameters-default]#[yellow-background]*[tck-id-payloads-template-definition-parameters-default] A
+Template Definition MAY include values for parameters in the Template Definition parameters.*#
+**** These act as the defaults for any template instances that don't include parameter values in the
+NBIRTH or DBIRTH messages.
+
 * *Template Instance*
 ** This is an instance of a Sparkplug Template.
-[tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*A Template
-Instance MUST have is_definition set to false.*#
-[tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*A Template Instance MUST
-have template_ref set to the type of template definition it is.*#
-In other words, it must be set to the name of the metric that represents the template definition.
+*** [tck-testable tck-id-payloads-template-instance-is-definition]#[yellow-background]*[tck-id-payloads-template-instance-is-definition] A
+Template Instance MUST have is_definition set to false.*#
+*** [tck-testable tck-id-payloads-template-instance-ref]#[yellow-background]*[tck-id-payloads-template-instance-ref] A
+Template Instance MUST have template_ref set to the type of template definition it is.*#
+**** It must be set to the name of the metric that represents the template definition.
+*** [tck-testable tck-id-payloads-template-instance-members]#[yellow-background]*[tck-id-payloads-template-instance-members] A
+Template Instance MUST include only members that were included in the corresponding template
+definition.*#
+*** [tck-testable tck-id-payloads-template-instance-members-birth]#[yellow-background]*[tck-id-payloads-template-instance-members-birth] A
+Template Instance in a NBIRTH or DBIRTH message MUST include all members that were included in the
+corresponding Template Definition.*#
+*** [tck-testable tck-id-payloads-template-instance-members-data]#[yellow-background]*[tck-id-payloads-template-instance-members-data] A
+Template Instance in a NDATA or DDATA message MAY include only a subset of the members that were
+included in the corresponding template definition.*#
+**** A Template Instance does not need to be a complete set of all member metrics that were included
+in the Template Definition.
+*** [tck-testable tck-id-payloads-template-instance-parameters]#[yellow-background]*[tck-id-payloads-template-instance-parameters] A
+Template Instance MAY include parameter values for any parameters that were included in the
+corresponding Template Definition.*#
+**** If a parameter value was included in the Template Definition but not in the Template Instance
+the value of that parameter is implicitly the default value from the Template Definition.
 
 A Sparkplug Template includes the following components.
 
 * *version*
 ** This is an optional field and can be included in a Template Definition or Template Instance.
-[tck-testable tck-id-payloads-template-version]#[yellow-background]*If included, the version MUST be
-a UTF-8 string representing the version of the Template.*#
+** [tck-testable tck-id-payloads-template-version]#[yellow-background]*[tck-id-payloads-template-version] If
+included, the version MUST be a UTF-8 string representing the version of the Template.*#
 * *metrics*
 ** This is an array of metrics representing the members of the Template. These can be primitive
 datatypes or other Templates as required.
@@ -741,18 +763,19 @@ datatypes or other Templates as required.
 ** This is an option field and is an array of Parameter objects representing parameters associated
 with the Template.
 * *template_ref*
-** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*This MUST be omitted
-if this is a Template Definition.*#
-[tck-testable tck-id-payloads-template-ref-instance]#[yellow-background]*This MUST be a UTF-8 string
-representing a reference to a Template Definition name if this is a Template Instance.*#
+** [tck-testable tck-id-payloads-template-ref-definition]#[yellow-background]*[tck-id-payloads-template-ref-definition] This
+MUST be omitted if this is a Template Definition.*#
+** [tck-testable tck-id-payloads-template-ref-instance]#[yellow-background]*[tck-id-payloads-template-ref-instance] This
+MUST be a UTF-8 string representing a reference to a Template Definition name if this is a Template
+Instance.*#
 * *is_definition*
 ** This is a Boolean representing whether this is a Template definition or a Template instance.
-[tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*This MUST be included in
-every Template Definition and Template Instance.*#
-[tck-testable tck-id-payloads-template-is-definition-definition]#[yellow-background]*This MUST be
-set to true if this is a Template Definition.*#
-[tck-testable tck-id-payloads-template-is-definition-instance]#[yellow-background]*This MUST be set
-to false if this is a Template Instance.*#
+** [tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*[tck-id-payloads-template-is-definition] This
+MUST be included in every Template Definition and Template Instance.*#
+** [tck-testable tck-id-payloads-template-is-definition-definition]#[yellow-background]*[tck-id-payloads-template-is-definition-definition] This
+MUST be set to true if this is a Template Definition.*#
+** [tck-testable tck-id-payloads-template-is-definition-instance]#[yellow-background]*[tck-id-payloads-template-is-definition-instance] This
+MUST be set to false if this is a Template Instance.*#
 
 [[payloads_b_template_parameter]]
 ==== Template.Parameter
@@ -762,37 +785,27 @@ parameters that are common across a Template Definition but the values are uniqu
 instances. It includes the following components.
 
 * *name*
-** [tck-testable tck-id-payloads-template-parameter-name-required]#[yellow-background]*This MUST be
-included in every Template Parameter definition.*#
-[tck-testable tck-id-payloads-template-parameter-name-type]#[yellow-background]*This MUST be a UTF-8
-string representing the name of the Template parameter.*#
+** [tck-testable tck-id-payloads-template-parameter-name-required]#[yellow-background]*[tck-id-payloads-template-parameter-name-required] This
+MUST be included in every Template Parameter definition.*#
+** [tck-testable tck-id-payloads-template-parameter-name-type]#[yellow-background]*[tck-id-payloads-template-parameter-name-type] This
+MUST be a UTF-8 string representing the name of the Template parameter.*#
 * *type*
-** [tck-testable tck-id-payloads-template-parameter-value-type]#[yellow-background]*This MUST be an
-unsigned 32-bit integer representing the datatype.*#
-[tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*This value MUST be
-one of the enumerated values as shown in the
-link:#payloads_b_datatypes_basic[Sparkplug Basic Data Types].*#
-// FIXME: Is this correct?
-[tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*This MUST be included
-in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
+** [tck-testable tck-id-payloads-template-parameter-value-type]#[yellow-background]*[tck-id-payloads-template-parameter-value-type] This
+MUST be an unsigned 32-bit integer representing the datatype.*#
+** [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*[tck-id-payloads-template-parameter-type-value] This
+value MUST be one of the enumerated values as shown in the
+link:#payloads_b_datatype_basic[Sparkplug Basic Data Types].*#
+** [tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*[tck-id-payloads-template-parameter-type-req] This
+MUST be included in Template Parameter Definitions in NBIRTH and DBIRTH messages.*#
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
-[tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*The value supplied MUST
-be one of the following types: _uint32_, _uint64_, _float_, _double_, _bool_, or _string_.*#
-For a template definition, this is the default value of the parameter. For a template instance, this
-is the value unique to that instance. More information on these types can be found below.
-*** _uint32_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _uint64_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _float_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _double_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _bool_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** _string_
-**** Defined here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*[tck-id-payloads-template-parameter-value] The
+value supplied MUST be one of the following Google Protocol Buffer types: _uint32_, _uint64_,
+_float_, _double_, _bool_, or _string_.*#
+*** More information on these types can be found here:
+https://developers.google.com/protocol-buffers/docs/proto#scalar
+** For a template definition, this is the default value of the parameter. For a template instance,
+this is the value unique to that instance.
 
 [[payloads_b_datatypes]]
 ==== Data Types
@@ -952,59 +965,85 @@ enum DataType {
 
 [[payloads_b_datatype_array]]
 * *Array Types*
+
+All array types use the bytes_value field of the Metric value field. They are simply little-endian
+packed byte arrays.
+
+For example, consider an Int32 array with two decimal values [123456789, 987654321]
+
+Array converted to little endian hex: [0x15CD5B07, 0xB168DE3A]
+
+The bytes_value of the Sparkplug Metric must be: [0x15, 0xCD, 0x5B, 0x07, 0xB1, 0x68, 0xDE, 0x3A]
+
 ** _Int8Array_
 *** Int8Array as an array of packed little endian int8 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 22
+*** Example (Decimal to Metric bytes_value): [-23, 123] -> [0xEF, 0x7B]
 ** _Int16Array_
 *** Int16Array as an array of packed little endian int16 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 23
+*** Example (Decimal to Metric bytes_value): [-30000, 30000] -> [0xD0, 0x8A, 0x30, 0x75]
 ** _Int32Array_
 *** Int8Array as an array of packed little endian int32 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 24
+*** Example (Decimal to Metric bytes_value): [-1, 315338746] -> [0xFF, 0xFF, 0xFF, 0xFF, 0xFA, 0xAF, 0xCB, 0x12]
 ** _Int64Array_
 *** Int8Array as an array of packed little endian int64 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 25
+*** Example (Decimal to Metric bytes_value): [-4270929666821191986, -3601064768563266876] -> [0xCE, 0x06, 0x72, 0xAC, 0x18, 0x9C, 0xBA, 0xC4, 0xC4, 0xBA, 0x9C, 0x18, 0xAC, 0x72, 0x06, 0xCE]
 ** _UInt8Array_
 *** UInt8Array as an array of packed little endian uint8 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 26
+*** Example (Decimal to Metric bytes_value): [23, 250] -> [0x17, 0xFA]
 ** _UInt16Array_
 *** UInt16Array as an array of packed little endian uint16 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 27
+*** Example (Decimal to Metric bytes_value): [30, 52360] -> [0x1E, 0x00, 0x88, 0xCC]
 ** _UInt32Array_
 *** UInt32Array as an array of packed little endian uint32 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 28
+*** Example (Decimal to Metric bytes_value): [52, 3293969225] -> [0x34, 0x00, 0x00, 0x00, 0x49, 0xFB, 0x55, 0xC4]
 ** _UInt64Array_
 *** UInt64Array as an array of packed little endian uint64 bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 29
+*** Example (Decimal to Metric bytes_value): [52, 16444743074749521625] -> [0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xD9, 0x9E, 0x02, 0xD1, 0xB2, 0x76, 0x37, 0xE4]
 ** _FloatArray_
 *** FloatArray as an array of packed little endian 32-bit float bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 30
+*** Example (Decimal to Metric bytes_value): [1.23, 89.341] -> [0x3F, 0x9D, 0x70, 0xA4, 0x42, 0xB2, 0xAE, 0x98]
 ** _DoubleArray_
 *** DoubleArray as an array of packed little endian 64-bit float bytes
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 31
+*** Example (Decimal to Metric bytes_value): [12.354213, 1022.9123213] -> [0x40, 0x28, 0xB5, 0x5B, 0x68, 0x05, 0xA2, 0xD7, 0x40, 0x8F, 0xF7, 0x4C, 0x6F, 0x1C, 0x17, 0x8E]
 ** _BooleanArray_
-*** BooleanArray as an array of packed little endian boolean/bit bytes
+*** BooleanArray as an array of bit-packed bytes preceeded by a 4-byte integer that represents the
+total number of boolean values
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 32
+*** Example (boolean array to Metric bytes_value): [false, false, true, true, false, true, false, false, true, true, false, true] -> [0x0C, 0x00, 0x00, 0x00, 0x34, 0xDX]
+**** Note an 'X' above is a 'do not care'. It can be either 1 or 0 but must be present so the array
+ends on a byte boundary.
 ** _StringArray_
-*** StringArray as an array of packed little endian bytes
+*** StringArray as an array of null terminated strings
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 33
+*** Example (string array to Metric bytes_value): [ABC, hello] -> [0x41, 0x42, 0x43, 0x00, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00]
 ** _DateTimeArray_
-*** DateTimeArray as an array of packed little endian bytes where each date/time value is an 8-byte
+*** DateTimeArray as an array of packed little endian bytes where each Datetime value is an 8-byte
 value representing the number of milliseconds since epoch in UTC
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 34
+*** Example (DateTime array -> ms since epoch -> Metric bytes_value): ['Wednesday, October 21, 2009 5:27:55.335 AM', 'Friday, June 24, 2022 9:57:55 PM'] -> [1256102875335, 1656107875000] -> [0xC7, 0xD0, 0x90, 0x75, 0x24, 0x01, 0xB8, 0xBA, 0xB8, 0x97, 0x81, 0x01]
 
 [[payloads_payload_representation_on_host_applications]]
 ==== Payload Representation on Host Applications
@@ -1022,29 +1061,33 @@ There is a dependency on the MQTT CONNECT packet with regard to NBIRTH messages 
 subsequently sent for that given MQTT Session. These are can be found in the 
 link:#operational_behavior_edge_node_session_establishment[Edge Node Session Establishment Section]
 
-* [tck-testable tck-id-payloads-nbirth-timestamp]#[yellow-background]*NBIRTH messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-nbirth-edge-node-descriptor]#[yellow-background]*Every Edge Node
-Descriptor in any Sparkplug infrastructure MUST be unique in the system.*#
-These are used like addresses and need to be unique as a result.
-* [tck-testable tck-id-payloads-nbirth-seq]#[yellow-background]*Every NBIRTH message MUST include a
-sequence number and it MUST have a value between 0 and 255 (inclusive).*#
-* [tck-testable tck-id-payloads-nbirth-bdseq]#[yellow-background]*Every NBIRTH message MUST include
-a bdSeq number metric.*#
-* [tck-testable tck-id-payloads-nbirth-bdseq-repeat]#[yellow-background]*The bdSeq number value MUST
-match the bdSeq number value that was sent in the prior MQTT CONNECT packet WILL Message.*#
+* [tck-testable tck-id-payloads-nbirth-timestamp]#[yellow-background]*[tck-id-payloads-nbirth-timestamp] NBIRTH
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-nbirth-edge-node-descriptor]#[yellow-background]*[tck-id-payloads-nbirth-edge-node-descriptor] Every
+Edge Node Descriptor in any Sparkplug infrastructure MUST be unique in the system.*#
+** These are used like addresses and need to be unique as a result.
+* [tck-testable tck-id-payloads-nbirth-seq]#[yellow-background]*[tck-id-payloads-nbirth-seq] Every
+NBIRTH message MUST include a sequence number and it MUST have a value between 0 and 255
+(inclusive).*#
+* [tck-testable tck-id-payloads-nbirth-bdseq]#[yellow-background]*[tck-id-payloads-nbirth-bdseq] Every
+NBIRTH message MUST include a bdSeq number metric.*#
+* [tck-testable tck-id-payloads-nbirth-bdseq-repeat]#[yellow-background]*[tck-id-payloads-nbirth-bdseq-repeat] The
+bdSeq number value MUST match the bdSeq number value that was sent in the prior MQTT CONNECT packet
+WILL Message.*#
 ** Note if a new NBIRTH is being sent (due to a Rebirth request or ant other reason) the Sparkplug
 Edge Node MQTT client MUST publish the same bdSeq number that was sent in the prior MQTT CONNECT
 packet Will Message payload. This is because the NDEATH bdSeq number MUST always match the bdSeq
 number of the associated NBIRTH that is stored in the MQTT Server via the MQTT Will Message.
-* [tck-testable tck-id-payloads-nbirth-rebirth-req]#[yellow-background]*Every NBIRTH MUST include a
-metric with the name 'Node Control/Rebirth' and have a boolean value of false.*#
-This is used by Host Applications to force an Edge Node to send a new birth sequence (NBIRTH and
+* [tck-testable tck-id-payloads-nbirth-rebirth-req]#[yellow-background]*[tck-id-payloads-nbirth-rebirth-req] Every
+NBIRTH MUST include a metric with the name 'Node Control/Rebirth' and have a boolean value of
+false.*#
+** This is used by Host Applications to force an Edge Node to send a new birth sequence (NBIRTH and
 DBIRTH messages) if errors are detected by the Host Application in the data stream.
-* [tck-testable tck-id-payloads-nbirth-qos]#[yellow-background]*NBIRTH messages MUST be published
-with the MQTT QoS set to 0.*#
-* [tck-testable tck-id-payloads-nbirth-retain]#[yellow-background]*NBIRTH messages MUST be published
-with the MQTT retain flag set to false.*#
+* [tck-testable tck-id-payloads-nbirth-qos]#[yellow-background]*[tck-id-payloads-nbirth-qos] NBIRTH
+messages MUST be published with the MQTT QoS set to 0.*#
+* [tck-testable tck-id-payloads-nbirth-retain]#[yellow-background]*[tck-id-payloads-nbirth-retain] NBIRTH
+messages MUST be published with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple NBIRTH message on the topic:
 
@@ -1067,7 +1110,7 @@ Consider the following Sparkplug B payload in the NBIRTH message shown above:
         "metrics": [{
                 "name": "bdSeq",
                 "timestamp": 1486144502122,
-                "dataType": "Uint64",
+                "dataType": "Int64",
                 "value": 0
         }, {
                 "name": "Node Control/Reboot",
@@ -1121,9 +1164,8 @@ Consider the following Sparkplug B payload in the NBIRTH message shown above:
 
 This would result in a structure as follows on the Host Application.
 
-image:extracted-media/media/image13.png[image,width=752,height=332]
-
-Figure 9 – Sparkplug B Metric Structure 1
+.Figure 10 – Sparkplug B Metric Structure 1
+plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-1.puml[format=svg, alt="Sparkplug B Metric Structure 1"]
 
 [[payloads_b_dbirth]]
 ==== DBIRTH
@@ -1131,21 +1173,22 @@ Figure 9 – Sparkplug B Metric Structure 1
 The DBIRTH is responsible for informing the Host Application of all of the information about the
 device. This includes every metric it will publish data for in the future.
 
-* [tck-testable tck-id-payloads-dbirth-timestamp]#[yellow-background]*DBIRTH messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-dbirth-seq]#[yellow-background]*Every DBIRTH message MUST include a
-sequence number.*#
-* [tck-testable tck-id-payloads-dbirth-seq-inc]#[yellow-background]*Every DBIRTH message MUST
-include a sequence number value that is one greater than the previous sequence number sent by the
-Edge Node. This value MUST never exceed 255. If in the previous sequence number sent by the Edge
-Node was 255, the next sequence number sent MUST have a value of 0.*#
-* [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*All DBIRTH messages sent by an
-Edge Node MUST be sent immediately after the NBIRTH and before any NDATA or DDATA messages are
-published by the Edge Node.*#
-* [tck-testable tck-id-payloads-dbirth-qos]#[yellow-background]*DBIRTH messages MUST be published
-with the MQTT QoS set to 0.*#
-* [tck-testable tck-id-payloads-dbirth-retain]#[yellow-background]*DBIRTH messages MUST be published
-with the MQTT retain flag set to false.*#
+* [tck-testable tck-id-payloads-dbirth-timestamp]#[yellow-background]*[tck-id-payloads-dbirth-timestamp] DBIRTH
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-dbirth-seq]#[yellow-background]*[tck-id-payloads-dbirth-seq] Every
+DBIRTH message MUST include a sequence number.*#
+* [tck-testable tck-id-payloads-dbirth-seq-inc]#[yellow-background]*[tck-id-payloads-dbirth-seq-inc] Every
+DBIRTH message MUST include a sequence number value that is one greater than the previous sequence
+number sent by the Edge Node. This value MUST never exceed 255. If in the previous sequence number
+sent by the Edge Node was 255, the next sequence number sent MUST have a value of 0.*#
+* [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*[tck-id-payloads-dbirth-order] All
+DBIRTH messages sent by an Edge Node MUST be sent immediately after the NBIRTH and before any NDATA
+or DDATA messages are published by the Edge Node.*#
+* [tck-testable tck-id-payloads-dbirth-qos]#[yellow-background]*[tck-id-payloads-dbirth-qos] DBIRTH
+messages MUST be published with the MQTT QoS set to 0.*#
+* [tck-testable tck-id-payloads-dbirth-retain]#[yellow-background]*[tck-id-payloads-dbirth-retain] DBIRTH
+messages MUST be published with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple DBIRTH message on the topic:
 
@@ -1242,9 +1285,8 @@ Consider the following Sparkplug B payload in the DBIRTH message shown above:
 
 This would result in a structure as follows on the Host Application.
 
-image:extracted-media/media/image14.png[image,width=721,height=341]
-
-Figure 10 – Sparkplug B Metric Structure 2
+.Figure 11 – Sparkplug B Metric Structure 2
+plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-2.puml[format=svg, alt="Sparkplug B Metric Structure 2"]
 
 [[payloads_b_ndata]]
 ==== NDATA
@@ -1257,21 +1299,22 @@ aggregated and published together in a single NDATA message. Because the Sparkpl
 an ordered List of metrics, multiple different change events for multiple different metrics can all
 be included in a single NDATA message.
 
-* [tck-testable tck-id-payloads-ndata-timestamp]#[yellow-background]*NDATA messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-ndata-seq]#[yellow-background]*Every NDATA message MUST include a
-sequence number.*#
-* [tck-testable tck-id-payloads-ndata-seq-inc]#[yellow-background]*Every NDATA message MUST include
-a sequence number value that is one greater than the previous sequence number sent by the Edge Node.
-This value MUST never exceed 255. If in the previous sequence number sent by the Edge Node was 255,
-the next sequence number sent MUST have a value of 0.*#
-* [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*All NDATA messages sent by an Edge
-Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages have been published by the Edge
-Node.*#
-* [tck-testable tck-id-payloads-ndata-qos]#[yellow-background]*NDATA messages MUST be published with
-the MQTT QoS set to 0.*#
-* [tck-testable tck-id-payloads-ndata-retain]#[yellow-background]*NDATA messages MUST be published
-with the MQTT retain flag set to false.*#
+* [tck-testable tck-id-payloads-ndata-timestamp]#[yellow-background]*[tck-id-payloads-ndata-timestamp] NDATA
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-ndata-seq]#[yellow-background]*[tck-id-payloads-ndata-seq] Every
+NDATA message MUST include a sequence number.*#
+* [tck-testable tck-id-payloads-ndata-seq-inc]#[yellow-background]*[tck-id-payloads-ndata-seq-inc] Every
+NDATA message MUST include a sequence number value that is one greater than the previous sequence
+number sent by the Edge Node. This value MUST never exceed 255. If in the previous sequence number
+sent by the Edge Node was 255, the next sequence number sent MUST have a value of 0.*#
+* [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*[tck-id-payloads-ndata-order] All
+NDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
+have been published by the Edge Node.*#
+* [tck-testable tck-id-payloads-ndata-qos]#[yellow-background]*[tck-id-payloads-ndata-qos] NDATA
+messages MUST be published with the MQTT QoS set to 0.*#
+* [tck-testable tck-id-payloads-ndata-retain]#[yellow-background]*[tck-id-payloads-ndata-retain] NDATA
+messages MUST be published with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple NDATA message on the topic:
 
@@ -1313,21 +1356,22 @@ together in a single DDATA message. Because the Sparkplug B payload uses an orde
 multiple different change events for multiple different metrics can all be included in a single
 DDATA message.
 
-* [tck-testable tck-id-payloads-ddata-timestamp]#[yellow-background]*DDATA messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-ddata-seq]#[yellow-background]*Every DDATA message MUST include a
-sequence number.*#
-* [tck-testable tck-id-payloads-ddata-seq-inc]#[yellow-background]*Every DDATA message MUST include
-a sequence number value that is one greater than the previous sequence number sent by the Edge Node.
-This value MUST never exceed 255. If in the previous sequence number sent by the Edge Node was 255,
-the next sequence number sent MUST have a value of 0.*#
-* [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*All DDATA messages sent by an Edge
-Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages have been published by the Edge
-Node.*#
-* [tck-testable tck-id-payloads-ddata-qos]#[yellow-background]*DDATA messages MUST be published with
-the MQTT QoS set to 0.*#
-* [tck-testable tck-id-payloads-ddata-retain]#[yellow-background]*DDATA messages MUST be published
-with the MQTT retain flag set to false.*#
+* [tck-testable tck-id-payloads-ddata-timestamp]#[yellow-background]*[tck-id-payloads-ddata-timestamp] DDATA
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-ddata-seq]#[yellow-background]*[tck-id-payloads-ddata-seq] Every
+DDATA message MUST include a sequence number.*#
+* [tck-testable tck-id-payloads-ddata-seq-inc]#[yellow-background]*[tck-id-payloads-ddata-seq-inc] Every
+DDATA message MUST include a sequence number value that is one greater than the previous sequence
+number sent by the Edge Node. This value MUST never exceed 255. If in the previous sequence number
+sent by the Edge Node was 255, the next sequence number sent MUST have a value of 0.*#
+* [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*[tck-id-payloads-ddata-order] All
+DDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
+have been published by the Edge Node.*#
+* [tck-testable tck-id-payloads-ddata-qos]#[yellow-background]*[tck-id-payloads-ddata-qos] DDATA
+messages MUST be published with the MQTT QoS set to 0.*#
+* [tck-testable tck-id-payloads-ddata-retain]#[yellow-background]*[tck-id-payloads-ddata-retain] DDATA
+messages MUST be published with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple DDATA message on the topic:
 
@@ -1367,14 +1411,15 @@ metric.
 NCMD messages are used by Host Applications to write to Edge Node outputs and send Node Control
 commands to Edge Nodes. Multiple metrics can be supplied in a single NCMD message.
 
-* [tck-testable tck-id-payloads-ncmd-timestamp]#[yellow-background]*NCMD messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-ncmd-seq]#[yellow-background]*Every NCMD message MUST NOT include a
-sequence number.*#
-* [tck-testable tck-id-payloads-ncmd-qos]#[yellow-background]*NCMD messages MUST be published with
-the MQTT QoS set to 0.*#
-* [tck-testable tck-id-payloads-ncmd-retain]#[yellow-background]*NCMD messages MUST be published
-with the MQTT retain flag set to false.*#
+* [tck-testable tck-id-payloads-ncmd-timestamp]#[yellow-background]*[tck-id-payloads-ncmd-timestamp] NCMD
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-ncmd-seq]#[yellow-background]*[tck-id-payloads-ncmd-seq] Every NCMD
+message MUST NOT include a sequence number.*#
+* [tck-testable tck-id-payloads-ncmd-qos]#[yellow-background]*[tck-id-payloads-ncmd-qos] NCMD
+messages MUST be published with the MQTT QoS set to 0.*#
+* [tck-testable tck-id-payloads-ncmd-retain]#[yellow-background]*[tck-id-payloads-ncmd-retain] NCMD
+messages MUST be published with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple NCMD message on the topic:
 
@@ -1410,14 +1455,15 @@ or DDATA message that was not provided in the original NBIRTH or DBIRTH messages
 DCMD messages are used by Host Applications to write to device outputs and send Device Control
 commands to devices. Multiple metrics can be supplied in a single DCMD message.
 
-* [tck-testable tck-id-payloads-dcmd-timestamp]#[yellow-background]*DCMD messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-dcmd-seq]#[yellow-background]*Every DCMD message MUST NOT include a
-sequence number.*#
-* [tck-testable tck-id-payloads-dcmd-qos]#[yellow-background]*DCMD messages MUST be published with
-the MQTT QoS set to 0.*#
-* [tck-testable tck-id-payloads-dcmd-retain]#[yellow-background]*DCMD messages MUST be published
-with the MQTT retain flag set to false.*#
+* [tck-testable tck-id-payloads-dcmd-timestamp]#[yellow-background]*[tck-id-payloads-dcmd-timestamp] DCMD
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-dcmd-seq]#[yellow-background]*[tck-id-payloads-dcmd-seq] Every DCMD
+message MUST NOT include a sequence number.*#
+* [tck-testable tck-id-payloads-dcmd-qos]#[yellow-background]*[tck-id-payloads-dcmd-qos] DCMD
+messages MUST be published with the MQTT QoS set to 0.*#
+* [tck-testable tck-id-payloads-dcmd-retain]#[yellow-background]*[tck-id-payloads-dcmd-retain] DCMD
+messages MUST be published with the MQTT retain flag set to false.*#
 
 The following is a representation of a simple DCMD message on the topic:
 
@@ -1460,23 +1506,39 @@ The NDEATH messages are registered with the MQTT Server in the MQTT CONNECT pack
 Message'. This is used by Host Applications to know when an Edge Node has lost its MQTT connection
 with the MQTT Server.
 
-* [tck-testable tck-id-payloads-ndeath-seq]#[yellow-background]*Every NDEATH message MUST NOT
-include a sequence number.*#
-* [tck-testable tck-id-payloads-ndeath-will-message]#[yellow-background]*An NDEATH message MUST be
-registered as a Will Message in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-ndeath-will-message-qos]#[yellow-background]*The NDEATH message MUST
-set the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-ndeath-will-message-retain]#[yellow-background]*The NDEATH message
-MUST set the MQTT Will Retained flag to false in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-ndeath-bdseq]#[yellow-background]*The NDEATH message MUST include
-the same bdSeq number value that will be used in the associated NBIRTH message.*#
-This is used by Host Applications to correlate the NDEATH messages with a previously received NBIRTH
+* [tck-testable tck-id-payloads-ndeath-seq]#[yellow-background]*[tck-id-payloads-ndeath-seq] Every
+NDEATH message MUST NOT include a sequence number.*#
+* [tck-testable tck-id-payloads-ndeath-will-message]#[yellow-background]*[tck-id-payloads-ndeath-will-message] An
+NDEATH message MUST be registered as a Will Message in the MQTT CONNECT packet.*#
+* [tck-testable tck-id-payloads-ndeath-will-message-qos]#[yellow-background]*[tck-id-payloads-ndeath-will-message-qos] The
+NDEATH message MUST set the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
+* [tck-testable tck-id-payloads-ndeath-will-message-retain]#[yellow-background]*[tck-id-payloads-ndeath-will-message-retain] The
+NDEATH message MUST set the MQTT Will Retained flag to false in the MQTT CONNECT packet.*#
+* [tck-testable tck-id-payloads-ndeath-bdseq]#[yellow-background]*[tck-id-payloads-ndeath-bdseq] The
+NDEATH message MUST include the same bdSeq number value that will be used in the associated NBIRTH message.*#
+** This is used by Host Applications to correlate the NDEATH messages with a previously received NBIRTH
 message.
-** It is important to note that any new CONNEC
-* [tck-testable tck-id-payloads-ndeath-will-message-publisher]#[yellow-background]*An NDEATH message
-SHOULD be published by the Edge Node before it intentionally disconnects from the MQTT Server.*#
-This allows Host Applications advanced notice that an Edge Node has disconnected rather than waiting
-for the NDEATH to be delivered by the MQTT Server based on an MQTT keep alive timeout.
+** It is important to note that any new CONNECT packet must increment the bdSeq number in the
+payload compared to what was in the previous CONNECT packet. This ensures that any Host Applications
+will be able to distinguish between current and old bdSeq numbers in the event that messages are
+delivered out of order. When incrementing the bdSeq number, if the previous value was 255, the next
+must be zero.
+* [tck-testable tck-id-payloads-ndeath-will-message-publisher]#[yellow-background]*[tck-id-payloads-ndeath-will-message-publisher] An
+NDEATH message SHOULD be published by the Edge Node before it intentionally disconnects from the
+MQTT Server.*#
+** This allows Host Applications advanced notice that an Edge Node has disconnected rather than
+waiting for the NDEATH to be delivered by the MQTT Server based on an MQTT keep alive timeout.
+* [tck-testable tck-id-payloads-ndeath-will-message-publisher-disconnect-mqtt311]#[yellow-background]*[tck-id-payloads-ndeath-will-message-publisher-disconnect-mqtt311] If
+the Edge Node is using MQTT 3.1.1 and it sends an MQTT DISCONNECT packet, the Edge Node MUST publish
+an NDEATH message to the MQTT Server before it sends the MQTT DISCONNECT packet.*#
+** This is to ensure Host Applications are notified that the Edge Node is disconnecting. Because an
+MQTT DISCONNECT packet is sent, the MQTT Server will not deliver the Will Message/NDEATH on behalf
+of the disconnecting Edge Node.
+* [tck-testable tck-id-payloads-ndeath-will-message-publisher-disconnect-mqtt50]#[yellow-background]*[tck-id-payloads-ndeath-will-message-publisher-disconnect-mqtt50] If
+the Edge Node is using MQTT 5.0 and it sends an MQTT DISCONNECT packet, the MQTT v5.0 'Disconnect
+with Will Message' reason code MUST be set in the DISCONNECT packet.*#
+** This is to ensure Host Applications are notified that the Edge Node is disconnecting by the MQTT
+Server.
 * An NDEATH message MAY include a timestamp.
 ** It should be noted that this timestamp is typically set at the time of the MQTT CONNECT message
 and as a result may not be useful to Host Applications. If the timestamp is set, Host Applications
@@ -1517,14 +1579,15 @@ The DDEATH messages are published by an Edge Node on behalf of an attached devic
 determines that a device is no longer accessible (i.e. it has turned off, stopped responding, etc.)
 the Edge Node should publish a DDEATH to denote that device connectivity has been lost.
 
-* [tck-testable tck-id-payloads-ddeath-timestamp]#[yellow-background]*DDEATH messages MUST include a
-payload timestamp that denotes the time at which the message was published.*#
-* [tck-testable tck-id-payloads-ddeath-seq]#[yellow-background]*Every DDEATH message MUST include a
-sequence number.*#
-* [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*Every DDEATH message MUST include
-a sequence number value that is one greater than the previous sequence number sent by the Edge Node.
-This value MUST never exceed 255. If in the previous sequence number sent by the Edge Node was 255,
-the next sequence number sent MUST have a value of 0.*#
+* [tck-testable tck-id-payloads-ddeath-timestamp]#[yellow-background]*[tck-id-payloads-ddeath-timestamp] DDEATH
+messages MUST include a payload timestamp that denotes the time at which the message was
+published.*#
+* [tck-testable tck-id-payloads-ddeath-seq]#[yellow-background]*[tck-id-payloads-ddeath-seq] Every
+DDEATH message MUST include a sequence number.*#
+* [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*[tck-id-payloads-ddeath-seq-inc] Every
+DDEATH message MUST include a sequence number value that is one greater than the previous sequence
+number sent by the Edge Node. This value MUST never exceed 255. If in the previous sequence number
+sent by the Edge Node was 255, the next sequence number sent MUST have a value of 0.*#
 
 The following is a representation of a simple DDEATH message on the topic:
 
@@ -1546,9 +1609,9 @@ Consider the following Sparkplug B payload in the DDEATH message shown above:
 }
 ----
 
-[tck-testable tck-id-payloads-ddeath-seq-number]#[yellow-background]*A sequence number MUST be
-included with the DDEATH messages so the Host Application can ensure order of messages and maintain
-the state of the data.*#
+[tck-testable tck-id-payloads-ddeath-seq-number]#[yellow-background]*[tck-id-payloads-ddeath-seq-number] A
+sequence number MUST be included with the DDEATH messages so the Host Application can ensure order
+of messages and maintain the state of the data.*#
 
 [[payloads_b_state]]
 ==== STATE
@@ -1557,24 +1620,35 @@ As noted previously, the STATE messages published by Sparkplug Host Applications
 Sparkplug B payloads. State messages are used by Sparkplug Host Applications to denote to Edge Nodes
 whether or not the Sparkplug Host Application is online and operational or not.
 
-* [tck-testable tck-id-payloads-state-will-message]#[yellow-background]*Sparkplug Host Applications
-MUST register a Will Message in the MQTT CONNECT packet on the topic 'STATE/[sparkplug_host_id]'.*#
-The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
+* [tck-testable tck-id-payloads-state-will-message]#[yellow-background]*[tck-id-payloads-state-will-message] Sparkplug
+Host Applications MUST register a Will Message in the MQTT CONNECT packet on the topic
+'spBv1.0/STATE/[sparkplug_host_id]'.*#
+** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be any
 UTF-8 string.
-* [tck-testable tck-id-payloads-state-will-message-qos]#[yellow-background]*The Sparkplug Host
-Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*The Sparkplug Host
-Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-will-message-payload]#[yellow-background]*The Sparkplug Host
-Application MUST set the Will Payload to the UTF-8 string of 'OFFLINE' in the MQTT CONNECT packet.*#
-* [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*After establishing an MQTT
-connection, the Sparkplug Host Application MUST subscribe on it's own 'STATE/[sparkplug_host_id]'
-topic.*#
+* [tck-testable tck-id-payloads-state-will-message-qos]#[yellow-background]*[tck-id-payloads-state-will-message-qos] The
+Sparkplug Host Application MUST set the the MQTT Will QoS to 1 in the MQTT CONNECT packet.*#
+* [tck-testable tck-id-payloads-state-will-message-retain]#[yellow-background]*[tck-id-payloads-state-will-message-retain] The
+Sparkplug Host Application MUST set the Will Retained flag to true in the MQTT CONNECT packet.*#
+* [tck-testable tck-id-payloads-state-will-message-payload]#[yellow-background]*[tck-id-payloads-state-will-message-payload] The
+Death Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value pairs where one key
+MUST be 'online' and it's value is a boolean 'false'. The other key MUST be 'timestamp' and the
+value MUST be a numeric value representing the current UTC time in milliseconds since Epoch.*#
+* [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*[tck-id-payloads-state-subscribe] After
+establishing an MQTT connection, the Sparkplug Host Application MUST subscribe on it's own
+'spBv1.0/STATE/[sparkplug_host_id]' topic.*#
+** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
+any UTF-8 string.
 ** Non-normative comment: This allows the Sparkplug Host Application handle timing issues around
-STATE 'OFFLINE' messages being published on it's behalf by the MQTT Server when it is in fact
+STATE 'offline' messages being published on it's behalf by the MQTT Server when it is in fact
 online.
-* [tck-testable tck-id-payloads-state-birth]#[yellow-background]*After subscribing on it's own
-STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST publish an MQTT message on the
-topic 'STATE/[sparkplug_host_id]' with a payload of the UTF-8 string of 'ONLINE', a QoS of 1, and
-the retain flag set to true.*# The [sparkplug_host_id] should be replaced with the Sparkplug Host
-Application's ID. This can be any UTF-8 string.
+* [tck-testable tck-id-payloads-state-birth]#[yellow-background]*[tck-id-payloads-state-birth] After
+subscribing on it's own spBv1.0/STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST
+publish an MQTT message on the topic 'spBv1.0/STATE/[sparkplug_host_id]' with a QoS of 1, and the
+retain flag set to true.*#
+** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
+any UTF-8 string.
+* [tck-testable tck-id-payloads-state-birth-payload]#[yellow-background]*[tck-id-payloads-state-birth-payload] The
+Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value pairs where one key
+MUST be 'online' and it's value is a boolean 'true'. The other key MUST be 'timestamp' and the value
+MUST match the timestamp value that was used in the immediately prior MQTT CONNECT packet Will
+Message payload.*#
