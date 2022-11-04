@@ -8,9 +8,9 @@ https://www.eclipse.org/legal/epl-2.0.
 SPDX-License-Identifier: EPL-2.0
 ////
 
-= Sparkplug 3.0.0-rc1: Sparkplug Specification
+= Sparkplug 3.0.0-SNAPSHOT: Sparkplug Specification
 Eclipse Sparkplug Contributors
-Version 3.0.0-rc1 Release Candidate Release, {docdate}
+Version 3.0.0-SNAPSHOT Release, {docdate}
 // Settings:
 //:experimental:
 :reproducible:

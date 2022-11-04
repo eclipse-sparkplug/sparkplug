@@ -77,7 +77,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0-SNAPSHOT")
 public class PrimaryHostTest extends TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
