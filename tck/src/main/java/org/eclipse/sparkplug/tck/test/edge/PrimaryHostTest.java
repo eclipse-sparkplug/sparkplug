@@ -49,6 +49,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEH
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,14 +84,14 @@ public class PrimaryHostTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	public static final String PROPERTY_KEY_QUALITY = "Quality";
 
-	private final @NotNull String testIds[] =
-			{ ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID,
-					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE,
-					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
-					ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE,
-					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
-					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
-					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP };
+	private final @NotNull List<String> testIds = List.of(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ID,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_ONLINE,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_OFFLINE,
+			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE,
+			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
+			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_TIMESTAMP);
 
 	private final @NotNull TCK theTCK;
 	private final ManagedExtensionExecutorService executorService = Services.extensionExecutorService();
@@ -317,7 +318,7 @@ public class PrimaryHostTest extends TCKTest {
 			// e.printStackTrace();
 		}
 		testResults.putAll(results);
-		Utils.setEndTest(getName(), new ArrayList<String>(Arrays.asList(testIds)), testResults);
+		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);
 	}
 
@@ -326,7 +327,7 @@ public class PrimaryHostTest extends TCKTest {
 	}
 
 	public String[] getTestIds() {
-		return testIds;
+		return testIds.toArray(new String[0]);
 	}
 
 	public Map<String, String> getResults() {
