@@ -610,8 +610,8 @@ public class SendDataTest extends TCKTest {
 						PAYLOADS_TEMPLATE_INSTANCE_MEMBERS);
 			}
 
-			if (msgtype.equals(TOPIC_PATH_NBIRTH) || msgtype.equals(TOPIC_PATH_NDATA)
-					|| msgtype.equals(TOPIC_PATH_DDATA)) {
+			if (msgtype.equals(TOPIC_PATH_NBIRTH) || msgtype.equals(TOPIC_PATH_DBIRTH)
+					|| msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA)) {
 				// check the definition metrics are in the instance
 				for (Metric defmetric : defmetrics) {
 					boolean found = false;
@@ -632,7 +632,8 @@ public class SendDataTest extends TCKTest {
 							found || msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH);
 					setResultIfNotFail(testResults,
-							found && (msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA)),
+							found && (msgtype.equals(TOPIC_PATH_DBIRTH) || msgtype.equals(TOPIC_PATH_NDATA)
+									|| msgtype.equals(TOPIC_PATH_DDATA)),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA);
 				}
 			}

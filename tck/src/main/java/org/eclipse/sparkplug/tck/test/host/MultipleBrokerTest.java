@@ -100,6 +100,10 @@ public class MultipleBrokerTest extends TCKTest {
 		this.utilities = utilities;
 		this.config = config;
 
+		// Ignore duplicate STATE publish failures because we're connecting to two MQTT Servers and the monitor will
+		// detect a collision that isn't really a collision
+		utilities.getMonitor().setIgnoreDupHostCheck(true);
+
 		if (parms.length < 2) {
 			log("Not enough parameters: " + Arrays.toString(parms));
 			log("Parameters to host multiple broker test must be: hostApplicationId, brokerURL");
@@ -164,7 +168,7 @@ public class MultipleBrokerTest extends TCKTest {
 			if (topic.equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId)) {
 				StatePayload statePayload = Utils.getHostPayload(new String(msg.getMqttMessage().getPayload()));
 
-				Utils.setResult(testResults, statePayload.isOnline() && (statePayload.getTimestamp() != deathTimestamp),
+				Utils.setResult(testResults, statePayload.isOnline() && (statePayload.getTimestamp() >= deathTimestamp),
 						ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP,
 						OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP);
 
@@ -183,6 +187,8 @@ public class MultipleBrokerTest extends TCKTest {
 		} catch (Exception e) {
 			logger.error("endTest", e);
 		}
+
+		utilities.getMonitor().setIgnoreDupHostCheck(false);
 		testResults.putAll(results);
 		Utils.setEndTest(getName(), testIds, testResults);
 		reportResults(testResults);

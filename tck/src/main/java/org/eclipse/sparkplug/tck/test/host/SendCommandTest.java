@@ -586,9 +586,12 @@ public class SendCommandTest extends TCKTest {
 						if (birth.getName().equals(current.getName())) {
 							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
 									setShouldResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME));
-							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
-									setResult(current.getDatatype() == birth.getDatatype() && Utils.hasValue(current),
-											OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
+							testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE, setResult(
+									current.hasBooleanValue() || current.hasBytesValue() || current.hasDatasetValue()
+											|| current.hasDoubleValue() || current.hasFloatValue()
+											|| current.hasIntValue() || current.hasLongValue()
+											|| current.hasStringValue() || current.hasTemplateValue(),
+									OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE));
 							break;
 						}
 					}
