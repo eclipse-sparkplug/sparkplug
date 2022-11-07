@@ -115,14 +115,14 @@ successfully establishing the MQTT session and before publishing its own STATE m
 
 . [tck-testable tck-id-message-flow-phid-sparkplug-state-publish]#[yellow-background]*[tck-id-message-flow-phid-sparkplug-state-publish] Once
 an MQTT Session has been established, the Sparkplug Host Application subscriptions on the Sparkplug
-Topic Namespace have been established and the STATE topic subscription has been been established,
-the Sparkplug Host Application MUST publish a new STATE message.*#
+Topic Namespace have been established and the STATE topic subscription has been established, the
+Sparkplug Host Application MUST publish a new STATE message.*#
 +
 [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload]#[yellow-background]*[tck-id-message-flow-phid-sparkplug-state-publish-payload] The
 Host Application Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include two key/value
-pairs where one key MUST be 'online' and it's value is a boolean 'true'. The other key MUST be
-'timestamp' and the value MUST be be the same value set in the immediately prior MQTT CONNECT
-packet's Will Message payload..*#
+pairs where one key MUST be 'online' and its value is a boolean 'true'. The other key MUST be
+'timestamp' and the value MUST be the same value set in the immediately prior MQTT CONNECT packet's
+Will Message payload.*#
 +
 [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload-timestamp]#[yellow-background]*[tck-id-message-flow-phid-sparkplug-state-publish-payload-timestamp] The
 timestamp value in the Host Application Birth Certificate payload MUST be the same value set in the
@@ -891,9 +891,9 @@ an Edge Node or Device that may support functionality such as rebooting an Edge 
 is up to the Sparkplug implementor to define what functionality can be exposed.
 
 Security and access is an important aspect of commands. It may be the case that not all Sparkplug
-Host Applications should have the ability to send commands. This can be be controlled in multiple
-ways. ACLs (Access Control Lists) may be used to allow/disallow certain MQTT clients from publishing
-NCMD and DCMD messages. Security features in the Sparkplug Host Application itself could be used to
+Host Applications should have the ability to send commands. This can be controlled in multiple ways.
+ACLs (Access Control Lists) may be used to allow/disallow certain MQTT clients from publishing NCMD
+and DCMD messages. Security features in the Sparkplug Host Application itself could be used to
 allow/disallow certain users or applications from sending certain commands. Security features in the
 Sparkplug Edge Node application could be used to allow/disallow CMD messages to be honored. There
 are a number of ways in which this can be achieved based on the use case. However, implementation
