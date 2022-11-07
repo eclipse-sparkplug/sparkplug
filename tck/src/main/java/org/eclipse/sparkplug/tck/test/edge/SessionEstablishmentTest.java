@@ -112,7 +112,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
 			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC, ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT,
 			ID_PAYLOADS_NDATA_ORDER, ID_PAYLOADS_DDATA_ORDER, ID_PAYLOADS_ALIAS_UNIQUENESS, ID_TOPICS_NBIRTH_TOPIC,
-			ID_TOPICS_DBIRTH_TOPIC, ID_CASE_SENSITIVITY_METRIC_NAMES);
+			ID_TOPICS_DBIRTH_TOPIC, ID_CASE_SENSITIVITY_METRIC_NAMES, ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT,
+			ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT, ID_PAYLOADS_METRIC_DATATYPE_REQ);
 
 	private final @NotNull TCK theTCK;
 	private @NotNull Utilities utilities = null;
@@ -416,7 +417,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				aliases.add(alias);
 			}
 		}
-		testResults.put(ID_PAYLOADS_NAME_REQUIREMENT, setResult(isValid, PAYLOADS_ALIAS_BIRTH_REQUIREMENT));
+		testResults.put(ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT, setResult(isValid, PAYLOADS_ALIAS_BIRTH_REQUIREMENT));
 	}
 
 	@SpecAssertion(
@@ -434,9 +435,6 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDEATH,
 			id = ID_TOPICS_NDEATH_PAYLOAD)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_PAYLOAD,
-			id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
 
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
@@ -530,9 +528,6 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES)
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_B_METRIC,
-			id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
-	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_BDSEQ)
 	@SpecAssertion(
@@ -544,9 +539,6 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_SEQ)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_B_PAYLOAD,
-			id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_PAYLOAD,
 			id = ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH)
