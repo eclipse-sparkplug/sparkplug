@@ -678,7 +678,6 @@ Primary Host Application metric structure. Metrics can even be added dynamically
 a new NBIRTH and DBIRTH sequence of messages. These metrics will automatically be added to the
 Primary Host Application metric structure.
 
-// FIXME: This needs a bit of cleanup to be precise with non-normative MQTT concepts (e.g. ACLs)
 The other very important distinction to make here is that Edge Node NDATA and NCMD messages are
 decoupled from the Sparkplug Device level data and command messages of DDATA and DCMD. This
 decoupling in the Topic Namespace is important because it allows interaction from all MQTT Clients
@@ -687,6 +686,12 @@ of sending device commands. The Primary Host Application could provide a configu
 that would BLOCK output DDATA and DCMD messages but still allow NDATA and NCMD messages to flow. In
 this manner, multiple application systems can be connected to the same MQTT infrastructure, but only
 the ones with DCMD enabled can publish Device commands.
+
+It is also important to note that an Access Control List (ACL) can be used to allow one or more
+Sparkplug Host Applications to publish NCMD and DCMD messages to one or more Edge Nodes. Furthermore
+the ability to publish NCMD or DCMD messages by other Sparkplug Host Applications could be blocked.
+The decoupled nature of the commands and data messages allows for this type of granular access and
+control.
 
 The following simple message flow diagram demonstrates the messages used to update a changing
 cellular RSSI value in the Primary Host Application and sending a command from the Primary Host
