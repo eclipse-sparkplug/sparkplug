@@ -45,7 +45,7 @@
                 "
                                @click="changeMqttConnectFun(1)"
                         >
-                            <template #title> Sparkplug Conformance Profile Test</template>
+                            <template #title>Sparkplug Conformance Profile</template>
                             <SparkplugClientConnect
                                 v-model="sparkplugClient"
                                 :change="tabOpen"
