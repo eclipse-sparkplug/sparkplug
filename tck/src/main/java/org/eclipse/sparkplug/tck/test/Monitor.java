@@ -436,13 +436,14 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 							return;
 						}
 
-						setResultIfNotFail(testResults,
+						if (!setResultIfNotFail(testResults,
 								timestampNode.isLong()
 										&& Utils.checkUTC(timestampNode.longValue(), results.getConfig().UTCwindow),
 								ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT,
-								HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT);
-						log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT
-								+ ": host id: " + hostid + " with timestamp=" + timestamp);
+								HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT)) {
+							log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT
+									+ ": host id: " + hostid + " with timestamp=" + timestamp);
+						}
 
 						if (hostTimestamps.get(hostid) != null) {
 							if (!setResultIfNotFail(testResults, timestamp >= hostTimestamps.get(hostid),
