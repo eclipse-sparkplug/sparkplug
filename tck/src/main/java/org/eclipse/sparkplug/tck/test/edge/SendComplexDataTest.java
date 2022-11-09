@@ -218,7 +218,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Edge Send Complex Data Test";
+		return "Edge Send Complex Data";
 	}
 
 	public String[] getTestIds() {

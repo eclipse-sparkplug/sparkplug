@@ -165,7 +165,7 @@ public class MessageOrderingTest extends TCKTest {
 
 	@Override
 	public String getName() {
-		return "Host Message Ordering Test";
+		return "Host Message Ordering";
 	}
 
 	@Override

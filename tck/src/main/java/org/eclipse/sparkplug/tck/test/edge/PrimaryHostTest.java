@@ -323,7 +323,7 @@ public class PrimaryHostTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Edge Primary Host Test";
+		return "Edge Primary Host";
 	}
 
 	public String[] getTestIds() {
