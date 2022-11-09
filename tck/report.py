@@ -164,8 +164,8 @@ if __name__ == "__main__":
     files.append(glob.glob("**/Monitor.java", recursive=True)[0])
 
     for file in files:
-        print("Processing", file)
         if not file.endswith("TCKTest.java"):
+            print("Processing", file)
             ids = process(file)
             #print(ids)
             if file.find("test/broker") != -1:
@@ -225,5 +225,7 @@ if __name__ == "__main__":
     outfile = open(outfilename, "w")
     outfile.writelines(outlines)
     outfile.close()
+
+    print("Results summary written to", outfilename)
 
 
