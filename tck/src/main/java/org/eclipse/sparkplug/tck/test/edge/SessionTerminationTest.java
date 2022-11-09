@@ -150,7 +150,7 @@ public class SessionTerminationTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "SessionTermination";
+		return "Edge SessionTermination";
 	}
 
 	public String[] getTestIds() {

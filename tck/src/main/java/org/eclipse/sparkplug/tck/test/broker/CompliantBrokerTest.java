@@ -141,7 +141,7 @@ public class CompliantBrokerTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Broker Compliant Test";
+		return "Broker Sparkplug Compliant";
 	}
 
 	public String[] getTestIds() {

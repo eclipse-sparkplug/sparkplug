@@ -1,3 +1,5 @@
+#!/bin/python3
+
 """********************************************************************************
  * Copyright (c) 2022 Ian Craggs
  *
@@ -52,7 +54,7 @@ def getSetResultIfNotFail(curline, iterator):
         item = curline[idpos:].split()[0].strip(",")
     else:
         curline = next(iterator, None)
-        if curline.find("ID_") == -1:
+        while curline.find("ID_") == -1:
             curline = next(iterator, None)
         item = curline.split(",")[0].strip().strip(",")
         #print("888", item)
@@ -74,11 +76,20 @@ def process(filename):
         if curline.find("List<String> testIds =") != -1:
             testIds = getTestIds(curline, iterator)
 
-        elif curline.find("SpecAssertion(") != -1:
+        elif curline.find("@SpecAssertion(") != -1:
             specassertions.add(getSpecAssertion(iterator))
 
         elif curline.find("testResults.put(") != -1:
-            results.add(curline.split("(")[1].split(",")[0])
+            result = curline.split("(")[1].split(",")[0]
+            if result.startswith("ID_"):
+                results.add(result)
+
+        elif curline.find("testResult(ID_") != -1:
+            result = getSetResultIfNotFail(curline, iterator)
+            if result not in testIds:
+                print("result", result, "not in testids")
+            else:
+                results.add(result)
 
         elif curline.find("setResultIfNotFail(") != -1:
             result = getSetResultIfNotFail(curline, iterator)
@@ -144,6 +155,7 @@ def process(filename):
             print("Specassertions missing", missing)
 
 files = glob.glob("**/*Test.java", recursive=True)
+files.append(glob.glob("**/Monitor.java", recursive=True)[0])
 
 for file in files:
     if not file.endswith("TCKTest.java"):
