@@ -607,3 +607,7 @@ represents the current UTC time at the time of the CONNECT packet is sent to the
 a Host Application is disconnecting cleanly using MQTT DISCONNECT packet, the Host Application MUST
 publish a Death Certificate payload before sending the MQTT DISCONNECT packet with the timestamp set
 to the current UTC time the disconnect is occurring.*#
+* [tck-testable tck-id-host-topic-phid-death-payload-timestamp-disconnect-with-no-disconnect-packet]#[yellow-background]*[tck-id-host-topic-phid-death-payload-disconnect-with-no-disconnect-packet] If
+a Host Application is disconnecting and not using an MQTT DISCONNECT packet, the Host Application
+MUST publish a Death Certificate payload before terminating the MQTT connection with the timestamp
+set to the current UTC time the disconnect is occurring.*#

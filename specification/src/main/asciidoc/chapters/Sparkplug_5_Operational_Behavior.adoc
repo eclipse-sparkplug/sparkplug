@@ -797,8 +797,22 @@ Sparkplug Host Application's Death MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-death-retained]#[yellow-background]*[tck-id-operational-behavior-host-application-death-retained] The
 Sparkplug Host Application's Death retained flag MUST be set to true.*#
 * [tck-testable tck-id-operational-behavior-host-application-disconnect-intentional]#[yellow-background]*[tck-id-operational-behavior-host-application-disconnect-intentional] In
-the case of intentionally disconnecting, an MQTT DISCONNECT packet MUST be sent immediately after
+the case of intentionally disconnecting, an MQTT DISCONNECT packet MAY be sent immediately after
 the Death message is published.*#
+** If an MQTT DISCONNECT packet is sent by the Host Application, this signals to the MQTT Server
+that the Will Message MUST not be delivered by the MQTT Server to subscribers of that message. These
+subscribers are typically Sparkplug Edge Nodes. This is why a Death message MUST be published before
+disconnecting from the MQTT Server. It ensures Edge Nodes are notified the Host Application is now
+offline.
+** If an MQTT DISCONNECT packet is not sent by the Sparkplug Host Application, the MQTT Server will
+eventually deliver the Will Message (Death Certificate) to the subscribers. However, this can take
+some time to occur based on when the MQTT Server detects that the Host Application is no longer
+connected. By sending the Death Certificate before disconnecting without sending an MQTT DISCONNECT
+packet, we are ensuring that a Death message will be delivered to subscribing clients promptly. The
+fact that a second Death message will arrive when the Will Message is delivered is not significant.
+This is because the Will Message Death message will contain a timestamp older than the timestamp
+that is published by the Host Application immediately before the disconnect. Because it has an older
+timestamp, the Will Message Death message MUST be ignored by the subscribing Sparkplug clients.
 
 [[operational_behavior_sparkplug_host_application_receive_data]]
 === Sparkplug Host Application Receive Data
