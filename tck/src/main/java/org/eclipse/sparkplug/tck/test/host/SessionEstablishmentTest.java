@@ -649,7 +649,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		boolean overallResult = false;
 
-		// Topic is STATE/{host_application_id}
+		// Topic is spBv1.0/STATE/{host_application_id}
 		final boolean topicIsValid = packet.getTopic().equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 		overallResult = topicIsValid;
 
