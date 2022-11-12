@@ -182,7 +182,6 @@ public class SessionTerminationTest extends TCKTest {
 		reportResults(testResults);
 	}
 
-	
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC)
@@ -237,6 +236,9 @@ public class SessionTerminationTest extends TCKTest {
 		}
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET)
 	@Override
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
 		// on disconnecting the TCP connection, the NDEATH might not have been received
@@ -248,8 +250,11 @@ public class SessionTerminationTest extends TCKTest {
 			return;
 		}
 
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET,
+				setResult(ndeathFound, OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET));
+
 		disconnected = true;
-		if (disconnected && ndeathFound && ddeathFound) {
+		if (disconnected && ndeathFound) {
 			theTCK.endTest();
 		}
 	}
