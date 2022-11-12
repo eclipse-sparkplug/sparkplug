@@ -495,6 +495,7 @@ export default {
                             "Set the Device Id that is used by the configured Host, Group and Edge.",
                             "Connect the Host Application to the broker, if you are using one.",
                             "Start this test.",
+                            "Connect the Edge Node and Device.",
                             "Stop the edge node and device named.",
                             "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."

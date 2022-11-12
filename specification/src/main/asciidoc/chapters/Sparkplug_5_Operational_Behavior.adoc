@@ -300,7 +300,23 @@ Edge Node offline.
 an Edge Node disconnects intentionally, it MUST publish an NDEATH before terminating the connection.*#
 
 [tck-testable tck-id-operational-behavior-edge-node-intentional-disconnect-packet]#[yellow-background]*[tck-id-operational-behavior-edge-node-intentional-disconnect-packet] Immediately
-following the NDEATH publish, a DISCONNECT packet MUST be sent to the MQTT Server.*#
+following the NDEATH publish, a DISCONNECT packet MAY be sent to the MQTT Server.*#
+
+* If an MQTT DISCONNECT packet is sent by the Edge Node, this signals to the MQTT Server that the
+Will Message MUST not be delivered by the MQTT Server to subscribers of that message. These
+subscribers are typically Sparkplug Host Applications. This is why a Death message MUST be published
+before disconnecting from the MQTT Server. It ensures Edge Nodes are notified the Edge Node is now
+offline.
+* If an MQTT DISCONNECT packet is not sent by the Sparkplug Edge Node, the MQTT Server will
+eventually deliver the Will Message (Death Certificate) to the subscribers. However, this can take
+some time to occur based on when the MQTT Server detects that the Edge Node is no longer connected.
+By sending the Death Certificate before disconnecting without sending an MQTT DISCONNECT packet, we
+are ensuring that a Death message will be delivered to subscribing clients promptly. The fact that a
+second Death message will arrive when the Will Message is delivered is not significant. This is
+because the Will Message Death message will contain a bdSeq number that matches the bdSeq number
+that is published by the Edge Node immediately before the disconnect. Because it has a duplicate
+bdSeq, the Will Message Death message MUST be ignored by the subscribing Sparkplug Host Application
+clients.
 
 This allows the MQTT Server to be notified that the Edge Node is offline and as a result the MQTT
 Will Message of the Edge Node will not be delivered by the MQTT Server to subscribed MQTT clients.
