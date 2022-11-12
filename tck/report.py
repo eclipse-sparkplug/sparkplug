@@ -14,6 +14,8 @@
 
 import glob, sys
 
+reqfilename = "src/main/java/org/eclipse/sparkplug/tck/test/common/Requirements.java"
+
 brokerids = set([])
 hostids = set([])
 edgeids = set([])
@@ -21,6 +23,23 @@ edgeids = set([])
 brokerresults = {}
 hostresults = {}
 edgeresults = {}
+
+def getDescriptions():
+    reqs = {}
+    reqfile = open(reqfilename)
+    lines = reqfile.readlines()
+    id_string = None
+    for curline in lines:
+        curline = curline.strip()
+        if curline.find("String ID_") != -1:
+            id_string = curline.split()[4]
+        elif id_string != None and curline.find("String "+ id_string.upper().replace("-", "_")):
+            desc_string = curline.split("\"")[1].split(maxsplit=1)[1]
+            #print(id_string, desc_string)
+            reqs[id_string] = desc_string
+            id_string = None
+    reqfile.close()
+    return reqs
 
 def getTestIds(curline, iterator):
     start_found = False
@@ -127,20 +146,60 @@ def stats(results):
     percent = int(passes/count * 100.0)
     return count, passes, percent
 
-def export_html(profile, results):
+def getType(desc):
+    assertion_type = ""
+    if desc.find("MUST") != -1:
+        assertion_type = "MUST"
+    elif desc.find("SHOULD") != -1:
+        assertion_type = "SHOULD"
+    elif desc.find("MAY") != -1:
+        assertion_type = "MAY"
+    elif desc.find("must") != -1:
+        assertion_type = "MUST"
+        print("Error", desc)
+    elif desc.find("can") != -1:
+        assertion_type = "MAY"
+        print("Error", desc)
+    else:
+        print(desc)
+        sys.exit()
+    return assertion_type
+
+def isOptional(assertion_id, desc):
+    optional = False
+    if assertion_id.find("MULTPLE") != -1:
+        optional = True
+    elif assertion_id.find("REORDERING") != -1:
+        optional = True
+    elif assertion_id.find("TEMPLATE") != -1:
+        optional = True
+    elif assertion_id.find("PROPERTY") != -1:
+        optional = True
+    elif assertion_id.find("DATASET") != -1:
+        optional = True
+    elif assertion_id.find("ALIAS") != -1:
+        optional = True
+    elif desc.find("MUST") == -1:
+        optional = True
+    return optional
+
+def export_html(profile, results, reqs):
     lines = []
     count, passed, percent = stats(results)
     lines.append("<h3>Sparkplug Profile: %s </h3>" % (profile,))
     lines.append("<h4>Assertion count: %d Number passed: %d Percent passed: %d%% </h4>" % (count, passed, percent))
     lines.append("<table border=1 width=100%>")
-    lines.append( "<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>" % ("Assertion id", "Test", "Time", "Result"))
+    lines.append( "<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>" % ("Assertion ID", "Assertion Type", "Test", "Time", "Result"))
     sorted_list = list(results.keys())
     sorted_list.sort()
     for key in sorted_list:
+        assertion_type = getType(descs[key])
+        if isOptional(key, descs[key]):
+            assertion_type += " optional"
         if results[key] == "":
-            curline = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, "", "", "")
+            curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, "", "", "")
         else:
-            curline = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, results[key][0], results[key][1], results[key][2])
+            curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, results[key][0], results[key][1], results[key][2])
         lines.append(curline)
     lines.append("</table>")
     return lines
@@ -150,6 +209,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Test result file must be the first argument")
         sys.exit()
+
+    descs = getDescriptions()
 
     logfilename = sys.argv[1]
     try:
@@ -206,6 +267,7 @@ if __name__ == "__main__":
     table, th, td {
         border: 1px solid black;
         border-collapse: collapse;
+        text-align: center;
     }
     </style>
     </head>
@@ -216,9 +278,9 @@ if __name__ == "__main__":
     </html>
     """
 
-    outlines = export_html("Broker", brokerresults)
-    outlines.extend(export_html("Host", hostresults))
-    outlines.extend(export_html("Edge", edgeresults))
+    outlines = export_html("Broker", brokerresults, descs)
+    outlines.extend(export_html("Host", hostresults, descs))
+    outlines.extend(export_html("Edge", edgeresults, descs))
     outlines = [pre] + outlines + [post]
 
     outfilename = "summary.html"
