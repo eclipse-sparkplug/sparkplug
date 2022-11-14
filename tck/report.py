@@ -134,7 +134,6 @@ def process_logfile(lines):
             after = curline.find(eye) + len(eye)
             profile, test = curline[after:].split(maxsplit=1)
             test = test.replace(" ", "")
-            #print(profile, test)
             process_test(profile.lower(), test, date+" "+time, lines)
 
 def stats(key_list, results):
@@ -162,7 +161,6 @@ def stats(key_list, results):
         percent_without_optional = int((passes - optional_passes)/(count - optional_count) * 100.0)
     except:
         percent_without_optional = 0
-    print("****", fails)
     return count, passes, fails, percent, optional_count, optional_passes, percent_without_optional
 
 def getType(desc):
@@ -173,14 +171,8 @@ def getType(desc):
         assertion_type = "SHOULD"
     elif desc.find("MAY") != -1:
         assertion_type = "MAY"
-    elif desc.find("must") != -1:
-        assertion_type = "MUST"
-        print("Error", desc)
-    elif desc.find("can") != -1:
-        assertion_type = "MAY"
-        print("Error", desc)
     else:
-        print(desc)
+        print("Error classifying assertion type:", desc)
         sys.exit()
     return assertion_type
 
@@ -242,10 +234,11 @@ def export_html(profile, results, reqs):
         group_keys.sort()
         for key in group_keys:    
             assertion_type = getType(descs[key])
+            key_out = "tck-"+key.lower().replace("_", "-")
             if results[key] == "":
-                curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, "", "", "")
+                curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, "", "", "")
             else:
-                curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, results[key][0], results[key][1], results[key][2])
+                curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, results[key][0], results[key][1], results[key][2])
             lines.append(curline)
         lines.append("</table>")
 
@@ -261,10 +254,11 @@ def export_html(profile, results, reqs):
         optional, group =  isOptional(key, descs[key])
         if optional:
             assertion_type += " optional"
+        key_out = "tck-"+key.lower().replace("_", "-")
         if results[key] == "":
-            curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, "", "", "")
+            curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, "", "", "")
         else:
-            curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, results[key][0], results[key][1], results[key][2])
+            curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, results[key][0], results[key][1], results[key][2])
         lines.append(curline)
     lines.append("</table>")
     return lines
