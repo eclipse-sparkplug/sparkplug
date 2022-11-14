@@ -410,7 +410,7 @@ A Device can publish a DBIRTH as long as an NBIRTH has been sent previously and 
 active. The DBIRTH message must follow the following rules.
 
 * [tck-testable tck-id-message-flow-device-birth-publish-nbirth-wait]#[yellow-background]*[tck-id-message-flow-device-birth-publish-nbirth-wait] The
-NBIRTH message must have been sent within the current MQTT session prior to a DBIRTH being
+NBIRTH message MUST have been sent within the current MQTT session prior to a DBIRTH being
 published.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-topic]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-topic] The
 Device's DBIRTH MQTT topic MUST be of the form 'spBv1.0/group_id/DBIRTH/edge_node_id/device_id'
@@ -567,9 +567,9 @@ Application SHOULD send an NCMD to the Edge Node with a 'Node Control/Rebirth' r
 ** Non-normative comment: In most cases a 'Primary Host Application' would send a Rebirth Request
 but a Non-Primary Host may not
 * [tck-testable tck-id-operational-behavior-host-reordering-success]#[yellow-background]*[tck-id-operational-behavior-host-reordering-success] If
-the missing messages that triggered the start of the Reorder Timeout timer arrive before the
-reordering timer elapses, the timer can be terminated and normal operation in the Host Application
-can continue*#
+the missing message(s) that triggered the start of the Reorder Timeout timer arrive before the
+reordering timer elapses, the timer MUST be terminated and normal operation in the Host Application
+MUST continue until another out of order message arrives.*#
 
 [[operational_behavior_primary_application_state_in_multiple_mqtt_server_topologies]]
 === Primary Host Application STATE in Multiple MQTT Server Topologies
@@ -583,8 +583,8 @@ not able to receive the messages.
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-state-subs]#[yellow-background]*[tck-id-operational-behavior-primary-application-state-with-multiple-servers-state-subs] When
 using multiple MQTT Servers and Edge Nodes are configured with a Primary Host Application, the
-Primary Host Application instance must be configured to publish a STATE Birth Certificate and all
-Edge Nodes need to subscribe to this STATE message.*#
+Primary Host Application instance MUST be configured to publish a STATE Birth Certificate and all
+Edge Nodes configured with a Primary Host Application MUST subscribe to this STATE message.*#
 
 [tck-testable tck-id-operational-behavior-primary-application-state-with-multiple-servers-state]#[yellow-background]*[tck-id-operational-behavior-primary-application-state-with-multiple-servers-state] Regardless
 of the number of MQTT Servers in a Sparkplug Infrastructure, every time a Primary Host Application
@@ -797,7 +797,7 @@ and not any others it may be connected to.
 === Sparkplug Host Application Session Termination
 
 * [tck-testable tck-id-operational-behavior-host-application-termination]#[yellow-background]*[tck-id-operational-behavior-host-application-termination] If
-the Sparkplug Host Application ever disconnects intentionally, it must publish a Death message with
+the Sparkplug Host Application ever disconnects intentionally, it MUST publish a Death message with
 the following characteristics.*#
 
 * [tck-testable tck-id-operational-behavior-host-application-death-topic]#[yellow-background]*[tck-id-operational-behavior-host-application-death-topic] The
@@ -878,8 +878,8 @@ Rules for Edge Node data (NBIRTH and NDATA) messages:
 messages MUST include all metrics for the specified Edge Node that will ever be published for that
 Edge Node within the established Sparkplug session.*#
 * [tck-testable tck-id-operational-behavior-data-publish-nbirth-values]#[yellow-background]*[tck-id-operational-behavior-data-publish-nbirth-values] For
-each metric in the NBIRTH, the value must be set to the current value or if the current value is
-null, have the is_null flag set to true and no value specified.*#
+each metric in the NBIRTH, the value MUST be set to the current value or if the current value is
+null, the is_null flag MUST be set to true and MUST NOT have a value specified.*#
 * [tck-testable tck-id-operational-behavior-data-publish-nbirth-change]#[yellow-background]*[tck-id-operational-behavior-data-publish-nbirth-change] NDATA
 messages SHOULD only be published when Edge Node level metrics change.*#
 ** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
@@ -900,8 +900,8 @@ Rules for Device data (DBIRTH and DDATA) messages:
 messages MUST include all metrics for the specified Device that will ever be published for that
 Device within the established Sparkplug session.*#
 * [tck-testable tck-id-operational-behavior-data-publish-dbirth-values]#[yellow-background]*[tck-id-operational-behavior-data-publish-dbirth-values] For
-each metric in the DBIRTH, the value must be set to the current value or if the current value is
-null, have the is_null flag set to true and no value specified.*#
+each metric in the DBIRTH, the value MUST be set to the current value or if the current value is
+null, the is_null flag MUST be set to true and MUST NOT have a value specified.*#
 * [tck-testable tck-id-operational-behavior-data-publish-dbirth-change]#[yellow-background]*[tck-id-operational-behavior-data-publish-dbirth-change] DDATA
 messages SHOULD only be published when Device level metrics change.*#
 ** In other words, metric values that have not changed within the same Sparkplug Session SHOULD not
