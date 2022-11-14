@@ -12,7 +12,7 @@
  *   Ian Craggs - initial implementation
  ********************************************************************************"""
 
-import glob, sys
+import glob, sys, datetime
 
 reqfilename = "src/main/java/org/eclipse/sparkplug/tck/test/common/Requirements.java"
 
@@ -137,14 +137,33 @@ def process_logfile(lines):
             #print(profile, test)
             process_test(profile.lower(), test, date+" "+time, lines)
 
-def stats(results):
-    count = len(results)
+def stats(key_list, results):
+    count = len(key_list)
+    optional_count = 0
+    optional_passes = 0
     passes = 0
-    for result in results.keys():
-        if results[result] != "" and results[result][-1] == "PASS":
-            passes += 1
+    fails = 0
+    optional_fails = 0
+    for result in key_list:
+        optional, group = isOptional(result, descs[result])
+        if optional:
+            optional_count += 1
+        if results[result] != "":
+            if results[result][-1] == "PASS":
+                passes += 1
+                if optional:
+                    optional_passes += 1
+            elif results[result][-1].startswith("FAIL"):
+                fails += 1
+                if optional:
+                    optional_fails += 1
     percent = int(passes/count * 100.0)
-    return count, passes, percent
+    try:
+        percent_without_optional = int((passes - optional_passes)/(count - optional_count) * 100.0)
+    except:
+        percent_without_optional = 0
+    print("****", fails)
+    return count, passes, fails, percent, optional_count, optional_passes, percent_without_optional
 
 def getType(desc):
     assertion_type = ""
@@ -167,34 +186,80 @@ def getType(desc):
 
 def isOptional(assertion_id, desc):
     optional = False
+    group = None
     if assertion_id.find("MULTPLE") != -1:
         optional = True
+        group = "Multiple Brokers"
     elif assertion_id.find("REORDERING") != -1:
         optional = True
+        group = "Message Reordering"
     elif assertion_id.find("TEMPLATE") != -1:
         optional = True
+        group = "Templates"
     elif assertion_id.find("PROPERTY") != -1:
         optional = True
+        group = "Properties"
     elif assertion_id.find("DATASET") != -1:
         optional = True
+        group = "Datasets"
     elif assertion_id.find("ALIAS") != -1:
         optional = True
+        group = "Aliases"
+    elif assertion_id.find("AWARE") != -1:
+        optional = True
+        group = "Aware"
     elif desc.find("MUST") == -1:
         optional = True
-    return optional
+    return optional, group
 
 def export_html(profile, results, reqs):
     lines = []
-    count, passed, percent = stats(results)
-    lines.append("<h3>Sparkplug Profile: %s </h3>" % (profile,))
-    lines.append("<h4>Assertion count: %d Number passed: %d Percent passed: %d%% </h4>" % (count, passed, percent))
-    lines.append("<table border=1 width=100%>")
-    lines.append( "<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>" % ("Assertion ID", "Assertion Type", "Test", "Time", "Result"))
+    lines.append("<h2>Sparkplug Profile: %s </h2>" % (profile,))
     sorted_list = list(results.keys())
     sorted_list.sort()
+
+    groups = {}
+    new_list = []
+    for key in sorted_list:
+        optional, group =  isOptional(key, descs[key])
+        if group != None:
+            if group in groups.keys():
+                groups[group].add(key)
+            else:
+                groups[group] = set([key])
+        else:
+            new_list.append(key)
+    sorted_list = new_list
+
+    for group in groups.keys():
+        #print("Group", group, groups[group])
+        lines.append("<h4>%s Group</h4>" % (group, ))
+        count, passed, fails, percent, optional_count, optional_passed, percent_without_optional = stats(groups[group], results)
+        lines.append("<h4>Assertion count: %d Number passed: %d Number failed: %d Percent passed: %d%% </h4>" % (count, passed, fails, percent))
+        lines.append("<table border=1 width=100%>")
+        lines.append( "<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>" % ("Assertion ID", "Assertion Type", "Test", "Time", "Result"))
+        group_keys = list(groups[group])
+        group_keys.sort()
+        for key in group_keys:    
+            assertion_type = getType(descs[key])
+            if results[key] == "":
+                curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, "", "", "")
+            else:
+                curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, results[key][0], results[key][1], results[key][2])
+            lines.append(curline)
+        lines.append("</table>")
+
+    lines.append("<h4>Main Group</h4>")
+    count, passed, fails, percent, optional_count, optional_passed, percent_without_optional = stats(sorted_list, results)
+    lines.append("<h4>Assertion count: %d Number passed: %d Number failed: %d Percent passed: %d%% </h4>" % (count, passed, fails, percent))
+    lines.append("<h4>Optional assertion count: %d Optional number passed: %d Percent passed without optional: %d%% </h4>" % (optional_count, optional_passed, percent_without_optional))
+
+    lines.append("<table border=1 width=100%>")
+    lines.append( "<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>" % ("Assertion ID", "Assertion Type", "Test", "Time", "Result"))
     for key in sorted_list:
         assertion_type = getType(descs[key])
-        if isOptional(key, descs[key]):
+        optional, group =  isOptional(key, descs[key])
+        if optional:
             assertion_type += " optional"
         if results[key] == "":
             curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key, assertion_type, "", "", "")
@@ -278,7 +343,10 @@ if __name__ == "__main__":
     </html>
     """
 
-    outlines = export_html("Broker", brokerresults, descs)
+    now = datetime.datetime.now()
+    outlines = ["<h1>Eclipse\u2122 Sparkplug\u2122 TCK Results summary</h1>"]
+    outlines.extend("Date: " + now.strftime("%d/%m/%Y %H:%M:%S"))
+    outlines.extend(export_html("Broker", brokerresults, descs))
     outlines.extend(export_html("Host", hostresults, descs))
     outlines.extend(export_html("Edge", edgeresults, descs))
     outlines = [pre] + outlines + [post]
