@@ -98,6 +98,14 @@ def classify_assertion(assertionid):
     #print("Assertion ", assertionid, "classified as both")
     return None
 
+def setResult(results, assertion_id, test, timestamp, result):
+    oldresult = results[assertion_id]
+    if oldresult != None and oldresult[2].find("FAIL") != -1:
+        #print("Not overwriting failing test result", oldresult, "\nwith", result, "\n")
+        pass
+    else:
+        results[assertion_id] = test, timestamp, result
+
 def process_test(profile, test, timestamp, lines):
     curline = lines.pop(0)
     while curline.find("OVERALL") == -1:
@@ -108,24 +116,34 @@ def process_test(profile, test, timestamp, lines):
         result = result.strip(";\n")
         if profile == "edge":
             if assertion_id not in edgeids:
-                print("Assertion not in edgeids:", assertion_id, profile, test, "probably a Monitor check")
+                # probably a monitor check
+                if assertion_id not in hostids:
+                    print("Error: assertion not in hostids or edgeids:", assertion_id, profile, test)
+                else:
+                    setResult(hostresults, assertion_id, test, timestamp, result)
             else:
-                edgeresults[assertion_id] = test, timestamp, result
+                setResult(edgeresults, assertion_id, test, timestamp, result)
         elif profile == "host":
             if assertion_id not in hostids:
-                print("Assertion not in hostids:", assertion_id, profile, test, "probably a Monitor check")
+                # probably a monitor check
+                if assertion_id not in edgeids:
+                    print("Error: assertion not in hostids or edgeids:", assertion_id, profile, test)
+                else:
+                    setResult(edgeresults, assertion_id, test, timestamp, result)
             else:
-                hostresults[assertion_id] = test, timestamp, result
+                setResult(hostresults, assertion_id, test, timestamp, result)
         elif profile == "broker":
             if assertion_id not in brokerids:
-                print("Assertion not in brokerids:", assertion_id, profile, test, "probably a Monitor check")
+                print("Error: assertion not in brokerids:", assertion_id, profile, test)
             else:
-                brokerresults[assertion_id] = test, timestamp, result
+                setResult(brokerresults, assertion_id, test, timestamp, result)
         curline = lines.pop(0)
 
 
 def process_logfile(lines):
     print("Processing logfile...")
+    tests = {}
+    info = []
     eye = "Summary Test Results for"
     while len(lines) > 0:
         curline = lines.pop(0).strip()
@@ -134,7 +152,15 @@ def process_logfile(lines):
             after = curline.find(eye) + len(eye)
             profile, test = curline[after:].split(maxsplit=1)
             test = test.replace(" ", "")
+            if test in tests.keys():
+                logline = "<h4>Warning: test %s %s logged more than once. Any previously failing assertion will not be overwritten by a later success.</h4>" % (profile, test)
+                if logline not in info:
+                    info.append(logline)
+                tests[test].append(date+" "+time)
+            else:
+                tests[test] = [date+" "+time]
             process_test(profile.lower(), test, date+" "+time, lines)
+    return info
 
 def stats(key_list, results):
     count = len(key_list)
@@ -147,7 +173,7 @@ def stats(key_list, results):
         optional, group = isOptional(result, descs[result])
         if optional:
             optional_count += 1
-        if results[result] != "":
+        if results[result] != None:
             if results[result][-1] == "PASS":
                 passes += 1
                 if optional:
@@ -235,7 +261,7 @@ def export_html(profile, results, reqs):
         for key in group_keys:    
             assertion_type = getType(descs[key])
             key_out = "tck-"+key.lower().replace("_", "-")
-            if results[key] == "":
+            if results[key] == None:
                 curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, "", "", "")
             else:
                 curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, results[key][0], results[key][1], results[key][2])
@@ -255,7 +281,7 @@ def export_html(profile, results, reqs):
         if optional:
             assertion_type += " optional"
         key_out = "tck-"+key.lower().replace("_", "-")
-        if results[key] == "":
+        if results[key] == None:
             curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, "", "", "")
         else:
             curline = "<tr><td style=\"text-align: left\">%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (key_out, assertion_type, results[key][0], results[key][1], results[key][2])
@@ -310,13 +336,13 @@ if __name__ == "__main__":
     #print(len(brokerids), len(hostids), len(edgeids))
 
     for brokerid in brokerids:
-        brokerresults[brokerid] = ""
+        brokerresults[brokerid] = None
     for hostid in hostids:
-        hostresults[hostid] = ""
+        hostresults[hostid] = None
     for edgeid in edgeids:
-        edgeresults[edgeid] = ""
+        edgeresults[edgeid] = None
 
-    process_logfile(loglines)
+    warnings = process_logfile(loglines)
 
     pre = """
     <!DOCTYPE html>
@@ -340,6 +366,7 @@ if __name__ == "__main__":
     now = datetime.datetime.now()
     outlines = ["<h1>Eclipse\u2122 Sparkplug\u2122 TCK Results summary</h1>"]
     outlines.extend("Date: " + now.strftime("%d/%m/%Y %H:%M:%S"))
+    outlines.extend(warnings)
     outlines.extend(export_html("Broker", brokerresults, descs))
     outlines.extend(export_html("Host", hostresults, descs))
     outlines.extend(export_html("Edge", edgeresults, descs))
