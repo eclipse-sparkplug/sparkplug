@@ -559,11 +559,13 @@ sequence numbers to preserve the order of events as they occurred at the Edge No
 * [tck-testable tck-id-operational-behavior-host-reordering-param]#[yellow-background]*[tck-id-operational-behavior-host-reordering-param] Sparkplug
 Host Applications SHOULD provide a configurable 'Reorder Timeout' parameter*#
 * [tck-testable tck-id-operational-behavior-host-reordering-start]#[yellow-background]*[tck-id-operational-behavior-host-reordering-start] If
-a message arrives with an out of order sequence number, the Host Application SHOULD start a timer
-denoting the start of the Reorder Timeout window*#
+a Sparkplug Host Application is configured with a 'reordering timeout' parameter and a message
+arrives with an out of order sequence number, the Host Application MUST start a timer denoting the
+start of the Reorder Timeout window*#
 * [tck-testable tck-id-operational-behavior-host-reordering-rebirth]#[yellow-background]*[tck-id-operational-behavior-host-reordering-rebirth] If
-the Reorder Timeout elapses and the missing message(s) have not been received, the Sparkplug Host
-Application SHOULD send an NCMD to the Edge Node with a 'Node Control/Rebirth' request*#
+a Sparkplug Host Application is configured with a 'reordering timeout' parameter and the Reorder
+Timeout elapses and the missing message(s) have not been received, the Sparkplug Host Application
+MUST send an NCMD to the Edge Node with a 'Node Control/Rebirth' request*#
 ** Non-normative comment: In most cases a 'Primary Host Application' would send a Rebirth Request
 but a Non-Primary Host may not
 * [tck-testable tck-id-operational-behavior-host-reordering-success]#[yellow-background]*[tck-id-operational-behavior-host-reordering-success] If
