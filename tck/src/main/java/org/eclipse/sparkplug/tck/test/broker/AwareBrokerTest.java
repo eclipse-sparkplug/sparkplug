@@ -69,7 +69,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+		version = "3.0.0")
 public class AwareBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_AWARE_BASIC,
