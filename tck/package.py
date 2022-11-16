@@ -17,14 +17,14 @@ import zipfile, glob, os, sys
 files = \
 ["build/coverage-report/",
 "eftckl-v10",
-"build/hivemq-extension-test/sparkplug-tck/sparkplug-tck-3.0.0-SNAPSHOT.jar",
-"build/hivemq-extension-test/sparkplug-tck/hivemq-extension.xml",
+"build/hivemq-extension/sparkplug-tck-3.0.0.zip",
 "hivemq-configuration/",
 "report.py",
+"UserGuide.html",
 "README.md"
 ]
 
-zipfilename = "Sparkplug_TCK_3.0.0.zip"
+zipfilename = "Eclipse-Sparkplug-TCK-3.0.0.zip"
 prefix = "Sparkplug/"
 
 try:
@@ -55,6 +55,9 @@ def zipwrite(entry, tckzip):
 
 with zipfile.ZipFile(zipfilename, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as tckzip:
     for entry in files:
+
+        if type(entry) == type((0,)):
+            entry, newname = entry
 
         if entry.endswith("/"):
             files = glob.glob(entry+"**", recursive=True)

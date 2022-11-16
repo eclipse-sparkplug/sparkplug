@@ -15,10 +15,10 @@ plugins {
 /* ******************** metadata ******************** */
 
 group = "org.eclipse.sparkplug"
-description = "Technology Compatibility Kit for Eclipse MQTT Sparkplug"
+description = "Technology Compatibility Kit for Eclipse Sparkplug"
 
 hivemqExtension {
-    name = "Sparkplug TCK Tests"
+    name = "Eclipse™ Sparkplug™ TCK"
     author = "Eclipse"
     priority = 0
     startPriority = 1000
