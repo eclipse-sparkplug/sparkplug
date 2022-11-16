@@ -1393,6 +1393,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	private boolean metricsEqual(Metric metricOne, Metric metricTwo) {
+		/*
+		 * We don't use the metric equals methods because it includes a timestamp check too.
+		 * We should consider metrics equal even if the timestamp has been updated.
+		 * - Wes Johnson
+		 */
 		if (metricOne == null && metricTwo == null) {
 			logger.debug("metricOne and metricTwo are null");
 			return true;

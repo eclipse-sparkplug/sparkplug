@@ -280,10 +280,7 @@ export default {
                     if (!this.sparkplugClient.hostApplication.hostId) {
                         alert("The Host Application ID parameter must be set before executing this test");
                         return;
-                    } else if (!testParameter.parameters["client_id"].parameterValue) {
-                        alert("The Host Client ID parameter must be set before executing this test");
-                        return;
-                    }
+                    } 
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["client_id"].parameterValue;
