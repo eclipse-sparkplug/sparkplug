@@ -17,17 +17,18 @@ that were not possible in the original Kura payload definition.  These features 
 * Historical data
 * File data
 
-Sparkplug B Specification:
-https://www.eclipse.org/tahu/spec/Sparkplug%20Topic%20Namespace%20and%20State%20ManagementV2.2-with%20appendix%20B%20format%20-%20Eclipse.pdf
+Sparkplug Specification v3.0.0: https://www.eclipse.org/tahu/spec/sparkplug_spec.pdf
 
 # Eclipse Tahu
 
-Eclipse Tahu provide client libraries and reference implementations in various languages and for various devices
+Eclipse Tahu provide client libraries and compatible implementations in various languages and for various devices
 to show how the device/remote application must connect and disconnect from the MQTT server using the Sparkplug
 specification explained below.  This includes device lifecycle messages such as the required birth and last will &
 testament messages that must be sent to ensure the device lifecycle state and data integrity.
 
-Source code: https://github.com/eclipse/tahu
+Eclipse Tahu Project: https://projects.eclipse.org/projects/iot.tahu
+Eclipse Tahu Github Repository: https://github.com/eclipse/tahu
+Eclipse Tahu Binaries in Maven Central: https://search.maven.org/search?q=g:org.eclipse.tahu
 
 # Contributing
 Contributing to the Sparkplug Specification is easy and contributions are welcome. In order to submit a pull request (PR) you must follow these steps. Failure to follow these steps will likely lead to the PR being rejected.
