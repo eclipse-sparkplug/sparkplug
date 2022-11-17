@@ -27,7 +27,9 @@ specification explained below.  This includes device lifecycle messages such as 
 testament messages that must be sent to ensure the device lifecycle state and data integrity.
 
 Eclipse Tahu Project: https://projects.eclipse.org/projects/iot.tahu
+
 Eclipse Tahu Github Repository: https://github.com/eclipse/tahu
+
 Eclipse Tahu Binaries in Maven Central: https://search.maven.org/search?q=g:org.eclipse.tahu
 
 # Contributing
