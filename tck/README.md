@@ -13,4 +13,3 @@ Eclipse Tahu Sparkplug compatible implementations guide: TODO
 URLs for the issue trackers to file certification requests, bug reports, etc.
 
 A statement that the Certification of Compatibility process must be followed before a claim of compatibility can be made.
-

@@ -135,7 +135,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-SNAPSHOT")
+		version = "3.0.0")
 public class SendComplexDataTest extends TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
