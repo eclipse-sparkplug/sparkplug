@@ -8,7 +8,7 @@ User Guide: UserGuide.html
 
 Test coverage document: coverage-report/coverage-sparkplug.html
 
-Eclipse Tahu Sparkplug compatible implementations guide: TODO
+Eclipse Tahu Sparkplug compatible implementations guide: https://github.com/eclipse/tahu/blob/master/java/README.md
 
 URLs for the issue trackers to file certification requests, bug reports, etc.
 
