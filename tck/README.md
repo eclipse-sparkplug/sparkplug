@@ -22,5 +22,5 @@ An approved listing request is a statement from the Specification Project that y
 
 * [Report a bug](https://github.com/eclipse-sparkplug/sparkplug/issues/new?assignees=&labels=bugreport%2Ctriage&template=BUG-REPORT.yml&title=Bug+Report%3A+%5BADD+DETAILS+HERE%5D) in the Sparkplug TCK
 
-* [Ask a question](https://github.com/eclipse-sparkplug/sparkplug/issues/new?assignees=&labels=question%2Ctriage&template=QUESTION.yml&title=Question%3A+%5BADD+SUMMARY+HERE%5D) about Sparkplug or the Sparkplug
+* [Ask a question](https://github.com/eclipse-sparkplug/sparkplug/issues/new?assignees=&labels=question%2Ctriage&template=QUESTION.yml&title=Question%3A+%5BADD+SUMMARY+HERE%5D) about Sparkplug or the Sparkplug TCK
 
