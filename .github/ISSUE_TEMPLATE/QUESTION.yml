@@ -1,0 +1,35 @@
+name: Question
+description: Ask a question about Sparkplug or the Sparkplug TCK
+title: "Question: [ADD SUMMARY HERE]"
+labels: ["question", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in Sparkplug!
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you want to know?
+      description: Be as precise as possible
+    validations:
+      required: true
+  - type: textarea
+    id: listing-issue
+    attributes:
+      label: Is this related to a Sparkplug Listing request? If so, link the issue from https://github.com/eclipse-sparkplug/sparkplug.listings here.
+  - type: dropdown
+    id: tck-version
+    attributes:
+      label: Version
+      description: If this is related to the TCK, what version of the Sparkplug TCK are you running?
+      options:
+        - 3.0.0 (Default)
+  - type: checkboxes
+    id: terms-eftl
+    attributes:
+      label: Accept EFTL Terms
+      description: By checking this box I acknowledge that the organization I represent accepts the terms of the [EFTL] (https://www.eclipse.org/legal/tck.php).
+      options:
+        - label: I agree to the terms of EFTL
+          required: true
