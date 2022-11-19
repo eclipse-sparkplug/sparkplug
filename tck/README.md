@@ -4,11 +4,11 @@ This is the Eclipse Sparkplug Test Compatibility Kit (TCK)
 
 You can find the following here:
 
-User Guide: UserGuide.html
+[TCK User Guide](https://github.com/eclipse-sparkplug/sparkplug/blob/develop/tck/UserGuide.adoc)
 
 Test coverage document: coverage-report/coverage-sparkplug.html
 
-Eclipse Tahu Sparkplug compatible implementations guide: https://github.com/eclipse/tahu/blob/master/java/README.md
+[Eclipse Tahu Sparkplug Compatible Implementations Guide](https://github.com/eclipse/tahu/blob/master/java/README.md)
 
 Request a new [Sparkplug Product Listing](https://github.com/eclipse-sparkplug/sparkplug.listings/issues/new?assignees=&labels=getlisted%2Ctriage&template=GET-LISTED.yml&title=Get+Listed+Request%3A+%5BADD+DETAILS+HERE%5D)
 
