@@ -10,6 +10,8 @@ There are additional requirements that MUST be met by any organization wishing t
 
 An approved listing request is a statement from the Specification Project that you have met the intended TCK requirements and is just one of the requirements for logo usage. 
 
+More information on the process and requirements are available [here](https://sparkplug.eclipse.org/compatibility/get-listed/).
+
 ## Sparkplug and Sparkplug TCK Resources
 
 * [TCK User Guide](https://github.com/eclipse-sparkplug/sparkplug/blob/develop/tck/UserGuide.adoc)
