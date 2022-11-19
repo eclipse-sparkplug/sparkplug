@@ -1,0 +1,49 @@
+name: Bug Report
+description: Report a bug in the Sparkplug TCK
+title: "Bug Report: [ADD DETAILS HERE]"
+labels: ["bugreport", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also, what did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: product-name
+    attributes:
+      label: What is the product or software this issue was discovered with?
+    validations:
+      required: true
+  - type: textarea
+    id: repro-steps
+    attributes:
+      label: What exact steps need to be performed to reproduce the problem?
+    validations:
+      required: true
+  - type: textarea
+    id: listing-issue
+    attributes:
+      label: Is this related to a Sparkplug Listing request? If so, link the issue from https://github.com/eclipse-sparkplug/sparkplug.listings here.
+  - type: dropdown
+    id: tck-version
+    attributes:
+      label: Version
+      description: What version of the Sparkplug TCK are you running?
+      options:
+        - 3.0.0 (Default)
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms-eftl
+    attributes:
+      label: Accept EFTL Terms
+      description: By checking this box I acknowledge that the organization I represent accepts the terms of the [EFTL] (https://www.eclipse.org/legal/tck.php).
+      options:
+        - label: I agree to the terms of EFTL
+          required: true
