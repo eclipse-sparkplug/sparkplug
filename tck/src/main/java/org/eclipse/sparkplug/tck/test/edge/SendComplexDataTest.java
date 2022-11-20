@@ -527,7 +527,8 @@ public class SendComplexDataTest extends TCKTest {
 		if (topic.contains(TOPIC_PATH_NDATA) || topic.contains(TOPIC_PATH_DDATA) || topic.contains(TOPIC_PATH_NCMD)
 				|| topic.contains(TOPIC_PATH_DCMD)) {
 			for (Metric m : sparkplugPayload.getMetricsList()) {
-				if (!m.getIsNull() && (m.hasAlias() && m.getName().length() == 0))
+				if (!m.getIsNull() && ((m.hasAlias() && (!m.hasName() || m.getName().length() == 0))
+						|| (!m.hasAlias() && (m.hasName() || m.getName().length() > 0))))
 					isValid = true;
 				break;
 			}
