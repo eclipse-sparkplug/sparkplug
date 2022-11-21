@@ -21,16 +21,23 @@ files = \
 "hivemq-configuration/",
 "report.py",
 "UserGuide.html",
-"README.md"
+"README.md",
+"README.html"
 ]
 
 zipfilename = "Eclipse-Sparkplug-TCK-3.0.0.zip"
-prefix = "Sparkplug/"
+prefix = "SparkplugTCK/"
 
 try:
     os.remove(zipfilename)
 except:
     pass
+
+# Update the UserGuide.html doc
+os.system("asciidoc UserGuide.adoc")
+
+# update the tck jar notices directory
+jarfilename = "build/hivemq-extension/sparkplug-tck-3.0.0.jar"
 
 # get the webconsole directory except the node_modules subdir
 webconsole_files = glob.glob("webconsole/*")

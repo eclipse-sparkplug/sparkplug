@@ -56,6 +56,12 @@ tasks.hivemqExtensionResources {
     }
 }
 
+tasks.hivemqExtensionJar {
+    dependsOn(gradle.includedBuild(specFolderName).task(":${auditCreationTaskName}"))
+    from("../LICENSE") { into("META-INF") }
+    from("../NOTICE") { into("META-INF") }
+}
+
 
 /* ******************** dependencies ******************** */
 

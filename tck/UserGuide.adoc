@@ -49,7 +49,6 @@ Add a websocket listener to the HiveMQ broker by updating the config.xml file.
 (Example files for configuration config.xml and logging logback.xml can be found
 in the hivemq-configuration folder).
 
-[source,xml]
 ----
 <hivemq>
   <listeners>
@@ -115,7 +114,6 @@ The host and port on which the TCK web console listens can be changed by adding
 a server section to the https://nuxtjs.org/docs/features/configuration/#edit-host-and-port[nuxt.config.js] 
 file in the web console directory. Here is an example which changes the host to 0.0.0.0 and the port to 4500.
 
-[source,javascript]
 ----
 export default {
  ...
