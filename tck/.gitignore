@@ -8,3 +8,7 @@ classes
 build/
 .DS_Store
 **/Requirements.java
+SparkplugTCKResults.log
+summary.html
+.lck
+Eclipse-Sparkplug-TCK*.zip
