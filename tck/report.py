@@ -364,7 +364,7 @@ if __name__ == "__main__":
     """
 
     now = datetime.datetime.now()
-    outlines = ["<h1>Eclipse\u2122 Sparkplug\u2122 TCK Results summary</h1>"]
+    outlines = ["<h1>Eclipse&trade; Sparkplug&trade; TCK Results summary</h1>"]
     outlines.extend("Date: " + now.strftime("%d/%m/%Y %H:%M:%S"))
     outlines.extend(warnings)
     outlines.extend(export_html("Broker", brokerresults, descs))
