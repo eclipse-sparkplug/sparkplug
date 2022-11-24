@@ -24,21 +24,21 @@ group = "org.eclipse.sparkplug"
 description = "Sparkplug ${project.version} Specification"
 
 metadata {
-    moduleName = "org.eclipse.sparkplug.specification"
-    readableName = "Sparkplug ${project.version} Specification"
+    moduleName.set("org.eclipse.sparkplug.specification")
+    readableName.set("Sparkplug ${project.version} Specification")
 
     organization {
-        name = "Eclipse Foundation"
-        url = "https://sparkplug.eclipse.org/"
+        name.set("Eclipse Foundation")
+        url.set("https://sparkplug.eclipse.org/")
     }
     license {
-        shortName = "EPL-2.0"
-        readableName = "Eclipse Public License - v 2.0"
-        url = "https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt"
+        shortName.set("EPL-2.0")
+        readableName.set("Eclipse Public License - v 2.0")
+        url.set("https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt")
     }
     github {
-        org = "eclipse"
-        repo = "sparkplug"
+        org.set("eclipse")
+        repo.set("sparkplug")
         pages()
         issues()
     }
