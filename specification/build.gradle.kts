@@ -1,3 +1,4 @@
+import org.asciidoctor.gradle.base.log.Severity
 import org.asciidoctor.gradle.jvm.AsciidoctorJExtension
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.xml.sax.InputSource
@@ -8,12 +9,7 @@ import javax.xml.transform.sax.SAXSource
 import javax.xml.transform.stream.StreamResult
 
 plugins {
-    id("com.github.sgtsilvio.gradle.metadata")
     id("org.asciidoctor.jvm.base")
-}
-
-repositories {
-    mavenCentral()
 }
 
 
@@ -21,27 +17,6 @@ repositories {
 
 group = "org.eclipse.sparkplug"
 description = "Sparkplug ${project.version} Specification"
-
-metadata {
-    moduleName.set("org.eclipse.sparkplug.specification")
-    readableName.set("Sparkplug ${project.version} Specification")
-
-    organization {
-        name.set("Eclipse Foundation")
-        url.set("https://sparkplug.eclipse.org/")
-    }
-    license {
-        shortName.set("EPL-2.0")
-        readableName.set("Eclipse Public License - v 2.0")
-        url.set("https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt")
-    }
-    github {
-        org.set("eclipse")
-        repo.set("sparkplug")
-        pages()
-        issues()
-    }
-}
 
 
 /* ******************** asciidoctor ******************** */
@@ -93,7 +68,7 @@ val asciidoctorPdf by tasks.registering(AsciidoctorTask::class) {
         "pdf-theme" to "sparkplug"
     )
 
-    failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    failureLevel = Severity.WARN
 }
 
 val asciidoctorHtml by tasks.registering(AsciidoctorTask::class) {
@@ -134,7 +109,7 @@ val asciidoctorHtml by tasks.registering(AsciidoctorTask::class) {
         "imagesdir" to "assets/images"
     )
 
-    failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    failureLevel = Severity.WARN
 }
 
 val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
@@ -160,11 +135,11 @@ val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
         "imagesdir" to "assets/images"
     )
 
-    failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
+    failureLevel = Severity.WARN
 }
 
 
-/* ******************** xslt transformation ******************** */
+/* ******************** xsl transformation ******************** */
 
 val xsltAudit by tasks.registering(XslTransform::class) {
     group = "tck"
@@ -244,18 +219,15 @@ val combineSpecSourceWithNormativeAppendix by tasks.registering(Sync::class) {
     into(layout.buildDirectory.dir("spec"))
 }
 
-
 val renameHtml by tasks.registering(Copy::class) {
     group = "spec"
-    dependsOn("asciidoctorHtml")
 
-    from(buildDir.resolve("docs/html/sparkplug_spec.html")) {
+    dependsOn(asciidoctorHtml) // needed as outputDirProperty does not propagate dependency
+    from(asciidoctorHtml.get().outputDirProperty.file("sparkplug_spec.html")) {
         rename { "index.html" }
     }
-    into(buildDir.resolve("docs/html"))
+    into(asciidoctorHtml.get().outputDirProperty)
 }
-
-
 
 tasks.build {
     dependsOn(asciidoctorPdf, asciidoctorHtml, renameHtml)
