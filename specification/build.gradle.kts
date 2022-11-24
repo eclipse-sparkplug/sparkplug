@@ -12,14 +12,41 @@ plugins {
     id("org.asciidoctor.jvm.base")
 }
 
-
-/* ******************** metadata ******************** */
-
 group = "org.eclipse.sparkplug"
 description = "Sparkplug ${project.version} Specification"
 
+repositories {
+    mavenCentral()
+}
+
 
 /* ******************** asciidoctor ******************** */
+
+val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
+    group = "spec"
+
+    baseDirFollowsSourceDir()
+    sourceDirProperty.set(layout.projectDirectory.dir("src/main/asciidoc"))
+    sources {
+        include("sparkplug_spec.adoc")
+    }
+    outputDirProperty.set(layout.buildDirectory.dir("docs/docbook"))
+
+    outputOptions {
+        setBackends(listOf("docbook"))
+    }
+
+    options = mapOf(
+        "doctype" to "article",
+        "header_footer" to "true"
+    )
+    attributes = mapOf(
+        "project-version" to version,
+        "imagesdir" to "assets/images"
+    )
+
+    failureLevel = Severity.WARN
+}
 
 val asciidoctorPdf by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
@@ -112,30 +139,18 @@ val asciidoctorHtml by tasks.registering(AsciidoctorTask::class) {
     failureLevel = Severity.WARN
 }
 
-val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
+val renameHtml by tasks.registering(Copy::class) {
     group = "spec"
 
-    baseDirFollowsSourceDir()
-    sourceDirProperty.set(layout.projectDirectory.dir("src/main/asciidoc"))
-    sources {
-        include("sparkplug_spec.adoc")
+    dependsOn(asciidoctorHtml) // needed as outputDirProperty does not propagate dependency
+    from(asciidoctorHtml.get().outputDirProperty.file("sparkplug_spec.html")) {
+        rename { "index.html" }
     }
-    outputDirProperty.set(layout.buildDirectory.dir("docs/docbook"))
+    into(asciidoctorHtml.get().outputDirProperty)
+}
 
-    outputOptions {
-        setBackends(listOf("docbook"))
-    }
-
-    options = mapOf(
-        "doctype" to "article",
-        "header_footer" to "true"
-    )
-    attributes = mapOf(
-        "project-version" to version,
-        "imagesdir" to "assets/images"
-    )
-
-    failureLevel = Severity.WARN
+tasks.build {
+    dependsOn(asciidoctorPdf, asciidoctorHtml, renameHtml)
 }
 
 
@@ -217,18 +232,4 @@ val combineSpecSourceWithNormativeAppendix by tasks.registering(Sync::class) {
     from("src/main/asciidoc") { exclude("chapters/Sparkplug_Appendix_B.adoc") }
     from(createNormativeAppendix) { into("chapters") }
     into(layout.buildDirectory.dir("spec"))
-}
-
-val renameHtml by tasks.registering(Copy::class) {
-    group = "spec"
-
-    dependsOn(asciidoctorHtml) // needed as outputDirProperty does not propagate dependency
-    from(asciidoctorHtml.get().outputDirProperty.file("sparkplug_spec.html")) {
-        rename { "index.html" }
-    }
-    into(asciidoctorHtml.get().outputDirProperty)
-}
-
-tasks.build {
-    dependsOn(asciidoctorPdf, asciidoctorHtml, renameHtml)
 }
