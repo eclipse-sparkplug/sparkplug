@@ -1,8 +1,7 @@
 import org.asciidoctor.gradle.jvm.AsciidoctorJExtension
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.xml.sax.InputSource
-import java.nio.file.Files.newInputStream
-import java.nio.file.Files.newOutputStream
+import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.sax.SAXSource
@@ -167,92 +166,55 @@ val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
 
 /* ******************** xslt transformation ******************** */
 
-val xsltAudit by tasks.registering {
+val xsltAudit by tasks.registering(XslTransform::class) {
     group = "tck"
-    dependsOn(asciidoctorDocbook)
 
-    val inputFile = buildDir.resolve("docs/docbook/sparkplug_spec.xml")
-    val xslFile = projectDir.resolve("src/main/xsl/tck-audit.xsl")
-
-    inputs.file(inputFile)
-    inputs.file(xslFile)
-
-    val outputFolder = buildDir.resolve("tck-audit")
-    val outputFile = outputFolder.resolve("tck-audit.xml")
-
-    outputs.file(outputFile)
-
-    val parameters = mapOf(
-        "currentDate" to java.time.Instant.now().toString(),
-        "revision" to project.version.toString()
-    )
-
-    doLast {
-        outputFolder.mkdirs()
-        outputFile.delete()
-        transform(inputFile, xslFile, outputFile, parameters)
-    }
+    inputFile.set(asciidoctorDocbook.get().outputDirProperty.file("sparkplug_spec.xml"))
+    xslFile.set(layout.projectDirectory.file("src/main/xsl/tck-audit.xsl"))
+    parameters.put("currentDate", java.time.Instant.now().toString())
+    parameters.put("revision", project.version.toString())
+    outputFile.set(layout.buildDirectory.file("tck-audit.xml"))
 }
 
-val xsltNormativeStatements by tasks.registering {
+val xsltNormativeStatements by tasks.registering(XslTransform::class) {
     group = "spec"
-    dependsOn(xsltAudit)
 
-    val inputFile = xsltAudit.get().outputs.files.singleFile
-    val xslFile = projectDir.resolve("src/main/xsl/normative-statements.xsl")
-
-    inputs.file(inputFile)
-    inputs.file(xslFile)
-
-    val outputFolder = buildDir.resolve("normative-statements")
-    val outputFile = outputFolder.resolve("appendix.adoc")
-
-    outputs.file(outputFile)
-
-    doLast {
-        outputFolder.mkdirs()
-        outputFile.delete()
-        transform(inputFile, xslFile, outputFile, mapOf())
-    }
+    inputFile.set(xsltAudit.get().outputFile)
+    xslFile.set(layout.projectDirectory.file("src/main/xsl/normative-statements.xsl"))
+    outputFile.set(layout.buildDirectory.file("normative-statements.adoc"))
 }
 
-fun transform(inputFile: File, xslFile: File, outputFile: File, parameters: Map<String, String>) {
-    val transformerFactory = TransformerFactory.newInstance()
+abstract class XslTransform : DefaultTask() {
 
-    //XML input file
-    val inputStream = newInputStream(
-        inputFile.toPath(),
-        StandardOpenOption.READ
-    )
-    val inputSource = InputSource(inputStream)
-    val saxSource = SAXSource(inputSource)
+    @get:InputFile
+    val inputFile = project.objects.fileProperty()
 
-    //XSL stylesheet
-    val inputXslStream = newInputStream(
-        xslFile.toPath(),
-        StandardOpenOption.READ
-    )
-    val inputXslSource = InputSource(inputXslStream)
-    val saxXslSource = SAXSource(inputXslSource)
+    @get:InputFile
+    val xslFile = project.objects.fileProperty()
 
-    //XML output file
-    val outputFileStream = newOutputStream(
-        outputFile.toPath(),
-        StandardOpenOption.CREATE
-    )
-    val streamResult = StreamResult(outputFileStream)
+    @get:Input
+    val parameters = project.objects.mapProperty<String, String>()
 
-    //create transformer
-    val template = transformerFactory.newTemplates(saxXslSource)
-    val transformer = template.newTransformer()
+    @get:OutputFile
+    val outputFile = project.objects.fileProperty()
 
-    //set parameters for transformation
-    parameters.forEach { (name, value) ->
-        transformer.setParameter(name, value)
+    @TaskAction
+    protected fun run() {
+        val inputFileStream = Files.newInputStream(inputFile.get().asFile.toPath(), StandardOpenOption.READ)
+        val xslFileStream = Files.newInputStream(xslFile.get().asFile.toPath(), StandardOpenOption.READ)
+        val outputFileStream = Files.newOutputStream(outputFile.get().asFile.toPath(), StandardOpenOption.CREATE)
+
+        val transformerFactory = TransformerFactory.newInstance()
+        val template = transformerFactory.newTemplates(SAXSource(InputSource(xslFileStream)))
+        val transformer = template.newTransformer()
+
+        parameters.get().forEach { (name, value) ->
+            transformer.setParameter(name, value)
+        }
+
+        transformer.transform(SAXSource(InputSource(inputFileStream)), StreamResult(outputFileStream))
+        transformer.reset()
     }
-
-    transformer.transform(saxSource, streamResult)
-    transformer.reset()
 }
 
 
