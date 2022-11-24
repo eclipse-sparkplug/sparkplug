@@ -56,15 +56,15 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
     sources {
         include("sparkplug_spec.adoc")
     }
-    setOutputDir(buildDir.resolve("docs/pdf"))
-
-    outputOptions {
-        setBackends(listOf("pdf"))
-    }
+    outputDirProperty.set(layout.buildDirectory.dir("docs/pdf"))
 
     resources {
         from("src/main/asciidoc/assets/images")
         into("./assets/images")
+    }
+
+    outputOptions {
+        setBackends(listOf("pdf"))
     }
 
     configure<AsciidoctorJExtension> {
@@ -106,15 +106,15 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
     sources {
         include("sparkplug_spec.adoc")
     }
-    setOutputDir(buildDir.resolve("docs/html"))
-
-    outputOptions {
-        setBackends(listOf("html5"))
-    }
+    outputDirProperty.set(layout.buildDirectory.dir("docs/html"))
 
     resources {
         from("src/main/asciidoc/assets/images")
         into("./assets/images")
+    }
+
+    outputOptions {
+        setBackends(listOf("html5"))
     }
 
     configure<AsciidoctorJExtension> {
@@ -146,7 +146,7 @@ val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::c
     sources {
         include("sparkplug_spec.adoc")
     }
-    setOutputDir(buildDir.resolve("docs/docbook"))
+    outputDirProperty.set(layout.buildDirectory.dir("docs/docbook"))
 
     outputOptions {
         setBackends(listOf("docbook"))
