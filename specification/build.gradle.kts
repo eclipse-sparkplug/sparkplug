@@ -48,10 +48,10 @@ metadata {
 
 val asciidoctorPdf by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
-    dependsOn(createNormativeAppendix)
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("build/spec"))
+    sourceDirProperty.set(layout.dir(combineSpecSourceWithNormativeAppendix.map { it.destinationDir }))
+    dependsOn(combineSpecSourceWithNormativeAppendix) // needed as sourceDirProperty does not capture dependency
     sources {
         include("sparkplug_spec.adoc")
     }
@@ -59,7 +59,7 @@ val asciidoctorPdf by tasks.registering(AsciidoctorTask::class) {
 
     resources {
         from("src/main/asciidoc/assets/images")
-        into("./assets/images")
+        into("assets/images")
     }
 
     outputOptions {
@@ -98,10 +98,10 @@ val asciidoctorPdf by tasks.registering(AsciidoctorTask::class) {
 
 val asciidoctorHtml by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
-    dependsOn(createNormativeAppendix)
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("build/spec"))
+    sourceDirProperty.set(layout.dir(combineSpecSourceWithNormativeAppendix.map { it.destinationDir }))
+    dependsOn(combineSpecSourceWithNormativeAppendix) // needed as sourceDirProperty does not capture dependency
     sources {
         include("sparkplug_spec.adoc")
     }
@@ -109,7 +109,7 @@ val asciidoctorHtml by tasks.registering(AsciidoctorTask::class) {
 
     resources {
         from("src/main/asciidoc/assets/images")
-        into("./assets/images")
+        into("assets/images")
     }
 
     outputOptions {
@@ -141,7 +141,7 @@ val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("src/main/asciidoc"))
+    sourceDirProperty.set(layout.projectDirectory.dir("src/main/asciidoc"))
     sources {
         include("sparkplug_spec.adoc")
     }
@@ -170,6 +170,7 @@ val xsltAudit by tasks.registering(XslTransform::class) {
     group = "tck"
 
     inputFile.set(asciidoctorDocbook.get().outputDirProperty.file("sparkplug_spec.xml"))
+    dependsOn(asciidoctorDocbook) // needed as outputDirProperty does not propagate dependency
     xslFile.set(layout.projectDirectory.file("src/main/xsl/tck-audit.xsl"))
     parameters.put("currentDate", java.time.Instant.now().toString())
     parameters.put("revision", project.version.toString())
@@ -217,37 +218,30 @@ abstract class XslTransform : DefaultTask() {
     }
 }
 
-
-/* ******************** additional ******************** */
-
-val createNormativeAppendix by tasks.register("createNormativeAppendix") {
+val createNormativeAppendix by tasks.registering {
     group = "spec"
-    dependsOn(copySpecSourceIntoBuild, xsltNormativeStatements)
 
-    inputs.files(copySpecSourceIntoBuild.get().outputs.files)
-    inputs.file(xsltNormativeStatements.get().outputs.files.singleFile)
-
-    val origAppendixFile = file(buildDir.resolve("spec/chapters/Sparkplug_Appendix_B.adoc"))
-    val createdStatements = xsltNormativeStatements.get().outputs.files.singleFile
-
-    val outputFolder = buildDir.resolve("spec/chapters")
-    val outputFile = outputFolder.resolve("Sparkplug_Appendix_B.adoc")
-
-    outputs.file(outputFile)
+    val normativeAppendixHeader = layout.projectDirectory.file("src/main/asciidoc/chapters/Sparkplug_Appendix_B.adoc")
+    inputs.file(normativeAppendixHeader)
+    val normativeStatementsAdoc = xsltNormativeStatements.get().outputFile
+    inputs.file(normativeStatementsAdoc)
+    val normativeAppendixFile = layout.buildDirectory.file("Sparkplug_Appendix_B.adoc")
+    outputs.file(normativeAppendixFile)
 
     doLast {
-        outputFolder.mkdirs()
-
-        file(outputFile).writeText(origAppendixFile.readText())
-        file(outputFile).appendText(createdStatements.readText())
+        normativeAppendixFile.get().asFile.apply {
+            writeText(normativeAppendixHeader.asFile.readText())
+            appendText(normativeStatementsAdoc.get().asFile.readText())
+        }
     }
 }
 
-val copySpecSourceIntoBuild by tasks.registering(Copy::class) {
+val combineSpecSourceWithNormativeAppendix by tasks.registering(Sync::class) {
     group = "spec"
 
-    from("src/main/asciidoc")
-    into(buildDir.resolve("spec"))
+    from("src/main/asciidoc") { exclude("chapters/Sparkplug_Appendix_B.adoc") }
+    from(createNormativeAppendix) { into("chapters") }
+    into(layout.buildDirectory.dir("spec"))
 }
 
 
