@@ -70,34 +70,31 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
     configure<AsciidoctorJExtension> {
         modules {
             diagram.use()
-            pdf.use()
-            pdf.setVersion(project.property("plugin.asciidoctor.pdf.version"))
+            pdf.version(project.property("plugin.asciidoctor.pdf.version"))
         }
-
-        setOptions(mapOf(
-                "doctype" to "book",
-                "header_footer" to "true",
-                "template_engine" to "slim",
-                "compact" to "false"
-        ))
-
-        setAttributes(mapOf(
-                "source-highlighter" to "highlight.js",
-                "pagenums" to "true",
-                "numbered" to "true",
-                "docinfo2" to "true",
-                "experimental" to "false",
-                "linkcss" to "false",
-                "toc" to "true",
-                "project-version" to project.version,
-                "imagesdir" to "assets/images",
-                "pdf-themesdir" to "themes",
-                "pdf-theme" to "sparkplug"
-        ))
     }
-    asciidoctorj {
-        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
-    }
+
+    options = mapOf(
+        "doctype" to "book",
+        "header_footer" to "true",
+        "template_engine" to "slim",
+        "compact" to "false"
+    )
+    attributes = mapOf(
+        "source-highlighter" to "highlight.js",
+        "pagenums" to "true",
+        "numbered" to "true",
+        "docinfo2" to "true",
+        "experimental" to "false",
+        "linkcss" to "false",
+        "toc" to "true",
+        "project-version" to project.version,
+        "imagesdir" to "assets/images",
+        "pdf-themesdir" to "themes",
+        "pdf-theme" to "sparkplug"
+    )
+
+    failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
 }
 
 val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
@@ -124,63 +121,47 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
         modules {
             diagram.use()
         }
+    }
 
-        setOptions(mapOf(
-                "header_footer" to "true"
-        ))
-        setAttributes(mapOf(
-                "source-highlighter" to "highlight.js",
-                "toc" to "true",
-                "docinfo2" to "true",
-                "linkcss" to "false",
-                "project-version" to project.version,
-                "imagesdir" to "assets/images"
-        ))
-    }
-    asciidoctorj {
-        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
-    }
+    options = mapOf(
+        "header_footer" to "true"
+    )
+    attributes = mapOf(
+        "source-highlighter" to "highlight.js",
+        "toc" to "true",
+        "docinfo2" to "true",
+        "linkcss" to "false",
+        "project-version" to project.version,
+        "imagesdir" to "assets/images"
+    )
+
+    failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
 }
 
 val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
     group = "spec"
-    dependsOn("copySpecSourceIntoBuild")
 
     baseDirFollowsSourceDir()
-    sourceDirProperty.set(file("build/spec"))
+    sourceDirProperty.set(file("src/main/asciidoc"))
     sources {
         include("sparkplug_spec.adoc")
     }
     setOutputDir(buildDir.resolve("docs/docbook"))
-    outputs.file(buildDir.resolve("docs/docbook/sparkplug_spec.xml"))
 
     outputOptions {
         setBackends(listOf("docbook"))
     }
 
-    resources {
-        from("src/main/asciidoc/assets/images")
-        into("./assets/images")
-    }
+    options = mapOf(
+        "doctype" to "article",
+        "header_footer" to "true"
+    )
+    attributes = mapOf(
+        "project-version" to version,
+        "imagesdir" to "assets/images"
+    )
 
-    configure<AsciidoctorJExtension> {
-        modules {
-            diagram.use()
-        }
-
-        setOptions(mapOf(
-                "doctype" to "article",
-                "header_footer" to "true"
-        ))
-
-        setAttributes(mapOf(
-                "project-version" to version,
-                "imagesdir" to "assets/images"
-        ))
-    }
-    asciidoctorj {
-        failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
-    }
+    failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
 }
 
 
