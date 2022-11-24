@@ -18,7 +18,7 @@ and convert it into constants that the Java test programs can use.
 
 import xml.dom.minidom
 
-inputFile = "../specification/build/tck-audit/tck-audit.xml"
+inputFile = "../specification/build/tck-audit.xml"
 outputFile = "src/main/java/org/eclipse/sparkplug/tck/test/common/Requirements.java"
 
 outfile = open(outputFile, "w")

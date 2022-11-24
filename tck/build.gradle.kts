@@ -2,12 +2,10 @@ import de.undercouch.gradle.tasks.download.Download
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
 
 plugins {
-    id("java")
     id("com.hivemq.extension")
     id("com.github.hierynomus.license-report")
-    id("com.github.sgtsilvio.gradle.utf8")
+    id("io.github.sgtsilvio.gradle.defaults")
     id("de.undercouch.download")
-    //checkstyle
 }
 
 
@@ -17,12 +15,12 @@ group = "org.eclipse.sparkplug"
 description = "Technology Compatibility Kit for Eclipse Sparkplug"
 
 hivemqExtension {
-    name = "Eclipse™ Sparkplug™ TCK"
-    author = "Eclipse"
-    priority = 0
-    startPriority = 1000
-    mainClass = "org.eclipse.sparkplug.tck.SparkplugHiveMQExtension"
-    sdkVersion = "4.4.4"
+    name.set("Eclipse™ Sparkplug™ TCK")
+    author.set("Eclipse")
+    priority.set(0)
+    startPriority.set(1000)
+    mainClass.set("org.eclipse.sparkplug.tck.SparkplugHiveMQExtension")
+    sdkVersion.set("4.4.4")
 }
 
 
@@ -33,30 +31,38 @@ val auditCreationTaskName = "xsltAudit"
 
 /* ******************** extension related ******************** */
 
-tasks.hivemqExtensionResources {
-    dependsOn(gradle.includedBuild(specFolderName).task(":${auditCreationTaskName}"))
-    dependsOn("downloadLicenses")
-
+hivemqExtension.resources {
     //not sure why the same file was copied twice with different classifiers.
-    from(gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit/tck-audit.xml")) {
+    from(
+        files(gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml")).builtBy(
+            gradle.includedBuild(
+                specFolderName
+            ).task(":${auditCreationTaskName}")
+        )
+    ) {
         rename { "tck-audit-suite.xml" }
         into("coverage")
     }
-    from(gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit/tck-audit.xml")) {
+    from(
+        files(gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml")).builtBy(
+            gradle.includedBuild(
+                specFolderName
+            ).task(":${auditCreationTaskName}")
+        )
+    ) {
         rename { "tck-audit-audit.xml" }
         into("coverage")
     }
-    from(buildDir.resolve("coverage-report")) {
+    from(files(buildDir.resolve("coverage-report")).builtBy(tasks.compileJava)) {
         into("coverage")
     }
     from("LICENSE")
-    from(buildDir.resolve("reports/license/license-dependency.html")) {
+    from(files(tasks.downloadLicenses.map { it.htmlDestination.resolve("license-dependency.html") }).builtBy(tasks.downloadLicenses)) {
         into("third-party-licenses")
     }
 }
 
 tasks.hivemqExtensionJar {
-    dependsOn(gradle.includedBuild(specFolderName).task(":${auditCreationTaskName}"))
     from("../LICENSE") { into("META-INF") }
     from("../NOTICE") { into("META-INF") }
 }
@@ -65,30 +71,17 @@ tasks.hivemqExtensionJar {
 /* ******************** dependencies ******************** */
 
 repositories {
-    mavenLocal()
     mavenCentral()
-    maven {
-        url = uri("https://repository.jboss.org/nexus/content/groups/public-jboss/")
-    }
 }
 
 dependencies {
     annotationProcessor("org.jboss.test-audit:jboss-test-audit-impl:${property("jboss.test-audit.version")}")
 
-    compileOnly("org.slf4j:slf4j-api:${property("slf4j.version")}")
-    implementation("org.slf4j:slf4j-simple:${property("slf4j.version")}")
-    implementation("log4j:log4j:${property("log4j.version")}")
     implementation("com.google.protobuf:protobuf-java:${property("protobuf.version")}")
 
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${property("paho.version")}")
-    implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")
-    implementation("javax.validation:validation-api:${property("javax.validation.version")}")
-    implementation("com.google.code.gson:gson:${property("gson.version")}")
     implementation("org.hibernate.beanvalidation.tck:beanvalidation-tck-tests:${property("beanvalidation.tck.version")}")
-    implementation("org.junit.jupiter:junit-jupiter-params:${property("junit-jupiter.version")}")
-    runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit-jupiter.version")}")
     implementation("jakarta.annotation:jakarta.annotation-api:${property("jakarta.annotation.version")}")
-    implementation("jakarta.validation:jakarta.validation-api:${property("jakarta.validation.version")}")
 
     implementation("com.fasterxml.jackson.core:jackson-core:${property("jackson.version")}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${property("jackson.version")}")
@@ -98,73 +91,6 @@ dependencies {
     implementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-client.version")}")
     implementation("org.jetbrains:annotations:${property("jetbrainsAnnotations.version")}")
 }
-
-
-/* ******************** test ******************** */
-
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:${property("junit-jupiter.version")}")
-
-    testImplementation("io.github.glytching:junit-extensions:${property("junit-extensions.version")}")
-    testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
-    testImplementation("org.mockito:mockito-junit-jupiter:${property("mockito.version")}")
-}
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
-
-    testLogging {
-        events("STARTED", "FAILED", "SKIPPED")
-    }
-
-    val inclusions = rootDir.resolve("inclusions.txt")
-    val exclusions = rootDir.resolve("exclusions.txt")
-    if (inclusions.exists()) {
-        include(inclusions.readLines())
-    } else if (exclusions.exists()) {
-        exclude(exclusions.readLines())
-    }
-}
-
-
-/* ******************** integration test ******************** */
-
-sourceSets {
-    create("integrationTest") {
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
-    }
-}
-
-configurations {
-    getByName("integrationTestImplementation").extendsFrom(testImplementation.get())
-    getByName("integrationTestRuntimeOnly").extendsFrom(testRuntimeOnly.get())
-}
-
-dependencies {
-    "integrationTestImplementation"("com.hivemq:hivemq-testcontainer-junit5:${property("hivemq-testcontainer.version")}")
-    "integrationTestImplementation"("org.testcontainers:testcontainers:${property("testcontainers.version")}")
-}
-
-val prepareExtensionTest by tasks.registering(Sync::class) {
-    group = "hivemq extension"
-    description = "Prepares the extension for integration testing."
-
-    from(tasks.hivemqExtensionZip.map { zipTree(it.archiveFile) })
-    into(buildDir.resolve("hivemq-extension-test"))
-}
-
-val integrationTest by tasks.registering(Test::class) {
-    group = "verification"
-    description = "Runs integration tests."
-
-    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    classpath = sourceSets["integrationTest"].runtimeClasspath
-    shouldRunAfter(tasks.test)
-    dependsOn(prepareExtensionTest)
-}
-
-tasks.check { dependsOn(integrationTest) }
 
 
 /* ******************** license ******************** */
@@ -310,14 +236,6 @@ downloadLicenses {
 
 /* ******************** build process ******************** */
 
-plugins.withId("java") {
-    java {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    plugins.apply("com.github.sgtsilvio.gradle.utf8")
-}
-
 sourceSets {
     main {
         java.srcDir(buildDir.resolve("generated/sources/audit/"))
@@ -331,9 +249,7 @@ tasks.register("audit") {
     doLast {
         org.jboss.test.audit.generate.SectionsClassGenerator.main(
             arrayOf(
-                gradle.includedBuild(specFolderName)
-                    .projectDir.resolve("build/tck-audit/tck-audit.xml")
-                    .absolutePath,
+                gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml").absolutePath,
                 "org.eclipse.sparkplug.tck",
                 buildDir.resolve("generated/sources/audit/").absolutePath
             )
@@ -356,9 +272,7 @@ tasks.compileJava {
     options.compilerArgs.addAll(
         listOf(
             "-AauditXml=${
-                gradle.includedBuild(specFolderName)
-                    .projectDir.resolve("build/tck-audit/tck-audit.xml")
-                    .absolutePath
+                gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml").absolutePath
             }",
             "-AoutputDir=${buildDir.resolve("coverage-report").absolutePath}"
         )
@@ -383,7 +297,7 @@ val unzipHivemq by tasks.registering(Sync::class) {
 tasks.prepareHivemqHome {
     //use your own hivemq professional edition instead of unzip each time
 
-    hivemqFolder.set(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") } as Any)
+    hivemqHomeDirectory.set(layout.dir(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") }))
     from(projectDir.resolve("hivemq-configuration/config.xml")) {
         into("conf")
     }
@@ -405,40 +319,6 @@ tasks.runHivemqWithExtension {
     }
 }
 
-
-//Is this still necessary?
-/*
-<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>jakarta.validation</groupId>
-                                    <artifactId>jakarta.validation-api</artifactId>
-                                    <type>jar</type>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/validation-api</outputDirectory>
-                                    <includes>**'/*.class,**/*.xml</includes>
-                                </artifactItem>
-                            </artifactItems>
-                            <includes>**'/*.java</includes>
-                            <excludes>**'/*.properties</excludes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
- */
- */
- */
 
 tasks.jar {
     manifest.attributes["Main-Class"] = "org.eclipse.sparkplug.tck.utility.Device"
