@@ -1,6 +1,5 @@
 import de.undercouch.gradle.tasks.download.Download
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
-import org.gradle.jvm.tasks.Jar
 
 plugins {
     id("java")
@@ -104,9 +103,7 @@ dependencies {
 /* ******************** test ******************** */
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit-jupiter.version")}")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${property("junit-jupiter.version")}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit-jupiter.version")}")
+    testImplementation("org.junit.jupiter:junit-jupiter:${property("junit-jupiter.version")}")
 
     testImplementation("io.github.glytching:junit-extensions:${property("junit-extensions.version")}")
     testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
@@ -345,16 +342,16 @@ tasks.register("audit") {
 }
 
 tasks.register("generateRequirements") {
-	dependsOn("audit")
-	doLast {
-		exec {
-			commandLine = listOf("python3", "requirements.py")
-		}
-	}
+    dependsOn("audit")
+    doLast {
+        exec {
+            commandLine = listOf("python3", "requirements.py")
+        }
+    }
 }
 
 //Creates coverage-report with jboss audit annotation processor
-tasks.named("compileJava", JavaCompile::class.java) {
+tasks.compileJava {
     dependsOn("generateRequirements")
     options.compilerArgs.addAll(
         listOf(
@@ -381,7 +378,6 @@ val unzipHivemq by tasks.registering(Sync::class) {
     dependsOn(downloadHivemqCe)
     from(zipTree(buildDir.resolve("hivemq-ce.zip")))
     into({ temporaryDir })
-    println(temporaryDir)
 }
 
 tasks.prepareHivemqHome {

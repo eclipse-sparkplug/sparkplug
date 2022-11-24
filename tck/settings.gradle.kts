@@ -5,7 +5,6 @@ includeBuild("../specification")
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        mavenCentral()
     }
     plugins {
         id("com.hivemq.extension") version "${extra["plugin.hivemq-extension.version"]}"
