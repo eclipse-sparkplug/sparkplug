@@ -47,7 +47,7 @@ metadata {
 
 /* ******************** asciidoctor ******************** */
 
-val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
+val asciidoctorPdf by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
     dependsOn(createNormativeAppendix)
 
@@ -97,7 +97,7 @@ val asciidoctorPdf = tasks.register("asciidoctorPdf", AsciidoctorTask::class) {
     failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
 }
 
-val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) {
+val asciidoctorHtml by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
     dependsOn(createNormativeAppendix)
 
@@ -138,7 +138,7 @@ val asciidoctorHtml = tasks.register("asciidoctorHtml", AsciidoctorTask::class) 
     failureLevel = org.asciidoctor.gradle.base.log.Severity.WARN
 }
 
-val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::class) {
+val asciidoctorDocbook by tasks.registering(AsciidoctorTask::class) {
     group = "spec"
 
     baseDirFollowsSourceDir()
@@ -167,7 +167,7 @@ val asciidoctorDocbook = tasks.register("asciidoctorDocbook", AsciidoctorTask::c
 
 /* ******************** xslt transformation ******************** */
 
-val xsltAudit = tasks.register("xsltAudit") {
+val xsltAudit by tasks.registering {
     group = "tck"
     dependsOn(asciidoctorDocbook)
 
@@ -183,8 +183,8 @@ val xsltAudit = tasks.register("xsltAudit") {
     outputs.file(outputFile)
 
     val parameters = mapOf(
-            "currentDate" to java.time.Instant.now().toString(),
-            "revision" to project.version.toString()
+        "currentDate" to java.time.Instant.now().toString(),
+        "revision" to project.version.toString()
     )
 
     doLast {
@@ -194,7 +194,7 @@ val xsltAudit = tasks.register("xsltAudit") {
     }
 }
 
-val normativeStatements = tasks.register("xsltNormativeStatements") {
+val xsltNormativeStatements by tasks.registering {
     group = "spec"
     dependsOn(xsltAudit)
 
@@ -221,22 +221,25 @@ fun transform(inputFile: File, xslFile: File, outputFile: File, parameters: Map<
 
     //XML input file
     val inputStream = newInputStream(
-            inputFile.toPath(),
-            StandardOpenOption.READ)
+        inputFile.toPath(),
+        StandardOpenOption.READ
+    )
     val inputSource = InputSource(inputStream)
     val saxSource = SAXSource(inputSource)
 
     //XSL stylesheet
     val inputXslStream = newInputStream(
-            xslFile.toPath(),
-            StandardOpenOption.READ)
+        xslFile.toPath(),
+        StandardOpenOption.READ
+    )
     val inputXslSource = InputSource(inputXslStream)
     val saxXslSource = SAXSource(inputXslSource)
 
     //XML output file
     val outputFileStream = newOutputStream(
-            outputFile.toPath(),
-            StandardOpenOption.CREATE)
+        outputFile.toPath(),
+        StandardOpenOption.CREATE
+    )
     val streamResult = StreamResult(outputFileStream)
 
     //create transformer
@@ -255,15 +258,15 @@ fun transform(inputFile: File, xslFile: File, outputFile: File, parameters: Map<
 
 /* ******************** additional ******************** */
 
-val createNormativeAppendix = tasks.register("createNormativeAppendix") {
+val createNormativeAppendix by tasks.register("createNormativeAppendix") {
     group = "spec"
-    dependsOn(copySpec, normativeStatements)
+    dependsOn(copySpecSourceIntoBuild, xsltNormativeStatements)
 
-    inputs.files(copySpec.get().outputs.files)
-    inputs.file(normativeStatements.get().outputs.files.singleFile)
+    inputs.files(copySpecSourceIntoBuild.get().outputs.files)
+    inputs.file(xsltNormativeStatements.get().outputs.files.singleFile)
 
     val origAppendixFile = file(buildDir.resolve("spec/chapters/Sparkplug_Appendix_B.adoc"))
-    val createdStatements = normativeStatements.get().outputs.files.singleFile
+    val createdStatements = xsltNormativeStatements.get().outputs.files.singleFile
 
     val outputFolder = buildDir.resolve("spec/chapters")
     val outputFile = outputFolder.resolve("Sparkplug_Appendix_B.adoc")
@@ -278,7 +281,7 @@ val createNormativeAppendix = tasks.register("createNormativeAppendix") {
     }
 }
 
-val copySpec = tasks.register("copySpecSourceIntoBuild", Copy::class) {
+val copySpecSourceIntoBuild by tasks.registering(Copy::class) {
     group = "spec"
 
     from("src/main/asciidoc")
@@ -286,7 +289,7 @@ val copySpec = tasks.register("copySpecSourceIntoBuild", Copy::class) {
 }
 
 
-val renameHtml = tasks.register("renameHtml", Copy::class) {
+val renameHtml by tasks.registering(Copy::class) {
     group = "spec"
     dependsOn("asciidoctorHtml")
 
@@ -298,6 +301,6 @@ val renameHtml = tasks.register("renameHtml", Copy::class) {
 
 
 
-tasks.named("build") {
+tasks.build {
     dependsOn(asciidoctorPdf, asciidoctorHtml, renameHtml)
 }
