@@ -11,7 +11,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-
     dependencies {
         classpath("org.jboss.test-audit:jboss-test-audit-impl:${project.property("jboss.test-audit.version")}")
     }
@@ -54,7 +53,6 @@ hivemqExtension.resources {
         from(tckAuditXml) { rename { "tck-audit-audit.xml" } }
         from(files(buildDir.resolve("coverage-report")).builtBy(tasks.compileJava))
     }
-    from("LICENSE")
     into("third-party-licenses") {
         from(files(
             tasks.downloadLicenses.map { it.htmlDestination.resolve("license-dependency.html") }
