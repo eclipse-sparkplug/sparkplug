@@ -25,31 +25,29 @@ hivemqExtension {
 
 
 /* ******************** spec dependency ******************** */
-val specFolderName = "specification"
-val auditCreationTaskName = "xsltAudit"
+
+val tckAuditXml: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("tck-audit"))
+    }
+}
+
+dependencies {
+    tckAuditXml("org.eclipse.sparkplug:sparkplug-spec")
+}
 
 
 /* ******************** extension related ******************** */
 
 hivemqExtension.resources {
     //not sure why the same file was copied twice with different classifiers.
-    from(
-        files(gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml")).builtBy(
-            gradle.includedBuild(
-                specFolderName
-            ).task(":${auditCreationTaskName}")
-        )
-    ) {
+    from(tckAuditXml) {
         rename { "tck-audit-suite.xml" }
         into("coverage")
     }
-    from(
-        files(gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml")).builtBy(
-            gradle.includedBuild(
-                specFolderName
-            ).task(":${auditCreationTaskName}")
-        )
-    ) {
+    from(tckAuditXml) {
         rename { "tck-audit-audit.xml" }
         into("coverage")
     }
@@ -238,27 +236,29 @@ downloadLicenses {
 
 sourceSets {
     main {
-        java.srcDir(buildDir.resolve("generated/sources/audit/"))
+        java.srcDir(buildDir.resolve("generated/sources/audit"))
     }
 }
 
 //Fetches created tck-audit file from specification project.
-tasks.register("audit") {
-    dependsOn(gradle.includedBuild(specFolderName).task(":${auditCreationTaskName}"))
+val audit by tasks.registering {
+    inputs.files(tckAuditXml)
+    val generatedSourcesDir = layout.buildDirectory.dir("generated/sources/audit")
+    outputs.file(generatedSourcesDir)
 
     doLast {
         org.jboss.test.audit.generate.SectionsClassGenerator.main(
             arrayOf(
-                gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml").absolutePath,
+                tckAuditXml.singleFile.absolutePath,
                 "org.eclipse.sparkplug.tck",
-                buildDir.resolve("generated/sources/audit/").absolutePath
+                generatedSourcesDir.get().asFile.absolutePath
             )
         )
     }
 }
 
-tasks.register("generateRequirements") {
-    dependsOn("audit")
+val generateRequirements by tasks.registering {
+    inputs.files(tckAuditXml)
     doLast {
         exec {
             commandLine = listOf("python3", "requirements.py")
@@ -268,13 +268,17 @@ tasks.register("generateRequirements") {
 
 //Creates coverage-report with jboss audit annotation processor
 tasks.compileJava {
-    dependsOn("generateRequirements")
+    dependsOn(audit)
+    dependsOn(generateRequirements)
+
+    inputs.files(tckAuditXml)
+    val coverageReportDir = layout.buildDirectory.dir("coverage-report")
+    outputs.file(coverageReportDir)
+
     options.compilerArgs.addAll(
         listOf(
-            "-AauditXml=${
-                gradle.includedBuild(specFolderName).projectDir.resolve("build/tck-audit.xml").absolutePath
-            }",
-            "-AoutputDir=${buildDir.resolve("coverage-report").absolutePath}"
+            "-AauditXml=${tckAuditXml.singleFile.absolutePath}",
+            "-AoutputDir=${coverageReportDir.get().asFile.absolutePath}"
         )
     )
 }

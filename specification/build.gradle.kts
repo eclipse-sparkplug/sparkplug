@@ -233,3 +233,17 @@ val combineSpecSourceWithNormativeAppendix by tasks.registering(Sync::class) {
     from(createNormativeAppendix) { into("chapters") }
     into(layout.buildDirectory.dir("spec"))
 }
+
+/* ******************** artifacts ******************** */
+
+val tckAuditXml: Configuration by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("tck-audit"))
+    }
+}
+
+artifacts {
+    add(tckAuditXml.name, xsltAudit)
+}
