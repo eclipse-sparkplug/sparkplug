@@ -1,4 +1,3 @@
-import de.undercouch.gradle.tasks.download.Download
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
 
 plugins {
@@ -7,9 +6,6 @@ plugins {
     id("io.github.sgtsilvio.gradle.defaults")
     id("de.undercouch.download")
 }
-
-
-/* ******************** metadata ******************** */
 
 group = "org.eclipse.sparkplug"
 description = "Technology Compatibility Kit for Eclipse Sparkplug"
@@ -42,27 +38,25 @@ dependencies {
 /* ******************** extension related ******************** */
 
 hivemqExtension.resources {
-    //not sure why the same file was copied twice with different classifiers.
-    from(tckAuditXml) {
-        rename { "tck-audit-suite.xml" }
-        into("coverage")
-    }
-    from(tckAuditXml) {
-        rename { "tck-audit-audit.xml" }
-        into("coverage")
-    }
-    from(files(buildDir.resolve("coverage-report")).builtBy(tasks.compileJava)) {
-        into("coverage")
+    into("coverage") {
+        //not sure why the same file was copied twice with different classifiers.
+        from(tckAuditXml) { rename { "tck-audit-suite.xml" } }
+        from(tckAuditXml) { rename { "tck-audit-audit.xml" } }
+        from(files(buildDir.resolve("coverage-report")).builtBy(tasks.compileJava))
     }
     from("LICENSE")
-    from(files(tasks.downloadLicenses.map { it.htmlDestination.resolve("license-dependency.html") }).builtBy(tasks.downloadLicenses)) {
-        into("third-party-licenses")
+    into("third-party-licenses") {
+        from(files(
+            tasks.downloadLicenses.map { it.htmlDestination.resolve("license-dependency.html") }
+        ).builtBy(tasks.downloadLicenses))
     }
 }
 
 tasks.hivemqExtensionJar {
-    from("../LICENSE") { into("META-INF") }
-    from("../NOTICE") { into("META-INF") }
+    into("META-INF") {
+        from("../LICENSE")
+        from("../NOTICE")
+    }
 }
 
 
@@ -214,7 +208,6 @@ sourceSets {
     }
 }
 
-//Fetches created tck-audit file from specification project.
 val audit by tasks.registering {
     inputs.files(tckAuditXml)
     val generatedSourcesDir = layout.buildDirectory.dir("generated/sources/audit")
@@ -240,7 +233,6 @@ val generateRequirements by tasks.registering {
     }
 }
 
-//Creates coverage-report with jboss audit annotation processor
 tasks.compileJava {
     dependsOn(audit)
     dependsOn(generateRequirements)
@@ -249,6 +241,7 @@ tasks.compileJava {
     val coverageReportDir = layout.buildDirectory.dir("coverage-report")
     outputs.file(coverageReportDir)
 
+    // creates coverage-report with jboss audit annotation processor
     options.compilerArgs.addAll(
         listOf(
             "-AauditXml=${tckAuditXml.singleFile.absolutePath}",
@@ -260,7 +253,7 @@ tasks.compileJava {
 
 /* ******************** debug run ******************** */
 
-val downloadHivemqCe by tasks.registering(Download::class) {
+val downloadHivemqCe by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
     src("https://github.com/hivemq/hivemq-community-edition/releases/download/2021.1/hivemq-ce-2021.1.zip")
     dest(buildDir.resolve("hivemq-ce.zip"))
     overwrite(false)
@@ -274,20 +267,17 @@ val unzipHivemq by tasks.registering(Sync::class) {
 
 tasks.prepareHivemqHome {
     //use your own hivemq professional edition instead of unzip each time
-
     hivemqHomeDirectory.set(layout.dir(unzipHivemq.map { it.destinationDir.resolve("hivemq-ce-2021.1") }))
-    from(projectDir.resolve("hivemq-configuration/config.xml")) {
-        into("conf")
+    into("conf") {
+        from(projectDir.resolve("hivemq-configuration/config.xml"))
+        from(projectDir.resolve("hivemq-configuration/logback.xml"))
     }
-    from(projectDir.resolve("hivemq-configuration/logback.xml")) {
-        into("conf")
+    /*
+    into("extensions") {
+        // must be unzipped for aware tests
+        from(projectDir.resolve("hivemq-configuration/extensions/hivemq-sparkplug-aware-extension.zip")) {
     }
-    /**
-    from(projectDir.resolve("hivemq-configuration/extensions/hivemq-sparkplug-aware-extension.zip")) {
-    into("extensions")
-    /** must be unzipped for aware tests **/
-    }
-     **/
+    */
 }
 
 tasks.runHivemqWithExtension {
