@@ -322,14 +322,3 @@ tasks.runHivemqWithExtension {
         enabled.set(false)
     }
 }
-
-
-tasks.jar {
-    manifest.attributes["Main-Class"] = "org.eclipse.sparkplug.tck.utility.Device"
-    val dependencies = configurations
-        .runtimeClasspath
-        .get()
-        .map(::zipTree) // OR .map { zipTree(it) }
-    from(dependencies)
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
