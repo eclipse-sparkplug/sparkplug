@@ -7,6 +7,16 @@ plugins {
     id("de.undercouch.download")
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.jboss.test-audit:jboss-test-audit-impl:${project.property("jboss.test-audit.version")}")
+    }
+}
+
 group = "org.eclipse.sparkplug"
 description = "Technology Compatibility Kit for Eclipse Sparkplug"
 

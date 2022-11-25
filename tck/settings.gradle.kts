@@ -13,15 +13,3 @@ pluginManagement {
         id("de.undercouch.download") version "${extra["plugin.download.version"]}"
     }
 }
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    val jbossTestAuditVersion = extra["jboss.test-audit.version"]
-
-    dependencies {
-        classpath("org.jboss.test-audit:jboss-test-audit-impl:$jbossTestAuditVersion")
-    }
-}
