@@ -93,34 +93,6 @@ dependencies {
 
 /* ******************** license ******************** */
 
-/*
-<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>add-third-party</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>add-third-party</goal>
-                            <goal>download-licenses</goal>
-                        </goals>
-                        <configuration>
-                            <useMissingFile>true</useMissingFile>
-                            <excludedScopes>test</excludedScopes>
-                            <licenseMerges>
-                                <licenseMerge>The Apache Software License, Version
-                                    2.0|Apache License, Version 2.0|Apache Public License
-                                    2.0|Apache License 2.0|Apache Software License -
-                                    Version 2.0</licenseMerge>
-                            </licenseMerges>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
- */
-
 downloadLicenses {
     val apache_2 = license("Apache License, Version 2.0", "https://opensource.org/licenses/Apache-2.0")
     val mit = license("MIT License", "https://opensource.org/licenses/MIT")
@@ -132,6 +104,7 @@ downloadLicenses {
     val epl_1_0 = license("EPL, Version 1.0", "https://opensource.org/licenses/EPL-1.0")
     val epl_2_0 = license("EPL, Version 2.0", "https://opensource.org/licenses/EPL-2.0")
     val edl_1_0 = license("EDL, Version 1.0", "https://www.eclipse.org/org/documents/edl-v10.php")
+    val bsd_2clause = license("BSD 2-Clause License", "https://opensource.org/licenses/BSD-2-Clause")
     val bsd_3clause = license("BSD 3-Clause License", "https://opensource.org/licenses/BSD-3-Clause")
     val w3c = license("W3C License", "https://opensource.org/licenses/W3C")
     val cc0 = license("CC0", "https://creativecommons.org/publicdomain/zero/1.0/")
@@ -150,19 +123,20 @@ downloadLicenses {
             "The Apache License, Version 2.0",
             "Apache Software License - Version 2.0",
             "Apache Software License, version 2.0",
-            "The Apache Software License, Version 2.0"
+            "The Apache Software License, Version 2.0",
+            "Apache  Version 2.0, January 2004",
         ),
         mit to listOf(
             "MIT License",
             "MIT license",
             "The MIT License",
-            "The MIT License (MIT)"
+            "The MIT License (MIT)",
         ),
         cddl_1_0 to listOf(
             "CDDL, Version 1.0",
             "Common Development and Distribution License 1.0",
             "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
-            license("CDDL", "https://glassfish.dev.java.net/public/CDDLv1.0.html")
+            license("CDDL", "https://glassfish.dev.java.net/public/CDDLv1.0.html"),
         ),
         cddl_1_1 to listOf(
             "CDDL 1.1",
@@ -172,36 +146,40 @@ downloadLicenses {
             "CDDL + GPLv2 with classpath exception",
             "Dual license consisting of the CDDL v1.1 and GPL v2",
             "CDDL or GPLv2 with exceptions",
-            "CDDL/GPLv2+CE"
+            "CDDL/GPLv2+CE",
         ),
         lgpl_2_0 to listOf(
             "LGPL, Version 2.0",
-            "GNU General Public License, version 2"
+            "GNU General Public License, version 2",
         ),
         lgpl_2_1 to listOf(
             "LGPL, Version 2.1",
             "LGPL, version 2.1",
             "GNU Lesser General Public License version 2.1 (LGPLv2.1)",
-            license("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html")
+            license("GNU Lesser General Public License", "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"),
         ),
         lgpl_3_0 to listOf(
             "LGPL, Version 3.0",
-            "Lesser General Public License, version 3 or greater"
+            "Lesser General Public License, version 3 or greater",
         ),
         epl_1_0 to listOf(
             "EPL, Version 1.0",
             "Eclipse Public License - v 1.0",
             "Eclipse Public License - Version 1.0",
-            license("Eclipse Public License", "http://www.eclipse.org/legal/epl-v10.html")
+            license("Eclipse Public License", "http://www.eclipse.org/legal/epl-v10.html"),
         ),
         epl_2_0 to listOf(
             "EPL 2.0",
-            "EPL, Version 2.0"
+            "EPL, Version 2.0",
+            "Eclipse Public License - Version 2.0",
         ),
         edl_1_0 to listOf(
             "EDL 1.0",
             "EDL, Version 1.0",
-            "Eclipse Distribution License - v 1.0"
+            "Eclipse Distribution License - v 1.0",
+        ),
+        bsd_2clause to listOf(
+            license("BSD style", "http://www.opensource.org/licenses/bsd-license.php"),
         ),
         bsd_3clause to listOf(
             "BSD 3-clause",
@@ -211,24 +189,20 @@ downloadLicenses {
             "New BSD License",
             license("BSD", "http://asm.ow2.org/license.html"),
             license("BSD", "http://asm.objectweb.org/license.html"),
-            license("BSD", "LICENSE.txt")
+            license("BSD", "LICENSE.txt"),
         ),
         w3c to listOf(
             "W3C License",
             "W3C Software Copyright Notice and License",
-            "The W3C Software License"
+            "The W3C Software License",
         ),
         cc0 to listOf(
             "CC0",
-            "Public Domain"
-        )
+            "Public Domain",
+        ),
     )
 
     dependencyConfiguration = "runtimeClasspath"
-    excludeDependencies = listOf(
-    )
-
-
 }
 
 
