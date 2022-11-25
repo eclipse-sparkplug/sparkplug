@@ -219,7 +219,7 @@ sourceSets {
 val audit by tasks.registering {
     inputs.files(tckAuditXml)
     val generatedSourcesDir = layout.buildDirectory.dir("generated/sources/audit")
-    outputs.file(generatedSourcesDir)
+    outputs.dir(generatedSourcesDir)
 
     doLast {
         org.jboss.test.audit.generate.SectionsClassGenerator.main(
@@ -247,7 +247,7 @@ tasks.compileJava {
 
     inputs.files(tckAuditXml)
     val coverageReportDir = layout.buildDirectory.dir("coverage-report")
-    outputs.file(coverageReportDir)
+    outputs.dir(coverageReportDir)
 
     // creates coverage-report with jboss audit annotation processor
     options.compilerArgs.addAll(
