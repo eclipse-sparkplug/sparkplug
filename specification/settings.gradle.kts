@@ -1,4 +1,4 @@
-rootProject.name = "sparkplug-spec"
+rootProject.name = "specification"
 
 pluginManagement {
     repositories {

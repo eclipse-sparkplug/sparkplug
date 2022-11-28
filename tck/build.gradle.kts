@@ -40,7 +40,7 @@ val tckAuditXml: Configuration by configurations.creating {
 }
 
 dependencies {
-    tckAuditXml("org.eclipse.sparkplug:sparkplug-spec")
+   tckAuditXml("org.eclipse.sparkplug:specification")
 }
 
 
