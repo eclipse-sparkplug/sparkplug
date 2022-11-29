@@ -1,7 +1,7 @@
 pipeline {
   agent {
     kubernetes {
-      label 'my-agent-pod'
+      label 'sparkplug-agent-pod'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -19,7 +19,7 @@ spec:
     stage('Build') {
       steps {
         container('sparkplug-build') {
-          sh 'mvn -version'
+          sh './gradlew clean build'
         }
       }
     }
