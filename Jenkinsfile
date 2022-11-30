@@ -8,7 +8,7 @@ kind: Pod
 spec:
   containers:
   - name: sparkplug-build
-    image: eclipsecbi/jiro-agent-centos-8
+    image: cirruslink/sparkplug-build
     command:
     - cat
     tty: true
