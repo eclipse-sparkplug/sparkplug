@@ -19,7 +19,7 @@ spec:
     stage('Build') {
       steps {
         container('sparkplug-build') {
-          sh 'gradle clean build'
+          sh './gradlew clean build'
         }
       }
     }
