@@ -105,7 +105,6 @@ public class AwareBrokerTest extends TCKTest {
 		groupId = params[2];
 		edgeNodeId = params[3];
 
-		bBasicAwareChecked = true;
 		Services.extensionExecutorService().submit(new Runnable() {
 			@Override
 			public void run() {
