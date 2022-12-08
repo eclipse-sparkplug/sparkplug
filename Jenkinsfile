@@ -26,7 +26,9 @@ spec:
     stage('Build') {
       steps {
         container('sparkplug-build') {
-          sh './gradlew clean build'
+          wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
+            sh './gradlew clean build'
+          }
         }
       }
     }
