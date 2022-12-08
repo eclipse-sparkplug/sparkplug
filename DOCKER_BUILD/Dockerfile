@@ -11,7 +11,8 @@ FROM eclipsecbi/jiro-agent-centos-8-jdk11 AS builder
 USER root
 
 RUN dnf install -y java-11-openjdk-devel \
-    graphviz
+    graphviz \
+    asciidoctor
 
 RUN wget https://services.gradle.org/distributions/gradle-7.6-bin.zip -P /tmp
 RUN mkdir /opt/gradle
