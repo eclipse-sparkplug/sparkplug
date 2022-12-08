@@ -15,7 +15,9 @@ RUN dnf install -y java-11-openjdk-devel \
     asciidoctor \
     ruby \
     ruby-devel \
-    rubygems
+    rubygems \
+    asciidoc \
+    xmlto
 
 RUN wget https://services.gradle.org/distributions/gradle-7.6-bin.zip -P /tmp
 RUN mkdir /opt/gradle
