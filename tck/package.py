@@ -60,7 +60,7 @@ def zipwrite(entry, tckzip):
         arcname = entry
     tckzip.write(entry, prefix + arcname)
 
-with zipfile.ZipFile(zipfilename, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as tckzip:
+with zipfile.ZipFile(zipfilename, "w", compression=zipfile.ZIP_DEFLATED) as tckzip:
     for entry in files:
 
         if type(entry) == type((0,)):
