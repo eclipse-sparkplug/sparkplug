@@ -258,6 +258,15 @@ tasks.compileJava {
     )
 }
 
+tasks.named("hivemqExtensionJar") { finalizedBy("signExtension") }
+val signExtension by tasks.registering {
+    doLast {
+        exec {
+            commandLine = listOf("curl", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0.jar", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.jar", "https://cbi.eclipse.org/jarsigner/sign")
+        }
+    }
+}
+
 val packageTck by tasks.registering {
     dependsOn(tasks.hivemqExtensionZip)
 
