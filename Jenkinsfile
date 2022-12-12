@@ -23,11 +23,24 @@ spec:
     }
   }
   stages {
-    stage('Build') {
+    stage('build') {
       steps {
         container('sparkplug-build') {
           sh 'Xvfb :0 -screen 0 1600x1200x16 & export DISPLAY=:0'
           sh 'GRADLE_USER_HOME="/home/jenkins/.gradle" ./gradlew -Dorg.gradle.jvmargs="-Xmx1536m -Xms64m -Dfile.encoding=UTF-8 -Djava.awt.headless=true" clean packageTck'
+        }
+      }
+    }
+
+    stage('upload') {
+      steps {
+        sshagent(credentials: ['projects-storage.eclipse.org-bot-ssh']) {
+          sh '''
+            [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+            ssh-keyscan -t rsa,dsa projects-storage.eclipse.org >> ~/.ssh/known_hosts
+            scp -o BatchMode=yes tck/build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/
+            scp -o BatchMode=yes tck/Eclipse-Sparkplug-TCK-3.0.0-signed.zip genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/
+          '''
         }
       }
     }
