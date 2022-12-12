@@ -36,8 +36,6 @@ spec:
       steps {
         sshagent(credentials: ['projects-storage.eclipse.org-bot-ssh']) {
           sh '''
-            [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
-            ssh-keyscan -t rsa,dsa projects-storage.eclipse.org >> ~/.ssh/known_hosts
             scp -o BatchMode=yes tck/build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/
             scp -o BatchMode=yes tck/Eclipse-Sparkplug-TCK-3.0.0-signed.zip genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/
           '''
