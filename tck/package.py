@@ -17,7 +17,7 @@ import zipfile, glob, os, sys
 files = \
 ["build/coverage-report/",
 "eftckl-v10",
-"build/hivemq-extension/sparkplug-tck-3.0.0.zip",
+"build/hivemq-extension/sparkplug-tck-3.0.0-signed.zip",
 "hivemq-configuration/",
 "report.py",
 "UserGuide.html",
@@ -25,7 +25,7 @@ files = \
 "README.html"
 ]
 
-zipfilename = "Eclipse-Sparkplug-TCK-3.0.0.zip"
+zipfilename = "Eclipse-Sparkplug-TCK-3.0.0-signed.zip"
 prefix = "SparkplugTCK/"
 
 try:

@@ -258,6 +258,21 @@ tasks.compileJava {
     )
 }
 
+val packageTck by tasks.registering {
+    dependsOn(tasks.hivemqExtensionZip)
+
+    doLast {
+        exec {
+            commandLine = listOf("curl", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.zip", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
+        }
+        exec {
+            commandLine = listOf("curl", "-o", "Eclipse-Sparkplug-TCK-3.0.0-signed.zip", "-F", "file=@Eclipse-Sparkplug-TCK-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
+        }
+        exec {
+            commandLine = listOf("python3", "package.py")
+        }
+    }
+}
 
 /* ******************** debug run ******************** */
 
