@@ -262,7 +262,7 @@ tasks.named("hivemqExtensionJar") { finalizedBy("signExtension") }
 val signExtension by tasks.registering {
     doLast {
         exec {
-            commandLine = listOf("curl", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.jar", "https://cbi.eclipse.org/jarsigner/sign")
+            commandLine = listOf("curl", "-sS", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.jar", "https://cbi.eclipse.org/jarsigner/sign")
         }
     }
 }
@@ -272,13 +272,13 @@ val packageTck by tasks.registering {
 
     doLast {
         exec {
-            commandLine = listOf("curl", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.zip", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
+            commandLine = listOf("curl", "-sS", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.zip", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
         }
         exec {
             commandLine = listOf("python3", "package.py")
         }
         exec {
-            commandLine = listOf("curl", "-o", "Eclipse-Sparkplug-TCK-3.0.0-signed.zip", "-F", "file=@Eclipse-Sparkplug-TCK-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
+            commandLine = listOf("curl", "-sS", "-o", "Eclipse-Sparkplug-TCK-3.0.0-signed.zip", "-F", "file=@Eclipse-Sparkplug-TCK-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
         }
     }
 }
