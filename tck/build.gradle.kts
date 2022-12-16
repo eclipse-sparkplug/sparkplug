@@ -258,37 +258,6 @@ tasks.compileJava {
     )
 }
 
-tasks.named("hivemqExtensionJar") { finalizedBy("signExtension") }
-val signExtension by tasks.registering {
-    doLast {
-        exec {
-            commandLine = listOf("ls", "-l", "build/hivemq-extension/")
-        }
-
-        sourceFile = "build/hivemq-extension/sparkplug-tck-3.0.0.jar"
-        targetFile = "build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar"
-        exec {
-            commandLine = listOf("curl", "-vvvvs", "-o", "targetFile", "-F", "file=@$sourceFile", "https://cbi.eclipse.org/jarsigner/sign")
-        }
-    }
-}
-
-val packageTck by tasks.registering {
-    dependsOn(tasks.hivemqExtensionZip)
-
-    doLast {
-        exec {
-            commandLine = listOf("curl", "-vvvvs", "--http1.1", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.zip", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
-        }
-        exec {
-            commandLine = listOf("python3", "package.py")
-        }
-        exec {
-            commandLine = listOf("curl", "-vvvvs", "--http1.1", "-o", "Eclipse-Sparkplug-TCK-3.0.0-signed.zip", "-F", "file=@Eclipse-Sparkplug-TCK-3.0.0.zip", "https://cbi.eclipse.org/macos/codesign/sign")
-        }
-    }
-}
-
 /* ******************** debug run ******************** */
 
 val downloadHivemqCe by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
