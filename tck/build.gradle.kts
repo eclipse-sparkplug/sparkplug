@@ -261,17 +261,16 @@ tasks.compileJava {
 tasks.named("hivemqExtensionJar") { finalizedBy("signExtension") }
 val signExtension by tasks.registering {
     doLast {
-        exec {
-            commandLine = listOf("pwd")
-        }
-        exec {
-            commandLine = listOf("ls", "-l")
-        }
+        def sourceFile = "build/hivemq-extension/sparkplug-tck-3.0.0.jar"
+        def targetFile = "build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar"
         exec {
             commandLine = listOf("ls", "-l", "build/hivemq-extension/")
         }
+
+        def stdout = new ByteArrayOutputStream()
         exec {
-            commandLine = listOf("curl", "-vvvvs", "--http1.1", "-o", "build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar", "-F", "file=@build/hivemq-extension/sparkplug-tck-3.0.0.jar", "https://cbi.eclipse.org/jarsigner/sign")
+            commandLine 'curl', '-vvvvs', '-o', targetFile, '-F', "file=@$sourceFile", 'https://cbi.eclipse.org/jarsigner/sign'
+            standardOutput = stdout
         }
     }
 }
