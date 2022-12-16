@@ -27,7 +27,8 @@ spec:
       steps {
         container('sparkplug-build') {
           sh 'Xvfb :0 -screen 0 1600x1200x16 & export DISPLAY=:0'
-          sh 'GRADLE_USER_HOME="/home/jenkins/.gradle" ./gradlew -Dorg.gradle.jvmargs="-Xmx1536m -Xms64m -Dfile.encoding=UTF-8 -Djava.awt.headless=true" clean packageTck'
+          sh 'GRADLE_USER_HOME="/home/jenkins/.gradle" ./gradlew -Dorg.gradle.jvmargs="-Xmx1536m -Xms64m -Dfile.encoding=UTF-8 -Djava.awt.headless=true" clean build'
+          sh 'curl -o tck/build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar -F file=@tck/build/hivemq-extension/sparkplug-tck-3.0.0.jar https://cbi.eclipse.org/jarsigner/sign'
         }
       }
     }
