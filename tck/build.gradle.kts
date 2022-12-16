@@ -262,6 +262,12 @@ tasks.named("hivemqExtensionJar") { finalizedBy("signExtension") }
 val signExtension by tasks.registering {
     doLast {
         exec {
+            commandLine = listOf("pwd")
+        }
+        exec {
+            commandLine = listOf("ls", "-l")
+        }
+        exec {
             commandLine = listOf("ls", "-l", "build/hivemq-extension/")
         }
         exec {
