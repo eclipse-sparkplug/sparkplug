@@ -269,7 +269,7 @@ val signExtension by tasks.registering {
         targetFile = "build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar"
         def stdout = new ByteArrayOutputStream()
         exec {
-            commandLine = listOf('curl', '-vvvvs', '-o', targetFile, '-F', "file=@$sourceFile", 'https://cbi.eclipse.org/jarsigner/sign')
+            commandLine = listOf('curl', '-vvvvs', '-o', targetFile, '-F', 'file=@$sourceFile', 'https://cbi.eclipse.org/jarsigner/sign')
             standardOutput = stdout
         }
     }
