@@ -62,11 +62,10 @@ hivemqExtension.resources {
 
 tasks.hivemqExtensionJar {
     into("META-INF") {
-        from("../LICENSE")
-        from("../NOTICE")
+        from("../LICENSE") { rename { "LICENSE_SPARKPLUG" } }
+        from("../NOTICE") { rename { "NOTICE_SPARKPLUG" } }
     }
 }
-
 
 /* ******************** dependencies ******************** */
 
