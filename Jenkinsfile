@@ -67,9 +67,8 @@ spec:
             gpg -vvv --no-permission-warning --output "sparkplug-tck-3.0.0.zip.sig" --batch --yes --pinentry-mode=loopback --passphrase="${KEYRING_PASSPHRASE}" --no-tty --detach-sig sparkplug-tck-3.0.0.zip
             cd ../../
             ./package.sh
-            ls -l
             gpg -vvv --no-permission-warning --output "Eclipse-Sparkplug-TCK-3.0.0.zip.sig" --batch --yes --pinentry-mode=loopback --passphrase="${KEYRING_PASSPHRASE}" --no-tty --detach-sig Eclipse-Sparkplug-TCK-3.0.0.zip
-            ls -l
+            gpg -vvv --verify Eclipse-Sparkplug-TCK-3.0.0.zip.sig
           '''
         }
       }
