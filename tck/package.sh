@@ -17,8 +17,8 @@ FILES="build/coverage-report/coverage-sparkplug.html
 build/coverage-report/images/stickynote.png
 build/coverage-report/images/blank.png
 eftckl-v10
-build/hivemq-extension/sparkplug-tck-3.0.0.zip
-build/hivemq-extension/sparkplug-tck-3.0.0.zip.sig
+build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip
+build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip.sig
 hivemq-configuration/logback.xml
 hivemq-configuration/config.xml
 report.py
@@ -26,7 +26,7 @@ UserGuide.html
 README.md
 README.html"
 
-ZIP_FILE_NAME=Eclipse-Sparkplug-TCK-3.0.0.zip
+ZIP_FILE_NAME=Eclipse-Sparkplug-TCK-3.0.1-SNAPSHOT.zip
 PREFIX=build/SparkplugTCK/
 
 # Delete the old version
