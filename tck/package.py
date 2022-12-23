@@ -17,8 +17,8 @@ import zipfile, glob, os, sys
 files = \
 ["build/coverage-report/",
 "eftckl-v10",
-"build/hivemq-extension/sparkplug-tck-3.0.0.zip",
-"build/hivemq-extension/sparkplug-tck-3.0.0.zip.sig",
+"build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip",
+"build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip.sig",
 "hivemq-configuration/",
 "report.py",
 "UserGuide.html",
@@ -55,7 +55,7 @@ files = \
 "src//main/java/org/eclipse/sparkplug/tck/test/Monitor.java"
 ]
 
-zipfilename = "Eclipse-Sparkplug-TCK-3.0.0.zip"
+zipfilename = "Eclipse-Sparkplug-TCK-3.0.1-SNAPSHOT.zip"
 prefix = "SparkplugTCK/"
 
 try:
@@ -70,7 +70,7 @@ os.system("gpg --batch --yes --detach-sign build/hivemq-extension/sparkplug-tck-
 os.system("asciidoc UserGuide.adoc")
 
 # update the tck jar notices directory
-jarfilename = "build/hivemq-extension/sparkplug-tck-3.0.0.jar"
+jarfilename = "build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.jar"
 
 # get the webconsole directory except the node_modules subdir
 webconsole_files = glob.glob("webconsole/*")

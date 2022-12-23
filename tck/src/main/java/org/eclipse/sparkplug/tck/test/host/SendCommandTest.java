@@ -135,7 +135,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0")
+		version = "3.0.1-SNAPSHOT")
 public class SendCommandTest extends TCKTest {
 
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";

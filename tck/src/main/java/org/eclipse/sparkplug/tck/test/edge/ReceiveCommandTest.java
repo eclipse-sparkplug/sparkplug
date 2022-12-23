@@ -92,7 +92,7 @@ import com.hivemq.extension.sdk.api.services.session.ClientService;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0")
+		version = "3.0.1-SNAPSHOT")
 public class ReceiveCommandTest extends TCKTest {
 
 	private static final String BD_SEQ = "bdSeq";
