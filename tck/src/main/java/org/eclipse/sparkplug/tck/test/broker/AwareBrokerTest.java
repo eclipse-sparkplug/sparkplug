@@ -40,7 +40,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_WILL_MESSAGES;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -69,14 +69,13 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class AwareBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private final @NotNull String[] testId = { ID_CONFORMANCE_MQTT_AWARE_BASIC, ID_CONFORMANCE_MQTT_AWARE_STORE,
-			ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN,
-			ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
-			ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP };
-	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_AWARE_BASIC,
+			ID_CONFORMANCE_MQTT_AWARE_STORE, ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC,
+			ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC,
+			ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN, ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP);
 	private TCK theTCK = null;
 	private @NotNull String host;
 	private @NotNull String port;
@@ -96,7 +95,6 @@ public class AwareBrokerTest extends TCKTest {
 	public AwareBrokerTest(TCK aTCK, String[] params) {
 		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-		testIds.addAll(Arrays.asList(testId));
 		if (params.length < 4) {
 			log("Not enough parameters: " + Arrays.toString(params));
 			log("Parameters must be: host and port, groupId and egdeNodeId ");
@@ -107,7 +105,6 @@ public class AwareBrokerTest extends TCKTest {
 		groupId = params[2];
 		edgeNodeId = params[3];
 
-		bBasicAwareChecked = true;
 		Services.extensionExecutorService().submit(new Runnable() {
 			@Override
 			public void run() {
@@ -133,7 +130,7 @@ public class AwareBrokerTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Broker Aware Test";
+		return "Broker Sparkplug Aware";
 	}
 
 	public String[] getTestIds() {

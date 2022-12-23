@@ -135,7 +135,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class SendComplexDataTest extends TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
@@ -218,7 +218,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Edge Send Complex Data Test";
+		return "Edge Send Complex Data";
 	}
 
 	public String[] getTestIds() {
@@ -527,7 +527,8 @@ public class SendComplexDataTest extends TCKTest {
 		if (topic.contains(TOPIC_PATH_NDATA) || topic.contains(TOPIC_PATH_DDATA) || topic.contains(TOPIC_PATH_NCMD)
 				|| topic.contains(TOPIC_PATH_DCMD)) {
 			for (Metric m : sparkplugPayload.getMetricsList()) {
-				if (!m.getIsNull() && (m.hasAlias() && m.getName().length() == 0))
+				if (!m.getIsNull() && ((m.hasAlias() && (!m.hasName() || m.getName().length() == 0))
+						|| (!m.hasAlias() && (m.hasName() || m.getName().length() > 0))))
 					isValid = true;
 				break;
 			}

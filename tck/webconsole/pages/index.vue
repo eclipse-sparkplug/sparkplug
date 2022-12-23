@@ -45,7 +45,7 @@
                 "
                                @click="changeMqttConnectFun(1)"
                         >
-                            <template #title> Sparkplug Conformance Profile Test</template>
+                            <template #title>Sparkplug Conformance Profile</template>
                             <SparkplugClientConnect
                                 v-model="sparkplugClient"
                                 :change="tabOpen"
@@ -270,14 +270,35 @@ export default {
                 const profile = "host";
                 const testType = testParameter.name;
                 if (testType === "SessionEstablishmentTest") {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters = this.sparkplugClient.hostApplication.hostId;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (testType === "SessionTerminationTest") {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } 
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["client_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (["SendCommandTest", "ReceiveDataTest", "EdgeSessionTerminationTest"].includes(testType)) {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["group_id"].parameterValue) {
+                        alert("The Edge Node Group ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["edge_node_id"].parameterValue) {
+                        alert("The Edge Node Edge Node ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["device_id"].parameterValue) {
+                        alert("The Edge Node Device ID parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["group_id"].parameterValue +
@@ -285,6 +306,22 @@ export default {
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (["MessageOrderingTest"].includes(testType)) {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["group_id"].parameterValue) {
+                        alert("The Edge Node Group ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["edge_node_id"].parameterValue) {
+                        alert("The Edge Node Edge Node ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["device_id"].parameterValue) {
+                        alert("The Edge Node Device ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["reorder_timeout"].parameterValue) {
+                        alert("The Host Application Reorder Timeout parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["group_id"].parameterValue +
@@ -293,6 +330,13 @@ export default {
                         " " + testParameter.parameters["reorder_timeout"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if ([ "MultipleBrokerTest"].includes(testType)) {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["broker_uri"].parameterValue) {
+                        alert("The Broker URI parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["broker_uri"].parameterValue;
@@ -306,6 +350,19 @@ export default {
                 const profile = "edge";
                 const testType = testParameter.name;
                 if (["SessionEstablishmentTest", "SessionTerminationTest"].includes(testType)) {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } else if (!this.sparkplugClient.eonNode.groupId) {
+                        alert("The Edge Node Group ID parameter must be set before executing this test");
+                        return;
+                    } else if (!this.sparkplugClient.eonNode.edgeNodeId) {
+                        alert("The Edge Node Edge Node ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["device_ids"].parameterValue) {
+                        alert("The Edge Node Device IDs parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
@@ -313,6 +370,19 @@ export default {
                         " " + testParameter.parameters["device_ids"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if (["SendDataTest", "SendComplexDataTest", "PrimaryHostTest", "ReceiveCommandTest"].includes(testType)) {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } else if (!this.sparkplugClient.eonNode.groupId) {
+                        alert("The Edge Node Group ID parameter must be set before executing this test");
+                        return;
+                    } else if (!this.sparkplugClient.eonNode.edgeNodeId) {
+                        alert("The Edge Node Edge Node ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["device_id"].parameterValue) {
+                        alert("The Edge Node Device IDs parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +
@@ -320,6 +390,22 @@ export default {
                         " " + testParameter.parameters["device_id"].parameterValue;
                     this.createTestRequest(profile, testType, testParameters);
                 } else if ([ "MultipleBrokerTest"].includes(testType)) {
+                    if (!this.sparkplugClient.hostApplication.hostId) {
+                        alert("The Host Application ID parameter must be set before executing this test");
+                        return;
+                    } else if (!this.sparkplugClient.eonNode.groupId) {
+                        alert("The Edge Node Group ID parameter must be set before executing this test");
+                        return;
+                    } else if (!this.sparkplugClient.eonNode.edgeNodeId) {
+                        alert("The Edge Node Edge Node ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["device_id"].parameterValue) {
+                        alert("The Edge Node Device ID parameter must be set before executing this test");
+                        return;
+                    } else if (!testParameter.parameters["broker_uri"].parameterValue) {
+                        alert("The Broker URI parameter must be set before executing this test");
+                        return;
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + this.sparkplugClient.eonNode.groupId +

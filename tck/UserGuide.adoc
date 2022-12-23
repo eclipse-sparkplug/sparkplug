@@ -1,0 +1,185 @@
+////
+Copyright © 2022 Ian Craggs
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+////
+
+= Eclipse™ Sparkplug™ Technology Compatibility Kit (TCK) User Guide
+
+== Introduction
+
+This is the user guide for the Eclipse™ Sparkplug™ Technology Compatibility Kit (TCK).
+
+=== Software Requirements
+
+A HiveMQ instance is needed as the MQTT broker. The https://www.hivemq.com/developers/community/[HiveMQ Community edition]
+is open source and freely available. Download the complete package, including the hivemq-allow-all-extension.
+
+https://nodejs.org/en/[Node.js] and https://yarnpkg.com/[yarn] are needed to run the TCK Web Console
+which controls the running of the tests.
+
+=== Installation and Configuration
+
+==== HiveMQ Broker
+
+Install the HiveMQ broker following the instructions provided with it.
+
+Copy the extension distribution file (tck/build/hivemq-extension/sparkplug-tck-3.0.0.zip)
+to the HiveMQ extension folder (extensions), and unzip the file there. 
+The target folder should now have the following content.
+
+----
+|-| extensions/
+  |-| sparkplug-tck/
+    |--  hivemq-extension.xml
+    |--  sparkplug-tck-3.0.0.jar
+----
+
+Now, on starting the HiveMQ broker, this message should be seen:
+
+----
+Extension "Eclipse™ Sparkplug™ TCK" version 3.0.0 started successfully.
+----
+
+Add a websocket listener to the HiveMQ broker by updating the config.xml file.
+(Example files for configuration config.xml and logging logback.xml can be found
+in the hivemq-configuration folder).
+
+----
+<hivemq>
+  <listeners>
+    <tcp-listener>
+      <port>1883</port>
+      <bind-address>0.0.0.0</bind-address>
+    </tcp-listener>
+	<websocket-listener>
+      <port>8000</port>
+      <bind-address>0.0.0.0</bind-address>
+      <path>/mqtt</path>
+      <name>my-websocket-listener</name>
+      <subprotocols>
+        <subprotocol>mqttv3.1</subprotocol>
+        <subprotocol>mqtt</subprotocol>
+      </subprotocols>
+      <allow-extensions>true</allow-extensions>
+    </websocket-listener>
+  </listeners>
+  <anonymous-usage-statistics>
+    <enabled>true</enabled>
+  </anonymous-usage-statistics>
+</hivemq>
+----
+
+As a result of these changes you should see these messages on startup showing
+that both TCP and WebSocket listeners have been started:
+
+----
+Starting TCP listener on address 0.0.0.0 and port 1883
+Starting Websocket listener on address 0.0.0.0 and port 8000
+Started TCP Listener on address 0.0.0.0 and on port 1883
+Started Websocket Listener on address 0.0.0.0 and on port 8000
+----
+
+Now we're ready to run the TCK web console.
+
+==== TCK WebConsole
+
+In the tck/webconsole folder first we have to install the dependencies:
+
+`yarn install`
+
+If you get an error message like this:
+
+`The engine “node” is incompatible with this module. Expected version “>=10". Got “8.9.4”`
+
+then the command
+
+`yarn install --ignore-engines`
+
+might help. Next build with
+
+`yarn build`
+
+then start the console back end with 
+
+`yarn start`.
+
+By default the console listens on localhost:3000, so open a Web Browser to that location.
+
+The host and port on which the TCK web console listens can be changed by adding 
+a server section to the https://nuxtjs.org/docs/features/configuration/#edit-host-and-port[nuxt.config.js] 
+file in the web console directory. Here is an example which changes the host to 0.0.0.0 and the port to 4500.
+
+----
+export default {
+ ...
+  server: {
+     host: 0,       // defaults to localhost
+     port: 4500     // if you wanted to change the port too
+  }
+  ...
+}
+----
+
+
+=== How to Run the Tests
+
+The Web Console contain some instructions on how to run each test.
+
+Firstly, you need to connect the console to the HiveMQ broker. 
+
+1. Make sure the HiveMQ broker is running
+2. Select the MQTT Configuration tab
+3. Press "Set Default Values"
+4. Press "Connect"
+
+Now the console should be showing that it is connected to the broker.
+
+There are three conformance profiles:
+
+1. Sparkplug Host Applications
+2. Sparkplug Edge Nodes
+3. MQTT Brokers - Sparkplug compliant and aware
+
+To run a specific test:
+
+1. Select the Host Application profile
+2. Add the Sparkplug Host Application ID to use (this is always needed)
+3. Now select the profile you want to use
+4. For the Edge Node profile, fill in the Group and Edge Node ID fields
+5. Select the test you want to run
+6. Follow the instructions provided
+
+If any test does not finish automatically, you can press the "Stop Test" button 
+to stop it and report on the results so far. 
+The "Reset Test" button will clear the results for that test.
+
+The results are recorded in a file which is stored in the HiveMQ bin folder.
+Its default name is SparkplugTCKResults.log.
+
+To get a summary report from that log, run report.py:
+
+`python3 report.py ~/bin/hivemq-ce-2022.1/bin/SparkplugTCKResults.log`
+
+Which will be written to summary.html. The log file will contain all the 
+results from all the tests that have been run. Any failing results will be
+recorded and reported on. Once your implementations are passing all the tests,
+you will need to delete this log before running a clean set of tests so that
+previous failing runs are not included.
+
+Some groups of assertions are optional:
+
+- Broker profile: Sparkplug Aware
+- Host profile: message reordering
+- Edge profile: aliases, datasets, properties and templates
+
+If any tests are run in these optional groups, all the assertions in the group must 
+be tested and passed.
+
+=== Where to File Challenges
+
+Challenges to any tests must be made here: https://github.com/eclipse-sparkplug/sparkplug.listings

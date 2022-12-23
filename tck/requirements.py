@@ -1,6 +1,24 @@
+"""********************************************************************************
+ * Copyright (c) 2022 Ian Craggs
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Ian Craggs - initial implementation
+ ********************************************************************************"""
+
+"""
+Extract assertion information from the Sparkplug specification generated output
+and convert it into constants that the Java test programs can use.
+"""
+
 import xml.dom.minidom
 
-inputFile = "../specification/build/tck-audit/tck-audit.xml"
+inputFile = "../specification/build/tck-audit.xml"
 outputFile = "src/main/java/org/eclipse/sparkplug/tck/test/common/Requirements.java"
 
 outfile = open(outputFile, "w")

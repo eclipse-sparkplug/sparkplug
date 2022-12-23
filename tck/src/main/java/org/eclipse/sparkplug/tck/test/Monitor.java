@@ -162,20 +162,19 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
 	protected static final String TEST_FAILED_FOR_ASSERTION = "Monitor: Test failed for assertion ";
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private final TreeMap<String, String> testResults = new TreeMap<>();
-	String[] testIds = { ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
+	private final @NotNull List<String> testIds = List.of(ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
 			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,
 			ID_TOPICS_NBIRTH_METRIC_REQS, ID_TOPICS_NBIRTH_TEMPLATES, ID_TOPICS_NBIRTH_BDSEQ_INCREMENT,
 			ID_PAYLOADS_STATE_WILL_MESSAGE_PAYLOAD, ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT,
-			ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_DISCONNECT_CLEAN,
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_ORDER,
 			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_CHANGE,
@@ -188,7 +187,10 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			ID_TOPIC_STRUCTURE_NAMESPACE_DEVICE_ID_NON_ASSOCIATED_MESSAGE_TYPES,
 			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_GROUP_ID, ID_TOPIC_STRUCTURE_NAMESPACE_VALID_EDGE_NODE_ID,
 			ID_TOPIC_STRUCTURE_NAMESPACE_VALID_DEVICE_ID,
-			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ };
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD_BDSEQ, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD,
+			ID_PAYLOADS_NDATA_SEQ_INC, ID_PAYLOADS_DDATA_SEQ_INC, ID_TOPIC_STRUCTURE_NAMESPACE_A,
+			ID_PAYLOADS_DDEATH_SEQ_INC, ID_PAYLOADS_NBIRTH_SEQ,
+			ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ);
 
 	// edge_node_id to clientid
 	private HashMap<String, String> edge_nodes = new HashMap<>();
@@ -239,8 +241,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	public void clearResults() {
-		for (int i = 0; i < testIds.length; ++i) {
-			testResults.put(testIds[i], NOT_EXECUTED);
+		for (int i = 0; i < testIds.size(); ++i) {
+			testResults.put(testIds.get(i), NOT_EXECUTED);
 		}
 	}
 
@@ -257,7 +259,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	public String[] getTestIds() {
-		return testIds;
+		return testIds.toArray(new String[0]);
 	}
 
 	public void setIgnoreBdSeqNumCheck(boolean ignoreBdSeqNumCheck) {
@@ -284,9 +286,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	public TreeMap<String, String> getResults() {
 		TreeMap<String, String> labelledResults = new TreeMap<>();
-		for (int i = 0; i < testIds.length; ++i) {
-			if (testResults.containsKey(testIds[i])) {
-				labelledResults.put("Monitor:" + testIds[i], testResults.get(testIds[i]));
+		for (int i = 0; i < testIds.size(); ++i) {
+			if (testResults.containsKey(testIds.get(i))) {
+				labelledResults.put("Monitor:" + testIds.get(i), testResults.get(testIds.get(i)));
 			}
 		}
 		return labelledResults;
@@ -331,7 +333,6 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 		if (hostClientids.values().contains(clientid)) {
 			// remove hostid - clientid relation
-			String hostId = null;
 			for (String hostid : hostClientids.keySet()) {
 				if (hostClientids.get(hostid).equals(clientid)) {
 					hostClientids.remove(hostid);
@@ -433,6 +434,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 							log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD + ": host id: " + hostid
 									+ " with timestamp=" + timestamp);
 							return;
+						}
+
+						if (!setResultIfNotFail(testResults,
+								timestampNode.isLong()
+										&& Utils.checkUTC(timestampNode.longValue(), results.getConfig().UTCwindow),
+								ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT,
+								HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT)) {
+							log(TEST_FAILED_FOR_ASSERTION + ID_HOST_TOPIC_PHID_DEATH_PAYLOAD_TIMESTAMP_CONNECT
+									+ ": host id: " + hostid + " with timestamp=" + timestamp);
 						}
 
 						if (hostTimestamps.get(hostid) != null) {
@@ -1383,6 +1393,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	}
 
 	private boolean metricsEqual(Metric metricOne, Metric metricTwo) {
+		/*
+		 * We don't use the metric equals methods because it includes a timestamp check too.
+		 * We should consider metrics equal even if the timestamp has been updated.
+		 * - Wes Johnson
+		 */
 		if (metricOne == null && metricTwo == null) {
 			logger.debug("metricOne and metricTwo are null");
 			return true;

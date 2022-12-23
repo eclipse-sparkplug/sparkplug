@@ -46,7 +46,7 @@ import com.hivemq.extension.sdk.api.services.admin.LifecycleStage;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class Results implements MqttCallbackExtended {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	protected static final String SPARKPLUG_TCKRESULTS_LOG = "SparkplugTCKresults.log";

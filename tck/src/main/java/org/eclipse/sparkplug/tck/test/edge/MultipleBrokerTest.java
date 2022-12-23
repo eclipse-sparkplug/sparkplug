@@ -74,7 +74,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class MultipleBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
@@ -274,7 +274,7 @@ public class MultipleBrokerTest extends TCKTest {
 
 	@Override
 	public String getName() {
-		return "Host Multiple Broker Test";
+		return "Edge Multiple Broker";
 	}
 
 	@Override
