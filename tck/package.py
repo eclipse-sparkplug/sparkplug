@@ -18,6 +18,7 @@ files = \
 ["build/coverage-report/",
 "eftckl-v10",
 "build/hivemq-extension/sparkplug-tck-3.0.0.zip",
+"build/hivemq-extension/sparkplug-tck-3.0.0.zip.sig",
 "hivemq-configuration/",
 "report.py",
 "UserGuide.html",
