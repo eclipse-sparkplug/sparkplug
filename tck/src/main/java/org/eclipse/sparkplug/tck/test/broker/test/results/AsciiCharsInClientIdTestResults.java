@@ -15,10 +15,10 @@
  */
 package org.eclipse.sparkplug.tck.test.broker.test.results;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.LinkedList;
 import java.util.List;
-
-import jakarta.validation.constraints.NotNull;
 
 public class AsciiCharsInClientIdTestResults {
 	private final @NotNull List<@NotNull Tuple<Character, String>> testResults;

@@ -153,10 +153,8 @@ specification is expressly prohibited.
 
 The notice is:
 
-// TODO - the Specification Link below needs to be updated Github Issue: #72
 "Copyright (c) 2016-2022 Eclipse Foundation. This software or document includes material copied from
-or derived from the Sparkplug Specification: 
-https://www.eclipse.org/tahu/spec/Sparkplug%20Topic%20Namespace%20and%20State%20ManagementV2.2-with%20appendix%20B%20format%20-%20Eclipse.pdf
+or derived from the Sparkplug Specification: https://www.eclipse.org/tahu/spec/sparkplug_spec.pdf
 
 [[introduction_disclaimers]]
 ==== Disclaimers

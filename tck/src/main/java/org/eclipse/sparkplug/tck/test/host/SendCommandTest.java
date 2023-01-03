@@ -135,7 +135,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class SendCommandTest extends TCKTest {
 
 	private static final String NODE_CONTROL_REBIRTH = "Node Control/Rebirth";
@@ -154,7 +154,7 @@ public class SendCommandTest extends TCKTest {
 					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE,
 					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_NAME,
 					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_METRIC_VALUE, ID_TOPICS_NCMD_TOPIC, ID_TOPICS_DCMD_TOPIC,
-					ID_PAYLOADS_NAME_CMD_REQUIREMENT);
+					ID_PAYLOADS_NAME_CMD_REQUIREMENT, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC);
 	private @NotNull String deviceId;
 	private @NotNull String groupId;
 	private @NotNull String edgeNodeId;

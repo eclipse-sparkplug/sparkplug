@@ -23,7 +23,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_MQTT_WILL_MESSAGES;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -61,13 +61,12 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class CompliantBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private static final int TIME_OUT = 60;
-	private final @NotNull String[] testId = { ID_CONFORMANCE_MQTT_QOS0, ID_CONFORMANCE_MQTT_QOS1,
-			ID_CONFORMANCE_MQTT_WILL_MESSAGES, ID_CONFORMANCE_MQTT_RETAINED };
-	private final @NotNull ArrayList<String> testIds = new ArrayList<>();
+	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_QOS0, ID_CONFORMANCE_MQTT_QOS1,
+			ID_CONFORMANCE_MQTT_WILL_MESSAGES, ID_CONFORMANCE_MQTT_RETAINED);
 	private TCK theTCK = null;
 	private @NotNull String host;
 	private @NotNull String port;
@@ -75,7 +74,6 @@ public class CompliantBrokerTest extends TCKTest {
 	public CompliantBrokerTest(TCK aTCK, String[] params) {
 		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
-		testIds.addAll(Arrays.asList(testId));
 		if (params.length < 2) {
 			log("Not enough parameters: " + Arrays.toString(params));
 			log("Parameters must be: host and port, (already set during mqtt connection establishment)");
@@ -143,7 +141,7 @@ public class CompliantBrokerTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Broker Compliant Test";
+		return "Broker Sparkplug Compliant";
 	}
 
 	public String[] getTestIds() {

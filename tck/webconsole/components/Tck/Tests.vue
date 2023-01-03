@@ -495,6 +495,7 @@ export default {
                             "Set the Device Id that is used by the configured Host, Group and Edge.",
                             "Connect the Host Application to the broker, if you are using one.",
                             "Start this test.",
+                            "Connect the Edge Node and Device.",
                             "Stop the edge node and device named.",
                             "Wait until the test is finished and check the results.",
                             "If the test does not stop automatically, press the \"Stop Test\" button."
@@ -671,11 +672,16 @@ export default {
                     testValues: {
                         testType: "BROKER",
                         name: "CompliantBrokerTest",
-                        readableName: "Sparkplug Compliant Broker Test",
-                        description: "This is the test, that checks requirements for a Sparkplug compliant MQTT Broker.",
+                        readableName: "Sparkplug Compliant Test",
+                        description: `Any fully MQTT 3.1.1 or 5.0 MQTT broker will meet the requirements of Sparkplug.
+                                      However, not all of the features of MQTT are required. This test checks that the
+                                      broker supports the features of MQTT that are required.`,
                         requirements: [
-                            "Start this test with the given broker host and port.",
-                            "Wait until Tests are finished and check Results."
+                            "Connect this console to the HiveMQ broker.",
+                            "Ensure the correct Broker TCP/IP address is set.",
+                            "Start this test.",
+                            "Wait until the test is finished and check the results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         result: null,
                         logging: [],
@@ -685,13 +691,20 @@ export default {
                     testValues: {
                         testType: "BROKER",
                         name: "AwareBrokerTest",
-                        readableName: "Sparkplug Aware Broker Test",
-                        description: "This is the test, that checks requirements for a Sparkplug aware MQTT Broker.",
+                        readableName: "Sparkplug Aware Test",
+                        description: `A 'Sparkplug Aware' MQTT Server includes all of the aspects of a Sparkplug
+                                     Compliant MQTT Server. In addition, it also must have the ability to store
+                                     NBIRTH and DBIRTH messages of Sparkplug Edge Nodes that pass through it. This
+                                     test checks that those messages are stored and updated correctly.`,
                         requirements: [
-                            "Start this test with the given broker host and port.",
-                            "Start connect an Edge Node to trigger a Birth Message for Edge and its Devices of the given Group.",
-                            "Stop connection to trigger the DEATH Messages of the Edge Node.",
-                            "Wait until Tests are finished and check Results."
+                            "Connect this console to the HiveMQ broker.",
+                            "Ensure the correct Broker TCP/IP address is set.",
+                            "Enter the Group and Edge Node ids to use.",
+                            "Start this test.",
+                            "Connect an Edge Node to trigger a birth message for the Edge and its Devices.",
+                            "End the Edge Node to trigger DEATH messages.",
+                            "Wait until the test is finished and check the results.",
+                            "If the test does not stop automatically, press the \"Stop Test\" button."
                         ],
                         parameters: {
                             group_id: {

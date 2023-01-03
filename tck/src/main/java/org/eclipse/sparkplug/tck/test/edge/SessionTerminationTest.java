@@ -87,7 +87,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class SessionTerminationTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
@@ -96,8 +96,8 @@ public class SessionTerminationTest extends TCKTest {
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
 			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER, ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311,
-			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50, ID_TOPICS_NDEATH_TOPIC,
-			ID_TOPICS_DDEATH_TOPIC);
+			ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50, ID_TOPICS_NDEATH_TOPIC, ID_TOPICS_DDEATH_TOPIC,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC);
 
 	private final @NotNull TCK theTCK;
 	private @NotNull Utilities utilities = null;
@@ -150,7 +150,7 @@ public class SessionTerminationTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "SessionTermination";
+		return "Edge SessionTermination";
 	}
 
 	public String[] getTestIds() {
@@ -182,6 +182,9 @@ public class SessionTerminationTest extends TCKTest {
 		reportResults(testResults);
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
+			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_TOPIC)
 	public void connect(final @NotNull String clientId, final @NotNull ConnectPacket packet) {
 		/* Determine if this the connect packet for the Edge node under test.
 		 * Set the clientid if so. */
@@ -233,6 +236,9 @@ public class SessionTerminationTest extends TCKTest {
 		}
 	}
 
+	@SpecAssertion(
+			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
+			id = ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET)
 	@Override
 	public void onDisconnect(DisconnectEventInput disconnectEventInput) {
 		// on disconnecting the TCP connection, the NDEATH might not have been received
@@ -244,8 +250,11 @@ public class SessionTerminationTest extends TCKTest {
 			return;
 		}
 
+		testResults.put(ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET,
+				setResult(ndeathFound, OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET));
+
 		disconnected = true;
-		if (disconnected && ndeathFound && ddeathFound) {
+		if (disconnected && ndeathFound) {
 			theTCK.endTest();
 		}
 	}

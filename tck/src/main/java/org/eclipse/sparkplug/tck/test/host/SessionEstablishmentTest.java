@@ -155,7 +155,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0-rc1")
+		version = "3.0.0")
 public class SessionEstablishmentTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
@@ -170,7 +170,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_HOST_TOPIC_PHID_DEATH_QOS, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_QOS,
 			ID_PAYLOADS_STATE_WILL_MESSAGE_QOS, ID_HOST_TOPIC_PHID_DEATH_RETAIN,
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_WILL_RETAINED, ID_PAYLOADS_STATE_WILL_MESSAGE_RETAIN,
-			ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION, ID_PAYLOADS_STATE_SUBSCRIBE, ID_HOST_TOPIC_PHID_BIRTH_TOPIC,
+			ID_PAYLOADS_STATE_SUBSCRIBE, ID_HOST_TOPIC_PHID_BIRTH_TOPIC,
 			ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_TOPIC, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD,
 			ID_HOST_TOPIC_PHID_BIRTH_MESSAGE, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_PAYLOAD,
 			ID_HOST_TOPIC_PHID_BIRTH_QOS, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH_QOS,
@@ -649,7 +649,7 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		boolean overallResult = false;
 
-		// Topic is STATE/{host_application_id}
+		// Topic is spBv1.0/STATE/{host_application_id}
 		final boolean topicIsValid = packet.getTopic().equals(Constants.TOPIC_ROOT_STATE + "/" + hostApplicationId);
 		overallResult = topicIsValid;
 

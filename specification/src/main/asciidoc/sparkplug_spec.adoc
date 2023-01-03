@@ -1,5 +1,5 @@
 ////
-Copyright © 2016-2020 The Eclipse Foundation, Cirrus Link Solutions, and others
+Copyright © 2016-2022 The Eclipse Foundation, Cirrus Link Solutions, and others
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,9 +8,9 @@ https://www.eclipse.org/legal/epl-2.0.
 SPDX-License-Identifier: EPL-2.0
 ////
 
-= Sparkplug 3.0.0-rc1: Sparkplug Specification
+= Sparkplug 3.0.0: Sparkplug Specification
 Eclipse Sparkplug Contributors
-Version 3.0.0-rc1 Release Candidate Release, {docdate}
+Version 3.0.0 Release, {docdate}
 // Settings:
 //:experimental:
 :reproducible:
@@ -42,7 +42,7 @@ image::extracted-media/media/image4.png[image,width=200,height=80]
 |1.0 |5/26/16 |Cirrus Link |Initial Release
 |2.1 |12/10/16 |Cirrus Link |Payload B Addition
 |2.2 |10/11/19 |Cirrus Link |Re-branding for Eclipse foundation added TM to Sparkplug
-|3.0 |11/1/20 |Eclipse Sparkplug Specification Project Team |Reorganized to be in adoc format and to include normative and non-normative statements
+|3.0.0 |11/16/22 |Eclipse Sparkplug Specification Project Team |Reorganized to be in AsciiDoc format and to include normative and non-normative statements
 |===
 
 include::chapters/Sparkplug_1_Introduction.adoc[]
