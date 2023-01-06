@@ -454,15 +454,13 @@ public class SendComplexDataTest extends TCKTest {
 
 				for (int i = 0; i < m.getProperties().getValuesCount(); i++) {
 					final Payload.PropertyValue propertyValue = m.getProperties().getValues(i);
-					if (Payload.PropertyValue.ValueCase.forNumber(propertyValue.getType()) == null
-							|| Payload.PropertyValue.ValueCase.VALUE_NOT_SET == Payload.PropertyValue.ValueCase
-									.forNumber(propertyValue.getType())) {
+					if (propertyValue.getValueCase() == null
+							|| Payload.PropertyValue.ValueCase.VALUE_NOT_SET == propertyValue.getValueCase()) {
 						isValid_PropertyValueType = false;
 						isValid_PropertyValueTypeValue = false;
 					}
 					if ((topic.contains(TOPIC_PATH_NBIRTH) || topic.contains(TOPIC_PATH_DBIRTH))
-							&& Payload.PropertyValue.ValueCase.forNumber(
-									propertyValue.getType()) == Payload.PropertyValue.ValueCase.VALUE_NOT_SET) {
+							&& Payload.PropertyValue.ValueCase.VALUE_NOT_SET == propertyValue.getValueCase()) {
 						isValid_PropertyValueTypeReq = false;
 					}
 				}
