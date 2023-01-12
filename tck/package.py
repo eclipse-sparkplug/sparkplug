@@ -20,7 +20,6 @@ files = \
 "build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip",
 "build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip.sig",
 "hivemq-configuration/",
-"report.py",
 "UserGuide.html",
 "README.md",
 "README.html"

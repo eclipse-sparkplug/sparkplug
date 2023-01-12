@@ -21,10 +21,10 @@ build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip
 build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip.sig
 hivemq-configuration/logback.xml
 hivemq-configuration/config.xml
-report.py
 UserGuide.html
 README.md
 README.html"
+
 
 ZIP_FILE_NAME=Eclipse-Sparkplug-TCK-3.0.1-SNAPSHOT.zip
 PREFIX=build/SparkplugTCK/

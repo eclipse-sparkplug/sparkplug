@@ -158,18 +158,21 @@ If any test does not finish automatically, you can press the "Stop Test" button
 to stop it and report on the results so far. 
 The "Reset Test" button will clear the results for that test.
 
-The results are recorded in a file which is stored in the HiveMQ bin folder.
-Its default name is SparkplugTCKResults.log.
+Get the results:
 
-To get a summary report from that log, run report.py:
+The results are recorded in a file which is stored in the HiveMQ folder on the Broker.
+The log file contains all results from the tests that have been run.
+Any failing results will be recorded and reported on.
+Once your implementations are passing all the tests, you will need to delete/rename this log before running a clean set of tests so that previous failing runs are not included. Its default name is SparkplugTCKResults.log. (This can be changed on the *MQTT Configuration* tab when creating a Connection).
 
-`python3 report.py ~/bin/hivemq-ce-2022.1/bin/SparkplugTCKResults.log`
+Finally,
+To get a summary report from the created log:
 
-Which will be written to summary.html. The log file will contain all the 
-results from all the tests that have been run. Any failing results will be
-recorded and reported on. Once your implementations are passing all the tests,
-you will need to delete this log before running a clean set of tests so that
-previous failing runs are not included.
+1. Select the Results tab
+2. Press "Create" - To get a summary report from the test log.
+3. Press "Download" (Button becomes visible if a summary is created).
+
+The summary report will contain all available tests and all results from the tests that have been run.
 
 Some groups of assertions are optional:
 
