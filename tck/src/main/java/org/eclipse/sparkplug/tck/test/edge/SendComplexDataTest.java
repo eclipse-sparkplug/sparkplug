@@ -141,7 +141,7 @@ public class SendComplexDataTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	public static final String PROPERTY_KEY_QUALITY = "Quality";
 
-	private final @NotNull List<String> testIds = List.of(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED,
+	public static final @NotNull List<String> testIds = List.of(ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED,
 			ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE, ID_PAYLOADS_METRIC_DATATYPE_VALUE,
 			ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE, ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE,
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE, ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,

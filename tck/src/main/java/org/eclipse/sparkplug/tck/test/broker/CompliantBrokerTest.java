@@ -65,7 +65,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 public class CompliantBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private static final int TIME_OUT = 60;
-	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_QOS0, ID_CONFORMANCE_MQTT_QOS1,
+	public static final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_QOS0, ID_CONFORMANCE_MQTT_QOS1,
 			ID_CONFORMANCE_MQTT_WILL_MESSAGES, ID_CONFORMANCE_MQTT_RETAINED);
 	private TCK theTCK = null;
 	private @NotNull String host;

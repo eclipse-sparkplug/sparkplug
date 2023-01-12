@@ -134,7 +134,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 public class SendDataTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private final @NotNull List<String> testIds =
+	public static final @NotNull List<String> testIds =
 			List.of(ID_TOPICS_NDATA_MQTT, ID_TOPICS_NDATA_SEQ_NUM, ID_TOPICS_NDATA_TIMESTAMP, ID_TOPICS_NDATA_PAYLOAD,
 					ID_TOPICS_DDATA_MQTT, ID_TOPICS_DDATA_SEQ_NUM, ID_TOPICS_DDATA_TIMESTAMP, ID_TOPICS_DDATA_PAYLOAD,
 					ID_PAYLOADS_NDATA_TIMESTAMP, ID_PAYLOADS_NDATA_SEQ, ID_PAYLOADS_NDATA_QOS, ID_PAYLOADS_NDATA_RETAIN,

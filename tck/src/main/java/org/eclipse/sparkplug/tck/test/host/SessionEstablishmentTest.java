@@ -159,7 +159,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 public class SessionEstablishmentTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_PRIMARY_HOST,
+	public static final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_PRIMARY_HOST,
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_SUBSCRIPTION, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH,
 			ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER, ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_CONNECT_BIRTH,
 			ID_COMPONENTS_PH_STATE, ID_INTRO_SPARKPLUG_HOST_STATE, ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311,

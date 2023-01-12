@@ -43,11 +43,18 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 /**
  * @author Ian Craggs
  * @author Lukas Brand
+ * @author Anja Helmbrecht-Schaar
  */
 public abstract class TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
+	public static final String GROUP_SUMMARY = "Summary Test Results for ";
 	protected final @NotNull Map<String, String> testResults = new TreeMap<>();
+	protected String[] testIds;
+
+	public final String[] getAllTestIds() {
+		return testIds;
+	}
 
 	public void onMqttConnectionStart(ConnectionStartInput connectionStartInput) {
 	}
@@ -90,9 +97,9 @@ public abstract class TCKTest {
 	}
 
 	public void reportResults(final @NotNull Map<String, String> results) {
-		logger.info("Summary Test Results for {} ", getName());
+		logger.info(GROUP_SUMMARY + getName());
 
-		final StringBuilder summary = Results.getSummary(results);
+		final StringBuilder summary = Results.getSingleTestSummary(results);
 		logger.info(summary.toString());
 		summary.insert(0, new Timestamp(new Date().getTime()) + " Summary Test Results for " + getName()
 				+ System.lineSeparator());

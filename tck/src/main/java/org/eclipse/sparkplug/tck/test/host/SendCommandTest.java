@@ -142,7 +142,7 @@ public class SendCommandTest extends TCKTest {
 
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
-	private final @NotNull List<String> testIds =
+	public static final @NotNull List<String> testIds =
 			List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB, ID_TOPICS_NCMD_MQTT, ID_PAYLOADS_NCMD_QOS,
 					ID_PAYLOADS_NCMD_RETAIN, ID_TOPICS_NCMD_TIMESTAMP, ID_PAYLOADS_NCMD_SEQ, ID_PAYLOADS_NCMD_TIMESTAMP,
 					ID_TOPICS_NCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,

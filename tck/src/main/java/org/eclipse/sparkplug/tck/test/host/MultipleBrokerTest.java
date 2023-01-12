@@ -74,7 +74,7 @@ public class MultipleBrokerTest extends TCKTest {
 
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
-	private final @NotNull List<String> testIds =
+	public static final @NotNull List<String> testIds =
 			List.of(ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE_SUBS,
 					ID_OPERATIONAL_BEHAVIOR_PRIMARY_APPLICATION_STATE_WITH_MULTIPLE_SERVERS_STATE,
 					ID_OPERATIONAL_BEHAVIOR_HOST_APPLICATION_MULTI_SERVER_TIMESTAMP);

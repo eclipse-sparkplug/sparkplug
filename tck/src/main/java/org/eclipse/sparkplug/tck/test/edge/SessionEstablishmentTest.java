@@ -80,7 +80,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 public class SessionEstablishmentTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 
-	private final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
+	public static final @NotNull List<String> testIds = List.of(ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER,
 			ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_311, ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS, ID_PAYLOADS_NDEATH_SEQ, ID_TOPICS_NDEATH_SEQ, ID_TOPICS_NDEATH_PAYLOAD,
 			ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN, ID_PAYLOADS_NDEATH_WILL_MESSAGE, ID_PAYLOADS_NBIRTH_QOS,
