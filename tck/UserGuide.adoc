@@ -28,7 +28,7 @@ which controls the running of the tests.
 
 Install the HiveMQ broker following the instructions provided with it.
 
-Copy the extension distribution file (tck/build/hivemq-extension/sparkplug-tck-3.0.0.zip)
+Copy the extension distribution file (tck/build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip)
 to the HiveMQ extension folder (extensions), and unzip the file there. 
 The target folder should now have the following content.
 
@@ -36,13 +36,13 @@ The target folder should now have the following content.
 |-| extensions/
   |-| sparkplug-tck/
     |--  hivemq-extension.xml
-    |--  sparkplug-tck-3.0.0.jar
+    |--  sparkplug-tck-3.0.1-SNAPSHOT.jar
 ----
 
 Now, on starting the HiveMQ broker, this message should be seen:
 
 ----
-Extension "Eclipse™ Sparkplug™ TCK" version 3.0.0 started successfully.
+Extension "Eclipse™ Sparkplug™ TCK" version 3.0.1-SNAPSHOT started successfully.
 ----
 
 Add a websocket listener to the HiveMQ broker by updating the config.xml file.
