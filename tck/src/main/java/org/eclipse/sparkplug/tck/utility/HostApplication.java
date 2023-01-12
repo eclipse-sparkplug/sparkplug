@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0")
+		version = "3.0.1-SNAPSHOT")
 public class HostApplication {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");

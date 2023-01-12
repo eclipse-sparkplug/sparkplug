@@ -76,7 +76,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0")
+		version = "3.0.1-SNAPSHOT")
 public class SessionTerminationTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 

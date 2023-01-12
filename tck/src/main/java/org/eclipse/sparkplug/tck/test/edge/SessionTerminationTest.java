@@ -87,7 +87,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
  */
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0")
+		version = "3.0.1-SNAPSHOT")
 public class SessionTerminationTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
 	public static final @NotNull List<String> testIds = List.of(ID_TOPICS_DDEATH_MQTT, ID_TOPICS_DDEATH_SEQ_NUM,

@@ -162,7 +162,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.0")
+		version = "3.0.1-SNAPSHOT")
 public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");

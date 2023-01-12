@@ -35,8 +35,8 @@ import java.util.concurrent.TimeUnit;
 import static org.eclipse.sparkplug.tck.test.common.Constants.*;
 
 @SpecVersion(
-        spec = "sparkplug",
-        version = "3.0.0")
+		spec = "sparkplug",
+		version = "3.0.1-SNAPSHOT")
 public class Results implements MqttCallbackExtended {
     protected static final String SPARKPLUG_TCKRESULTS_LOG = "SparkplugTCKresults.log";
     private static final Logger LOGGER = LoggerFactory.getLogger("Sparkplug");

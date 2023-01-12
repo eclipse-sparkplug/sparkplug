@@ -186,8 +186,8 @@
 
         <specification xmlns="http://jboss.com/products/weld/tck/audit"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                       xsi:schemaLocation="http://jboss.com/products/weld/tck/audit" name="Sparkplug 3.0.0"
-                       version="3.0.0" id="sparkplug" generateSectionIds="true">
+                       xsi:schemaLocation="http://jboss.com/products/weld/tck/audit" name="Sparkplug 3.0.1-SNAPSHOT"
+                       version="3.0.1-SNAPSHOT" id="sparkplug" generateSectionIds="true">
 
             <xsl:apply-templates mode="createAuditFile"/>
 
