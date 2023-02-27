@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Anja Helmbrecht-Schaar
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Anja Helmbrecht-Schaar - initial implementation and documentation
+ *******************************************************************************/
 package org.eclipse.sparkplug.tck.test.report;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;

@@ -1,4 +1,4 @@
-rootProject.name = "tck"
+rootProject.name = "sparkplug-tck"
 
 includeBuild("../specification")
 
