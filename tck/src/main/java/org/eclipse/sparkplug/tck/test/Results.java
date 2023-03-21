@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2014-2022 Cirrus Link Solutions and others
+ * Copyright (c) 2014-2023 Ian Craggs, Anja Helmbrecht-Schaar
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *   Cirrus Link Solutions - initial implementation
  *   Ian Craggs - add checks for Sparkplug TCK
+ *   Anja Helmbrecht-Schaar - add web report
  ********************************************************************************/
 
 package org.eclipse.sparkplug.tck.test;

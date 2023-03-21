@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Anja Helmbrecht-Schaar
+ * Copyright (c) 2021, 2022, 2023 Anja Helmbrecht-Schaar
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
