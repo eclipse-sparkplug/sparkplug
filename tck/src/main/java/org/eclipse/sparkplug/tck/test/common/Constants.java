@@ -47,6 +47,10 @@ public class Constants {
 	public static final String TCK_HOST_CONTROL = "SPARKPLUG_TCK/HOST_CONTROL";
 	public static final String SPARKPLUG_AWARE_ROOT = "$sparkplug/certificates/";
 
+	//topic to create the Summary html from the TCK Log
+	public static final String TCK_REPORT_TOPIC = "SPARKPLUG_TCK/REPORT";
+	public static final String TCK_REPORT_DOWNLOAD_TOPIC = "SPARKPLUG_TCK/REPORT_DOWNLOAD";
+
 	public enum Profile {
 		HOST,
 		EDGE,

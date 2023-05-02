@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2022, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -79,7 +79,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 public class EdgeSessionTerminationTest extends TCKTest {
 
 	private static Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private final @NotNull List<String> testIds =
+	public static final @NotNull List<String> testIds =
 			List.of(ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_OFFLINE,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_NODE_TAGS_STALE,
 					ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_ACTION_NDEATH_DEVICES_OFFLINE,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Anja Helmbrecht-Schaar
+ * Copyright (c) 2021, 2022, 2023 Anja Helmbrecht-Schaar
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -72,7 +72,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 		version = "3.0.1-SNAPSHOT")
 public class AwareBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
-	private final @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_AWARE_BASIC,
+	public final static @NotNull List<String> testIds = List.of(ID_CONFORMANCE_MQTT_AWARE_BASIC,
 			ID_CONFORMANCE_MQTT_AWARE_STORE, ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC,
 			ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC,
 			ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN, ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP);

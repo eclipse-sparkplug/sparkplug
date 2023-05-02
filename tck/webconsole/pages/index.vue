@@ -65,8 +65,12 @@
                                 :change="tabOpen"
                                 :currentTest="currentTest"
                                 :filename="filename"
+                                :report="report"
+                                :reportCreated="reportCreated"
                                 class="mt-3"
                                 @reset-log="resetLogging"
+                                @create-report="createReport"
+                                @download-report="downloadReport"
                             />
                         </b-tab>
 
@@ -109,12 +113,13 @@
 <script>
 
 let interactionListenerCreated = false;
-let loggingCreated = false;
 
 export default {
     data: function () {
         return {
             filename: "",
+            report: "",
+            reportCreated: "",
 
             /**
              * Controls visibility of the user interactions popup.
@@ -140,6 +145,7 @@ export default {
 
             currentTest: null,
             currentTestLogging: null,
+            reportSummary: "",
 
             /**
              * All information about the possible sparkplug client.
@@ -185,6 +191,7 @@ export default {
              * List of received pending user interactions.
              */
             popupNotifications: [],
+
         };
     },
 
@@ -280,7 +287,7 @@ export default {
                     if (!this.sparkplugClient.hostApplication.hostId) {
                         alert("The Host Application ID parameter must be set before executing this test");
                         return;
-                    } 
+                    }
                     const testParameters =
                         this.sparkplugClient.hostApplication.hostId +
                         " " + testParameter.parameters["client_id"].parameterValue;
@@ -422,7 +429,7 @@ export default {
                 const profile = "broker";
                 const testType = testParameter.name;
                 if (testType === "CompliantBrokerTest") {
-                    const testParameters = 
+                    const testParameters =
                         this.sparkplugClient.broker.host +
                         " " + this.sparkplugClient.broker.port;
                     this.createTestRequest(profile, testType, testParameters);
@@ -475,13 +482,17 @@ export default {
         createResultLogTopic: function () {
             const resultTopic = "SPARKPLUG_TCK/RESULT";
             const logTopic = "SPARKPLUG_TCK/LOG";
-            console.log("index: createLogback - subscribe to: ", resultTopic, logTopic);
-            this.mqttClient.subscribe([resultTopic, logTopic], (error) => {
+            const reportTopic = "SPARKPLUG_TCK/REPORT";
+            const downloadTopic = "SPARKPLUG_TCK/REPORT_DOWNLOAD";
+            console.log("index: createLogback - subscribe to: ", resultTopic, logTopic, reportTopic, downloadTopic);
+            this.mqttClient.subscribe([resultTopic, logTopic, reportTopic, downloadTopic], (error) => {
                 if (error) {
-                    console.log("Subscribe error", error);
+                    console.log("index: Subscribe error", error);
                 }
             });
-
+            /*
+            * read payload of summary and write into vue variable
+             */
             this.mqttClient.on("message", (topic, message) => {
                 if (topic === resultTopic || topic === logTopic ) {
                     if (this.logging.length > 100) {
@@ -493,9 +504,15 @@ export default {
                         id: this.logging.length,
                     };
 
-                    console.log("logging:", logMessage);
+                    console.log("index: message on Logging:", logMessage);
                     this.logging.push(logMessage);
                     this.currentTestLogging = logMessage;
+                } else if (topic ===  reportTopic ) {
+                    this.reportCreated= "created";
+                    console.log("index: message on Create report:", this.report);
+                } else  if (topic ===  downloadTopic ) {
+                    console.log("index: message on Download report for "+ this.report + " with size:", message.length);
+                    this.reportSummary = message.toString();
                 }
             });
         },
@@ -538,6 +555,19 @@ export default {
             this.logging = [];
         },
 
+        downloadReport: function () {
+            this.report = "Summary-"+this.filename+".html"
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:text;charset=utf-8,' + encodeURIComponent(this.reportSummary));
+            element.setAttribute('download', this.report);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            console.log("notification:", "download Report from " + this.filename);
+        },
+
+
         /**********************
          * MQTT functions
          **********************/
@@ -559,8 +589,20 @@ export default {
         createResultLog: function () {
             let topic = "SPARKPLUG_TCK/RESULT_CONFIG";
             let payload = "NEW_RESULT-LOG " + this.filename;
-            console.log("index: createResultLog - write into: ", this.filename);
-            this.mqttClient.publish(topic, payload, {qos: 1, retain: true}, (error) => {
+            this.reportCreated ="";
+            console.log("index: configure Result Log - create new file:", this.filename);
+            this.mqttClient.publish(topic, payload, {qos: 1, retain: false}, (error) => {
+                if (error) {
+                    console.log("Publish error", error);
+                }
+            });
+        },
+
+        createReport: function () {
+            let topic = "SPARKPLUG_TCK/REPORT";
+            let payload = "NEW_REPORT " + this.filename;
+            console.log("index: create TCK Report - from: ", this.filename);
+            this.mqttClient.publish(topic, payload, {qos: 1, retain: false}, (error) => {
                 if (error) {
                     console.log("Publish error", error);
                 }
@@ -584,7 +626,7 @@ export default {
         createTestRequest: function (profile, testType, testParameters) {
             let topic = "SPARKPLUG_TCK/TEST_CONTROL";
             let payload = "NEW_TEST " + profile + " " + testType + " " + testParameters;
-            console.log("index createTest:", payload);
+            console.log("index: createTest:", payload);
             this.mqttClient.publish(topic, payload, 1, (error) => {
                 if (error) {
                     console.log("Publish error", error);

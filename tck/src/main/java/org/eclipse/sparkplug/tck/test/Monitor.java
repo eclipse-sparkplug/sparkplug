@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2022, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -169,7 +169,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 	protected static final String TEST_FAILED_FOR_ASSERTION = "Monitor: Test failed for assertion ";
 	private static final @NotNull String NAMESPACE = TOPIC_ROOT_SP_BV_1_0;
 	private final TreeMap<String, String> testResults = new TreeMap<>();
-	private final @NotNull List<String> testIds = List.of(ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
+	public static final @NotNull List<String> testIds = List.of(ID_INTRO_EDGE_NODE_ID_UNIQUENESS,
 			ID_TOPIC_STRUCTURE_NAMESPACE_DUPLICATE_DEVICE_ID_ACROSS_EDGE_NODE,
 			ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_EDGE_NODE_DESCRIPTOR, ID_TOPIC_STRUCTURE_NAMESPACE_UNIQUE_DEVICE_ID,
 			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_NBIRTH_EDGE_NODE_DESCRIPTOR, ID_TOPICS_DBIRTH_METRIC_REQS,

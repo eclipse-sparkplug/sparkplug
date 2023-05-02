@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2022, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -84,7 +84,7 @@ import com.hivemq.extension.sdk.api.services.publish.PublishService;
 public class MessageOrderingTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
-	private final @NotNull List<String> testIds =
+	public static final @NotNull List<String> testIds =
 			List.of(ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_PARAM, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_START,
 					ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_REBIRTH, ID_OPERATIONAL_BEHAVIOR_HOST_REORDERING_SUCCESS);
 	private @NotNull String deviceId;

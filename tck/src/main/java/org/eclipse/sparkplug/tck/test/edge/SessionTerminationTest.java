@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Ian Craggs
+ * Copyright (c) 2022, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -90,8 +90,7 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubscribePacket;
 		version = "3.0.1-SNAPSHOT")
 public class SessionTerminationTest extends TCKTest {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
-
-	private final @NotNull List<String> testIds = List.of(ID_TOPICS_DDEATH_MQTT, ID_TOPICS_DDEATH_SEQ_NUM,
+	public static final @NotNull List<String> testIds = List.of(ID_TOPICS_DDEATH_MQTT, ID_TOPICS_DDEATH_SEQ_NUM,
 			ID_PAYLOADS_DDEATH_TIMESTAMP, ID_PAYLOADS_DDEATH_SEQ, ID_PAYLOADS_DDEATH_SEQ_INC,
 			ID_PAYLOADS_DDEATH_SEQ_NUMBER, ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_NDEATH,
 			ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_INTENTIONAL_DISCONNECT_PACKET, ID_OPERATIONAL_BEHAVIOR_DEVICE_DDEATH,
