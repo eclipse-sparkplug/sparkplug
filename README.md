@@ -33,9 +33,12 @@ Eclipse Tahu Github Repository: https://github.com/eclipse/tahu
 Eclipse Tahu Binaries in Maven Central: https://search.maven.org/search?q=g:org.eclipse.tahu
 
 # Contributing
+* Make sure you submit your PR against the correct branch
+  - Submit PRs against 'develop' for changes to the Sparkplug 4.0.0 specification and TCK
+  - Submit PRs againt '3.x' for changes to the Sparkplug 3.0.0 specification and TCK
 Contributing to the Sparkplug Specification is easy and contributions are welcome. In order to submit a pull request (PR) you must follow these steps. Failure to follow these steps will likely lead to the PR being rejected.
 1. Sign the Eclipse Contributor Agreement (ECA): https://accounts.eclipse.org/user/eca
 2. Make sure the email tied to your Github account is the same one you used to sign the ECA.
-3. Submit your PR against the develop branch of the repository. PRs against master will not be accepted: https://github.com/eclipse/sparkplug/tree/develop
+3. Submit your PR against the appropriate branch of the repository. PRs against master will not be accepted.
 4. Sign off on your PR using the '-s' flag. For example: 'git commit -m"My brief comment" ChangedFile'
 5. Make sure to include any important context or information associated with the PR in the PR submission. Keep your commit comment brief.
