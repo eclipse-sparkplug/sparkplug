@@ -947,7 +947,7 @@ established Sparkplug session and is publishing DATA messages. Now say a new Spa
 Application connects to the same MQTT Server that the Edge Node is connected to. On the next DATA
 message published by the Edge Node, the Host Application will receive it without ever having
 received the BIRTH message(s) associated with the Edge Node. As a result, it can send a 'Rebirth
-Request' using the 'Node Control/Refresh' metric to reset its understanding of that Edge Node and
+Request' using the 'Node Control/Rebirth' metric to reset its understanding of that Edge Node and
 become aware of all metrics associated with it.
 
 These are the rules around the 'Node Control/Rebirth' metric.
