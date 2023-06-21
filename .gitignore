@@ -12,3 +12,4 @@ specification/src/main/asciidoc/docinfo-header.html
 .settings
 Sparkplug_TCK_*.zip
 tck/Sparkplug_TCK_*.zip
+.pydevproject
