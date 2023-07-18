@@ -166,9 +166,9 @@ public class Utils {
 			case Int32:
 			case UInt8:
 			case UInt16:
+			case UInt32:
 				return m.hasIntValue();
 			case Int64:
-			case UInt32:
 			case UInt64:
 			case DateTime:
 				return m.hasLongValue();
