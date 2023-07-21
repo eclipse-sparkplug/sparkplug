@@ -152,56 +152,43 @@ public class Utils {
 		return (seq == 255) ? 0 : seq + 1;
 	}
 
+	public static boolean hasValidDatatype(Metric m){
+		// Checks that the datatype is valid for Metric and that the value case corresponds with the datatype
+		return DataType.forNumber(m.getDatatype()) != null && m.getValueCase() == Metric.ValueCase.forDatatype(DataType.forNumber(m.getDatatype()));
+	}
+
+	public static boolean hasValidDatatype(Payload.PropertyValue p){
+		// Checks that the datatype is valid for Property Values and that the value case corresponds with the datatype
+		return DataType.forNumber(p.getType()) != null && p.getValueCase() == Payload.PropertyValue.ValueCase.forDatatype(DataType.forNumber(p.getType()));
+	}
+
 	public static boolean hasValue(Metric m) {
 		if (m.hasIsNull() && m.getIsNull()) {
 			// A null value is valid
 			return true;
 		}
 
-		switch (DataType.forNumber(m.getDatatype())) {
-			case Unknown:
-				return false;
-			case Int8:
-			case Int16:
-			case Int32:
-			case UInt8:
-			case UInt16:
+		switch(m.getValueCase()){
+			case INT_VALUE:
 				return m.hasIntValue();
-			case Int64:
-			case UInt32:
-			case UInt64:
-			case DateTime:
+			case LONG_VALUE:
 				return m.hasLongValue();
-			case Float:
+			case FLOAT_VALUE:
 				return m.hasFloatValue();
-			case Double:
+			case DOUBLE_VALUE:
 				return m.hasDoubleValue();
-			case Boolean:
+			case BOOLEAN_VALUE:
 				return m.hasBooleanValue();
-			case String:
-			case Text:
-			case UUID:
+			case STRING_VALUE:
 				return m.hasStringValue();
-			case Bytes:
-			case File:
-			case Int8Array:
-			case Int16Array:
-			case Int32Array:
-			case Int64Array:
-			case UInt8Array:
-			case UInt16Array:
-			case UInt32Array:
-			case UInt64Array:
-			case FloatArray:
-			case DoubleArray:
-			case BooleanArray:
-			case StringArray:
-			case DateTimeArray:
+			case BYTES_VALUE:
 				return m.hasBytesValue();
-			case DataSet:
+			case DATASET_VALUE:
 				return m.hasDatasetValue();
-			case Template:
+			case TEMPLATE_VALUE:
 				return m.hasTemplateValue();
+			case EXTENSION_VALUE:
+				return m.hasExtensionValue();
 			default:
 				return false;
 		}
@@ -211,22 +198,26 @@ public class Utils {
 		if (!p.hasType()) {
 			return false;
 		}
-		switch (p.getType()) {
-			case Parameter.INT_VALUE_FIELD_NUMBER:
+
+		switch (p.getValueCase()){
+			case INT_VALUE:
 				return p.hasIntValue();
-			case Parameter.LONG_VALUE_FIELD_NUMBER:
+			case LONG_VALUE:
 				return p.hasLongValue();
-			case Parameter.FLOAT_VALUE_FIELD_NUMBER:
+			case FLOAT_VALUE:
 				return p.hasFloatValue();
-			case Parameter.DOUBLE_VALUE_FIELD_NUMBER:
+			case DOUBLE_VALUE:
 				return p.hasDoubleValue();
-			case Parameter.BOOLEAN_VALUE_FIELD_NUMBER:
+			case BOOLEAN_VALUE:
 				return p.hasBooleanValue();
-			case Parameter.STRING_VALUE_FIELD_NUMBER:
+			case STRING_VALUE:
 				return p.hasStringValue();
+			case EXTENSION_VALUE:
+				return p.hasExtensionValue();
 			default:
 				return false;
 		}
+
 	}
 
 	public static String getRetained(String topic) {

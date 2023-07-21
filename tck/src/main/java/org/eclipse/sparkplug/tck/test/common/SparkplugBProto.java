@@ -1715,6 +1715,32 @@ public final class SparkplugBProto {
             return forNumber(value);
           }
 
+          public static ValueCase forDatatype(DataType datatype) {
+            switch (datatype){
+              case Int8:
+              case Int16:
+              case Int32:
+              case UInt8:
+              case UInt16:
+              case UInt32:
+                return INT_VALUE;
+              case Int64:
+              case UInt64:
+                return LONG_VALUE;
+              case Float:
+                return FLOAT_VALUE;
+              case Double:
+                return DOUBLE_VALUE;
+              case Boolean:
+                return BOOLEAN_VALUE;
+              case String:
+              case Text:
+              case UUID:
+                return STRING_VALUE;
+              default:
+                return null;
+            }
+          }
           public static ValueCase forNumber(int value) {
             switch (value) {
               case 3: return INT_VALUE;
@@ -5738,6 +5764,34 @@ public final class SparkplugBProto {
             return forNumber(value);
           }
 
+
+          public static ValueCase forDatatype(DataType datatype) {
+            switch (datatype){
+              case Int8:
+              case Int16:
+              case Int32:
+              case UInt8:
+              case UInt16:
+              case UInt32:
+                return INT_VALUE;
+              case Int64:
+              case UInt64:
+                return LONG_VALUE;
+              case Float:
+                return FLOAT_VALUE;
+              case Double:
+                return DOUBLE_VALUE;
+              case Boolean:
+                return BOOLEAN_VALUE;
+              case String:
+              case Text:
+              case UUID:
+                return STRING_VALUE;
+              default:
+                return null;
+            }
+          }
+
           public static ValueCase forNumber(int value) {
             switch (value) {
               case 1: return INT_VALUE;
@@ -9748,6 +9802,37 @@ public final class SparkplugBProto {
         @java.lang.Deprecated
         public static ValueCase valueOf(int value) {
           return forNumber(value);
+        }
+
+        public static ValueCase forDatatype(DataType datatype) {
+          switch (datatype){
+            case Int8:
+            case Int16:
+            case Int32:
+            case UInt8:
+            case UInt16:
+            case UInt32:
+              return INT_VALUE;
+            case Int64:
+            case UInt64:
+              return LONG_VALUE;
+            case Float:
+              return FLOAT_VALUE;
+            case Double:
+              return DOUBLE_VALUE;
+            case Boolean:
+              return BOOLEAN_VALUE;
+            case PropertySet:
+              return PROPERTYSET_VALUE;
+            case PropertySetList:
+              return PROPERTYSETS_VALUE;
+            case String:
+            case Text:
+            case UUID:
+              return STRING_VALUE;
+            default:
+              return null;
+          }
         }
 
         public static ValueCase forNumber(int value) {
@@ -16641,6 +16726,53 @@ public final class SparkplugBProto {
           return forNumber(value);
         }
 
+        public static ValueCase forDatatype(DataType datatype) {
+          switch (datatype){
+            case Int8:
+            case Int16:
+            case Int32:
+            case UInt8:
+            case UInt16:
+            case UInt32:
+              return INT_VALUE;
+            case Int64:
+            case UInt64:
+            case DateTime:
+              return LONG_VALUE;
+            case Float:
+              return FLOAT_VALUE;
+            case Double:
+              return DOUBLE_VALUE;
+            case Boolean:
+              return BOOLEAN_VALUE;
+            case String:
+            case Text:
+            case UUID:
+              return STRING_VALUE;
+            case Bytes:
+            case File:
+            case Int8Array:
+            case Int16Array:
+            case Int32Array:
+            case Int64Array:
+            case UInt8Array:
+            case UInt16Array:
+            case UInt32Array:
+            case UInt64Array:
+            case FloatArray:
+            case DoubleArray:
+            case BooleanArray:
+            case StringArray:
+            case DateTimeArray:
+              return BYTES_VALUE;
+            case DataSet:
+              return DATASET_VALUE;
+            case Template:
+              return TEMPLATE_VALUE;
+            default:
+              return null;
+          }
+        }
         public static ValueCase forNumber(int value) {
           switch (value) {
             case 10: return INT_VALUE;
