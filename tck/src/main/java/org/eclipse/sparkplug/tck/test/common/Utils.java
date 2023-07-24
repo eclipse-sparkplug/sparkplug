@@ -47,6 +47,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
+import org.testng.ReporterConfig;
 
 public class Utils {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
@@ -152,15 +153,115 @@ public class Utils {
 		return (seq == 255) ? 0 : seq + 1;
 	}
 
-	public static boolean hasValidDatatype(Metric m){
-		// Checks that the datatype is valid for Metric and that the value case corresponds with the datatype
-		return DataType.forNumber(m.getDatatype()) != null && m.getValueCase() == Metric.ValueCase.forDatatype(DataType.forNumber(m.getDatatype()));
-	}
+	public static boolean hasValidDatatype(Metric m) {
+        // Checks that the datatype is valid for Metric and that the value case corresponds with the datatype
+        Metric.ValueCase expectedValueCase = Metric.ValueCase.VALUE_NOT_SET;
 
-	public static boolean hasValidDatatype(Payload.PropertyValue p){
-		// Checks that the datatype is valid for Property Values and that the value case corresponds with the datatype
-		return DataType.forNumber(p.getType()) != null && p.getValueCase() == Payload.PropertyValue.ValueCase.forDatatype(DataType.forNumber(p.getType()));
-	}
+        if(DataType.forNumber(m.getDatatype()) != null) {
+            switch (DataType.forNumber(m.getDatatype())) {
+                case Int8:
+                case Int16:
+                case Int32:
+                case UInt8:
+                case UInt16:
+                case UInt32:
+                    expectedValueCase = Metric.ValueCase.INT_VALUE;
+                    break;
+                case Int64:
+                case UInt64:
+                case DateTime:
+                    expectedValueCase = Metric.ValueCase.LONG_VALUE;
+                    break;
+                case Float:
+                    expectedValueCase = Metric.ValueCase.FLOAT_VALUE;
+                    break;
+                case Double:
+                    expectedValueCase = Metric.ValueCase.DOUBLE_VALUE;
+                    break;
+                case Boolean:
+                    expectedValueCase = Metric.ValueCase.BOOLEAN_VALUE;
+                    break;
+                case String:
+                case Text:
+                case UUID:
+                    expectedValueCase = Metric.ValueCase.STRING_VALUE;
+                    break;
+                case Bytes:
+                case File:
+                case Int8Array:
+                case Int16Array:
+                case Int32Array:
+                case Int64Array:
+                case UInt8Array:
+                case UInt16Array:
+                case UInt32Array:
+                case UInt64Array:
+                case FloatArray:
+                case DoubleArray:
+                case BooleanArray:
+                case StringArray:
+                case DateTimeArray:
+                    expectedValueCase = Metric.ValueCase.BYTES_VALUE;
+                    break;
+                case DataSet:
+                    expectedValueCase = Metric.ValueCase.DATASET_VALUE;
+                    break;
+                case Template:
+                    expectedValueCase = Metric.ValueCase.TEMPLATE_VALUE;
+                    break;
+                default:
+                    break;
+            }
+        }else {
+            // If Metric does not have datatype, assumed valid
+            return true;
+
+        }
+
+        return DataType.forNumber(m.getDatatype()) != null && expectedValueCase != Metric.ValueCase.VALUE_NOT_SET && m.getValueCase() == expectedValueCase;
+    }
+
+	public static boolean hasValidDatatype(Payload.PropertyValue p) {
+        // Checks that the datatype is valid for Property Values and that the value case corresponds with the datatype
+        Payload.PropertyValue.ValueCase expectedValueCase = Payload.PropertyValue.ValueCase.VALUE_NOT_SET;
+        if (DataType.forNumber(p.getType()) != null) {
+            switch (DataType.forNumber(p.getType())) {
+                case Int8:
+                case Int16:
+                case Int32:
+                case UInt8:
+                case UInt16:
+                case UInt32:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.INT_VALUE;
+                    break;
+                case Int64:
+                case UInt64:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.LONG_VALUE;
+                    break;
+                case Float:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.FLOAT_VALUE;
+                    break;
+                case Double:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.DOUBLE_VALUE;
+                    break;
+                case Boolean:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.BOOLEAN_VALUE;
+                    break;
+                case String:
+                case Text:
+                case UUID:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.STRING_VALUE;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            // If Property Value does not have type, assumed valid
+            return true;
+
+        }
+        return DataType.forNumber(p.getType()) != null && expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET && p.getValueCase() == expectedValueCase;
+    }
 
 	public static boolean hasValue(Metric m) {
 		if (m.hasIsNull() && m.getIsNull()) {
