@@ -47,7 +47,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.publish.PublishPacket;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.publish.RetainedPublish;
-import org.testng.ReporterConfig;
 
 public class Utils {
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");
