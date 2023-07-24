@@ -217,6 +217,11 @@ public class Utils {
 
         }
 
+		if(m.getIsNull()){
+			// If Metric is null, Value case will not be set, so just confirms datatype is valid
+			return expectedValueCase != Metric.ValueCase.VALUE_NOT_SET;
+		}
+
         return DataType.forNumber(m.getDatatype()) != null && expectedValueCase != Metric.ValueCase.VALUE_NOT_SET && m.getValueCase() == expectedValueCase;
     }
 
@@ -259,6 +264,10 @@ public class Utils {
             return true;
 
         }
+		if(p.getIsNull()){
+			// If Property Value is null, Value case will not be set, so just confirms datatype is valid
+			return expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET;
+		}
         return DataType.forNumber(p.getType()) != null && expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET && p.getValueCase() == expectedValueCase;
     }
 
