@@ -1,5 +1,5 @@
 <!--****************************************************************************
- * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ * Copyright (c) 2021, 2023 Lukas Brand, Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -109,8 +109,7 @@
                         <b-button-toolbar size="m">
                             <div v-show="startH">
                                 <b-button class="mr-1" variant="success"
-                                          @click="$emit('start-single-test', test); testState(test)">Start Test
-                                </b-button>
+                                          @click="$emit('start-single-test', test)">Start Test</b-button>
                                 <span v-if="test.result != null">
                                     <b-button class="mr-5" variant="info"
                                               @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
@@ -119,7 +118,7 @@
                             <div v-show="stopH">
                               <span v-if="test.result === null">
                                   <b-button class="ml-1" variant="danger"
-                                            @click="$emit('abort-single-test', test); testState(test) ">Stop Test</b-button>
+                                            @click="$emit('abort-single-test', test); testState(test)">Stop Test</b-button>
                               </span>
                                 <b-button class="mr-5" variant="info"
                                           @click="$emit('reset-single-test', test); resetState(test)">Reset Test
@@ -160,8 +159,7 @@
                         <b-button-toolbar size="m">
                             <div v-show="start">
                                 <b-button class="mr-1" variant="success"
-                                          @click="$emit('start-single-test', test); testState(test)">Start Test
-                                </b-button>
+                                          @click="$emit('start-single-test', test)">Start Test</b-button>
                                 <span v-if="test.result != null">
                                     <b-button class="mr-5" variant="info"
                                               @click="$emit('reset-single-test', test); resetState(test)">Reset Test</b-button>
@@ -211,7 +209,7 @@
                         <b-button-toolbar size="m">
                             <div v-show="startB">
                                 <b-button class="mr-1" variant="success"
-                                          @click="$emit('start-single-test', test); testState(test)">Start Test
+                                          @click="$emit('start-single-test', test)">Start Test
                                 </b-button>
                                 <span v-if="test.result != null">
                                     <b-button class="mr-5" variant="info"
@@ -404,6 +402,10 @@ export default {
                 const lines = logMessage.logValue.trim().split(/\r\n|\n\r|\n|\r/);
                 console.log(lines);
                 logLines = logLines.concat(lines);
+
+                if (lines[0].includes("Test started successfully:")) {
+                    this.testState(this.test);
+                }
             }
             logLines = logLines.filter((line) => line.trim().length != 0);
             return logLines;
@@ -455,7 +457,8 @@ export default {
                 this.stop = !this.stop;
             }
         },
-        resetState(test ) {
+
+        resetState(test) {
             if (test.testType === "HOSTAPPLICATION") {
                 this.startH = true;
                 this.stopH = false;
