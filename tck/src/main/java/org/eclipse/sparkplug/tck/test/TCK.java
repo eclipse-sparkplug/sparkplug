@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -14,6 +14,7 @@
 package org.eclipse.sparkplug.tck.test;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
@@ -87,9 +88,16 @@ public class TCK {
 	 */
 	private @NotNull Boolean hasMonitor = true;
 
-	public void MQTTLog(String message) {
-		final PublishService publishService = Services.publishService();
+	final PublishService publishService = Services.publishService();
+
+	public void MQTTResults(String message) {
 		final Publish payload = Builders.publish().topic(TCK_RESULTS_TOPIC).qos(Qos.AT_LEAST_ONCE)
+				.payload(ByteBuffer.wrap(message.getBytes())).build();
+		publishService.publish(payload);
+	}
+
+	public void MQTTLog(String message) {
+		final Publish payload = Builders.publish().topic(TCK_LOG_TOPIC).qos(Qos.AT_LEAST_ONCE)
 				.payload(ByteBuffer.wrap(message.getBytes())).build();
 		publishService.publish(payload);
 	}
@@ -133,12 +141,18 @@ public class TCK {
 			if (hasMonitor) {
 				monitor.startTest();
 			}
+
+			logger.info("Test started successfully: " + profile.name().toLowerCase() + " " + test);
+
+			// tell the webconsole the test has started
+			MQTTLog("Test started successfully: " + profile.name().toLowerCase() + " " + test);
+
 		} catch (java.lang.reflect.InvocationTargetException e) {
 			logger.error("Error starting test " + profile.name().toLowerCase() + "." + test);
 			if (e.getMessage() != null) {
 				logger.error(e.getMessage());
 			}
-			MQTTLog("OVERALL: NOT EXECUTED"); // Ensure the test ends
+			MQTTResults("OVERALL: NOT EXECUTED"); // Ensure the test ends
 		} catch (final Exception e) {
 			logger.error("Could not find or set test class " + profile.name().toLowerCase() + "." + test, e);
 		}
