@@ -1,5 +1,5 @@
 <!--****************************************************************************
- * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ * Copyright (c) 2021, 2023 Lukas Brand, Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -271,7 +271,6 @@ export default {
             }
 
             console.log("index startTest:", testParameter);
-            this.currentTest = testParameter.name;
 
             if (this.sparkplugClient.testType === "HOSTAPPLICATION") {
                 const profile = "host";
@@ -350,6 +349,7 @@ export default {
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");
+                    return;
                 }
             }
 
@@ -422,6 +422,7 @@ export default {
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test does not exist");
+                    return;
                 }
             }
 
@@ -442,8 +443,10 @@ export default {
                     this.createTestRequest(profile, testType, testParameters);
                 } else {
                     alert("Test:'" + testType + "' does not exist");
+                    return;
                 }
             }
+            this.currentTest = testParameter.name;
         },
 
         /**

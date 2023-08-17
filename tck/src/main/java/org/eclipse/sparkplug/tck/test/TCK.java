@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022, 2023 Ian Craggs
+ * Copyright (c) 2021, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -38,6 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.TreeMap;
 
 import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_RESULTS_TOPIC;
+import static org.eclipse.sparkplug.tck.test.common.Constants.TCK_LOG_TOPIC;
 
 /**
  * @author Ian Craggs
@@ -62,13 +63,20 @@ public class TCK {
         results.initialize(new String[0]);
     }
 
-    public void MQTTLog(String message) {
-        final PublishService publishService = Services.publishService();
+    final PublishService publishService = Services.publishService();
+    
+    public void MQTTResults(String message) {
         final Publish payload = Builders.publish().topic(TCK_RESULTS_TOPIC).qos(Qos.AT_LEAST_ONCE)
                 .payload(ByteBuffer.wrap(message.getBytes())).build();
         publishService.publish(payload);
     }
-
+    
+    public void MQTTLog(String message) {
+        final Publish payload = Builders.publish().topic(TCK_LOG_TOPIC).qos(Qos.AT_LEAST_ONCE)
+                .payload(ByteBuffer.wrap(message.getBytes())).build();
+        publishService.publish(payload);
+    }
+    
     public void newTest(final @NotNull Profile profile, final @NotNull String test, final @NotNull String[] parms) {
 
         LOGGER.info("Test requested " + profile.name().toLowerCase() + " " + test);
@@ -101,12 +109,18 @@ public class TCK {
             if (hasMonitor) {
                 monitor.startTest();
             }
+            
+            LOGGER.info("Test started successfully: " + profile.name().toLowerCase() + " " + test);
+            
+            // tell the webconsole the test has started
+            MQTTLog("Test started successfully: " + profile.name().toLowerCase() + " " + test);
+            
         } catch (java.lang.reflect.InvocationTargetException e) {
             LOGGER.error("Error starting test " + profile.name().toLowerCase() + "." + test);
             if (e.getMessage() != null) {
                 LOGGER.error(e.getMessage());
             }
-            MQTTLog("OVERALL: NOT EXECUTED"); // Ensure the test ends
+            MQTTResults("OVERALL: NOT EXECUTED"); // Ensure the test ends
         } catch (final Exception e) {
             LOGGER.error("Could not find or set test class " + profile.name().toLowerCase() + "." + test, e);
         }
