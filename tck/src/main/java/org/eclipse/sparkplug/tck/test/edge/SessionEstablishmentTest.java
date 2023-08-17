@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -118,6 +118,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	private final @NotNull TCK theTCK;
 	private @NotNull Utilities utilities = null;
 	private final @NotNull Map<String, Boolean> deviceIds = new HashMap<>();
+	private @NotNull Results.Config config = null;
 
 	private @NotNull String testClientId = null;
 	private @NotNull String hostApplicationId;
@@ -144,6 +145,7 @@ public class SessionEstablishmentTest extends TCKTest {
 		logger.info("Edge Node session establishment test. Parameters: {} ", Arrays.asList(parms));
 		theTCK = aTCK;
 		this.utilities = utilities;
+		this.config = config;
 
 		if (parms.length < 3) {
 			log("Not enough parameters: " + Arrays.toString(parms));
@@ -595,10 +597,6 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
 			id = ID_CASE_SENSITIVITY_METRIC_NAMES)
 	public void checkNBirth(final @NotNull PublishPacket packet) {
-		Date receivedBirth = new Date();
-		long millisReceivedBirth = receivedBirth.getTime();
-		long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
-
 		testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT,
 				setResult(stateFound, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT));
 
@@ -641,14 +639,11 @@ public class SessionEstablishmentTest extends TCKTest {
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
 					setResult((seq >= 0 && seq <= 255), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
 
-			// receivedBirthTime::making sure that the payload timestamp is greater than (receivedBirthTime - 5 min) and
-			// less than the
 			logger.debug(
 					"Check Req: NBIRTH messages MUST include a payload timestamp that denotes the time at which the message was published.");
 			boolean bHasTimeStamp = false;
 			if (sparkplugPayload.hasTimestamp()) {
-				long ts = sparkplugPayload.getTimestamp();
-				bHasTimeStamp = (ts > millisPastFiveMin && ts < (millisReceivedBirth));
+				bHasTimeStamp = Utils.checkUTC(sparkplugPayload.getTimestamp(), config.UTCwindow);
 			}
 			testResults.put(ID_PAYLOADS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, PAYLOADS_NBIRTH_TIMESTAMP));
 			testResults.put(ID_TOPICS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, TOPICS_NBIRTH_TIMESTAMP));
@@ -812,10 +807,6 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_CASE_SENSITIVITY,
 			id = ID_CASE_SENSITIVITY_METRIC_NAMES)
 	public void checkDBirth(final @NotNull PublishPacket packet) {
-		Date receivedBirth = new Date();
-		long millisReceivedBirth = receivedBirth.getTime();
-		long millisPastFiveMin = millisReceivedBirth - (5 * 60 * 1000);
-
 		testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT,
 				setResult(nbirthFound, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_NBIRTH_WAIT));
 
@@ -873,17 +864,13 @@ public class SessionEstablishmentTest extends TCKTest {
 				setResult(sparkplugPayload != null, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_MATCH_EDGE_NODE_TOPIC));
 
 		if (sparkplugPayload != null) {
-
-			// making sure that the payload timestamp is greater than (recievedBirthTime - 5 min) and less than the
-			// receivedBirthTime
 			logger.debug(
 					"Check Req: NBIRTH must include payload timestamp that denotes the time at which the message was published");
 			prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_TIMESTAMP, NOT_EXECUTED);
 			boolean bValid = false;
 			if (!prevResult.contains(FAIL)) {
 				if (sparkplugPayload.hasTimestamp()) {
-					long millisPayload = sparkplugPayload.getTimestamp();
-					bValid = (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth));
+					bValid = Utils.checkUTC(sparkplugPayload.getTimestamp(), config.UTCwindow);
 				}
 				if (prevResult.equals(NOT_EXECUTED)) {
 					testResults.put(ID_TOPICS_DBIRTH_TIMESTAMP, setResult(bValid, TOPICS_DBIRTH_TIMESTAMP));
