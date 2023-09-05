@@ -1,6 +1,6 @@
 #!/bin/python3
 """********************************************************************************
- * Copyright (c) 2022 Ian Craggs
+ * Copyright (c) 2022, 2023 Ian Craggs
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,7 +23,36 @@ files = \
 "report.py",
 "UserGuide.html",
 "README.md",
-"README.html"
+"README.html",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/CompliantBrokerTest.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/BrokerAwareFeatureTester.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/BrokerConformanceFeatureTester.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/results/ComplianceTestResult.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/results/AwareTestResult.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/results/SharedSubscriptionTestResult.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/results/TopicLengthTestResults.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/results/QosTestResult.java",
+"src/main/java/org/eclipse/sparkplug/tck/test/broker/test/results/AsciiCharsInClientIdTestResults.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/broker/test/results/WildcardSubscriptionsTestResult.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/broker/test/results/ClientIdLengthTestResults.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/broker/test/results/PayloadTestResults.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/broker/AwareBrokerTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/host/MessageOrderingTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/host/SessionTerminationTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/host/SessionEstablishmentTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/host/EdgeSessionTerminationTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/host/SendCommandTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/host/MultipleBrokerTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/SendDataTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/SessionTerminationTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/SendComplexDataTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/SessionEstablishmentTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/ReceiveCommandTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/PrimaryHostTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/edge/MultipleBrokerTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/common/Requirements.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/TCKTest.java",
+"src//main/java/org/eclipse/sparkplug/tck/test/Monitor.java"
 ]
 
 zipfilename = "Eclipse-Sparkplug-TCK-3.0.0.zip"
@@ -33,6 +62,9 @@ try:
     os.remove(zipfilename)
 except:
     pass
+
+# generate signature for HiveMQ extension file - this needs to be run with the correct gpg identity
+os.system("gpg --batch --yes --detach-sign build/hivemq-extension/sparkplug-tck-3.0.0.zip")
 
 # Update the UserGuide.html doc
 os.system("asciidoc UserGuide.adoc")
