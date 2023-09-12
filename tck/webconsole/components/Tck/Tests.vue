@@ -1,5 +1,5 @@
 <!--****************************************************************************
- * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ * Copyright (c) 2021, 2023 Lukas Brand, Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -74,6 +74,7 @@ export default {
 
         currentTestLogging: null,
         currentTest: null,
+        connected: null,
     },
 
     computed: {
@@ -129,6 +130,56 @@ export default {
     },
 
     watch: {
+        /*
+         * Reset the current test if we lose the MQTT connection
+         */
+        connected: function (newValue, oldValue) {
+            console.log("newvalue", newValue, this.testType, this.currentTest);
+            if (newValue != false) return;
+            if (this.testType == null || this.currentTest == null) return;
+
+            if (this.testType === "HOSTAPPLICATION") {
+                for (const [_, testValue] of Object.entries(this.hostTests)) {
+                    if (testValue.testValues.name === this.currentTest) {
+                        console.log("Test aborted - MQTT connection broken");
+
+                        const logMessage = {
+                            logLevel: "INFO",
+                            logValue: "Test aborted - MQTT connection broken",
+                            id: 10,
+                        };
+                        testValue.testValues.logging.push(logMessage);
+                    }
+                }
+            } else if (this.testType === "EONNODE") {
+                for (const [_, testValue] of Object.entries(this.eonTests)) {
+                    if (testValue.testValues.name === this.currentTest) {
+                        console.log("Test aborted - MQTT connection broken");
+
+                        const logMessage = {
+                            logLevel: "INFO",
+                            logValue: "Test aborted - MQTT connection broken",
+                            id: 10,
+                        };
+                        testValue.testValues.logging.push(logMessage);
+                    }
+                }
+            } else if (this.testType === "BROKER") {
+                for (const [_, testValue] of Object.entries(this.brokerTests)) {
+                    if (testValue.testValues.name === this.currentTest) {
+                        console.log("Test aborted - MQTT connection broken");
+
+                        const logMessage = {
+                            logLevel: "INFO",
+                            logValue: "Test aborted - MQTT connection broken",
+                            id: 10,
+                        };
+                        testValue.testValues.logging.push(logMessage);
+                    }
+                }
+            }
+            this.$emit("reset-current-test");
+        },
         /**
          * Updates test with logging.
          * @param {String} newValue - New current tests logging

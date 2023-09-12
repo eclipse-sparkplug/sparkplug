@@ -77,6 +77,7 @@
                 <TckTests
                     :currentTest="this.currentTest"
                     :currentTestLogging="this.currentTestLogging"
+                    :connected="this.mqttClient.connected"
                     :testType="this.sparkplugClient.testType"
                     class="mt-3"
                     @start-all-tests="(hostTests, eonTests, brokerTests) => startAllTestsFun(hostTests, eonTests, brokerTests)"
@@ -104,7 +105,6 @@
         </b-button>
     </div>
 </template>
-
 
 <script>
 
