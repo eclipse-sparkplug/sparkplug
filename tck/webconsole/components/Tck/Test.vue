@@ -398,14 +398,24 @@ export default {
     computed: {
         loggingSplitInLines: function () {
             let logLines = [];
+            let index = 0;
             for (const logMessage of this.test.logging) {
                 const lines = logMessage.logValue.trim().split(/\r\n|\n\r|\n|\r/);
                 console.log(lines);
                 logLines = logLines.concat(lines);
 
-                if (lines[0].includes("Test started successfully:")) {
-                    this.testState(this.test);
+                if (index == this.test.logging.length -1) {
+                    if (lines[0].includes("Test started successfully:")) {
+                        this.testState(this.test);
+                    }
+
+                    if (lines[0].includes("Test aborted")) {
+                        console.log("resetting test");
+                        this.resetState(this.test);
+                        alert("Test aborted - lost connection to HiveMQ broker.");
+                    }
                 }
+                index++;
             }
             logLines = logLines.filter((line) => line.trim().length != 0);
             return logLines;
@@ -445,7 +455,6 @@ export default {
         },
 
         testState(test) {
-
             if (test.testType === "HOSTAPPLICATION") {
                 this.startH = !this.startH;
                 this.stopH = !this.stopH;

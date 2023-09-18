@@ -1,5 +1,5 @@
 <!--****************************************************************************
- * Copyright (c) 2021, 2022 Lukas Brand, Ian Craggs
+ * Copyright (c) 2021, 2023 Lukas Brand, Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -251,6 +251,9 @@ export default {
         this.mqttClient.on("connect", () => {
             this.successCountDown = 5;
             console.log("Connection succeeded!");
+        });
+        this.mqttClient.on("offline", () => {
+            console.log("Connection broken!");
         });
         this.mqttClient.on("error", (error) => {
             this.failureCountDown = 5;
