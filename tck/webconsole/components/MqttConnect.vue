@@ -51,7 +51,7 @@
                       <label>Broker Port:</label>
                   </b-col>
                   <b-col sm="9">
-                      <b-form-input v-model="connection.port" size="sm" type="number"
+                      <b-form-input v-model.number="connection.port" size="sm" type="number"
                                     :disabled="mqttClient.connected"
                                     placeholder="Enter broker port" required></b-form-input>
                   </b-col>
@@ -74,6 +74,16 @@
                       <b-form-input v-model="connection.clientId" size="sm"
                                     :disabled="mqttClient.connected"
                                     placeholder="Enter client id"></b-form-input>
+                  </b-col>
+              </b-row>
+              <b-row class="mt-3">
+                  <b-col sm="3">
+                      <label>Keepalive interval (seconds):</label>
+                  </b-col>
+                  <b-col sm="6">
+                      <b-form-input v-model.number="connection.keepalive" size="sm" type="number"
+                                    :disabled="mqttClient.connected"
+                                    placeholder="Enter keepalive interval"></b-form-input>
                   </b-col>
               </b-row>
               <b-row class="mt-3">
@@ -181,12 +191,13 @@ export default {
              * The default connection settings used for the MQTT connection.
              * @type {Object} connection
              * @type {String} connection.host
-             * @type {String} connection.port
+             * @type {Integer} connection.port
              * @type {String} connection.endpoint
              * @type {Boolean} connection.cleanSession
              * @type {Integer} connection.connectionTimeout
              * @type {Integer} connection.reconnectPeriod
              * @type {String} connection.clientId
+             * @type {Integer} connection.keepalive
              * @type {?String} connection.username
              * @type {?String} connection.password
              */
@@ -198,8 +209,9 @@ export default {
                 connectTimeout: 4000,
                 reconnectPeriod: 4000,
                 clientId: "",
+                keepalive: 60,
                 username: null,
-                 password: null,
+                password: null,
             },
       successCountDown: 0,
       failureCountDown: 0,
@@ -216,6 +228,7 @@ export default {
         this.connection.port = 8000;
         this.connection.endpoint = "/mqtt";
         this.connection.clientId = "tck-web-console-" + uuidv4();
+        this.connection.keepalive = 60;
         this.filename = defaultLogFileName;
         this.UTCwindow = defaultUTCwindow
     },
