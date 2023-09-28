@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Anja Helmbrecht-Schaar
+ * Copyright (c) 2021, 2023 Anja Helmbrecht-Schaar, Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -41,6 +41,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_CONFORMANCE_
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
 
 import java.util.List;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -92,6 +93,10 @@ public class AwareBrokerTest extends TCKTest {
 	private long willTimestamp;
 	private BrokerAwareFeatureTester brokerAwareFeatureTester;
 
+	private int nBirthCount = 0,
+				dBirthCount = 0;
+	private String savedOrigin = null;
+
 	public AwareBrokerTest(TCK aTCK, String[] params) {
 		logger.info("Broker: {} Parameters: {} ", getName(), Arrays.asList(params));
 		theTCK = aTCK;
@@ -105,20 +110,15 @@ public class AwareBrokerTest extends TCKTest {
 		groupId = params[2];
 		edgeNodeId = params[3];
 
+		// first run the basic conformance test
 		Services.extensionExecutorService().submit(new Runnable() {
 			@Override
 			public void run() {
-				// create subscriber client
-				brokerAwareFeatureTester =
-						new BrokerAwareFeatureTester(host, Integer.parseInt(port), null, null, null, 60);
-				subscriber = brokerAwareFeatureTester.getClientBuilder("AwareTestSubscriber").build();
-				try {
-					subscriber.toAsync().connect().get();
-				} catch (InterruptedException | ExecutionException e) {
-					logger.error(e.getMessage());
-				}
+				checkConformanceAware(host, Integer.parseInt(port));
 			}
 		});
+
+		nBirthCount = dBirthCount = 0;
 	}
 
 	@Override
@@ -143,16 +143,13 @@ public class AwareBrokerTest extends TCKTest {
 
 	@Override
 	public void connect(String clientId, ConnectPacket packet) {
+		/* This member function will never fire as it's on the wrong broker - IC
+
 		if (packet.getClientId() == edgeNodeId && packet.getWillPublish().isPresent()) {
 			logger.info("AWARE:: Broker - {} - connect - clientId: {}", getName(), clientId);
 			// catch the will message and store the timestamp for later comparison
 			willTimestamp = System.currentTimeMillis();
-		}
-
-		if (clientId.equals("AwareTestSubscriber")) {
-			logger.info("AWARE:: Broker - {} - connect - clientId: {}", getName(), clientId);
-			createSubscriptionToSysTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/#");
-		}
+		}*/
 	}
 
 	@Override
@@ -167,27 +164,7 @@ public class AwareBrokerTest extends TCKTest {
 
 	@Override
 	public void publish(String clientId, PublishPacket packet) {
-		final String packetTopic = packet.getTopic();
-		logger.info("AWARE:: Broker - {} - publish - topic: {}", getName(), packetTopic);
-
-		if (!bBasicAwareChecked) {
-			// async to continue the publish flow!
-			Services.extensionExecutorService().submit(new Runnable() {
-				@Override
-				public void run() {
-					checkConformanceAware(host, Integer.parseInt(port));
-				}
-			});
-		}
-
-		if (isUsedTopic(packetTopic) && packetTopic.contains(TOPIC_PATH_NDEATH)) {
-			checkNDEATHAware(packet);
-		}
-
-		if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
-			logger.debug("AWARE:: Broker {}, publish - end test", getName());
-			theTCK.endTest();
-		}
+		//
 	}
 
 	private boolean isUsedTopic(String topic) {
@@ -240,14 +217,19 @@ public class AwareBrokerTest extends TCKTest {
 			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
 			id = ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN)
 	public void checkNBIRTHAware(Boolean isRetain) {
+		nBirthCount++;
+
 		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC);
 		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC,
 				setResult(true, CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_TOPIC));
 
 		logger.debug("AWARE:: Broker - Check Req: {} {}", ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN, isRetain);
-		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN,
-				setResult(isRetain, CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN));
-		bNBirthChecked = true;
+		Utils.setResultIfNotPass(testResults, isRetain, ID_CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN,
+				CONFORMANCE_MQTT_AWARE_NBIRTH_MQTT_RETAIN);
+
+		if (nBirthCount == 2) {
+			bNBirthChecked = true;
+		}
 	}
 
 	@SpecAssertion(
@@ -261,28 +243,34 @@ public class AwareBrokerTest extends TCKTest {
 			id = ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP)
 
 	public void checkDBIRTHAware(Boolean isRetain) {
+		dBirthCount++;
 
 		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC);
 		testResults.put(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC,
 				setResult(true, CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_TOPIC));
 
 		logger.debug("AWARE:: Broker - Check Req: {} {}", ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN, isRetain);
-		testResults.put(ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
-				setResult(isRetain, CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN));
+		Utils.setResultIfNotPass(testResults, isRetain, ID_CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN,
+				CONFORMANCE_MQTT_AWARE_DBIRTH_MQTT_RETAIN);
 
-		bDBirthChecked = true;
+		if (dBirthCount == 1) {
+			secondSubscriptionToSysTopic();
+		} else if (dBirthCount == 2) {
+			bDBirthChecked = true;
+		}
 	}
 
 	@SpecAssertion(
 			section = Sections.CONFORMANCE_SPARKPLUG_AWARE_MQTT_SERVER,
 			id = ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP)
 
-	public void checkNDEATHAware(PublishPacket packet) {
+	public void checkNDEATHAware(ByteBuffer packet) {
 		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP);
-		SparkplugBProto.PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
+		SparkplugBProto.PayloadOrBuilder result = Utils.decode(packet);
 		boolean bValid = result.getTimestamp() > willTimestamp;
 		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP,
 				setResult(bValid, CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP));
+
 		bNDeathChecked = true;
 	}
 
@@ -300,6 +288,25 @@ public class AwareBrokerTest extends TCKTest {
 				&& testResults.get(ID_CONFORMANCE_MQTT_RETAINED).equals(PASS);
 		testResults.put(ID_CONFORMANCE_MQTT_AWARE_BASIC, setResult(isBasicAware, CONFORMANCE_MQTT_AWARE_BASIC));
 		bBasicAwareChecked = true;
+
+		// Now conduct the Sparkplug aware broker test proper
+		Services.extensionExecutorService().submit(new Runnable() {
+			@Override
+			public void run() {
+				// create subscriber client
+				brokerAwareFeatureTester =
+						new BrokerAwareFeatureTester(host, port, null, null, null, 60);
+				subscriber = brokerAwareFeatureTester.getClientBuilder("AwareTestSubscriber").build();
+				try {
+					subscriber.toAsync().connect().get();
+					// we are connected, so can subscribe
+					createSubscriptionToBirthDeathTopics(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/#");
+					createSubscriptionToSysTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + groupId + "/#");
+				} catch (InterruptedException | ExecutionException e) {
+					logger.error(e.getMessage());
+				}
+			}
+		});
 	}
 
 	@SpecAssertion(
@@ -315,8 +322,42 @@ public class AwareBrokerTest extends TCKTest {
 				setResult(pass1.equals(PASS) && pass2.equals(PASS), CONFORMANCE_MQTT_AWARE_STORE));
 	}
 
+	public void createSubscriptionToBirthDeathTopics(String origin) {
+		logger.info("AWARE:: Broker - {} - create subscription to birth/death topics for {} {}", getName(), groupId, edgeNodeId);
+		final Mqtt3Subscription subscription =
+				Mqtt3Subscription.builder().topicFilter(origin).qos(MqttQos.AT_LEAST_ONCE).build();
+		try {
+			logger.debug("AWARE:: Broker - subscribing to birth/death topic {} with qos {}", origin, MqttQos.AT_LEAST_ONCE);
+			subscriber.toAsync().subscribeWith().addSubscription(subscription).callback(publish -> {
+				logger.info("AWARE:: Broker - receive message on birth/death topic: {} {}", publish.getTopic(),
+						publish.isRetain());
+
+				String packetTopic = publish.getTopic().toString();
+				if (isUsedTopic(packetTopic) && packetTopic.contains(TOPIC_PATH_NDEATH)) {
+					checkNDEATHAware(publish.getPayload().get());
+				}
+
+				if (bBasicAwareChecked && bNBirthChecked && bDBirthChecked && bNDeathChecked) {
+					logger.debug("AWARE:: Broker {}, publish - end test", getName());
+					theTCK.endTest();
+				}
+			}).send().whenComplete((subAck, throwable) -> {
+				if (throwable != null) {
+					logger.error("AWARE:: Broker - Subscribe failed: {}", throwable.getMessage());
+				} else {
+					logger.info("AWARE:: Broker - Successfully subscribed to topic: " + subscription.getTopicFilter());
+				}
+			});
+
+		} catch (final Exception ex) {
+			logger.error("Failed to subscribe to topic ", ex);
+			createSubscriptionResult = AwareTestResult.SUBSCRIBE_FAILED;
+		}
+	}
+
 	public void createSubscriptionToSysTopic(String origin) {
 		logger.info("AWARE:: Broker - {} - create subscription to sys topic for {} {}", getName(), groupId, edgeNodeId);
+		savedOrigin = origin;
 		final String topic = SPARKPLUG_AWARE_ROOT + origin;
 		final Mqtt3Subscription subscription =
 				Mqtt3Subscription.builder().topicFilter(topic).qos(MqttQos.AT_LEAST_ONCE).build();
@@ -330,7 +371,28 @@ public class AwareBrokerTest extends TCKTest {
 				if (throwable != null) {
 					logger.error("AWARE:: Broker - Subscribe failed: {}", throwable.getMessage());
 				} else {
-					logger.info("AWARE:: Broker - Successful subscribed to topic: " + subscription.getTopicFilter());
+					logger.info("AWARE:: Broker - Successfully subscribed to topic: " + subscription.getTopicFilter());
+				}
+			});
+
+		} catch (final Exception ex) {
+			logger.error("Failed to subscribe to topic ", ex);
+			createSubscriptionResult = AwareTestResult.SUBSCRIBE_FAILED;
+		}
+	}
+
+	public void secondSubscriptionToSysTopic() {
+		logger.info("AWARE:: Broker - {} - second subscription to sys topic for {} {}", getName(), groupId, edgeNodeId);
+		final String topic = SPARKPLUG_AWARE_ROOT + savedOrigin;
+		final Mqtt3Subscription subscription =
+				Mqtt3Subscription.builder().topicFilter(topic).qos(MqttQos.AT_LEAST_ONCE).build();
+		try {
+			logger.debug("AWARE:: Broker - subscribing to sys topic {} with qos {}", topic, MqttQos.AT_LEAST_ONCE);
+			subscriber.toAsync().subscribeWith().addSubscription(subscription).send().whenComplete((subAck, throwable) -> {
+				if (throwable != null) {
+					logger.error("AWARE:: Broker - Subscribe failed: {}", throwable.getMessage());
+				} else {
+					logger.info("AWARE:: Broker - Successfully subscribed to topic: " + subscription.getTopicFilter());
 				}
 			});
 
