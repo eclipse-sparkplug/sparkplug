@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Anja Helmbrecht-Schaar, Ian Craggs
+ * Copyright (c) 2022, 2023 Anja Helmbrecht-Schaar, Ian Craggs
  * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -115,6 +115,14 @@ public class Utils {
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
 		if (results.get(req_id) == null || !results.get(req_id).equals(FAIL)) {
+			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
+		}
+		return result;
+	}
+
+	public static @NotNull boolean setResultIfNotPass(Map<String, String> results, boolean result, String req_id,
+			String req_desc) {
+		if (results.get(req_id) == null || !results.get(req_id).equals(PASS)) {
 			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
 		}
 		return result;
