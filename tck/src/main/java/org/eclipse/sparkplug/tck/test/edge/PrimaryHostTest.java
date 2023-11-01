@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022, 2023 Ian Craggs
+ * Copyright (c) 2021, 2023 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -78,7 +78,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.1-SNAPSHOT")
+		version = "4.0.0-SNAPSHOT")
 public class PrimaryHostTest extends TCKTest {
 
 	private static final @NotNull Logger logger = LoggerFactory.getLogger("Sparkplug");

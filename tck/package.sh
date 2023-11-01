@@ -1,6 +1,6 @@
 #!/bin/sh
 ###################################################################################
-# Copyright (c) 2022 Wes Johnson
+# Copyright (c) 2022, 2023 Wes Johnson
 #
 # This program and the accompanying materials are made available under the
 # terms of the Eclipse Public License 2.0 which is available at
@@ -17,8 +17,8 @@ FILES="build/coverage-report/coverage-sparkplug.html
 build/coverage-report/images/stickynote.png
 build/coverage-report/images/blank.png
 eftckl-v10
-build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip
-build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip.sig
+build/hivemq-extension/sparkplug-tck-4.0.0-SNAPSHOT.zip
+build/hivemq-extension/sparkplug-tck-4.0.0-SNAPSHOT.zip.sig
 hivemq-configuration/logback.xml
 hivemq-configuration/config.xml
 UserGuide.html
@@ -26,7 +26,7 @@ README.md
 README.html"
 
 
-ZIP_FILE_NAME=Eclipse-Sparkplug-TCK-3.0.1-SNAPSHOT.zip
+ZIP_FILE_NAME=Eclipse-Sparkplug-TCK-4.0.0-SNAPSHOT.zip
 PREFIX=build/SparkplugTCK/
 
 # Delete the old version
