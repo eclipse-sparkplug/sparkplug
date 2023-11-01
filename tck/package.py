@@ -1,6 +1,6 @@
 #!/bin/python3
 """********************************************************************************
- * Copyright (c) 2022 Ian Craggs
+ * Copyright (c) 2022, 2023 Ian Craggs
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,15 +17,15 @@ import zipfile, glob, os, sys
 files = \
 ["build/coverage-report/",
 "eftckl-v10",
-"build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip",
-"build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.zip.sig",
+"build/hivemq-extension/sparkplug-tck-4.0.0-SNAPSHOT.zip",
+"build/hivemq-extension/sparkplug-tck-4.0.0-SNAPSHOT.zip.sig",
 "hivemq-configuration/",
 "UserGuide.html",
 "README.md",
 "README.html"
 ]
 
-zipfilename = "Eclipse-Sparkplug-TCK-3.0.1-SNAPSHOT.zip"
+zipfilename = "Eclipse-Sparkplug-TCK-4.0.0-SNAPSHOT.zip"
 prefix = "SparkplugTCK/"
 
 try:
@@ -37,7 +37,7 @@ except:
 os.system("asciidoc UserGuide.adoc")
 
 # update the tck jar notices directory
-jarfilename = "build/hivemq-extension/sparkplug-tck-3.0.1-SNAPSHOT.jar"
+jarfilename = "build/hivemq-extension/sparkplug-tck-4.0.0-SNAPSHOT.jar"
 
 # get the webconsole directory except the node_modules subdir
 webconsole_files = glob.glob("webconsole/*")
