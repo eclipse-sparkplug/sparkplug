@@ -263,7 +263,7 @@ Application it may consume Edge Node data and display it in a dashboard, it may 
 in a database, or it may analyze the data in some way. SCADA/IIoT Hosts, MES, Historians, and 
 Analytics applications are all examples of potential Sparkplug Host Applications. A Host Application 
 may perform many different functions in handling the data. In addition, Host Applications may also 
-send Sparkplug NCMD or DCMD messages to Edge Nodes.
+send Sparkplug REBIRTH, NCMD, or DCMD messages to Edge Nodes.
 
 A Sparkplug Edge Node may specify one Host Application as its 'Primary Host Application'. This is
 handled by the Edge Node waiting to publish its NBIRTH and DBIRTH messages until the Host
