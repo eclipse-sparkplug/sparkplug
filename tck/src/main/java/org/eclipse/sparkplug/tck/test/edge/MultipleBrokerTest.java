@@ -74,7 +74,7 @@ import com.hivemq.extension.sdk.api.services.Services;
 
 @SpecVersion(
 		spec = "sparkplug",
-		version = "3.0.1-SNAPSHOT")
+		version = "3.0.0")
 public class MultipleBrokerTest extends TCKTest {
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
 	private final @NotNull Map<String, String> testResults = new HashMap<>();
