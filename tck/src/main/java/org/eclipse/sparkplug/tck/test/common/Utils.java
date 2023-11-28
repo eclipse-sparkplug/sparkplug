@@ -152,56 +152,152 @@ public class Utils {
 		return (seq == 255) ? 0 : seq + 1;
 	}
 
+	public static boolean hasValidDatatype(Metric m) {
+        // Checks that the datatype is valid for Metric and that the value case corresponds with the datatype
+        Metric.ValueCase expectedValueCase = Metric.ValueCase.VALUE_NOT_SET;
+
+        if(DataType.forNumber(m.getDatatype()) != null) {
+            switch (DataType.forNumber(m.getDatatype())) {
+                case Int8:
+                case Int16:
+                case Int32:
+                case UInt8:
+                case UInt16:
+                case UInt32:
+                    expectedValueCase = Metric.ValueCase.INT_VALUE;
+                    break;
+                case Int64:
+                case UInt64:
+                case DateTime:
+                    expectedValueCase = Metric.ValueCase.LONG_VALUE;
+                    break;
+                case Float:
+                    expectedValueCase = Metric.ValueCase.FLOAT_VALUE;
+                    break;
+                case Double:
+                    expectedValueCase = Metric.ValueCase.DOUBLE_VALUE;
+                    break;
+                case Boolean:
+                    expectedValueCase = Metric.ValueCase.BOOLEAN_VALUE;
+                    break;
+                case String:
+                case Text:
+                case UUID:
+                    expectedValueCase = Metric.ValueCase.STRING_VALUE;
+                    break;
+                case Bytes:
+                case File:
+                case Int8Array:
+                case Int16Array:
+                case Int32Array:
+                case Int64Array:
+                case UInt8Array:
+                case UInt16Array:
+                case UInt32Array:
+                case UInt64Array:
+                case FloatArray:
+                case DoubleArray:
+                case BooleanArray:
+                case StringArray:
+                case DateTimeArray:
+                    expectedValueCase = Metric.ValueCase.BYTES_VALUE;
+                    break;
+                case DataSet:
+                    expectedValueCase = Metric.ValueCase.DATASET_VALUE;
+                    break;
+                case Template:
+                    expectedValueCase = Metric.ValueCase.TEMPLATE_VALUE;
+                    break;
+                default:
+                    break;
+            }
+        }else {
+            // If Metric does not have datatype, assumed valid
+            return true;
+
+        }
+
+		if(m.getIsNull()){
+			// If Metric is null, Value case will not be set, so just confirms datatype is valid
+			return expectedValueCase != Metric.ValueCase.VALUE_NOT_SET;
+		}
+
+        return DataType.forNumber(m.getDatatype()) != null && expectedValueCase != Metric.ValueCase.VALUE_NOT_SET && m.getValueCase() == expectedValueCase;
+    }
+
+	public static boolean hasValidDatatype(Payload.PropertyValue p) {
+        // Checks that the datatype is valid for Property Values and that the value case corresponds with the datatype
+        Payload.PropertyValue.ValueCase expectedValueCase = Payload.PropertyValue.ValueCase.VALUE_NOT_SET;
+        if (DataType.forNumber(p.getType()) != null) {
+            switch (DataType.forNumber(p.getType())) {
+                case Int8:
+                case Int16:
+                case Int32:
+                case UInt8:
+                case UInt16:
+                case UInt32:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.INT_VALUE;
+                    break;
+                case Int64:
+                case UInt64:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.LONG_VALUE;
+                    break;
+                case Float:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.FLOAT_VALUE;
+                    break;
+                case Double:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.DOUBLE_VALUE;
+                    break;
+                case Boolean:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.BOOLEAN_VALUE;
+                    break;
+                case String:
+                case Text:
+                case UUID:
+                    expectedValueCase = Payload.PropertyValue.ValueCase.STRING_VALUE;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            // If Property Value does not have type, assumed valid
+            return true;
+
+        }
+		if(p.getIsNull()){
+			// If Property Value is null, Value case will not be set, so just confirms datatype is valid
+			return expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET;
+		}
+        return DataType.forNumber(p.getType()) != null && expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET && p.getValueCase() == expectedValueCase;
+    }
+
 	public static boolean hasValue(Metric m) {
 		if (m.hasIsNull() && m.getIsNull()) {
 			// A null value is valid
 			return true;
 		}
 
-		switch (DataType.forNumber(m.getDatatype())) {
-			case Unknown:
-				return false;
-			case Int8:
-			case Int16:
-			case Int32:
-			case UInt8:
-			case UInt16:
+		switch(m.getValueCase()){
+			case INT_VALUE:
 				return m.hasIntValue();
-			case Int64:
-			case UInt32:
-			case UInt64:
-			case DateTime:
+			case LONG_VALUE:
 				return m.hasLongValue();
-			case Float:
+			case FLOAT_VALUE:
 				return m.hasFloatValue();
-			case Double:
+			case DOUBLE_VALUE:
 				return m.hasDoubleValue();
-			case Boolean:
+			case BOOLEAN_VALUE:
 				return m.hasBooleanValue();
-			case String:
-			case Text:
-			case UUID:
+			case STRING_VALUE:
 				return m.hasStringValue();
-			case Bytes:
-			case File:
-			case Int8Array:
-			case Int16Array:
-			case Int32Array:
-			case Int64Array:
-			case UInt8Array:
-			case UInt16Array:
-			case UInt32Array:
-			case UInt64Array:
-			case FloatArray:
-			case DoubleArray:
-			case BooleanArray:
-			case StringArray:
-			case DateTimeArray:
+			case BYTES_VALUE:
 				return m.hasBytesValue();
-			case DataSet:
+			case DATASET_VALUE:
 				return m.hasDatasetValue();
-			case Template:
+			case TEMPLATE_VALUE:
 				return m.hasTemplateValue();
+			case EXTENSION_VALUE:
+				return m.hasExtensionValue();
 			default:
 				return false;
 		}
@@ -211,22 +307,26 @@ public class Utils {
 		if (!p.hasType()) {
 			return false;
 		}
-		switch (p.getType()) {
-			case Parameter.INT_VALUE_FIELD_NUMBER:
+
+		switch (p.getValueCase()){
+			case INT_VALUE:
 				return p.hasIntValue();
-			case Parameter.LONG_VALUE_FIELD_NUMBER:
+			case LONG_VALUE:
 				return p.hasLongValue();
-			case Parameter.FLOAT_VALUE_FIELD_NUMBER:
+			case FLOAT_VALUE:
 				return p.hasFloatValue();
-			case Parameter.DOUBLE_VALUE_FIELD_NUMBER:
+			case DOUBLE_VALUE:
 				return p.hasDoubleValue();
-			case Parameter.BOOLEAN_VALUE_FIELD_NUMBER:
+			case BOOLEAN_VALUE:
 				return p.hasBooleanValue();
-			case Parameter.STRING_VALUE_FIELD_NUMBER:
+			case STRING_VALUE:
 				return p.hasStringValue();
+			case EXTENSION_VALUE:
+				return p.hasExtensionValue();
 			default:
 				return false;
 		}
+
 	}
 
 	public static String getRetained(String topic) {

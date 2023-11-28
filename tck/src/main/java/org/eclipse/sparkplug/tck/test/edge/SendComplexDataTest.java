@@ -98,6 +98,7 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_REF_INSTANCE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_VERSION;
 import static org.eclipse.sparkplug.tck.test.common.Utils.setResult;
+import static org.eclipse.sparkplug.tck.test.common.Utils.setResultIfNotFail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -370,23 +371,22 @@ public class SendComplexDataTest extends TCKTest {
 			isValid_DataTypeValue = false;
 			logger.error("Check req set for : {}", ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE);
 		}
-		testResults.put(ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE,
-				setResult(isValid_DataType, PAYLOADS_METRIC_DATATYPE_VALUE_TYPE));
 
 		logger.debug(
 				"Check Req: The datatype MUST be one of the enumerated values as shown in the valid Sparkplug Data Types.");
 		if (result != null) {
 			for (Metric m : result.getMetricsList()) {
-				if (DataType.forNumber(m.getDatatype()) == null
-						|| DataType.Unknown == DataType.forNumber(m.getDatatype())) {
+				if(!Utils.hasValidDatatype(m)){
+					isValid_DataType = false;
 					isValid_DataTypeValue = false;
 					break;
 				}
 			}
 		}
 
-		testResults.put(ID_PAYLOADS_METRIC_DATATYPE_VALUE,
-				setResult(isValid_DataTypeValue, PAYLOADS_METRIC_DATATYPE_VALUE));
+		setResultIfNotFail(testResults,isValid_DataType,ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE,PAYLOADS_METRIC_DATATYPE_VALUE_TYPE);
+
+		setResultIfNotFail(testResults,isValid_DataTypeValue,ID_PAYLOADS_METRIC_DATATYPE_VALUE,PAYLOADS_METRIC_DATATYPE_VALUE);
 	}
 
 	@SpecAssertion(
@@ -454,8 +454,7 @@ public class SendComplexDataTest extends TCKTest {
 
 				for (int i = 0; i < m.getProperties().getValuesCount(); i++) {
 					final Payload.PropertyValue propertyValue = m.getProperties().getValues(i);
-					if (propertyValue.getValueCase() == null
-							|| Payload.PropertyValue.ValueCase.VALUE_NOT_SET == propertyValue.getValueCase()) {
+					if(!Utils.hasValidDatatype(propertyValue)){
 						isValid_PropertyValueType = false;
 						isValid_PropertyValueTypeValue = false;
 					}
@@ -479,12 +478,9 @@ public class SendComplexDataTest extends TCKTest {
 		testResults.put(ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE,
 				setResult(isValid_KeyArraySize, PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE));
 
-		testResults.put(ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE,
-				setResult(isValid_PropertyValueType, PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE));
-		testResults.put(ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,
-				setResult(isValid_PropertyValueTypeValue, PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE));
-		testResults.put(ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ,
-				setResult(isValid_PropertyValueTypeReq, PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ));
+		setResultIfNotFail(testResults,isValid_PropertyValueType,ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE,PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE);
+		setResultIfNotFail(testResults,isValid_PropertyValueTypeValue,ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE);
+		setResultIfNotFail(testResults,isValid_PropertyValueTypeReq,ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ,PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ);
 
 	}
 
