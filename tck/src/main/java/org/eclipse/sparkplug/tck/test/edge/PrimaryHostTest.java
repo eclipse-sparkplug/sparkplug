@@ -323,7 +323,7 @@ public class PrimaryHostTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Edge Primary Host";
+		return "Edge PrimaryHost";
 	}
 
 	public String[] getTestIds() {

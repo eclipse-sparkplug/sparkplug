@@ -130,7 +130,7 @@ public class AwareBrokerTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Broker Sparkplug Aware";
+		return "Broker SparkplugAware";
 	}
 
 	public String[] getTestIds() {
