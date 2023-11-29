@@ -155,7 +155,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Host EdgeNodeSessionTermination";
+		return "Host EdgeSessionTermination";
 	}
 
 	public String[] getTestIds() {
