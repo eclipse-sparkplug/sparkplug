@@ -274,7 +274,7 @@ public class MultipleBrokerTest extends TCKTest {
 
 	@Override
 	public String getName() {
-		return "Edge Multiple Broker";
+		return "Edge MultipleBroker";
 	}
 
 	@Override

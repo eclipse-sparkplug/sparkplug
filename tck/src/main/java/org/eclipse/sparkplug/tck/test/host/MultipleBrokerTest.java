@@ -196,7 +196,7 @@ public class MultipleBrokerTest extends TCKTest {
 
 	@Override
 	public String getName() {
-		return "Host Multiple Broker";
+		return "Host MultipleBroker";
 	}
 
 	@Override

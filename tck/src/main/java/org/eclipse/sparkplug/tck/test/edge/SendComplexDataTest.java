@@ -218,7 +218,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Edge Send Complex Data";
+		return "Edge SendComplexData";
 	}
 
 	public String[] getTestIds() {
