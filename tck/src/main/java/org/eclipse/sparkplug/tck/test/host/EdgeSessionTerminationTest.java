@@ -155,7 +155,7 @@ public class EdgeSessionTerminationTest extends TCKTest {
 	}
 
 	public String getName() {
-		return "Sparkplug Host Edge Node Session Termination Test";
+		return "Host EdgeNodeSessionTermination";
 	}
 
 	public String[] getTestIds() {
