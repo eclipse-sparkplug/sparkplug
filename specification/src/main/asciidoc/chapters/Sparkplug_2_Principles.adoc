@@ -119,7 +119,7 @@ infrastructure. In these use cases, all the Device needs to do is to issue an MQ
 control packet prior to going offline to leave the MQTT infrastructure “gracefully”. In this case an
 MQTT device or associated DEATH certificate will not be sent to Sparkplug Host Applications. System
 designers just need to be aware that the metric in the Host Application will represent “Last Known
-Good” values with a timestamp of this data where the current state of the of the MQTT Device is not
+Good” values with a timestamp of this data where the current state of the MQTT Device is not
 a real-time indication. The Host Application metric timestamp values can be used to determine when
 the values from this Edge Node were last updated.
 
