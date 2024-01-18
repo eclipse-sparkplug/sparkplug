@@ -49,7 +49,7 @@ spec:
           [$class: 'StringBinding', credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE']
         ]) {
           sh '''
-            curl -o tck/build/hivemq-extension/sparkplug-tck-3.0.0-signed.jar -F file=@tck/build/hivemq-extension/sparkplug-tck-3.0.0.jar https://cbi.eclipse.org/jarsigner/sign
+            curl -o tck/build/hivemq-extension/sparkplug-tck-4.0.0-signed.jar -F file=@tck/build/hivemq-extension/sparkplug-tck-4.0.0.jar https://cbi.eclipse.org/jarsigner/sign
             export GPG_TTY=/dev/console
 
             gpg --batch --import "${KEYRING}"
@@ -57,18 +57,18 @@ spec:
 
             mkdir tck/build/hivemq-extension/working_tmp
             cd tck/build/hivemq-extension/working_tmp
-            unzip ../sparkplug-tck-3.0.0.zip
-            mv ../sparkplug-tck-3.0.0-signed.jar sparkplug-tck/sparkplug-tck-3.0.0.jar
-            zip -r ../sparkplug-tck-3.0.0.zip sparkplug-tck
+            unzip ../sparkplug-tck-4.0.0.zip
+            mv ../sparkplug-tck-4.0.0-signed.jar sparkplug-tck/sparkplug-tck-4.0.0.jar
+            zip -r ../sparkplug-tck-4.0.0.zip sparkplug-tck
             cd ..
-            gpg -v --no-tty --passphrase "${KEYRING_PASSPHRASE}" -c --batch sparkplug-tck-3.0.0.zip
+            gpg -v --no-tty --passphrase "${KEYRING_PASSPHRASE}" -c --batch sparkplug-tck-4.0.0.zip
 
             echo "no-tty" >> ~/.gnupg/gpg.conf
-            gpg -vvv --no-permission-warning --output "sparkplug-tck-3.0.0.zip.sig" --batch --yes --pinentry-mode=loopback --passphrase="${KEYRING_PASSPHRASE}" --no-tty --detach-sig sparkplug-tck-3.0.0.zip
+            gpg -vvv --no-permission-warning --output "sparkplug-tck-4.0.0.zip.sig" --batch --yes --pinentry-mode=loopback --passphrase="${KEYRING_PASSPHRASE}" --no-tty --detach-sig sparkplug-tck-4.0.0.zip
             cd ../../
             ./package.sh
-            gpg -vvv --no-permission-warning --output "Eclipse-Sparkplug-TCK-3.0.0.zip.sig" --batch --yes --pinentry-mode=loopback --passphrase="${KEYRING_PASSPHRASE}" --no-tty --detach-sig Eclipse-Sparkplug-TCK-3.0.0.zip
-            gpg -vvv --verify Eclipse-Sparkplug-TCK-3.0.0.zip.sig
+            gpg -vvv --no-permission-warning --output "Eclipse-Sparkplug-TCK-4.0.0.zip.sig" --batch --yes --pinentry-mode=loopback --passphrase="${KEYRING_PASSPHRASE}" --no-tty --detach-sig Eclipse-Sparkplug-TCK-4.0.0.zip
+            gpg -vvv --verify Eclipse-Sparkplug-TCK-4.0.0.zip.sig
           '''
         }
       }
@@ -78,10 +78,10 @@ spec:
       steps {
         sshagent(credentials: ['projects-storage.eclipse.org-bot-ssh']) {
           sh '''
-            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes genie.sparkplug@projects-storage.eclipse.org rm -rf /home/data/httpd/download.eclipse.org/sparkplug/*
-            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes genie.sparkplug@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/sparkplug/3.0.0
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes tck/Eclipse-Sparkplug-TCK-3.0.0.zip genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/3.0.0/
-            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes tck/Eclipse-Sparkplug-TCK-3.0.0.zip.sig genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/3.0.0/
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes genie.sparkplug@projects-storage.eclipse.org rm -rf /home/data/httpd/download.eclipse.org/sparkplug/4.0.0/*
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes genie.sparkplug@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/sparkplug/4.0.0
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes tck/Eclipse-Sparkplug-TCK-4.0.0.zip genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/4.0.0/
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes tck/Eclipse-Sparkplug-TCK-4.0.0.zip.sig genie.sparkplug@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/sparkplug/4.0.0/
           '''
         }
       }
