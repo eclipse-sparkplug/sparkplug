@@ -1,7 +1,7 @@
 # Eclipse™ Sparkplug™ TCK
 
 This is the Eclipse Sparkplug Test Compatibility Kit (TCK). For Sparkplug certification requests, this TCK should be downloaded in binary form
-from [Eclipse downloads](https://]download.eclipse.org). This README is meant to be read as part of that package.
+from [sparkplug.eclipse.org/compatibility/get-listed](https://sparkplug.eclipse.org/compatibility/get-listed/). This README is meant to be read as part of that package.
 
 ## Listing Requests for Compatible Products
 
