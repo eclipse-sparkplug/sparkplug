@@ -80,15 +80,22 @@ version of the Sparkplug implementation as indicated by the namespace element.
 
 The following message_type elements are defined for the Sparkplug topic namespace:
 
+* *NMETA* - Metadata definition for Sparkplug Edge Nodes
 * *NBIRTH* – Birth certificate for Sparkplug Edge Nodes
-* *NDEATH* – Death certificate for Sparkplug Edge Nodes
-* *DBIRTH* – Birth certificate for Devices
-* *DDEATH* – Death certificate for Devices
 * *NDATA* – Edge Node data message
+* *NDEATH* – Death certificate for Sparkplug Edge Nodes
+* *NREBIRTH* - Edge Node Rebirth response sent from Sparkplug Edge Nodes
+
+* *DMETA* - Metadata definition for Sparkplug Devices
+* *DBIRTH* – Birth certificate for Devices
 * *DDATA* – Device data message
+* *DDEATH* – Death certificate for Devices
+* *DREBIRTH* - Device Rebirth response sent from Sparkplug Edge Nodes
+
 * *NCMD* – Edge Node command message
 * *DCMD* – Device command message
 * *STATE* – Sparkplug Host Application state message
+* *REBIRTH* - Rebirth request for Sparkplug Edge Nodes sent by Host Applications
 
 The specification for each of these _message_type_ elements are detailed later in this document.
 
@@ -143,15 +150,22 @@ state as well as bidirectional metric information exchange that would apply to m
 real-time SCADA/IIoT, monitoring, and data collection system use cases. The defined message types
 are:
 
+* *NMETA* - Metadata definition for Sparkplug Edge Nodes
 * *NBIRTH* – Birth certificate for Sparkplug Edge Nodes
+* *NDATA* – Edge Node data message
 * *NDEATH* – Death certificate for Sparkplug Edge Nodes
+* *NREBIRTH* - Edge Node Rebirth response sent from Sparkplug Edge Nodes
+
+* *DMETA* - Metadata definition for Sparkplug Devices
 * *DBIRTH* – Birth certificate for Devices
-* *DDEATH* – Death certificate for Devices
-* *NDATA* – Node data message
 * *DDATA* – Device data message
-* *NCMD* – Node command message
+* *DDEATH* – Death certificate for Devices
+* *DREBIRTH* - Device Rebirth response sent from Sparkplug Edge Nodes
+
+* *NCMD* – Edge Node command message
 * *DCMD* – Device command message
 * *STATE* – Sparkplug Host Application state message
+* *REBIRTH* - Rebirth request for Sparkplug Edge Nodes sent by Host Applications
 
 Using these defined messages Host Applications can:
 
@@ -212,11 +226,6 @@ MUST match the bdSeq number provided in the MQTT CONNECT packet’s Will Message
 ** This allows Host Applications to correlate NBIRTHs to NDEATHs.
 * [tck-testable tck-id-topics-nbirth-bdseq-increment]#[yellow-background]*[tck-id-topics-nbirth-bdseq-increment] The
 bdSeq number MUST start at zero and increment by one on every new MQTT CONNECT packet.*#
-* [tck-testable tck-id-topics-nbirth-rebirth-metric]#[yellow-background]*[tck-id-topics-nbirth-rebirth-metric] The
-NBIRTH message MUST include a metric with the name 'Node Control/Rebirth'. It MUST be of datatype
-boolean and have a value of false.*#
-** The 'Node Control/Rebirth' metric is used by Host Application(s) to request a new NBIRTH and
-DBIRTH(s) from an Edge Node.
 
 The NBIRTH message can also include additional Node Control payload components. These are used by a
 Sparkplug Host Application to control aspects of the Edge Node. The following are examples of Node
@@ -348,6 +357,9 @@ NCMD MUST include a timestamp denoting the date and time the message was sent fr
 Application’s MQTT client.*#
 * [tck-testable tck-id-topics-ncmd-payload]#[yellow-background]*[tck-id-topics-ncmd-payload] The
 NCMD MUST include the metrics that need to be written to on the Edge Node.*#
+* [tck-testable tck-id-topics-ncmd-payload-source]#[yellow-background]*[tck-id-topics-ncmd-payload-source] The
+NCMD MUST have the 'source' field set in the payload and it MUST have a string value representing
+the Host ID of the Sparkplug Host Application that sent the NCMD message.*#
 
 [[topics_device_sensor]]  
 ==== Device/Sensor
@@ -400,8 +412,6 @@ metrics.
 
 * Metric name: ‘Device Control/Reboot’
 ** Used by Host Application(s) to reboot a device.
-* Metric name: ‘Device Control/Rebirth’
-** Used by Host Application(s) to request a new DBIRTH from a device.
 * Metric name: ‘Device Control/Scan rate’
 ** Used by Host Application(s) to modify a poll rate on a device.
 
@@ -512,6 +522,9 @@ DCMD MUST include a timestamp denoting the date and time the message was sent fr
 Application’s MQTT client.*#
 * [tck-testable tck-id-topics-dcmd-payload]#[yellow-background]*[tck-id-topics-dcmd-payload] The
 DCMD MUST include the metrics that need to be written to on the Device.*#
+* [tck-testable tck-id-topics-dcmd-payload-source]#[yellow-background]*[tck-id-topics-dcmd-payload-source] The
+DCMD MUST have the 'source' field set in the payload and it MUST have a string value representing
+the Host ID of the Sparkplug Host Application that sent the DCMD message.*#
 
 [[topics_sparkplug_host_application]]
 [upperalpha, start=1]

@@ -565,9 +565,7 @@ start of the Reorder Timeout window*#
 * [tck-testable tck-id-operational-behavior-host-reordering-rebirth]#[yellow-background]*[tck-id-operational-behavior-host-reordering-rebirth] If
 a Sparkplug Host Application is configured with a 'reordering timeout' parameter and the Reorder
 Timeout elapses and the missing message(s) have not been received, the Sparkplug Host Application
-MUST send an NCMD to the Edge Node with a 'Node Control/Rebirth' request*#
-** Non-normative comment: In most cases a 'Primary Host Application' would send a Rebirth Request
-but a Non-Primary Host may not
+MUST send an REBIRTH request to the Edge Node*#
 * [tck-testable tck-id-operational-behavior-host-reordering-success]#[yellow-background]*[tck-id-operational-behavior-host-reordering-success] If
 the missing message(s) that triggered the start of the Reorder Timeout timer arrive before the
 reordering timer elapses, the timer MUST be terminated and normal operation in the Host Application
@@ -683,7 +681,6 @@ be exposed in the Primary Host Application. Some examples of these will be "read
 
 Other metrics may be dynamic and "read/write" such as:
 
-* Edge Node Rebirth command to republish all Edge Node and Device Birth Certificates
 * Edge Node Next server command to move to next available MQTT Server
 * Edge Node Reboot command to reboot the Edge Node
 * Edge Node Primary Network (PRI_NETWORK) where 1 = Cellular, 2 = Ethernet
@@ -848,15 +845,13 @@ Because there is so much flexibility in what a Sparkplug Host Application may do
 receives there aren't hard requirements on what it does with it once it receives it. However, there
 are some things to consider:
 
-* A Sparkplug Host Application MAY send Node Control/Rebirth NCMD messages if messages arrive out of
-sequence order and can not be reordered within the sequence reordering timeout. It is often
-reasonable for whether or not a Host Application sends Rebirths to be a configuration option as this
-can have an impact on the overall Sparkplug system.
-* A Sparkplug Host Application MAY send Node Control/Rebirth NCMD messages if malformed payloads
-arrive. Because this can have an impact on the overall system this should be configurable by the
-Host Application.
-* There are other reasons a Host Application may send out Node Control/Rebirth NCMD messages. These
-include but are not limited to:
+* A Sparkplug Host Application MUST send a REBIRTH request message if messages arrive out of
+sequence order and can not be reordered within the sequence reordering timeout.
+* A Sparkplug Host Application MAY send REBIRTH request messages if malformed payloads arrive.
+Because this can have an impact on the overall system, this should be configurable by the Host
+Application.
+* There are other reasons a Host Application may send out REBIRTH request messages. These include
+but are not limited to:
 ** Receiving any DBIRTH, NDATA, DDATA, or DDEATH before receiving an NBIRTH from a Sparkplug Edge
 Node
 ** Receiving a metric in an NDATA message that was not included in the previous NBIRTH message
@@ -922,10 +917,10 @@ chronological order in the list of metrics in the payload.*#
 === Commands
 
 Commands are used in Sparkplug to allow Sparkplug Host Applications to send data to Sparkplug Edge
-Nodes. Examples include writing to outputs of Sparkplug Edge Nodes and Devices or to request
-Rebirths from Edge Nodes. Custom command endpoints can be declared in an NBIRTH or DBIRTH message by
-an Edge Node or Device that may support functionality such as rebooting an Edge Node or Device. This
-is up to the Sparkplug implementor to define what functionality can be exposed.
+Nodes. Examples include writing to outputs of Sparkplug Edge Nodes and Devices or to call 'Node
+Control' or 'Device Control' commands. Custom command endpoints can be declared in an NBIRTH or
+DBIRTH message by an Edge Node or Device that may support functionality such as rebooting an Edge
+Node or Device. This is up to the Sparkplug implementor to define what functionality can be exposed.
 
 Security and access is an important aspect of commands. It may be the case that not all Sparkplug
 Host Applications should have the ability to send commands. This can be controlled in multiple ways.
@@ -940,41 +935,31 @@ to consider.
 There are two types of command (CMD) verbs in Sparkplug. These are NCMD and DCMD messages which
 target Edge Nodes and Devices respectively.
 
-There is one NCMD that is required to be implemented for all Sparkplug Edge Nodes and that is the
-'Node Control/Rebirth' command. This exists to allow a Sparkplug Host Application to reset its
-end-to-end session with a specific Edge Node. For example, say an Edge Node has been in an
-established Sparkplug session and is publishing DATA messages. Now say a new Sparkplug Host
-Application connects to the same MQTT Server that the Edge Node is connected to. On the next DATA
-message published by the Edge Node, the Host Application will receive it without ever having
-received the BIRTH message(s) associated with the Edge Node. As a result, it can send a 'Rebirth
-Request' using the 'Node Control/Rebirth' metric to reset its understanding of that Edge Node and
-become aware of all metrics associated with it.
+[[operational_behavior_rebirth]]
+=== Rebirth Requests
 
-These are the rules around the 'Node Control/Rebirth' metric.
+The REBIRTH verb exists to allow a Sparkplug Host Application to reset its end-to-end session with a
+specific Edge Node. For example, say an Edge Node has been in an established Sparkplug session and
+is publishing DATA messages. Now say a new Sparkplug Host Application connects to the same MQTT
+Server that the Edge Node is connected to. On the next DATA message published by the Edge Node, the
+Host Application will receive it without ever having received the BIRTH message(s) associated with
+the Edge Node. As a result, it can send a 'Rebirth Request' using the 'REBIRTH' Sparkplug verb to
+reset its understanding of that Edge Node and become aware of all metrics associated with it.
 
-* [tck-testable tck-id-operational-behavior-data-commands-rebirth-name]#[yellow-background]*[tck-id-operational-behavior-data-commands-rebirth-name] An
-NBIRTH message MUST include a metric with a name of 'Node Control/Rebirth'.*#
-* [tck-testable tck-id-operational-behavior-data-commands-rebirth-name-aliases]#[yellow-background]*[tck-id-operational-behavior-data-commands-rebirth-name-aliases] When
-aliases are being used by an Edge Node an NBIRTH message MUST NOT include an alias for the
-'Node Control/Rebirth' metric.*#
-** This is to ensure that any Host Application connecting to the MQTT Server is capable of
-requesting a rebirth without knowledge of any potential alias being used for this metric.
-* [tck-testable tck-id-operational-behavior-data-commands-rebirth-datatype]#[yellow-background]*[tck-id-operational-behavior-data-commands-rebirth-datatype] The
-'Node Control/Rebirth' metric in the NBIRTH message MUST have a datatype of 'Boolean'.*#
-* [tck-testable tck-id-operational-behavior-data-commands-rebirth-value]#[yellow-background]*[tck-id-operational-behavior-data-commands-rebirth-value] The
-'Node Control/Rebirth' metric value in the NBIRTH message MUST have a value of false.*#
+These are the rules around the 'REBIRTH' Sparkplug verb.
 
 A 'Rebirth Request' consists of the following message from a Sparkplug Host Application with the
 following characteristics.
 
 * [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-verb]#[yellow-background]*[tck-id-operational-behavior-data-commands-ncmd-rebirth-verb] A
-Rebirth Request MUST use the NCMD Sparkplug verb.*#
-* [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-name]#[yellow-background]*[tck-id-operational-behavior-data-commands-ncmd-rebirth-name] A
-Rebirth Request MUST include a metric with a name of 'Node Control/Rebirth'.*#
-* [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-value]#[yellow-background]*[tck-id-operational-behavior-data-commands-ncmd-rebirth-value] A
-Rebirth Request MUST include a metric value of true.*#
+Rebirth Request MUST use the REBIRTH Sparkplug verb.*#
+* [tck-testable tck-id-operational-behavior-data-commands-ncmd-rebirth-source]#[yellow-background]*[tck-id-operational-behavior-data-commands-ncmd-rebirth-name] A
+Rebirth Request MUST include a 'source' in the payload and it's value MUST be the Host Application's
+host_id.*#
 
 Upon receipt of a Rebirth Request, the Edge Node must do the following.
+
+#FIXME - everything below
 
 * [tck-testable tck-id-operational-behavior-data-commands-rebirth-action-1]#[yellow-background]*[tck-id-operational-behavior-data-commands-rebirth-action-1] When
 an Edge Node receives a Rebirth Request, it MUST immediately stop sending DATA messages.*#
