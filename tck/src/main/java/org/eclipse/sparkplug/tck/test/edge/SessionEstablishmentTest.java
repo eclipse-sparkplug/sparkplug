@@ -48,7 +48,6 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
@@ -88,15 +87,11 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_PAYLOADS_NBIRTH_BDSEQ, ID_PAYLOADS_NBIRTH_TIMESTAMP, ID_PAYLOADS_NBIRTH_REBIRTH_REQ,
 			ID_PAYLOADS_NDEATH_BDSEQ, ID_MESSAGE_FLOW_EDGE_NODE_NCMD_SUBSCRIBE, ID_TOPICS_NBIRTH_MQTT,
 			ID_TOPICS_NBIRTH_SEQ_NUM, ID_TOPICS_NBIRTH_TIMESTAMP, ID_TOPICS_NBIRTH_BDSEQ_INCLUDED,
-			ID_TOPICS_NBIRTH_BDSEQ_MATCHING, ID_TOPICS_NBIRTH_REBIRTH_METRIC, ID_PAYLOADS_DBIRTH_QOS,
-			ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT, ID_TOPICS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_TIMESTAMP,
-			ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ, ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_DBIRTH_ORDER,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES,
-			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES,
-			ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES, ID_TOPICS_NBIRTH_METRICS,
-			ID_TOPICS_DBIRTH_METRICS, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS,
-			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED,
+			ID_TOPICS_NBIRTH_BDSEQ_MATCHING, ID_PAYLOADS_DBIRTH_QOS, ID_PAYLOADS_DBIRTH_RETAIN, ID_TOPICS_DBIRTH_MQTT,
+			ID_TOPICS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_TIMESTAMP, ID_PAYLOADS_DBIRTH_SEQ, ID_TOPICS_DBIRTH_SEQ,
+			ID_PAYLOADS_DBIRTH_SEQ_INC, ID_PAYLOADS_DBIRTH_ORDER, ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_NBIRTH_VALUES,
+			ID_OPERATIONAL_BEHAVIOR_DATA_PUBLISH_DBIRTH_VALUES, ID_TOPICS_NBIRTH_METRICS, ID_TOPICS_DBIRTH_METRICS,
+			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_QOS, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_RETAINED,
 			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
 			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD,
 			ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_WILL_RETAINED,
@@ -515,23 +510,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_TOPICS_NBIRTH_BDSEQ_MATCHING)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NBIRTH,
-			id = ID_TOPICS_NBIRTH_REBIRTH_METRIC)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_DESC_NBIRTH,
 			id = ID_TOPICS_NBIRTH_METRICS)
-
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES)
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_B_NBIRTH,
@@ -654,22 +633,11 @@ public class SessionEstablishmentTest extends TCKTest {
 			testResults.put(ID_TOPICS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, TOPICS_NBIRTH_TIMESTAMP));
 
 			logger.debug("Check Req: NBIRTH must include a bdSeq");
-			boolean rebirthFound = false;
-			boolean bdSeqFound = false;
-			boolean rebirthVal = true;
-			DataType datatype = null;
 			List<Metric> metrics = sparkplugPayload.getMetricsList();
 			Set<String> metric_names = new HashSet<String>();
 			for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
-					bdSeqFound = true;
 					birthBdSeq = m.getLongValue();
-				} else if (m.getName().equals("Node Control/Rebirth")) {
-					rebirthFound = true;
-					datatype = DataType.forNumber(m.getDatatype());
-					rebirthVal = m.getBooleanValue();
-					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES,
-							setResult(m.hasAlias() == false, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME_ALIASES));
 				}
 
 				if (m.hasName()) {
@@ -720,25 +688,6 @@ public class SessionEstablishmentTest extends TCKTest {
 			boolean bMatches = (birthBdSeq != -1 && deathBdSeq != -1 && birthBdSeq == deathBdSeq);
 			testResults.put(ID_PAYLOADS_NDEATH_BDSEQ, setResult(bMatches, PAYLOADS_NDEATH_BDSEQ));
 			testResults.put(ID_TOPICS_NBIRTH_BDSEQ_MATCHING, setResult(bMatches, TOPICS_NBIRTH_BDSEQ_MATCHING));
-
-			logger.debug("Check Req: NBIRTH must include a 'Node Control/Rebirth' metric.");
-			testResults.put(ID_PAYLOADS_NBIRTH_REBIRTH_REQ, setResult(rebirthFound, PAYLOADS_NBIRTH_REBIRTH_REQ));
-			testResults.put(ID_TOPICS_NBIRTH_REBIRTH_METRIC, setResult(rebirthFound, TOPICS_NBIRTH_REBIRTH_METRIC));
-
-			logger.debug("Check Req: An NBIRTH message MUST include a metric with a name of 'Node Control/Rebirth'.");
-			testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME,
-					setResult(rebirthFound, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_NAME));
-
-			logger.debug(
-					"Check Req: The 'Node Control/Rebirth' metric in the NBIRTH message MUST have a datatype of 'Boolean'.");
-			boolean bIsBoolean = (rebirthFound && datatype == DataType.Boolean);
-			testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE,
-					setResult(bIsBoolean, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_DATATYPE));
-
-			logger.debug("Check Req: NBIRTH 'node control/rebirth' metric must == false.");
-			boolean bRebirthMetric = (rebirthFound && datatype == DataType.Boolean && !rebirthVal);
-			testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE,
-					setResult(bRebirthMetric, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_REBIRTH_VALUE));
 
 			checkPayloadsNameInDataRequirement(sparkplugPayload);
 			checkPayloadsAliasAndNameRequirement(sparkplugPayload);

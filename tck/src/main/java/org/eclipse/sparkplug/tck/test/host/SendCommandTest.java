@@ -26,8 +26,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DCMD_QOS;
@@ -53,8 +51,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEH
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DCMD_QOS;
@@ -95,7 +91,6 @@ import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
 import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
@@ -146,8 +141,6 @@ public class SendCommandTest extends TCKTest {
 			List.of(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_VERB, ID_TOPICS_NCMD_MQTT, ID_PAYLOADS_NCMD_QOS,
 					ID_PAYLOADS_NCMD_RETAIN, ID_TOPICS_NCMD_TIMESTAMP, ID_PAYLOADS_NCMD_SEQ, ID_PAYLOADS_NCMD_TIMESTAMP,
 					ID_TOPICS_NCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
 					ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_DCMD_VERB, ID_TOPICS_DCMD_MQTT, ID_PAYLOADS_DCMD_QOS,
 					ID_PAYLOADS_DCMD_RETAIN, ID_TOPICS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_TIMESTAMP, ID_PAYLOADS_DCMD_SEQ,
 					ID_TOPICS_DCMD_PAYLOAD, ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME,
@@ -537,12 +530,6 @@ public class SendCommandTest extends TCKTest {
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
-			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
 			id = ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_METRIC_NAME)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_COMMANDS,
@@ -566,18 +553,6 @@ public class SendCommandTest extends TCKTest {
 							OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB);
 					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB,
 							setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VERB));
-
-					logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-							OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME);
-					testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME,
-							setResult(true, OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_NAME));
-
-					if (current.getDatatype() == DataType.Boolean.getNumber()) {
-						logger.debug("Check Req: {}:{}.", ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE,
-								OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE);
-						testResults.put(ID_OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE, setResult(
-								current.getBooleanValue(), OPERATIONAL_BEHAVIOR_DATA_COMMANDS_NCMD_REBIRTH_VALUE));
-					}
 				}
 
 				if (edgeBirthMetrics != null) {
