@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Ian Craggs
+ * Copyright (c) 2021, 2024 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -630,14 +630,15 @@ public class SessionEstablishmentTest extends TCKTest {
 			logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
 			logger.debug(
 					"Check Req: Every NBIRTH message MUST include a sequence number and it MUST have a value of 0.");
+			boolean hasSeq = sparkplugPayload.hasSeq();
 			seq = sparkplugPayload.getSeq();
-			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((seq == 0), PAYLOADS_NBIRTH_SEQ));
-			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((seq == 0), TOPICS_NBIRTH_SEQ_NUM));
+			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((hasSeq && seq == 0), PAYLOADS_NBIRTH_SEQ));
+			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((hasSeq && seq == 0), TOPICS_NBIRTH_SEQ_NUM));
 			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
-					setResult((seq >= 0 && seq <= 255), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
+					setResult((hasSeq && (seq >= 0 && seq <= 255)), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
 
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
-					setResult((seq >= 0 && seq <= 255), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
+					setResult((hasSeq && (seq >= 0 && seq <= 255)), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
 
 			logger.debug(
 					"Check Req: NBIRTH messages MUST include a payload timestamp that denotes the time at which the message was published.");
@@ -881,9 +882,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			logger.debug("Check Req: DBIRTH must include a sequence number");
 			prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_SEQ, NOT_EXECUTED);
 			if (!prevResult.contains(FAIL)) {
-				boolean bContains = (sparkplugPayload.getSeq() != -1);
 				if (prevResult.equals(NOT_EXECUTED)) {
-					testResults.put(ID_PAYLOADS_DBIRTH_SEQ, setResult(bContains, PAYLOADS_DBIRTH_SEQ));
+					testResults.put(ID_PAYLOADS_DBIRTH_SEQ, setResult(sparkplugPayload.hasSeq(), PAYLOADS_DBIRTH_SEQ));
 				}
 			}
 
@@ -894,12 +894,12 @@ public class SessionEstablishmentTest extends TCKTest {
 			if (!prevResult.contains(FAIL)) {
 				boolean bSeqValid = false;
 				if (seq != 255) {
-					if (sparkplugPayload.getSeq() == (seq + 1)) {
+					if (sparkplugPayload.hasSeq() && (sparkplugPayload.getSeq() == (seq + 1))) {
 						bSeqValid = true;
 						seq = sparkplugPayload.getSeq();
 					}
 				} else {
-					if (sparkplugPayload.getSeq() == 0) {
+					if (sparkplugPayload.hasSeq() && (sparkplugPayload.getSeq() == 0)) {
 						bSeqValid = true;
 						seq = sparkplugPayload.getSeq();
 					}

@@ -1,6 +1,6 @@
 
 /**
- * Copyright (c) 2022 Anja Helmbrecht-Schaar, Ian Craggs
+ * Copyright (c) 2022, 2024 Anja Helmbrecht-Schaar, Ian Craggs
  * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -341,9 +341,11 @@ public class SendComplexDataTest extends TCKTest {
 			isValid = false;
 			logger.error("Check req set for : {}", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
 		} else {
-			if (result.getSeq() >= 0) {
-				isValid = true;
-			} else if (result.getSeq() == seqUnassigned && topic.contains(TOPIC_PATH_NDEATH)) {
+			if (result.hasSeq()) {
+				if (result.getSeq() >= 0 && result.getSeq() <= 255) {
+					isValid = true;
+				}
+			} else if (topic.contains(TOPIC_PATH_NDEATH)) {
 				isValid = true;
 			}
 		}
