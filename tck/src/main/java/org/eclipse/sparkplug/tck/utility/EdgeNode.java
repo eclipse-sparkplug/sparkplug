@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2024 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -9,6 +9,7 @@
  *
  * Contributors:
  *    Ian Craggs - initial implementation and documentation
+ *    Ian Craggs - don't send template definitions in DBIRTH
  *******************************************************************************/
 
 package org.eclipse.sparkplug.tck.utility;
@@ -74,9 +75,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpecVersion(
-		spec = "sparkplug",
-		version = "3.0.0")
+@SpecVersion(spec = "sparkplug", version = "3.0.0")
 public class EdgeNode {
 
 	private static final Logger logger = LoggerFactory.getLogger("Sparkplug");
@@ -194,7 +193,7 @@ public class EdgeNode {
 			logger.info("Edge node " + edge_node_id + " does not exist");
 			return;
 		}
-		// The intention here is to "disconnect" without sending the MQTT disconnect packet
+		// The intention here is to "disconnect" without sending the MQTT disconnect
 		// Will this work?
 		// Publishing NDEATH - cause we gracefully disconnect
 		String deathTopic = TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/NDEATH/" + edge_node_id;
@@ -291,8 +290,8 @@ public class EdgeNode {
 		// Publish edgeNode birth message
 		byte[] payload = createDeviceBirthPayload();
 		MqttMessage mqttmessage = new MqttMessage(payload);
-		device_topic =
-				edge.getTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + deviceId);
+		device_topic = edge
+				.getTopic(TOPIC_ROOT_SP_BV_1_0 + "/" + group_id + "/DBIRTH/" + edge_node_id + "/" + deviceId);
 		device_topic.publish(mqttmessage);
 
 		logger.info("Device {} successfully created", deviceId);
@@ -317,8 +316,8 @@ public class EdgeNode {
 		seq = 0;
 
 		// Create the BIRTH payload and set the position and other metrics
-		SparkplugBPayload payload =
-				new SparkplugBPayload(new Date(), new ArrayList<Metric>(), getNextSeqNum(), newUUID(), null);
+		SparkplugBPayload payload = new SparkplugBPayload(new Date(), new ArrayList<Metric>(), getNextSeqNum(),
+				newUUID(), null);
 
 		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) birthBdSeq).createMetric());
 		payload.addMetric(new MetricBuilder("Node Control/Rebirth", Boolean, false).createMetric());
@@ -326,17 +325,22 @@ public class EdgeNode {
 		payload.addMetric(new MetricBuilder("TCK_metric/Boolean", Boolean, true).createMetric());
 		payload.addMetric(new MetricBuilder("TCK_metric/Int32", Int32, 0).createMetric());
 
-		PropertySet propertySet =
-				new PropertySetBuilder().addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
-						.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
-						.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
-						/*
-						 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
-						 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0)) .addProperty("CustC",
-						 * new PropertyValue(PropertyDataType.Int32, 100))
-						 */
-						.createPropertySet();
+		PropertySet propertySet = new PropertySetBuilder()
+				.addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
+				.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
+				.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
+				/*
+				 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
+				 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0))
+				 * .addProperty("CustC", new PropertyValue(PropertyDataType.Int32, 100))
+				 */
+				.createPropertySet();
 		payload.addMetric(new MetricBuilder("Metric", String, "My Value").properties(propertySet).createMetric());
+
+		payload.addMetric(new MetricBuilder("TemplateDef", Template, newTemplate(true, null)).createMetric());
+		
+		// Template definitions must be in the Node Birth, not in the Device Birth
+		payload.addMetrics(newComplexTemplateDef());
 
 		payload.setTimestamp(new Date());
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
@@ -353,8 +357,8 @@ public class EdgeNode {
 
 	private byte[] createDeviceBirthPayload() throws Exception {
 		// Create the payload and add some metrics
-		SparkplugBPayload payload =
-				new SparkplugBPayload(new Date(), newMetrics(true), getNextSeqNum(), newUUID(), null);
+		SparkplugBPayload payload = new SparkplugBPayload(new Date(), newMetrics(true), getNextSeqNum(), newUUID(),
+				null);
 
 		payload.addMetric(new MetricBuilder("EdgeNode Control/Rebirth", Boolean, false).createMetric());
 
@@ -375,16 +379,16 @@ public class EdgeNode {
 		payload.addMetric(new MetricBuilder("Properties/hw_version", String, HW_VERSION).createMetric());
 		payload.addMetric(new MetricBuilder("Properties/sw_version", String, SW_VERSION).createMetric());
 
-		PropertySet propertySet =
-				new PropertySetBuilder().addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
-						.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
-						.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
-						/*
-						 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
-						 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0)) .addProperty("CustC",
-						 * new PropertyValue(PropertyDataType.Int32, 100))
-						 */
-						.createPropertySet();
+		PropertySet propertySet = new PropertySetBuilder()
+				.addProperty("engUnit", new PropertyValue(PropertyDataType.String, "My Units"))
+				.addProperty("engLow", new PropertyValue(PropertyDataType.Double, 1.0))
+				.addProperty("engHigh", new PropertyValue(PropertyDataType.Double, 10.0))
+				/*
+				 * .addProperty("CustA", new PropertyValue(PropertyDataType.String, "Custom A"))
+				 * .addProperty("CustB", new PropertyValue(PropertyDataType.Double, 10.0))
+				 * .addProperty("CustC", new PropertyValue(PropertyDataType.Int32, 100))
+				 */
+				.createPropertySet();
 		payload.addMetric(new MetricBuilder("MyMetric", String, "My Value").properties(propertySet).createMetric());
 
 		SparkplugBPayloadEncoder encoder = new SparkplugBPayloadEncoder();
@@ -409,20 +413,18 @@ public class EdgeNode {
 		metrics.add(new MetricBuilder("DateTime", DateTime, new Date()).createMetric());
 		metrics.add(new MetricBuilder("Text", Text, newUUID()).createMetric());
 		metrics.add(new MetricBuilder("UUID", UUID, newUUID()).createMetric());
-		// metrics.add(new MetricBuilder("Bytes", Bytes, randomBytes(20)).createMetric());
+		// metrics.add(new MetricBuilder("Bytes", Bytes,
+		// randomBytes(20)).createMetric());
 		// metrics.add(new MetricBuilder("File", File, null).createMetric());
 
 		// DataSet
 		metrics.add(new MetricBuilder("DataSet", DataSet, newDataSet()).createMetric());
-		if (isBirth) {
-			metrics.add(new MetricBuilder("TemplateDef", Template, newTemplate(true, null)).createMetric());
-		}
 
-		// Template
+		// Template instance
 		metrics.add(new MetricBuilder("TemplateInst", Template, newTemplate(false, "TemplateDef")).createMetric());
 
-		// Complex Template
-		metrics.addAll(newComplexTemplate(isBirth));
+		// Complex Template instance
+		metrics.addAll(newComplexTemplateInst());
 
 		// Metrics with properties
 		metrics.add(new MetricBuilder("IntWithProps", Int32, random.nextInt()).properties(
@@ -445,26 +447,29 @@ public class EdgeNode {
 		return metrics;
 	}
 
-	private List<Metric> newComplexTemplate(boolean withTemplateDefs) throws SparkplugInvalidTypeException {
+	private List<Metric> newComplexTemplateDef() throws SparkplugInvalidTypeException {
 		ArrayList<Metric> metrics = new ArrayList<Metric>();
-		if (withTemplateDefs) {
+		// Add a new template "subType" definition with two primitive members
+		metrics.add(new MetricBuilder("subType", Template,
+				new TemplateBuilder().definition(true)
+						.addMetric(new MetricBuilder("StringMember", String, "value").createMetric())
+						.addMetric(new MetricBuilder("IntegerMember", Int32, 0).createMetric()).createTemplate())
+								.createMetric());
+		// Add new template "newType" definition that contains an instance of "subType"
+		// as a member
+		metrics.add(
+				new MetricBuilder("newType", Template,
+						new TemplateBuilder().definition(true).addMetric(new MetricBuilder("mySubType", Template,
+								new TemplateBuilder().definition(false).templateRef("subType")
+										.addMetric(new MetricBuilder("StringMember", String, "value").createMetric())
+										.addMetric(new MetricBuilder("IntegerMember", Int32, 0).createMetric())
+										.createTemplate()).createMetric())
+								.createTemplate()).createMetric());
+		return metrics;
+	}
 
-			// Add a new template "subType" definition with two primitive members
-			metrics.add(new MetricBuilder("subType", Template,
-					new TemplateBuilder().definition(true)
-							.addMetric(new MetricBuilder("StringMember", String, "value").createMetric())
-							.addMetric(new MetricBuilder("IntegerMember", Int32, 0).createMetric()).createTemplate())
-									.createMetric());
-			// Add new template "newType" definition that contains an instance of "subType" as a member
-			metrics.add(new MetricBuilder("newType", Template,
-					new TemplateBuilder().definition(true).addMetric(new MetricBuilder("mySubType", Template,
-							new TemplateBuilder().definition(false).templateRef("subType")
-									.addMetric(new MetricBuilder("StringMember", String, "value").createMetric())
-									.addMetric(new MetricBuilder("IntegerMember", Int32, 0).createMetric())
-									.createTemplate()).createMetric())
-							.createTemplate()).createMetric());
-		}
-
+	private List<Metric> newComplexTemplateInst() throws SparkplugInvalidTypeException {
+		ArrayList<Metric> metrics = new ArrayList<Metric>();
 		// Add an instance of "newType
 		metrics.add(new MetricBuilder("myNewType", Template,
 				new TemplateBuilder().definition(false).templateRef("newType")
@@ -474,9 +479,7 @@ public class EdgeNode {
 										.addMetric(new MetricBuilder("IntegerMember", Int32, 1).createMetric())
 										.createTemplate()).createMetric())
 						.createTemplate()).createMetric());
-
 		return metrics;
-
 	}
 
 	private List<Parameter> newParams() throws SparkplugException {
@@ -577,7 +580,7 @@ public class EdgeNode {
 		}
 
 		public void connectionLost(Throwable cause) {
-			logger.debug("{} connection lost: {}", getName(),cause.getMessage());
+			logger.debug("{} connection lost: {}", getName(), cause.getMessage());
 		}
 
 		public void deliveryComplete(IMqttDeliveryToken token) {
