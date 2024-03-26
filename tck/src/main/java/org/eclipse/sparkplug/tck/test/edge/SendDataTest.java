@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ian Craggs
+ * Copyright (c) 2021, 2024 Ian Craggs
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -511,7 +511,7 @@ public class SendDataTest extends TCKTest {
 		if (payload != null) {
 			long seqNum = payload.getSeq();
 			bValidPayload[0] = true;
-			bValidPayload[1] = (seqNum >= 0 && seqNum <= 255);
+			bValidPayload[1] = payload.hasSeq() && (seqNum >= 0 && seqNum <= 255);
 			bValidPayload[2] = payload.hasTimestamp();
 			bValidPayload[3] = payload.hasTimestamp();
 			List<Metric> metrics = payload.getMetricsList();
