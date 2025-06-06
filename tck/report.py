@@ -312,6 +312,7 @@ if __name__ == "__main__":
     for file in files:
         if not file.endswith("TCKTest.java"):
             print("Processing", file)
+            file = file.replace("\\", "/")
             ids = process(file)
             #print(ids)
             if file.find("test/broker") != -1:
