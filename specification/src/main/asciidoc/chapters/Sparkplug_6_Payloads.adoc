@@ -309,7 +309,7 @@ message Payload {
 
         optional string   name            = 1;        // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
         optional uint64   alias           = 2;        // Metric alias - tied to name on BIRTH and included in all later DATA messages
-        optional uint64   timestamp       = 3;        // Timestamp associated with data acquisition time - if omitted, the overall payload timestamp is assumed as the data acquisition time
+        optional uint64   timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
         optional DataType datatype        = 4;        // DataType of the metric/tag value
         optional int32    quality         = 5;        // Quality code of the metric/tag value
         optional string   quality_context = 6;        // The optional quality context of the metric/tag value
@@ -494,6 +494,13 @@ nanoseconds since epoch (Jan 1, 1970).
 *** [tck-testable tck-id-payloads-timestamp-in-UTC]#[yellow-background]*[tck-id-payloads-timestamp-in-UTC] This
 timestamp MUST be in UTC.*#
 *** This timestamp represents the time at which the message was published.
+*** [tck-not-testable]#[yellow-background]*In an NBIRTH, NREBIRTH, DBIRTH, or DREBIRTH message, the
+payload timestamp MUST represent the time at which the message was published, and the values of all
+Metrics the message carries MUST be current as of that time.*#
+**** Non-normative comment: a BIRTH message therefore carries two distinct times. The payload
+timestamp is the point at which the reported values were current, and the timestamp of each Metric
+is the time that metric's value last changed. A consuming application needs both to know what a
+value is and how long it has held that value.
 ** _seq_
 *** This is the sequence number which is an unsigned 64-bit integer.
 **** [tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*[tck-id-payloads-sequence-num-always-included] A
@@ -661,12 +668,27 @@ DDATA, NCMD, and DCMD messages MUST only include an alias and the metric name MU
 * *timestamp*
 ** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
 nanoseconds since epoch (Jan 1, 1970).
+** [tck-not-testable]#[yellow-background]*In an NBIRTH, NREBIRTH, DBIRTH, DREBIRTH, NDATA, or DDATA
+message, the timestamp of a Metric MUST represent the metric value change time, meaning the time at
+which that metric's value last changed. It MUST NOT represent the time at which the value was read
+from the underlying device, nor the time at which the message carrying it was published.*#
+*** Non-normative comment: an Edge Node that knows when a metric's value last changed reports that
+time, including in a BIRTH message. This is what allows a single BIRTH to convey both the current
+values of an Edge Node's metrics and how long each of those values has been in effect.
 ** [tck-testable tck-id-payloads-name-birth-data-requirement]#[yellow-background]*[tck-id-payloads-name-birth-data-requirement] The
 timestamp MAY be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.*#
 *** If the timestamp is omitted from the Metric definition, the overall payload timestamp MUST be
-assumed as the data acquisition time.
-*** Non-normative comment: This timestamp represents the time at which the value of a metric was
-acquired for message types of NBIRTH, NREBIRTH, NDATA, NBIRTH, DREBIRTH, and DDATA.
+assumed as the metric value change time.
+*** Non-normative comment: the distinction between a metric value change time that an Edge Node has
+reported and one that a consuming application has substituted from the payload timestamp is carried
+by whether the field is present, not by its value. A consuming application that needs to know
+whether an Edge Node reports change times at all, for example in order to determine how long a value
+has held, checks for the presence of the field rather than comparing it against the payload
+timestamp.
+*** Non-normative comment: for message types of NBIRTH, NREBIRTH, DBIRTH, DREBIRTH, NDATA, and DDATA
+this timestamp represents the time at which the value of the metric last changed, which is not
+necessarily the time at which it was read from the underlying device or the time at which the
+message carrying it was published.
 ** [tck-testable tck-id-payloads-name-cmd-requirement]#[yellow-background]*[tck-id-payloads-name-cmd-requirement] The
 timestamp MAY be included with metrics in NCMD and DCMD messages.*#
 *** If the timestamp is omitted from the Metric definition, the overall payload timestamp MUST be

@@ -45,7 +45,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_P
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_HOST_TOPIC_PHID_DEATH_TOPIC;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_INTRO_SPARKPLUG_HOST_STATE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
@@ -71,7 +70,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_STATE_WILL_MESSAGE_RETAIN;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.INTRO_SPARKPLUG_HOST_STATE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_311;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_CLEAN_SESSION_50;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH;
@@ -178,8 +176,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			ID_PAYLOADS_STATE_BIRTH, ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD_TIMESTAMP,
 			ID_MESSAGE_FLOW_PHID_SPARKPLUG_STATE_PUBLISH_PAYLOAD, ID_PAYLOADS_STATE_BIRTH_PAYLOAD,
 			ID_HOST_TOPIC_PHID_BIRTH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_PAYLOAD_TIMESTAMP,
-			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED,
-			ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED);
+			ID_HOST_TOPIC_PHID_DEATH_REQUIRED, ID_HOST_TOPIC_PHID_BIRTH_SUB_REQUIRED);
 
 	private @NotNull String hostApplicationId;
 
@@ -302,9 +299,6 @@ public class SessionEstablishmentTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_STATE,
 			id = ID_HOST_TOPIC_PHID_BIRTH_REQUIRED)
-	@SpecAssertion(
-			section = Sections.OPERATIONAL_BEHAVIOR_PRIMARY_HOST_APPLICATION_SESSION_ESTABLISHMENT,
-			id = ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED)
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
 
 		// ignore messages before connect
@@ -314,10 +308,10 @@ public class SessionEstablishmentTest extends TCKTest {
 
 		if (hostClientId.equals(clientId)) {
 			if (state == HostState.PUBLISHED) {
-				final boolean overallPass = checkBirthMessage(packet);
-
-				testResults.put(ID_MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED,
-						setResult(overallPass, MESSAGE_FLOW_HID_SPARKPLUG_STATE_MESSAGE_DELIVERED));
+				// The assertion previously recorded here, message-flow-hid-sparkplug-state-message-delivered,
+				// was replaced in the specification by the operational-behavior-hid-state-* assertions.
+				// This check needs rewriting against those; see the Sparkplug v4 TCK rewrite.
+				checkBirthMessage(packet);
 				theTCK.endTest("resend good");
 			} else {
 				logger.info("Primary - {} test - PUBLISH - topic: {}, state: {} ", getName(), packet.getTopic(), state);

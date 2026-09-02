@@ -29,8 +29,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NDATA_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_REF;
@@ -59,8 +57,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_SEQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NDATA_TIMESTAMP;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_MEMBERS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_NBIRTH;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_REF;
@@ -139,11 +135,11 @@ public class SendDataTest extends TCKTest {
 					ID_TOPICS_DDATA_MQTT, ID_TOPICS_DDATA_SEQ_NUM, ID_TOPICS_DDATA_TIMESTAMP_1, ID_TOPICS_DDATA_PAYLOAD,
 					ID_PAYLOADS_NDATA_TIMESTAMP, ID_PAYLOADS_NDATA_SEQ, ID_PAYLOADS_NDATA_QOS, ID_PAYLOADS_NDATA_RETAIN,
 					ID_PAYLOADS_DDATA_TIMESTAMP, ID_PAYLOADS_DDATA_SEQ, ID_PAYLOADS_DDATA_QOS, ID_PAYLOADS_DDATA_RETAIN,
-					ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY, ID_PAYLOADS_TEMPLATE_DEFINITION_REF,
-					ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT, ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY,
+					ID_PAYLOADS_TEMPLATE_DEFINITION_REF,
+					ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT,
 					ID_PAYLOADS_TEMPLATE_INSTANCE_REF, ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS,
 					ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA,
-					ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH, ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS,
+					ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS,
 					ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS, ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS,
 					ID_TOPICS_NDATA_TOPIC, ID_TOPICS_DDATA_TOPIC, ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC);
 
@@ -531,9 +527,6 @@ public class SendDataTest extends TCKTest {
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_TEMPLATE,
-			id = ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_REF)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_TEMPLATE,
@@ -544,9 +537,6 @@ public class SendDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
-			id = ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS)
@@ -563,8 +553,11 @@ public class SendDataTest extends TCKTest {
 			String msgtype) {
 		Payload.Template definition = null;
 		if (instance.hasIsDefinition() && instance.getIsDefinition()) {
-			setResultIfNotFail(testResults, !msgtype.equals(TOPIC_PATH_NBIRTH),
-					ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY, PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY);
+		// The assertions previously recorded here, payloads-template-definition-nbirth-only and
+		// payloads-template-definition-nbirth, were replaced in the specification by
+		// payloads-template-definition-nmeta-only and payloads-template-definition-nmeta, which
+		// require Template definitions in the NMETA rather than the NBIRTH. The v3 TCK has no NMETA
+		// concept, so these checks need rewriting; see the Sparkplug v4 TCK rewrite.
 		} else {
 			if (!instance.hasTemplateRef()) {
 				setResultIfNotFail(testResults, false, ID_PAYLOADS_TEMPLATE_INSTANCE_REF,
@@ -575,9 +568,6 @@ public class SendDataTest extends TCKTest {
 
 				setResultIfNotFail(testResults, defFound, ID_PAYLOADS_TEMPLATE_INSTANCE_REF,
 						PAYLOADS_TEMPLATE_INSTANCE_REF);
-
-				setResultIfNotFail(testResults, defFound, ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH,
-						PAYLOADS_TEMPLATE_DEFINITION_NBIRTH);
 
 				if (defFound) {
 					definition = definitions.get(defname);
@@ -669,17 +659,11 @@ public class SendDataTest extends TCKTest {
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_TEMPLATE,
-			id = ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_REF)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT)
 	public void checkNBIRTH(String clientId, PublishPacket packet) {
-
-		setResultIfNotFail(testResults, true, ID_PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY,
-				PAYLOADS_TEMPLATE_DEFINITION_NBIRTH_ONLY);
 
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 
