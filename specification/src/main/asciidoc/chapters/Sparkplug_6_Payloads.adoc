@@ -311,7 +311,7 @@ message Payload {
         optional uint64   alias           = 2;        // Metric alias - tied to name on BIRTH and included in all later DATA messages
         optional uint64   timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
         optional DataType datatype        = 4;        // DataType of the metric/tag value
-        optional int32    quality         = 5;        // Quality code of the metric/tag value
+        optional uint32   quality         = 5;        // Quality code of the metric/tag value - severity in bits 30-31
         optional string   quality_context = 6;        // The optional quality context of the metric/tag value
         optional string   source          = 7;        // Source for CMD messages if unique to the Metric (typically for forwarded writes in CMD messages)
         optional bool     is_historical   = 8;        // If this is historical data and should not update real time tag
@@ -708,21 +708,12 @@ datatype MUST be included with each metric definition in NBIRTH and DBIRTH messa
 ** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*[tck-id-payloads-metric-datatype-not-req] The
 datatype SHOULD NOT be included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *quality*
-** This defines the quality of the value associated with the metric. This property is optional and
-is only required if the quality of the metric is not GOOD. If the quality is not present, it is
-implicitly GOOD.
-** There are three defined qualities. These are defined below with their associated meanings.
-*** *0*
-**** BAD
-*** *192*
-**** GOOD
-*** *500*
-**** STALE
-** [tck-testable tck-id-payloads-quality-value]#[yellow-background]*[tck-id-payloads-quality-value] The
-value of quality MUST be an int32.*#
+** This defines the quality of the value associated with the metric. It is defined in the
+link:#payloads_c_quality[Quality] section. This property is optional and is only required if the
+quality of the metric is not Good. If the quality is not present, it is implicitly Good.
 * *quality_context*
 ** This is an optional string value used to provide additional context to the quality code of the
-metric.
+metric. It is defined in the link:#payloads_c_quality[Quality] section.
 * *source*
 ** This is the source field which represents the Sparkplug Host Application ID of the publisher for
 NCMD, DCMD, and REBIRTH messages if it differs from the overall payload source value. This may be
@@ -766,6 +757,102 @@ can be found here: https://developers.google.com/protocol-buffers/docs/proto#sca
 **** Defined link:#payloads_c_dataset[here].
 *** Sparkplug _Template_
 **** Defined link:#payloads_c_template[here].
+
+[[payloads_c_quality]]
+==== Quality
+
+The quality of a Metric's value is carried in the quality field of that Metric, with optional
+diagnostic text in quality_context. A quality code is a 32-bit unsigned value whose two most
+significant bits carry a _severity_ and whose remaining bits carry a _subcode_ identifying the
+specific condition. The severity is what a consuming application acts on; the subcode tells it why.
+
+Sparkplug uses the quality code numbering defined by OPC UA for its StatusCode type. Adopting an
+existing numbering rather than defining a new one means that the large number of Sparkplug Edge
+Nodes which acquire data from OPC UA servers, or which are themselves fronting an OPC UA address
+space, can report a value's quality without translating it.
+
+[[payloads_c_quality_severity]]
+===== Severity
+
+* [tck-testable tck-id-payloads-quality-severity-valid]#[yellow-background]*[tck-id-payloads-quality-severity-valid] The
+two most significant bits of a quality code, bits 30 and 31, MUST be one of the following values.
+The value 11 is reserved and MUST NOT be published.*#
+
+[cols="1,2,3",options="header"]
+|===
+|*Bits 30-31* |*Severity* |*Meaning*
+|00 |Good |The value is usable.
+|01 |Uncertain |The value is usable but its accuracy or currency is in doubt.
+|10 |Bad |The value is not usable.
+|11 |(reserved) |MUST NOT be published.
+|===
+
+* [tck-not-testable tck-id-payloads-quality-severity-authoritative]#[yellow-background]*[tck-id-payloads-quality-severity-authoritative] A consuming application MUST determine whether a Metric's
+value is usable from the severity alone, and MUST NOT require recognition of the subcode in order to
+do so.*#
+** Non-normative comment: this is what allows an Edge Node to report a specific condition without
+every consuming application needing to know that condition. A consuming application that does not
+recognize a subcode still handles the value correctly, because the severity is unambiguous. It is
+also why this specification names only the quality codes below rather than enumerating every code
+OPC UA defines.
+* [tck-not-testable tck-id-payloads-quality-absent-good]#[yellow-background]*[tck-id-payloads-quality-absent-good] A quality code that is not present MUST be interpreted as
+Good.*#
+** Non-normative comment: the Good severity is the value 0, so an absent quality field and a quality
+field containing Good carry the same meaning. An Edge Node therefore only needs to include the field
+when the quality of a value is something other than Good.
+
+[[payloads_c_quality_codes]]
+===== Quality Codes
+
+* [tck-not-testable tck-id-payloads-quality-recognized-codes]#[yellow-background]*[tck-id-payloads-quality-recognized-codes] A consuming application MUST recognize the following quality
+codes. An Edge Node MAY publish any quality code defined by OPC UA for its StatusCode type, and a
+consuming application MUST handle a code that is not listed here according to its severity.*#
+
+[cols="2,1,1,3",options="header"]
+|===
+|*Quality Code* |*Value* |*Severity* |*Meaning*
+|Good |0x00000000 |Good |The value is usable.
+|Uncertain |0x40000000 |Uncertain |The value is usable but in doubt, for an unspecified reason.
+|UncertainLastUsableValue |0x40900000 |Uncertain |The value is the last one known to be usable. This
+is the quality code that denotes a STALE value.
+|UncertainInitialValue |0x40920000 |Uncertain |The value is an initial value and has not yet been
+acquired from the source.
+|UncertainSensorNotAccurate |0x40930000 |Uncertain |The value is outside the operating range of the
+sensor that produced it.
+|Bad |0x80000000 |Bad |The value is not usable, for an unspecified reason.
+|BadNoCommunication |0x80310000 |Bad |Communication with the source of the value is not established.
+|BadNotConnected |0x808A0000 |Bad |The source of the value is not connected.
+|BadDeviceFailure |0x808B0000 |Bad |The device that produces the value has failed.
+|BadSensorFailure |0x808C0000 |Bad |The sensor that produces the value has failed.
+|BadOutOfService |0x808D0000 |Bad |The source of the value is out of service.
+|===
+
+* [tck-not-testable tck-id-payloads-quality-stale-code]#[yellow-background]*[tck-id-payloads-quality-stale-code] A value that this specification describes as STALE MUST be
+denoted by the UncertainLastUsableValue quality code.*#
+** Non-normative comment: a STALE value is one that was accurate when it was acquired but can no
+longer be confirmed as current, which is why its severity is Uncertain rather than Bad. The
+circumstances in which a Host Application marks a value STALE are described in the
+link:#operational_behavior[Operational Behavior] chapter.
+
+Non-normative comment: earlier versions of this specification defined three quality values of 0 for
+BAD, 192 for GOOD, and 500 for STALE, which were derived from OPC DA rather than OPC UA. Those
+values are not valid quality codes in this version. Note in particular that 0 denoted BAD in the
+earlier scheme and denotes Good in this one. The two are never encountered together, because a
+quality code is carried in a Metric field that exists only in this version of the specification, and
+because an Edge Node publishes under a namespace that identifies which version of the specification
+it implements.
+
+[[payloads_c_quality_context]]
+===== Quality Context
+
+* [tck-not-testable tck-id-payloads-quality-context-not-required]#[yellow-background]*[tck-id-payloads-quality-context-not-required] The quality_context is an optional UTF-8 string carrying
+diagnostic information about a quality code. A consuming application MUST NOT require the
+quality_context in order to interpret a quality code, and MUST NOT rely on any particular content or
+format within it.*#
+** Non-normative comment: the quality_context is intended for a person diagnosing a problem, and
+typically carries something like the identifier of the failed source or the text of an error
+reported by an underlying protocol. The quality code itself carries everything a consuming
+application needs in order to act.
 
 [[payloads_c_metadata]]
 ==== MetaData

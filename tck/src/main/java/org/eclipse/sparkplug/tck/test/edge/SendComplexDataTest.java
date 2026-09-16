@@ -38,8 +38,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_MET
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAME_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_QUALITY_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_QUALITY_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DATASET_VALUE;
@@ -76,8 +74,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_REQUIREMENT;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_QUALITY_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_QUALITY_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DATASET_VALUE;
@@ -146,8 +142,7 @@ public class SendComplexDataTest extends TCKTest {
 			ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE, ID_PAYLOADS_METRIC_DATATYPE_VALUE,
 			ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE, ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE,
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE, ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,
-			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ, ID_PAYLOADS_QUALITY_VALUE,
-			ID_PAYLOADS_QUALITY_VALUE, ID_PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT,
+			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ, ID_PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT,
 			ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ, ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT, ID_PAYLOADS_NAME_REQUIREMENT,
 			ID_PAYLOADS_DATASET_COLUMN_SIZE, ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS, ID_PAYLOADS_DATASET_TYPES_DEF,
 			ID_PAYLOADS_DATASET_TYPES_TYPE, ID_PAYLOADS_DATASET_TYPES_VALUE, ID_PAYLOADS_DATASET_TYPES_NUM,
@@ -421,18 +416,11 @@ public class SendComplexDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_PROPERTYVALUE,
 			id = ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
-			id = ID_PAYLOADS_QUALITY_VALUE)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
-			id = ID_PAYLOADS_QUALITY_VALUE)
 	public void checkPropertiesValidType(final @NotNull PublishPacket packet, String topic) {
 		boolean isValid_KeyArraySize = true;
 		boolean isValid_PropertyValueType = true;
 		boolean isValid_PropertyValueTypeValue = true;
 		boolean isValid_PropertyValueTypeReq = true;
-		boolean qualityCodeSettingIsUsed = false;
 
 		logger.debug("Check Req: {} The datatype MUST be an unsigned 32-bit integer representing the datatype.",
 				ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE);
@@ -466,9 +454,6 @@ public class SendComplexDataTest extends TCKTest {
 						&& m.getProperties().getValuesList().size() != m.getProperties().getKeysList().size()) {
 					isValid_KeyArraySize = false;
 				}
-				// execute always, but set only if one is true
-				qualityCodeSettingIsUsed = checkQualityCodeRequirement(m) || qualityCodeSettingIsUsed;
-
 				for (int i = 0; i < m.getProperties().getValuesCount(); i++) {
 					final Payload.PropertyValue propertyValue = m.getProperties().getValues(i);
 					if(!Utils.hasValidDatatype(propertyValue)){
@@ -482,14 +467,6 @@ public class SendComplexDataTest extends TCKTest {
 				}
 			}
 		}
-		if (!qualityCodeSettingIsUsed) {
-			// option was not used -so test is than passed by default - otherwise the result is set in the subroutine
-			testResults.put(ID_PAYLOADS_QUALITY_VALUE,
-					setResult(true, PAYLOADS_QUALITY_VALUE));
-			testResults.put(ID_PAYLOADS_QUALITY_VALUE,
-					setResult(true, PAYLOADS_QUALITY_VALUE));
-
-		}
 		testResults.put(ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE,
 				setResult(isValid_KeyArraySize, PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE));
 		testResults.put(ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE,
@@ -501,31 +478,10 @@ public class SendComplexDataTest extends TCKTest {
 
 	}
 
-	private boolean checkQualityCodeRequirement(Metric m) {
-		// optional key - but if it is used - it must fit to requirements
-		boolean qualityCodeSettingIsUsed = false;
-		for (int i = 0; i < m.getProperties().getValuesCount(); i++) {
-			final String key = m.getProperties().getKeys(i);
-			if (key.equals(PROPERTY_KEY_QUALITY)) {
-				final Payload.PropertyValue propertyValue = m.getProperties().getValues(i);
-				logger.debug(
-						"Check: Req: Property Value MUST be a value of 3 which represents a Signed 32-bit Integer.");
-				if (!(propertyValue.getType() == Payload.PropertyValue.ValueCase.LONG_VALUE.getNumber())) {
-					testResults.put(ID_PAYLOADS_QUALITY_VALUE,
-							setResult(false, PAYLOADS_QUALITY_VALUE));
-				}
-				logger.debug(
-						"Check: Req: 'value' of the Property Value MUST be an int_value and be one of the valid quality codes of 0, 192, or 500.");
-				if (!(propertyValue.getLongValue() == 0 || propertyValue.getLongValue() == 192
-						|| propertyValue.getLongValue() == 500)) {
-					testResults.put(ID_PAYLOADS_QUALITY_VALUE,
-							setResult(false, PAYLOADS_QUALITY_VALUE));
-				}
-				qualityCodeSettingIsUsed = true;
-			}
-		}
-		return qualityCodeSettingIsUsed;
-	}
+	// The assertion previously checked here, payloads-quality-value, tested quality carried as a
+	// PropertySet property named "Quality" with the values 0, 192 or 500. In this version of the
+	// specification quality is a Metric field carrying an OPC UA StatusCode, so this check no longer
+	// corresponds to anything the specification defines; see the Sparkplug v4 TCK rewrite.
 
 	@SpecAssertion(
 			section = Sections.PAYLOADS_C_METRIC,
