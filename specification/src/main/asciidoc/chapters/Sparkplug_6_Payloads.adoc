@@ -1028,6 +1028,48 @@ A Sparkplug B Template is used for encoding complex datatypes in a payload. It i
 and can be used to create custom datatype definitions and instances. These are also sometimes
 referred to as 'User Defined Types' or UDTs. There are two types of Templates.
 
+Non-normative comment: The model is the same one found in most type systems. A Template Definition
+declares a type once. A Template Instance is a value of that type, and there may be any number of
+them. The Definition is a metric in the Edge Node's NMETA whose name is the name of the type, and it
+carries no metric values. An Instance is declared, like any other metric, in the NMETA or DMETA that
+describes the Edge Node or Device it belongs to, and carries its values in the BIRTH and DATA
+messages; it names the type it is an instance of in its template_ref. So a Definition answers
+'what does a motor look like', and each Instance answers 'here is a particular motor'.
+
+Non-normative comment: A Template carries two different kinds of members, and the distinction
+matters when designing a type. The _metrics_ of a Template are its data, and an Instance reports a
+value for each of them. The _parameters_ of a Template are configuration that describes a particular
+Instance rather than data that changes as the process runs, such as a manufacturer, a serial number,
+or an engineering-unit range. A Definition MAY give a parameter a value, which then acts as the
+default for every Instance that does not supply its own. A rule of thumb is that anything a
+consuming application would want to trend or alarm on is a metric, and anything it would want in
+order to label or scale that trend is a parameter.
+
+Non-normative comment: A Template member may itself be a Template, which is how a type composes
+other types. A member that is itself a Template is an Instance of the member type, whether it
+appears in a Definition or in an Instance, so it has is_definition set to false and its template_ref
+names that type. A member cannot be a Definition, because a Definition omits template_ref and so
+could not say which type the member is. Nesting can be carried to any depth, though a deeply nested
+type is correspondingly harder for a consuming application to present, and the flatter alternatives
+described in the link:#payloads_c_template_choosing[Choosing How to Express Structure] section are
+often a better fit.
+
+Non-normative comment: A Template Definition is scoped to the Edge Node that publishes it, so
+nothing in Sparkplug prevents two Edge Nodes from publishing different Definitions under the same
+type name. A consuming application that treats a type name as meaningful across an infrastructure,
+for example by creating one type in its own data model for each Definition name it encounters,
+cannot reconcile them. Where more than one Edge Node publishes a Definition of the same name and
+version, those Definitions should be structurally identical: the same members with the same names
+and datatypes, and the same parameters. Two Definitions that share a name and a version but differ
+in structure are a configuration error that Sparkplug itself cannot detect, because no Edge Node has
+visibility of what any other Edge Node has defined.
+
+Non-normative comment: Where a type genuinely differs between Edge Nodes, it should be given either
+a different name or a different version, so that a consuming application can tell the two apart
+rather than silently treating one as the other. Distinguishing revisions of a same-named type across
+Edge Nodes is the clearest use of the version field, because the definition identifier is scoped to
+a single Edge Node's metadata and so cannot be compared between them.
+
 * *Template Definition*
 ** This is the definition of a Sparkplug Template.
 *** [tck-testable tck-id-payloads-template-definition-nmeta-only]#[yellow-background]*[tck-id-payloads-template-definition-nmeta-only] Template
@@ -1088,6 +1130,12 @@ A Sparkplug Template includes the following components.
 ** This is an optional field and can be included in a Template Definition or Template Instance.
 ** [tck-testable tck-id-payloads-template-version]#[yellow-background]*[tck-id-payloads-template-version] If
 included, the version MUST be a UTF-8 string representing the version of the Template.*#
+** Non-normative comment: The version is not a substitute for the definition identifier, and the two
+serve different purposes. The definition identifier is a content hash that changes automatically
+whenever a Definition changes, and it is what a consuming application uses to detect that a type has
+changed. The version is a string an implementer sets by hand and which Sparkplug does not interpret.
+It remains useful for communicating a type's revision to a person, or for carrying a version from an
+external type system through Sparkplug unchanged.
 * *metrics*
 ** This is an array of metrics representing the members of the Template. These can be primitive
 datatypes or other Templates as required.
@@ -1102,12 +1150,247 @@ MUST be a UTF-8 string representing a reference to a Template Definition name if
 Instance.*#
 * *is_definition*
 ** This is a Boolean representing whether this is a Template definition or a Template instance.
+** Non-normative comment: This field, together with template_ref, is what distinguishes the two. A
+Definition has is_definition true and no template_ref. An Instance has is_definition false and a
+template_ref naming its Definition.
 ** [tck-testable tck-id-payloads-template-is-definition]#[yellow-background]*[tck-id-payloads-template-is-definition] This
 MUST be included in every Template Definition and Template Instance.*#
 ** [tck-testable tck-id-payloads-template-is-definition-definition]#[yellow-background]*[tck-id-payloads-template-is-definition-definition] This
 MUST be set to true if this is a Template Definition.*#
 ** [tck-testable tck-id-payloads-template-is-definition-instance]#[yellow-background]*[tck-id-payloads-template-is-definition-instance] This
 MUST be set to false if this is a Template Instance.*#
+
+[[payloads_c_template_example]]
+===== Template Example
+
+The following is a non-normative example of a Template Definition and Template Instances of it,
+shown as the four messages that carry them. The Edge Node's NBIRTH is not shown, which is why the
+sequence numbers below skip 1.
+
+The Definition declares a type named 'MotorType' with three metrics and one parameter, and appears
+in the Edge Node's NMETA. It carries no metric values, because a Definition describes structure
+only.
+
+----
+Acme/Dublin/Packaging/spCv4.0/NMETA/EdgeNode1
+----
+
+----
+{
+        "header": {
+                "timestamp": 1486144502122000000,
+                "seq": 0,
+                "bd_seq": 0,
+                "descriptor_seq": 0,
+                "definition_id": "9f2c...e2"
+        },
+        "content": {
+                "metrics": [{
+                        "name": "MotorType",
+                        "dataType": "Template",
+                        "template": {
+                                "version": "1.0",
+                                "is_definition": true,
+                                "parameters": [{
+                                        "name": "Manufacturer",
+                                        "type": "String",
+                                        "value": "Acme"
+                                }],
+                                "metrics": [{
+                                        "name": "RPM",
+                                        "dataType": "Int32"
+                                }, {
+                                        "name": "AmpDraw",
+                                        "dataType": "Float"
+                                }, {
+                                        "name": "Running",
+                                        "dataType": "Boolean"
+                                }]
+                        }
+                }]
+        }
+}
+----
+
+A Sparkplug Device then declares two motors as Instances of that type in its DMETA. As with any
+metric, the DMETA carries structure only: each Instance sets is_definition to false and names
+'MotorType' in its template_ref, and no values appear.
+
+----
+Acme/Dublin/Packaging/spCv4.0/DMETA/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": 1486144502122000000,
+                "seq": 2,
+                "bd_seq": 0,
+                "descriptor_seq": 0,
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "name": "Motors/Conveyor",
+                        "dataType": "Template",
+                        "template": {
+                                "version": "1.0",
+                                "is_definition": false,
+                                "template_ref": "MotorType"
+                        }
+                }, {
+                        "name": "Motors/Filler",
+                        "dataType": "Template",
+                        "template": {
+                                "version": "1.0",
+                                "is_definition": false,
+                                "template_ref": "MotorType"
+                        }
+                }]
+        }
+}
+----
+
+The Device's DBIRTH then reports a value for every metric of each Instance, referencing that DMETA
+through its definition_id. The first Instance overrides the Manufacturer parameter; the second omits
+it and so takes the default of 'Acme' from the Definition.
+
+----
+Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": 1486144502122000000,
+                "seq": 3,
+                "bd_seq": 0,
+                "descriptor_seq": 1,
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "name": "Motors/Conveyor",
+                        "dataType": "Template",
+                        "template": {
+                                "version": "1.0",
+                                "is_definition": false,
+                                "template_ref": "MotorType",
+                                "parameters": [{
+                                        "name": "Manufacturer",
+                                        "type": "String",
+                                        "value": "Globex"
+                                }],
+                                "metrics": [{
+                                        "name": "RPM",
+                                        "dataType": "Int32",
+                                        "value": 1780
+                                }, {
+                                        "name": "AmpDraw",
+                                        "dataType": "Float",
+                                        "value": 12.4
+                                }, {
+                                        "name": "Running",
+                                        "dataType": "Boolean",
+                                        "value": true
+                                }]
+                        }
+                }, {
+                        "name": "Motors/Filler",
+                        "dataType": "Template",
+                        "template": {
+                                "version": "1.0",
+                                "is_definition": false,
+                                "template_ref": "MotorType",
+                                "metrics": [{
+                                        "name": "RPM",
+                                        "dataType": "Int32",
+                                        "value": 900
+                                }, {
+                                        "name": "AmpDraw",
+                                        "dataType": "Float",
+                                        "value": 7.1
+                                }, {
+                                        "name": "Running",
+                                        "dataType": "Boolean",
+                                        "value": false
+                                }]
+                        }
+                }]
+        }
+}
+----
+
+A subsequent DDATA reporting only a change to the conveyor motor's RPM may carry just that member,
+because a Template Instance in a DATA message MAY include a subset of the Definition's metrics.
+
+----
+Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": 1486144502122000000,
+                "seq": 4,
+                "bd_seq": 0,
+                "descriptor_seq": 2,
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "name": "Motors/Conveyor",
+                        "dataType": "Template",
+                        "template": {
+                                "is_definition": false,
+                                "template_ref": "MotorType",
+                                "metrics": [{
+                                        "name": "RPM",
+                                        "dataType": "Int32",
+                                        "value": 1802
+                                }]
+                        }
+                }]
+        }
+}
+----
+
+[[payloads_c_template_choosing]]
+===== Choosing How to Express Structure
+
+Non-normative comment: Sparkplug offers three ways to express that data is structured, and they are
+not so much alternatives to one another as choices about where the structure lives.
+
+A Template expresses structure in the type system. It is the right choice when the same shape
+recurs, such as many motors, many tanks, or many valves, because a consuming application can
+recognize the type and present every instance of it the same way.
+
+A forward-slash delimited metric name expresses structure in the name. It is the right choice for
+one-off hierarchy that does not recur, where there is no reuse to justify declaring a type.
+
+Additional device_tokens levels express structure in the topic, as described in the
+link:#topics_device_tokens_element[device_tokens Element] section. This is the right choice when a
+consuming application should be able to subscribe to part of the structure without receiving the
+rest.
+
+These compose. A Sparkplug Device addressed by device_tokens may report Template Instances whose
+metric names carry a folder path. A useful way to choose is to ask what a consuming application
+needs. If it needs to recognize a recurring shape, use a Template. If it needs to subscribe to a
+subset, use device_tokens. If it needs neither, a metric name is sufficient.
+
+Non-normative comment: Of the three, a Template is the only one that is not interchangeable with the
+others. The split between metric-name folders and device_tokens may be changed without altering a
+metric's fully-qualified name, as described in the
+link:#topics_device_tokens_element[device_tokens Element] section. Moving data into or out of a
+Template changes the payload structure and the definition identifier, and therefore requires
+consuming applications to resynchronize.
+
+Non-normative comment: Because a Template Definition is part of an Edge Node's metric structure, any
+change to a Definition changes the definition identifier of the NMETA that carries it, as required
+in the link:#payloads_c_definition_identifier[Definition Identifier] section. Every consuming
+application then re-resolves that Edge Node's metadata. Adding a member to a widely instantiated
+type is therefore more disruptive than its size suggests, and it is worth designing a Template with
+the members it will eventually need.
 
 [[payloads_c_template_parameter]]
 ==== Template.Parameter
