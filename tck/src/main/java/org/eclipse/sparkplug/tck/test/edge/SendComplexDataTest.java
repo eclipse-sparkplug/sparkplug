@@ -485,9 +485,9 @@ public class SendComplexDataTest extends TCKTest {
 		}
 		if (!qualityCodeSettingIsUsed) {
 			// option was not used -so test is than passed by default - otherwise the result is set in the subroutine
-			testResults.put(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE,
+			testResults.putIfAbsent(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE,
 					setResult(true, PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE));
-			testResults.put(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE,
+			testResults.putIfAbsent(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE,
 					setResult(true, PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE));
 
 		}
@@ -511,16 +511,18 @@ public class SendComplexDataTest extends TCKTest {
 				final Payload.PropertyValue propertyValue = m.getProperties().getValues(i);
 				logger.debug(
 						"Check: Req: Property Value MUST be a value of 3 which represents a Signed 32-bit Integer.");
-				if (!(propertyValue.getType() == Payload.PropertyValue.ValueCase.LONG_VALUE.getNumber())) {
+				boolean validType = propertyValue.getType() == DataType.Int32.getNumber();
+				if (!validType || !testResults.containsKey(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE)) {
 					testResults.put(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE,
-							setResult(false, PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE));
+							setResult(validType, PAYLOADS_PROPERTYSET_QUALITY_VALUE_TYPE));
 				}
 				logger.debug(
 						"Check: Req: 'value' of the Property Value MUST be an int_value and be one of the valid quality codes of 0, 192, or 500.");
-				if (!(propertyValue.getLongValue() == 0 || propertyValue.getLongValue() == 192
-						|| propertyValue.getLongValue() == 500)) {
+				boolean validValue = propertyValue.hasIntValue() && (propertyValue.getIntValue() == 0
+						|| propertyValue.getIntValue() == 192 || propertyValue.getIntValue() == 500);
+				if (!validValue || !testResults.containsKey(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE)) {
 					testResults.put(ID_PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE,
-							setResult(false, PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE));
+							setResult(validValue, PAYLOADS_PROPERTYSET_QUALITY_VALUE_VALUE));
 				}
 				qualityCodeSettingIsUsed = true;
 			}
