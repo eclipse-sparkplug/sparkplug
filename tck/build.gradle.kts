@@ -73,7 +73,13 @@ repositories {
     mavenCentral()
 }
 
+tasks.test {
+    useTestNG()
+}
+
 dependencies {
+    testImplementation("org.testng:testng:6.9.9")
+
     annotationProcessor("org.jboss.test-audit:jboss-test-audit-impl:${property("jboss.test-audit.version")}")
 
     implementation("com.google.protobuf:protobuf-java:${property("protobuf.version")}")
