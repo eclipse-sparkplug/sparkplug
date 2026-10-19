@@ -73,7 +73,15 @@ repositories {
     mavenCentral()
 }
 
+tasks.test {
+    useTestNG()
+}
+
 dependencies {
+    testImplementation("org.testng:testng:6.9.9")
+    testImplementation("org.mockito:mockito-inline:3.12.4")
+    testImplementation("com.hivemq:hivemq-extension-sdk:4.4.4")
+
     annotationProcessor("org.jboss.test-audit:jboss-test-audit-impl:${property("jboss.test-audit.version")}")
 
     implementation("com.google.protobuf:protobuf-java:${property("protobuf.version")}")
