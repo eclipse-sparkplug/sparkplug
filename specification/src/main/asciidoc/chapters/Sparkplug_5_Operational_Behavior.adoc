@@ -470,7 +470,8 @@ Edge Node's MQTT Will Message's topic MUST be of the form '[topic_prefix/]spCv4.
 where the optional topic_prefix is the Sparkplug Topic Prefix and the edge_node_id is the Sparkplug
 Edge Node ID for this Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-payload] The
-Edge Node's MQTT Will Message's payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+Edge Node's MQTT Will Message's payload MUST be a Sparkplug payload encoded as defined for the
+namespace on which it is published.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq] The
 Edge Node's MQTT Will Message's payload MUST include a bd_seq number in the payload and the value
 MUST be incremented by one from the value in the previous MQTT CONNECT packet unless the value would
@@ -566,7 +567,8 @@ Edge Node's NBIRTH MQTT topic MUST be of the form
 '[topic_prefix/]spCv4.0/NBIRTH/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
 Prefix and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload] The
-Edge Node's NBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+Edge Node's NBIRTH payload MUST be a Sparkplug payload encoded as defined for the namespace on
+which it is published.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-bdSeq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload-bdSeq] The
 Edge Node's NBIRTH payload MUST include a bd_seq number in the payload and the value MUST be the same
 as the bd_seq number value specified in the immediately previous MQTT CONNECT packet.*#
@@ -851,7 +853,8 @@ identify the Sparkplug Device.*#
 Device's DBIRTH MQTT topic topic_prefix and edge_node_id MUST match the topic_prefix and edge_node_id
 that were sent in the prior NBIRTH message for the Edge Node this Device is associated with.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-payload] The
-Device's DBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+Device's DBIRTH payload MUST be a Sparkplug payload encoded as defined for the namespace on which
+it is published.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-qos]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-qos] The
 Device's DBIRTH MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-retained]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-retained] The

@@ -378,7 +378,7 @@ JSON as follows:
                         "name": <metric_name>,
                         "alias": <alias>,
                         "timestamp": <timestamp>,
-                        "dataType": <datatype>,
+                        "datatype": <datatype>,
                         "value": <value>
                 }]
         }
@@ -401,7 +401,7 @@ A simple Sparkplug B payload with values would be represented as follows:
                         "name": "My Metric",
                         "alias": 1,
                         "timestamp": 1479123452194000000,
-                        "dataType": "String",
+                        "datatype": "String",
                         "value": "Test"
                 }]
         }
@@ -1255,8 +1255,8 @@ Acme/Dublin/Packaging/spCv4.0/NMETA/EdgeNode1
         "content": {
                 "metrics": [{
                         "name": "MotorType",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": true,
                                 "parameters": [{
@@ -1266,13 +1266,13 @@ Acme/Dublin/Packaging/spCv4.0/NMETA/EdgeNode1
                                 }],
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32"
+                                        "datatype": "Int32"
                                 }, {
                                         "name": "AmpDraw",
-                                        "dataType": "Float"
+                                        "datatype": "Float"
                                 }, {
                                         "name": "Running",
-                                        "dataType": "Boolean"
+                                        "datatype": "Boolean"
                                 }]
                         }
                 }]
@@ -1300,16 +1300,16 @@ Acme/Dublin/Packaging/spCv4.0/DMETA/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "name": "Motors/Conveyor",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType"
                         }
                 }, {
                         "name": "Motors/Filler",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType"
@@ -1339,8 +1339,8 @@ Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "name": "Motors/Conveyor",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType",
@@ -1351,36 +1351,36 @@ Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Line3
                                 }],
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 1780
                                 }, {
                                         "name": "AmpDraw",
-                                        "dataType": "Float",
+                                        "datatype": "Float",
                                         "value": 12.4
                                 }, {
                                         "name": "Running",
-                                        "dataType": "Boolean",
+                                        "datatype": "Boolean",
                                         "value": true
                                 }]
                         }
                 }, {
                         "name": "Motors/Filler",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType",
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 900
                                 }, {
                                         "name": "AmpDraw",
-                                        "dataType": "Float",
+                                        "datatype": "Float",
                                         "value": 7.1
                                 }, {
                                         "name": "Running",
-                                        "dataType": "Boolean",
+                                        "datatype": "Boolean",
                                         "value": false
                                 }]
                         }
@@ -1408,13 +1408,13 @@ Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "name": "Motors/Conveyor",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "is_definition": false,
                                 "template_ref": "MotorType",
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 1802
                                 }]
                         }
@@ -2640,7 +2640,7 @@ Consider the following Sparkplug B payload in the NCMD message shown above:
                 "metrics": [{
                         "name": "DIGITAL_OUT_1",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Boolean",
+                        "datatype": "Boolean",
                         "value": true
                 }]
         }
@@ -2671,12 +2671,12 @@ The following is a representation of an NCMD payload that invokes the 'Calibrate
                 "metrics": [{
                         "name": "Calibrate",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Command",
+                        "datatype": "Command",
                         "command": {
                                 "correlation_id": "5d7c1f6e-9c2a-4f1b-8f3a-1c9d2e6b4a01",
                                 "arguments": [{
                                         "name": "channel",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 1
                                 }]
                         }
@@ -2735,12 +2735,12 @@ Consider the following Sparkplug B payload in the DCMD message shown above:
                 "metrics": [{
                         "name": "Motor/Run",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Boolean",
+                        "datatype": "Boolean",
                         "value": true
                 }, {
                         "name": "Motor/Speed Setpoint",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Int32",
+                        "datatype": "Int32",
                         "value": 120
                 }]
         }
@@ -2799,7 +2799,7 @@ Consider the following Sparkplug B payload in the NRESP message shown above:
                 "metrics": [{
                         "name": "Calibrate",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Command",
+                        "datatype": "Command",
                         "command": {
                                 "correlation_id": "5d7c1f6e-9c2a-4f1b-8f3a-1c9d2e6b4a01",
                                 "status": {
@@ -2808,7 +2808,7 @@ Consider the following Sparkplug B payload in the NRESP message shown above:
                                 },
                                 "results": [{
                                         "name": "offset",
-                                        "dataType": "Double",
+                                        "datatype": "Double",
                                         "value": 0.125
                                 }]
                         }
@@ -2863,7 +2863,7 @@ Consider the following Sparkplug B payload in the DRESP message shown above:
                 "metrics": [{
                         "name": "Reset",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Command",
+                        "datatype": "Command",
                         "command": {
                                 "correlation_id": "a1b2c3d4-0001",
                                 "status": {
@@ -3444,3 +3444,521 @@ on the publishing (transmission) side, and 5xx indicate an error on the receivin
 |Receiving Side Error
 |Error Renaming Partial File
 |===
+
+[[payloads_json]]
+=== Sparkplug JSON Payload Definition
+
+[[payloads_json_overview]]
+==== Overview
+
+Sparkplug defines two payload encodings of the same data model. The Google Protocol Buffers
+encoding is defined in the link:#payloads_sparkplug_c_mqtt_payload_definition[Sparkplug B MQTT
+Payload Definition] section above and is published on the spCv4.0 namespace. The JSON encoding is
+defined in this section and is published on the spJv4.0 namespace.
+
+The two encodings carry identical information. Every component defined in the sections above -
+Header, Content, Metric, Quality, MetaData, PropertySet, DataSet, Template, Command, and the
+DataTypes - applies unchanged to the JSON encoding, and every normative statement made about those
+components applies to both encodings. This section defines only how those components are
+represented as JSON text. All operational behavior, topic structure, sequence numbering, and
+session management defined elsewhere in this specification is encoding independent.
+
+Non-normative comment: Because the two encodings are two representations of one model, a message
+may be converted from one to the other without loss and without consulting anything outside the
+message itself. This is what allows a bridging application to republish an spCv4.0 namespace onto
+spJv4.0, or the reverse, as a mechanical transformation.
+
+Non-normative comment: The JSON encoding is derived from the JSON Mapping defined by Google
+Protocol Buffers, which most Protocol Buffers libraries implement directly. Where this
+specification deviates from that mapping it does so explicitly, and those deviations are collected
+in the link:#payloads_json_structural[Structural Mappings] section. An implementation that already
+has the Sparkplug Protocol Buffers schema can therefore produce most of the JSON encoding with
+library facilities rather than with hand-written code.
+
+[[payloads_json_encoding_selection]]
+==== Encoding Selection
+
+[tck-testable tck-id-payloads-json-namespace-encoding]#[yellow-background]*[tck-id-payloads-json-namespace-encoding] The
+payload of any Sparkplug message published on the spJv4.0 namespace MUST be encoded as defined in
+this section.*#
+
+[tck-testable tck-id-payloads-protobuf-namespace-encoding]#[yellow-background]*[tck-id-payloads-protobuf-namespace-encoding] The
+payload of any Sparkplug message published on the spCv4.0 namespace MUST be encoded using the
+Google Protocol Buffers schema defined in the
+link:#payloads_c_google_protocol_buffer_schema[Google Protocol Buffer Schema] section.*#
+
+[tck-testable tck-id-payloads-json-utf8]#[yellow-background]*[tck-id-payloads-json-utf8] A Sparkplug
+JSON payload MUST be a JSON text as defined by RFC 8259, encoded as UTF-8 with no byte order
+mark.*#
+
+[tck-testable tck-id-payloads-json-object]#[yellow-background]*[tck-id-payloads-json-object] The
+top level JSON value of a Sparkplug JSON payload MUST be a JSON object representing the Payload
+message.*#
+
+Non-normative comment: An Edge Node publishes on one namespace, not both. An Edge Node that
+publishes on spJv4.0 is a complete Sparkplug Edge Node and is not required to implement the
+Protocol Buffers encoding at all. The choice is a deployment decision; see the
+link:#payloads_json_choosing[Choosing a Payload Encoding] section.
+
+[[payloads_json_field_naming]]
+==== Field Naming
+
+[tck-testable tck-id-payloads-json-field-names]#[yellow-background]*[tck-id-payloads-json-field-names] Each
+JSON object key MUST be the name of the corresponding field exactly as it appears in the Sparkplug
+Google Protocol Buffers schema, except where the
+link:#payloads_json_structural[Structural Mappings] section names a different key.*#
+
+[tck-testable tck-id-payloads-json-field-names-accept]#[yellow-background]*[tck-id-payloads-json-field-names-accept] A
+consuming application MUST also accept the lowerCamelCase form of a field name, because that is the
+form a Google Protocol Buffers JSON Mapping implementation emits by default.*#
+
+[tck-testable tck-id-payloads-json-omit-absent]#[yellow-background]*[tck-id-payloads-json-omit-absent] A
+field that is not present MUST be omitted from the JSON object rather than written with a JSON null
+or a zero value.*#
+
+[tck-testable tck-id-payloads-json-ignore-unknown]#[yellow-background]*[tck-id-payloads-json-ignore-unknown] A
+consuming application MUST ignore any JSON object key it does not recognize, and MUST NOT treat the
+payload as malformed on that basis.*#
+
+Non-normative comment: The naming rule keeps a JSON payload visually identical to the field names
+in the Protocol Buffers schema, so the two encodings can be read against one another and against
+the component definitions above without a translation table. Ignoring unrecognized keys is the JSON
+counterpart of the extension ranges reserved in the Protocol Buffers schema, and serves the same
+purpose for third party extensions.
+
+[[payloads_json_scalar]]
+==== Scalar Value Mapping
+
+The following table defines how each Protocol Buffers scalar type is represented in JSON.
+
+[cols="2,2,4"]
+|===
+|*Protocol Buffers Type*
+|*JSON Type*
+|*Representation*
+
+|int32, uint32, sint32, fixed32, sfixed32
+|number
+|A JSON number with no fractional part or exponent.
+
+|int64, uint64, sint64, fixed64, sfixed64
+|string
+|The value written in decimal, as a JSON string. For example "1486144502122847913".
+
+|float, double
+|number or string
+|A JSON number, or one of the strings "NaN", "Infinity", or "-Infinity".
+
+|bool
+|true or false
+|A JSON literal, never the strings "true" or "false" and never 0 or 1.
+
+|string
+|string
+|The string value.
+
+|bytes
+|string
+|The bytes, base64 encoded as defined in RFC 4648 Section 4, including padding.
+
+|enum
+|string
+|The name of the enumerated value, for example "Int32", "Template", or "ADD".
+|===
+
+[tck-testable tck-id-payloads-json-64bit-string]#[yellow-background]*[tck-id-payloads-json-64bit-string] A
+publishing application MUST represent every 64-bit integer field as a JSON string containing the
+decimal value, including when the value is small enough to be represented exactly as a JSON
+number.*#
+
+[tck-testable tck-id-payloads-json-64bit-accept]#[yellow-background]*[tck-id-payloads-json-64bit-accept] A
+consuming application MUST accept a 64-bit integer field represented as either a JSON string or a
+JSON number.*#
+
+[tck-testable tck-id-payloads-json-bytes-base64]#[yellow-background]*[tck-id-payloads-json-bytes-base64] A
+field of Protocol Buffers type bytes MUST be represented as a JSON string containing the base64
+encoding of those bytes as defined in RFC 4648 Section 4, including padding.*#
+
+[tck-testable tck-id-payloads-json-enum-name]#[yellow-background]*[tck-id-payloads-json-enum-name] A
+publishing application MUST represent an enumerated value, including a DataType and a
+MetricOperation, as a JSON string containing the name of that value.*#
+
+[tck-testable tck-id-payloads-json-enum-accept]#[yellow-background]*[tck-id-payloads-json-enum-accept] A
+consuming application MUST accept an enumerated value represented as either the name of that value
+or the integer value assigned to it in the Google Protocol Buffers schema.*#
+
+[tck-testable tck-id-payloads-json-float-nonfinite]#[yellow-background]*[tck-id-payloads-json-float-nonfinite] A
+non-finite float or double value MUST be represented as one of the JSON strings "NaN", "Infinity",
+or "-Infinity", because RFC 8259 provides no numeric form for these values.*#
+
+Non-normative comment: 64-bit integers are represented as strings because a JSON number is not
+required by RFC 8259 to carry more precision than an IEEE 754 double, which holds integers exactly
+only up to 2^53^. Several widely used JSON parsers, including the one built into every web browser,
+decode JSON numbers into doubles unconditionally. A Sparkplug timestamp is a nanosecond count and
+is therefore roughly 165 times larger than that limit, so a timestamp written as a JSON number
+would be silently rounded, typically to the nearest 256 nanoseconds. Metric values of type Int64,
+UInt64, and DateTime have the same exposure.
+
+Non-normative comment: The rule is driven by the declared type of the field rather than by the
+magnitude of the value, so seq, bd_seq, and descriptor_seq are written as strings even though a
+Sparkplug sequence number is always small. This keeps the mapping mechanical: an encoder derives
+it from the schema alone, and no value can lose precision because of how large it happened to be.
+
+[[payloads_json_structural]]
+==== Structural Mappings
+
+A Protocol Buffers message is represented as a JSON object and a repeated field as a JSON array.
+The following cases are where the Sparkplug JSON encoding deviates from a direct mapping of the
+Protocol Buffers schema, in each case so that the JSON encoding reads as JSON rather than as a
+transliteration of a binary format.
+
+[[payloads_json_typed_values]]
+===== Typed Values
+
+In the Protocol Buffers schema a Metric carries its value in a TypedValue submessage, which repeats
+the datatype and selects one of several value fields. In JSON the datatype is already carried by
+the enclosing object and the value field is not needed to disambiguate.
+
+[tck-testable tck-id-payloads-json-typedvalue-flat]#[yellow-background]*[tck-id-payloads-json-typedvalue-flat] A
+TypedValue MUST be represented as the value itself, under the key 'value', rather than as a nested
+object, and its datatype MUST be carried by the 'datatype' key of the enclosing Metric or the
+'type' key of the enclosing Template.Parameter.*#
+
+[tck-testable tck-id-payloads-json-typedvalue-parameter-keys]#[yellow-background]*[tck-id-payloads-json-typedvalue-parameter-keys] A
+Template.Parameter MUST therefore be represented with the keys 'name', 'type', and 'value', and
+MUST NOT use the key 'typed_value'.*#
+
+Non-normative comment: These are the two places where a JSON key is not a Protocol Buffers field
+name. 'value' is the name of the oneof within TypedValue rather than of any field in it, because
+flattening replaces the whole oneof with the single value it holds; a Metric's own field is also
+called value, so a Metric reads the same either way. A Template.Parameter's field is typed_value,
+and flattening replaces it with the 'type' and 'value' pair used for parameters throughout this
+specification.
+
+[tck-testable tck-id-payloads-json-null]#[yellow-background]*[tck-id-payloads-json-null] A value
+that is null MUST be represented by setting 'is_null' to true and omitting the 'value' key.*#
+
+[[payloads_json_propertyset]]
+===== PropertySet
+
+In the Protocol Buffers schema a PropertySet is a pair of parallel arrays of keys and values. In
+JSON it is represented as an object, which is both smaller and directly usable by a consuming
+application.
+
+[tck-testable tck-id-payloads-json-propertyset-object]#[yellow-background]*[tck-id-payloads-json-propertyset-object] A
+PropertySet MUST be represented as a JSON object whose keys are the property names and whose values
+are the corresponding PropertyValues.*#
+
+[tck-testable tck-id-payloads-json-propertyset-unique]#[yellow-background]*[tck-id-payloads-json-propertyset-unique] Property
+names within a single PropertySet MUST be unique, and the order of the keys MUST NOT be
+significant.*#
+
+[[payloads_json_array_types]]
+===== Array Types
+
+In the Protocol Buffers encoding the array DataTypes are carried as packed little-endian bytes, as
+described in the link:#payloads_c_datatype_array[Array Types] section. Carrying those same packed
+bytes in JSON would make an array value opaque to a JSON consumer.
+
+[tck-testable tck-id-payloads-json-array-values]#[yellow-background]*[tck-id-payloads-json-array-values] A
+value of an array DataType MUST be represented as a JSON array of the element values, not as a
+base64 encoded packed byte array.*#
+
+[tck-testable tck-id-payloads-json-array-element-type]#[yellow-background]*[tck-id-payloads-json-array-element-type] Each
+element of that JSON array MUST be represented according to the scalar mapping for the element
+type, so that the elements of an Int64Array and a DateTimeArray are JSON strings and the elements
+of an Int32Array are JSON numbers.*#
+
+[[payloads_json_dataset]]
+===== DataSet
+
+In the Protocol Buffers schema a DataSet.Column carries its values in one of six parallel arrays,
+one per underlying Protocol Buffers type, of which exactly one is used. In JSON the column's
+datatype already identifies the element type.
+
+[tck-testable tck-id-payloads-json-dataset-values]#[yellow-background]*[tck-id-payloads-json-dataset-values] A
+DataSet.Column MUST carry its values as a single JSON array under the key 'values', rather than as
+one of the typed value arrays named in the Google Protocol Buffers schema, and each element MUST be
+represented according to the scalar mapping for the column's datatype.*#
+
+[[payloads_json_content]]
+===== Content and Compression
+
+[tck-testable tck-id-payloads-json-content-key]#[yellow-background]*[tck-id-payloads-json-content-key] An
+uncompressed payload MUST carry its content under the key 'content', and a compressed payload MUST
+carry it under the key 'compressed', matching the two arms of the content oneof in the Google
+Protocol Buffers schema.*#
+
+[tck-testable tck-id-payloads-json-compressed-base64]#[yellow-background]*[tck-id-payloads-json-compressed-base64] The
+value of 'compressed' MUST be a JSON string containing the base64 encoding of the compressed bytes,
+and those bytes MUST be the compressed form of the UTF-8 JSON text of the Content object.*#
+
+Non-normative comment: The header of a compressed JSON payload is a sibling of the 'compressed' key
+and remains readable without decompressing, exactly as in the Protocol Buffers encoding.
+
+[[payloads_json_schema]]
+==== JSON Schema
+
+The following JSON Schema describes a Sparkplug JSON payload. It is normative for the structure and
+types it expresses. Requirements stated elsewhere in this specification that a JSON Schema cannot
+express, such as the relationship between a metric's datatype and the form of its value, apply in
+addition.
+
+[tck-testable tck-id-payloads-json-schema-valid]#[yellow-background]*[tck-id-payloads-json-schema-valid] A
+Sparkplug JSON payload MUST validate against the JSON Schema below.*#
+
+----
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://sparkplug.eclipse.org/specification/4.0.0/sparkplug_j.json",
+    "title": "Sparkplug JSON Payload",
+    "type": "object",
+    "properties": {
+        "header": { "$ref": "#/$defs/header" },
+        "content": { "$ref": "#/$defs/content" },
+        "compressed": { "$ref": "#/$defs/base64" }
+    },
+    "not": { "required": [ "content", "compressed" ] },
+    "$defs": {
+        "uint64": { "type": [ "string", "integer" ], "pattern": "^[0-9]+$" },
+        "int64": { "type": [ "string", "integer" ], "pattern": "^-?[0-9]+$" },
+        "base64": { "type": "string", "contentEncoding": "base64" },
+        "number": {
+            "oneOf": [
+                { "type": "number" },
+                { "enum": [ "NaN", "Infinity", "-Infinity" ] }
+            ]
+        },
+        "datatype": {
+            "oneOf": [
+                { "type": "string" },
+                { "type": "integer", "minimum": 0 }
+            ]
+        },
+        "header": {
+            "type": "object",
+            "properties": {
+                "timestamp": { "$ref": "#/$defs/uint64" },
+                "seq": { "$ref": "#/$defs/uint64" },
+                "bd_seq": { "$ref": "#/$defs/uint64" },
+                "descriptor_seq": { "$ref": "#/$defs/uint64" },
+                "definition_id": { "type": "string" },
+                "previous_definition_id": { "type": "string" },
+                "source": { "type": "string" },
+                "uuid": { "type": "string" },
+                "compression_algorithm": { "type": "string" }
+            }
+        },
+        "content": {
+            "type": "object",
+            "properties": {
+                "metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "body": { "$ref": "#/$defs/base64" }
+            }
+        },
+        "value": {
+            "anyOf": [
+                { "type": [ "string", "boolean" ] },
+                { "$ref": "#/$defs/number" },
+                { "type": "array" },
+                { "$ref": "#/$defs/dataset" },
+                { "$ref": "#/$defs/template" },
+                { "$ref": "#/$defs/propertyset" },
+                { "type": "array", "items": { "$ref": "#/$defs/propertyset" } }
+            ]
+        },
+        "metric": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "alias": { "$ref": "#/$defs/uint64" },
+                "timestamp": { "$ref": "#/$defs/uint64" },
+                "datatype": { "$ref": "#/$defs/datatype" },
+                "quality": { "type": "integer", "minimum": 0 },
+                "quality_context": { "type": "string" },
+                "source": { "type": "string" },
+                "is_historical": { "type": "boolean" },
+                "is_transient": { "type": "boolean" },
+                "is_null": { "type": "boolean" },
+                "metadata": { "$ref": "#/$defs/metadata" },
+                "properties": { "$ref": "#/$defs/propertyset" },
+                "value": { "$ref": "#/$defs/value" },
+                "command": { "$ref": "#/$defs/command" },
+                "operation": { "enum": [ "ADD", "UPDATE", "DELETE", 1, 2, 3 ] }
+            }
+        },
+        "propertyset": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/$defs/propertyvalue" }
+        },
+        "propertyvalue": {
+            "type": "object",
+            "properties": {
+                "datatype": { "$ref": "#/$defs/datatype" },
+                "is_null": { "type": "boolean" },
+                "value": { "$ref": "#/$defs/value" }
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "is_multi_part": { "type": "boolean" },
+                "content_type": { "type": "string" },
+                "size": { "$ref": "#/$defs/uint64" },
+                "seq": { "$ref": "#/$defs/uint64" },
+                "file_name": { "type": "string" },
+                "file_type": { "type": "string" },
+                "md5": { "type": "string" },
+                "description": { "type": "string" },
+                "engUnit": { "type": "string" }
+            }
+        },
+        "dataset": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "datatype": { "$ref": "#/$defs/datatype" },
+                            "values": { "type": "array" }
+                        }
+                    }
+                }
+            }
+        },
+        "template": {
+            "type": "object",
+            "properties": {
+                "version": { "type": "string" },
+                "template_ref": { "type": "string" },
+                "is_definition": { "type": "boolean" },
+                "metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "type": { "$ref": "#/$defs/datatype" },
+                            "value": { "$ref": "#/$defs/value" }
+                        }
+                    }
+                }
+            }
+        },
+        "command": {
+            "type": "object",
+            "properties": {
+                "arguments": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "results": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "correlation_id": { "type": "string" },
+                "status": {
+                    "type": "object",
+                    "properties": {
+                        "code": { "$ref": "#/$defs/uint64" },
+                        "message": { "type": "string" }
+                    }
+                }
+            }
+        }
+    }
+}
+----
+
+[[payloads_json_example]]
+==== JSON Payload Example
+
+The following is a non-normative example of one DDATA message shown in both encodings, so the two
+may be compared directly. The payload reports a single aliased Float metric.
+
+The spCv4.0 form, shown as a structural illustration of the Protocol Buffers message:
+
+----
+Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": 1486144502122847913,
+                "seq": 4,
+                "bd_seq": 0,
+                "descriptor_seq": 2,
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "alias": 1,
+                        "datatype": "Float",
+                        "value": 1802.5
+                }]
+        }
+}
+----
+
+The same message on the spJv4.0 namespace. The payload below is the literal UTF-8 text published as
+the MQTT message payload, with the 64-bit fields represented as strings:
+
+----
+Acme/Dublin/Packaging/spJv4.0/DDATA/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": "1486144502122847913",
+                "seq": "4",
+                "bd_seq": "0",
+                "descriptor_seq": "2",
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "alias": "1",
+                        "datatype": "Float",
+                        "value": 1802.5
+                }]
+        }
+}
+----
+
+Non-normative comment: The examples given throughout the rest of this chapter use the same JSON
+notation to illustrate the structure of Protocol Buffers messages, and predate the JSON encoding.
+They show field names and nesting rather than the exact text of a published spJv4.0 payload, and in
+particular they write 64-bit values as JSON numbers. A published spJv4.0 payload follows the rules
+in this section.
+
+[[payloads_json_choosing]]
+==== Choosing a Payload Encoding
+
+Non-normative comment: The two encodings are interchangeable in terms of the information they
+carry, so the choice between them is made on operational grounds. The Protocol Buffers encoding
+produces smaller messages and is cheaper to encode and decode. The JSON encoding is readable
+without tooling and can be consumed by any application that has a JSON parser, which is most of
+them.
+
+Non-normative comment: The size difference is largest on small messages and narrows as messages
+grow, because a larger message amortizes the per-message overhead over more metrics while the
+per-metric overhead of JSON keys stays proportional. For representative payloads the JSON encoding
+is roughly two to three times the size of the Protocol Buffers encoding. The difference in
+encode and decode cost is of roughly one order of magnitude, and unlike the size difference it does
+not narrow with message size.
+
+Non-normative comment: The size difference largely disappears when the content section is
+compressed, as described in the link:#payloads_c_compression[Compression] section. The repeated
+field names that make JSON large are highly compressible, so for payloads of more than a few
+metrics the two encodings compress to within a few percent of one another. On a bandwidth
+constrained link where compression is already in use, message size is therefore not a strong reason
+to prefer one encoding over the other; encode and decode cost remains one.
+
+Non-normative comment: Taken together, the Protocol Buffers encoding is the better fit for Edge
+Nodes on constrained hardware, on metered or low bandwidth links, and wherever messages are small
+and frequent, which is the case Sparkplug was originally designed around. The JSON encoding is the
+better fit where Sparkplug data is consumed directly by applications that cannot readily add a
+Protocol Buffers dependency, and where readability during development and troubleshooting is worth
+more than the bytes. A deployment may use both, with a bridging application republishing one
+namespace onto the other, so that constrained Edge Nodes publish spCv4.0 while enterprise consumers
+subscribe to spJv4.0.

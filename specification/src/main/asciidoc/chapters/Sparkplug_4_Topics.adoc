@@ -72,6 +72,12 @@ and spJv4.0 namespaces, which differ only in payload encoding. For earlier 'Spar
 'Sparkplug B' topic namespace definitions and concepts, see the earlier versions of the Sparkplug
 Specification.
 
+Non-normative comment: Topics are written with the spCv4.0 namespace element throughout the
+remainder of this specification. Every such topic applies equally to the spJv4.0 namespace with
+that element substituted, because the two namespaces share one topic structure. The encoding of the
+payload carried on a topic is determined by the namespace element of that topic, as required in the
+link:#payloads_json_encoding_selection[Encoding Selection] section.
+
 [[topics_topic_prefix_element]]
 ==== topic_prefix Element
 
