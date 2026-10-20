@@ -165,7 +165,9 @@ public class Utils {
                 case UInt16:
                     expectedValueCase = Metric.ValueCase.INT_VALUE;
                     break;
-                case UInt32: // all integers in Java are signed
+                case UInt32:
+                    // Accept the specified uint32 field and the legacy uint64 encoding.
+                    return m.getIsNull() || m.hasIntValue() || m.hasLongValue();
                 case Int64:
                 case UInt64:
                 case DateTime:
