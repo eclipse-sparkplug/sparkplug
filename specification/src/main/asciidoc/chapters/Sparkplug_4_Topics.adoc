@@ -330,7 +330,7 @@ definitions MUST be published in the NMETA.*#
 include a sequence number. When the NMETA is published at the start of a BIRTH sequence it is the
 first message and its sequence number MUST be 0. When the NMETA is published as an update
 (accompanying an NMMETA), its sequence number MUST be one greater than the sequence number of the
-previous message from this Edge Node, unless that message contained a value of 18446744073709551615 (max value of a UINT64), in which case the
+previous message from this Edge Node, unless that message contained a value of 9223372036854775807 (max value of an INT64), in which case the
 sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-nmeta-bdseq]#[yellow-background]*[tck-id-topics-nmeta-bdseq] The NMETA
 MUST include a bd_seq number matching the bd_seq of the current MQTT session.*#
@@ -374,7 +374,7 @@ NMMETA MUST include only the metrics affected by the change, and each metric MUS
 of ADD, UPDATE, or DELETE.*#
 * [tck-testable tck-id-topics-nmmeta-seq]#[yellow-background]*[tck-id-topics-nmmeta-seq] The NMMETA MUST
 include a sequence number that is one greater than the sequence number of the previous message
-published by this Edge Node, unless that message contained a value of 18446744073709551615 (max value of a UINT64), in which case the sequence
+published by this Edge Node, unless that message contained a value of 9223372036854775807 (max value of an INT64), in which case the sequence
 number MUST be 0.*#
 * [tck-testable tck-id-topics-nmmeta-bdseq]#[yellow-background]*[tck-id-topics-nmmeta-bdseq] The NMMETA
 MUST include a bd_seq number matching the bd_seq of the current MQTT session.*#
@@ -439,7 +439,7 @@ immediately prior MQTT CONNECT packet's Will Message.*#
 matching bd_seq number allows Host Applications to correlate NBIRTHs to NDEATHs.*#
 * [tck-testable tck-id-topics-nbirth-bdseq-increment]#[yellow-background]*[tck-id-topics-nbirth-bdseq-increment] The
 bd_seq number MUST start at zero and increment by one on every new MQTT CONNECT packet until it
-reaches a maximum of 18446744073709551615 (max value of a UINT64). At this point, the following
+reaches a maximum of 9223372036854775807 (max value of an INT64). At this point, the following
 bd_seq number MUST be zero.*#
 
 The NBIRTH message can also include additional Node Control payload components. These are used by a
@@ -534,7 +534,7 @@ payload.*#
 ** This allows Host Applications to correlate NREBIRTHs to NDEATHs.
 * [tck-testable tck-id-topics-nrebirth-bdseq-increment]#[yellow-background]*[tck-id-topics-nrebirth-bdseq-increment] The
 bd_seq number MUST start at zero and increment by one on every new MQTT CONNECT packet until it
-reaches a maximum of 18446744073709551615 (max value of a UINT64). At this point, the following
+reaches a maximum of 9223372036854775807 (max value of an INT64). At this point, the following
 bd_seq number MUST be zero.*#
 
 The NREBIRTH message can also include additional Node Control payload components. These are used by
@@ -594,7 +594,7 @@ messages MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-ndata-seq-num]#[yellow-background]*[tck-id-topics-ndata-seq-num] The
 NDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
-value of 18446744073709551615 (max value of a UINT64). In this case the sequence number MUST be 0.*#
+value of 9223372036854775807 (max value of an INT64). In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-ndata-timestamp-1]#[yellow-background]*[tck-id-topics-ndata-timestamp-1] The
 NDATA MUST include the overall payload timestamp denoting the date and time the message was sent from
 the Edge Node.*#
@@ -756,7 +756,7 @@ metadata MAY also be included. Aliases are optional.*#
 DMETA MUST NOT be used to convey current metric values.*#
 * [tck-testable tck-id-topics-dmeta-seq]#[yellow-background]*[tck-id-topics-dmeta-seq] The DMETA MUST
 include a sequence number that is one greater than the sequence number of the previous message from
-this Edge Node, unless that message contained a value of 18446744073709551615 (max value of a UINT64), in which case the sequence number MUST
+this Edge Node, unless that message contained a value of 9223372036854775807 (max value of an INT64), in which case the sequence number MUST
 be 0. A DMETA is never the first message of a BIRTH sequence, as it follows the NMETA and NBIRTH.*#
 * [tck-testable tck-id-topics-dmeta-bdseq]#[yellow-background]*[tck-id-topics-dmeta-bdseq] The DMETA
 MUST include a bd_seq number matching the bd_seq of the current MQTT session.*#
@@ -798,7 +798,7 @@ DMMETA MUST include only the metrics affected by the change, and each metric MUS
 of ADD, UPDATE, or DELETE.*#
 * [tck-testable tck-id-topics-dmmeta-seq]#[yellow-background]*[tck-id-topics-dmmeta-seq] The DMMETA MUST
 include a sequence number that is one greater than the sequence number of the previous message
-published by this Edge Node, unless that message contained a value of 18446744073709551615 (max value of a UINT64), in which case the sequence
+published by this Edge Node, unless that message contained a value of 9223372036854775807 (max value of an INT64), in which case the sequence
 number MUST be 0.*#
 * [tck-testable tck-id-topics-dmmeta-bdseq]#[yellow-background]*[tck-id-topics-dmmeta-bdseq] The DMMETA
 MUST include a bd_seq number matching the bd_seq of the current MQTT session.*#
@@ -840,7 +840,7 @@ messages MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-dbirth-seq]#[yellow-background]*[tck-id-topics-dbirth-seq] The DBIRTH
 MUST include a sequence number in the payload and it MUST have a value of one greater than the
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
-value of 18446744073709551615 (max value of a UINT64). In this case the sequence number MUST be 0.*#
+value of 9223372036854775807 (max value of an INT64). In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-dbirth-timestamp-1]#[yellow-background]*[tck-id-topics-dbirth-timestamp-1] The
 DBIRTH MUST include the overall payload timestamp denoting the date and time the message was sent
 from the Edge Node.*#
@@ -928,7 +928,7 @@ messages MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-drebirth-seq]#[yellow-background]*[tck-id-topics-drebirth-seq] The DREBIRTH
 MUST include a sequence number in the payload and it MUST have a value of one greater than the
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
-value of 18446744073709551615 (max value of a UINT64). In this case the sequence number MUST be 0.*#
+value of 9223372036854775807 (max value of an INT64). In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-drebirth-timestamp-1]#[yellow-background]*[tck-id-topics-drebirth-timestamp-1] The
 DREBIRTH MUST include the overall payload timestamp denoting the date and time the message was sent
 from the Edge Node.*#
@@ -1006,7 +1006,7 @@ messages MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-ddata-seq-num]#[yellow-background]*[tck-id-topics-ddata-seq-num] The
 DDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the
 previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
-value of 18446744073709551615 (max value of a UINT64). In this case the sequence number MUST be 0.*#
+value of 9223372036854775807 (max value of an INT64). In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-ddata-timestamp-1]#[yellow-background]*[tck-id-topics-ddata-timestamp-1] The
 DDATA MUST include the overall payload timestamp denoting the date and time the message was sent from
 the Edge Node.*#
@@ -1052,7 +1052,7 @@ messages MUST be published with MQTT QoS equal to 0 and retain equal to false.*#
 * [tck-testable tck-id-topics-ddeath-seq-num]#[yellow-background]*[tck-id-topics-ddeath-seq-num] The
 DDEATH MUST include a sequence number in the payload and it MUST have a value of one greater than
 the previous MQTT message from the Edge Node contained unless the previous MQTT message contained a
-value of 18446744073709551615 (max value of a UINT64). In this case the sequence number MUST be 0.*#
+value of 9223372036854775807 (max value of an INT64). In this case the sequence number MUST be 0.*#
 * [tck-testable tck-id-topics-ddeath-bdseq]#[yellow-background]*[tck-id-topics-ddeath-bdseq] The
 DDEATH MUST include a bd_seq number matching the bd_seq of the current MQTT session.*#
 

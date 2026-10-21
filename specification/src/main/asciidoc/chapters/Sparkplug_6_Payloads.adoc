@@ -327,9 +327,9 @@ message Payload {
 
     message Header {
         optional uint64 timestamp              = 1;  // Timestamp at message sending time
-        optional uint64 seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
-        optional uint64 bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
-        optional uint64 descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
+        optional int64  seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
+        optional int64  bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
+        optional int64  descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
         optional string definition_id          = 5;  // Definition identifier: content hash of the metric definitions this message reports against
         optional string previous_definition_id = 6;  // NMMETA/DMMETA only: the definition_id in effect before the change
         optional string source                 = 7;  // Source for CMD and REBIRTH messages - the Host Application ID that sent the message
@@ -517,11 +517,11 @@ Node does. This allows Host Applications to easily distinguish an NDEATH deliver
 from an NDEATH published by the Edge Node itself.
 **** [tck-testable tck-id-payloads-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-sequence-num-req-nbirth] A
 NBIRTH message from an Edge Node MUST always contain a sequence number between 0 and
-18446744073709551615 (inclusive).*#
+9223372036854775807 (inclusive).*#
 **** [tck-testable tck-id-payloads-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-sequence-num-incrementing] All
 subsequent messages after an NBIRTH from an Edge Node MUST contain a sequence number that is
 continually increasing by one in each message from that Edge Node until a value of
-18446744073709551615 (max value of a UINT64) is reached. At that point, the sequence number of the
+9223372036854775807 (max value of an INT64) is reached. At that point, the sequence number of the
 following message MUST be zero.*#
 ** _bd_seq_
 *** This is the birth/death sequence number which is an unsigned 64-bit integer. It scopes a message to
@@ -545,7 +545,7 @@ that Host Application and is unrelated to the bd_seq number of any Edge Node. Se
 link:#payloads_c_state_bd_seq[STATE bd_seq Number] section.
 **** [tck-testable tck-id-payloads-bd-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-bd-sequence-num-req-nbirth] Every
 birth/death sequence number included in the payload from an Edge Node MUST always be between 0 and
-18446744073709551615 (inclusive).*#
+9223372036854775807 (inclusive).*#
 **** [tck-testable tck-id-payloads-bd-sequence-num-session-constant]#[yellow-background]*[tck-id-payloads-bd-sequence-num-session-constant] Every
 message an Edge Node publishes within a single MQTT session MUST carry the same birth/death sequence
 number, and that value MUST be the one registered in the Will Message payload of that session's MQTT
@@ -555,7 +555,7 @@ message from an Edge Node can be attributed to the session that produced it, and
 discard a message belonging to a session it has already replaced.
 **** [tck-testable tck-id-payloads-bd-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-bd-sequence-num-incrementing] The
 birth/death sequence number MUST start at zero and MUST increment by one on every new MQTT CONNECT
-packet sent by the Edge Node, until a value of 18446744073709551615 (max value of a UINT64) is reached.
+packet sent by the Edge Node, until a value of 9223372036854775807 (max value of an INT64) is reached.
 At that point the birth/death sequence number of the following MQTT CONNECT packet MUST be zero.*#
 ***** Non-normative comment: the bd_seq number is not incremented from message to message within a
 session, and it is not incremented by an NREBIRTH, because an NREBIRTH does not establish a new MQTT
@@ -584,7 +584,7 @@ sequence (see the Reconnect Optimization), the NBIRTH or DBIRTH is the first mes
 **** [tck-testable tck-id-payloads-descriptor-seq-incrementing]#[yellow-background]*[tck-id-payloads-descriptor-seq-incrementing] Each
 subsequent message in a descriptor sequence stream MUST contain a descriptor sequence number that is
 one greater than the descriptor sequence number of the previous message in that same stream, until a
-value of 18446744073709551615 (max value of a UINT64) is reached, after which the next descriptor
+value of 9223372036854775807 (max value of an INT64) is reached, after which the next descriptor
 sequence number MUST be 0.*#
 **** [tck-testable tck-id-payloads-descriptor-seq-rebirth]#[yellow-background]*[tck-id-payloads-descriptor-seq-rebirth] An
 NREBIRTH or DREBIRTH slip-streams a Host Application into the existing data stream and MUST NOT reset
@@ -2109,11 +2109,11 @@ alias was assigned to it in the referenced NMETA, or otherwise by its metric nam
 NOT be used to convey metric datatype, properties, or metadata.*#
 * [tck-testable tck-id-payloads-nrebirth-seq-1]#[yellow-background]*[tck-id-payloads-nrebirth-seq-1] Every
 NREBIRTH message MUST include a sequence number and it MUST have a value between 0 and
-18446744073709551615 (inclusive).*#
+9223372036854775807 (inclusive).*#
 * [tck-testable tck-id-payloads-nrebirth-seq-2]#[yellow-background]*[tck-id-payloads-nrebirth-seq-2] Every
 NREBIRTH message MUST include a sequence number that is the following value:*#
 ** rsn = pds - (1 + dc)
-** If the rsn results in a negative number, add 18446744073709551615 (max value of a UINT64) to it.
+** If the rsn results in a negative number, add 9223372036854775807 (max value of an INT64) to it.
 *** rsn = Rebirth Sequence Number value
 *** pds = Next pending DATA publish seq number
 *** dc = Device count (number of Sparkplug Devices under the scope of the Edge Node)
@@ -2230,8 +2230,8 @@ NOT be used to convey metric datatype, properties, or metadata.*#
 DBIRTH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-dbirth-seq-inc]#[yellow-background]*[tck-id-payloads-dbirth-seq-inc] Every
 DBIRTH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
+INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*[tck-id-payloads-dbirth-order] All
 DBIRTH messages sent by an Edge Node MUST be sent immediately after the NBIRTH and before any NDATA
@@ -2333,8 +2333,8 @@ NOT be used to convey metric datatype, properties, or metadata.*#
 DREBIRTH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-drebirth-seq-inc]#[yellow-background]*[tck-id-payloads-drebirth-seq-inc] Every
 DREBIRTH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
+INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST be a value of 0.*#
 * [tck-testable tck-id-payloads-drebirth-order]#[yellow-background]*[tck-id-payloads-drebirth-order] All
 DREBIRTH messages sent by an Edge Node MUST be sent immediately after the NREBIRTH and before any
@@ -2433,8 +2433,8 @@ published.*#
 NDATA message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ndata-seq-inc]#[yellow-background]*[tck-id-payloads-ndata-seq-inc] Every
 NDATA message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
+INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*[tck-id-payloads-ndata-order] All
 NDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
@@ -2500,8 +2500,8 @@ published.*#
 DDATA message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ddata-seq-inc]#[yellow-background]*[tck-id-payloads-ddata-seq-inc] Every
 DDATA message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
+INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*[tck-id-payloads-ddata-order] All
 DDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
@@ -2903,7 +2903,7 @@ message.
 payload compared to what was in the previous CONNECT packet. This ensures that any Host Applications
 will be able to distinguish between current and old bd_seq numbers in the event that messages are
 delivered out of order. When incrementing the bd_seq number, if the previous value was
-18446744073709551615 (max value of a UINT64), the next value must be zero.
+9223372036854775807 (max value of an INT64), the next value must be zero.
 * [tck-testable tck-id-payloads-ndeath-will-message-publisher]#[yellow-background]*[tck-id-payloads-ndeath-will-message-publisher] An
 NDEATH message SHOULD be published by the Edge Node before it intentionally disconnects from the
 MQTT Server.*#
@@ -2971,8 +2971,8 @@ published.*#
 DDEATH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*[tck-id-payloads-ddeath-seq-inc] Every
 DDEATH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
+INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 
 The following is a representation of a simple DDEATH message on the topic:
@@ -3061,15 +3061,15 @@ Certificate to be matched to the Birth Certificate of the session it terminates.
 bd_seq number MUST be included in every STATE message published by or on behalf of a Sparkplug Host
 Application, including the Death Certificate registered as the MQTT Will Message.*#
 * [tck-testable tck-id-payloads-state-bdseq-range]#[yellow-background]*[tck-id-payloads-state-bdseq-range] The
-bd_seq number in a STATE payload MUST always be between 0 and 18446744073709551615 (inclusive).*#
+bd_seq number in a STATE payload MUST always be between 0 and 9223372036854775807 (inclusive).*#
 * [tck-testable tck-id-payloads-state-bdseq-session-constant]#[yellow-background]*[tck-id-payloads-state-bdseq-session-constant] Every
 STATE message a Sparkplug Host Application publishes within a single MQTT session MUST carry the
 same bd_seq number, and that value MUST be the one registered in the Will Message payload of that
 session's MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-bdseq-increment]#[yellow-background]*[tck-id-payloads-state-bdseq-increment] The
 bd_seq number MUST start at zero and MUST increment by one on every new MQTT CONNECT packet the
-Sparkplug Host Application sends to a given MQTT Server, until a value of 18446744073709551615 (max
-value of a UINT64) is reached. At that point the bd_seq number of the following MQTT CONNECT packet
+Sparkplug Host Application sends to a given MQTT Server, until a value of 9223372036854775807 (max
+value of an INT64) is reached. At that point the bd_seq number of the following MQTT CONNECT packet
 MUST be zero.*#
 ** Non-normative comment: these are the same rules that apply to an Edge Node's bd_seq number. As
 with an Edge Node, the bd_seq number is not incremented from message to message within a session.
@@ -3725,8 +3725,7 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
     },
     "not": { "required": [ "content", "compressed" ] },
     "$defs": {
-        "uint64": { "type": [ "string", "integer" ], "pattern": "^[0-9]+$" },
-        "int64": { "type": [ "string", "integer" ], "pattern": "^-?[0-9]+$" },
+        "nonNegative64": { "type": [ "string", "integer" ], "pattern": "^[0-9]+$" },
         "base64": { "type": "string", "contentEncoding": "base64" },
         "number": {
             "oneOf": [
@@ -3743,10 +3742,10 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
         "header": {
             "type": "object",
             "properties": {
-                "timestamp": { "$ref": "#/$defs/uint64" },
-                "seq": { "$ref": "#/$defs/uint64" },
-                "bd_seq": { "$ref": "#/$defs/uint64" },
-                "descriptor_seq": { "$ref": "#/$defs/uint64" },
+                "timestamp": { "$ref": "#/$defs/nonNegative64" },
+                "seq": { "$ref": "#/$defs/nonNegative64" },
+                "bd_seq": { "$ref": "#/$defs/nonNegative64" },
+                "descriptor_seq": { "$ref": "#/$defs/nonNegative64" },
                 "definition_id": { "type": "string" },
                 "previous_definition_id": { "type": "string" },
                 "source": { "type": "string" },
@@ -3776,8 +3775,8 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
             "type": "object",
             "properties": {
                 "name": { "type": "string" },
-                "alias": { "$ref": "#/$defs/uint64" },
-                "timestamp": { "$ref": "#/$defs/uint64" },
+                "alias": { "$ref": "#/$defs/nonNegative64" },
+                "timestamp": { "$ref": "#/$defs/nonNegative64" },
                 "datatype": { "$ref": "#/$defs/datatype" },
                 "quality": { "type": "integer", "minimum": 0 },
                 "quality_context": { "type": "string" },
@@ -3809,8 +3808,8 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
             "properties": {
                 "is_multi_part": { "type": "boolean" },
                 "content_type": { "type": "string" },
-                "size": { "$ref": "#/$defs/uint64" },
-                "seq": { "$ref": "#/$defs/uint64" },
+                "size": { "$ref": "#/$defs/nonNegative64" },
+                "seq": { "$ref": "#/$defs/nonNegative64" },
                 "file_name": { "type": "string" },
                 "file_type": { "type": "string" },
                 "md5": { "type": "string" },
@@ -3863,7 +3862,7 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
                 "status": {
                     "type": "object",
                     "properties": {
-                        "code": { "$ref": "#/$defs/uint64" },
+                        "code": { "$ref": "#/$defs/nonNegative64" },
                         "message": { "type": "string" }
                     }
                 }

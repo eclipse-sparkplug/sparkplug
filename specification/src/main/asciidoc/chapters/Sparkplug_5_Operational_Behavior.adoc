@@ -475,8 +475,8 @@ namespace on which it is published.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq] The
 Edge Node's MQTT Will Message's payload MUST include a bd_seq number in the payload and the value
 MUST be incremented by one from the value in the previous MQTT CONNECT packet unless the value would
-be greater than 18446744073709551615 (max value of a UINT64). If in the previous NBIRTH a value of
-18446744073709551615 was sent, the next MQTT Connect packet Will Message payload bd_seq number value
+be greater than 9223372036854775807 (max value of an INT64). If in the previous NBIRTH a value of
+9223372036854775807 was sent, the next MQTT Connect packet Will Message payload bd_seq number value
 MUST have a value of 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-qos]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-qos] The
 Edge Node's MQTT Will Message's MQTT QoS MUST be 1.*#
@@ -577,11 +577,11 @@ Edge Node's NBIRTH MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-retained]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-retained] The
 Edge Node's NBIRTH retained flag MUST be set to false.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-seq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload-seq] The
-Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 18446744073709551615
+Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 9223372036854775807
 (inclusive).*#
 ** This will become the starting sequence number which all following messages will include a
-sequence number that is one more than the previous up to 18446744073709551615 (max value of a
-UINT64) where it wraps back to zero.
+sequence number that is one more than the previous up to 9223372036854775807 (max value of an
+INT64) where it wraps back to zero.
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-offline]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-phid-offline] If
 the Edge Node is configured to wait for a Primary Host Application, it is connected to the MQTT
 Server, and receives a STATE message on its configured Primary Host, the timestamp value in the
@@ -860,7 +860,7 @@ Device's DBIRTH MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-retained]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-retained] The
 Device's DBIRTH retained flag MUST be set to false.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload-seq]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-payload-seq] The
-Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 18446744073709551615
+Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 9223372036854775807
 (inclusive) and be one more than was included in the prior Sparkplug message sent from the Edge Node
 associated with this Device.*#
 
@@ -1265,7 +1265,7 @@ values stop making sense.
 A Host Application also has to establish where in a descriptor sequence stream it is starting from.
 A BIRTH begins a stream and carries a descriptor_seq of 0. A REBIRTH does not begin a stream; it
 slip-streams the Host Application into a stream that is already running and carries the next
-incrementing value, which is only 0 in the case of a UINT64 rollover.
+incrementing value, which is only 0 in the case of an INT64 rollover.
 
 * [tck-testable tck-id-operational-behavior-host-partial-descriptor-seq-anchor]#[yellow-background]*[tck-id-operational-behavior-host-partial-descriptor-seq-anchor] A
 Host Application MUST anchor its expected descriptor_seq for a Sparkplug Descriptor on the
@@ -1746,9 +1746,9 @@ Application getting in sync with the data stream.
 NREBIRTH payload MUST account for sequence number rollover if required based on the next pending
 DATA message and the number of devices under the scope of the Edge Node.*#
 ** For example, if the next pending DATA message sequence number will be 1 and the Edge Node has
-two devices, the NBIRTHs sequence number value must be 18446744073709551614. This means the sequence
-numbers will be: NBIRTH: 18446744073709551614, DBIRTH 1: 18446744073709551615, DBIRTH 2: 0, DATA: 1
-** The above example is based on the fact that the max value of a UINT64 is 18446744073709551615
+two devices, the NBIRTHs sequence number value must be 9223372036854775806. This means the sequence
+numbers will be: NBIRTH: 9223372036854775806, DBIRTH 1: 9223372036854775807, DBIRTH 2: 0, DATA: 1
+** The above example is based on the fact that the max value of an INT64 is 9223372036854775807
 * [tck-testable tck-id-operational-behavior-rebirth-action-6]#[yellow-background]*[tck-id-operational-behavior-rebirth-action-6] Each
 DREBIRTH payload MUST use a seq number that is incremented by one from the previous message.*#
 * [tck-testable tck-id-operational-behavior-rebirth-action-7]#[yellow-background]*[tck-id-operational-behavior-rebirth-action-7] Each
