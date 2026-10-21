@@ -502,7 +502,7 @@ timestamp is the point at which the reported values were current, and the timest
 is the time that metric's value last changed. A consuming application needs both to know what a
 value is and how long it has held that value.
 ** _seq_
-*** This is the sequence number which is an unsigned 64-bit integer.
+*** This is the sequence number which is a signed 64-bit integer.
 **** [tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*[tck-id-payloads-sequence-num-always-included] A
 sequence number MUST be included in the payload of every Sparkplug MQTT message from an Edge Node
 except an NDEATH message that is delivered as the Edge Node's registered MQTT Will Message.*#
@@ -524,7 +524,7 @@ continually increasing by one in each message from that Edge Node until a value 
 9223372036854775807 (max value of an INT64) is reached. At that point, the sequence number of the
 following message MUST be zero.*#
 ** _bd_seq_
-*** This is the birth/death sequence number which is an unsigned 64-bit integer. It scopes a message to
+*** This is the birth/death sequence number which is a signed 64-bit integer. It scopes a message to
 the MQTT session in which it was published. Unlike seq and descriptor_seq, which advance from message
 to message, the bd_seq number is constant for the lifetime of an MQTT session and changes only when a
 new session is established.
@@ -561,7 +561,7 @@ At that point the birth/death sequence number of the following MQTT CONNECT pack
 session, and it is not incremented by an NREBIRTH, because an NREBIRTH does not establish a new MQTT
 session.
 ** _descriptor_seq_
-*** This is the descriptor sequence number which is an unsigned 64-bit integer. It is an ordered
+*** This is the descriptor sequence number which is a signed 64-bit integer. It is an ordered
 sequence number stream scoped to a single Sparkplug Descriptor (see the
 link:#introduction_sparkplug_ids[Sparkplug Identifiers] section), either the Edge Node Descriptor for
 an Edge Node's messages (NBIRTH, NDATA) or a Device Descriptor for a Device's messages (DBIRTH,
