@@ -3599,10 +3599,15 @@ is therefore roughly 165 times larger than that limit, so a timestamp written as
 would be silently rounded, typically to the nearest 256 nanoseconds. Metric values of type Int64,
 UInt64, and DateTime have the same exposure.
 
+Non-normative comment: The sequence numbers are subject to this for the same reason. A Sparkplug
+seq, bd_seq, and descriptor_seq each count up to the maximum value of their declared type before
+rolling over to zero, as required in the link:#payloads_c_payload_header[Header] section, so they
+reach magnitudes a JSON number cannot carry exactly. A sequence number is small early in a session
+and large late in one, which would make a numeric form correct in testing and lossy in production.
+
 Non-normative comment: The rule is driven by the declared type of the field rather than by the
-magnitude of the value, so seq, bd_seq, and descriptor_seq are written as strings even though a
-Sparkplug sequence number is always small. This keeps the mapping mechanical: an encoder derives
-it from the schema alone, and no value can lose precision because of how large it happened to be.
+magnitude of a particular value, so an encoder derives it from the schema alone and no value can
+lose precision because of how large it happened to be.
 
 [[payloads_json_structural]]
 ==== Structural Mappings
