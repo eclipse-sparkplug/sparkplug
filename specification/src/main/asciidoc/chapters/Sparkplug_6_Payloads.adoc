@@ -309,7 +309,7 @@ message Payload {
 
         optional string   name            = 1;        // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
         optional uint64   alias           = 2;        // Metric alias - tied to name on BIRTH and included in all later DATA messages
-        optional uint64   timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
+        optional int64    timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
         optional DataType datatype        = 4;        // DataType of the metric/tag value
         optional uint32   quality         = 5;        // Quality code of the metric/tag value - severity in bits 30-31
         optional string   quality_context = 6;        // The optional quality context of the metric/tag value
@@ -326,7 +326,7 @@ message Payload {
     }
 
     message Header {
-        optional uint64 timestamp              = 1;  // Timestamp at message sending time
+        optional int64  timestamp              = 1;  // Timestamp at message sending time
         optional int64  seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
         optional int64  bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
         optional int64  descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
@@ -489,7 +489,7 @@ The header section includes the following components.
 
 * *header*
 ** _timestamp_
-*** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
+*** This is the timestamp in the form of a signed 64-bit integer representing the number of
 nanoseconds since epoch (Jan 1, 1970).
 *** [tck-testable tck-id-payloads-timestamp-in-UTC]#[yellow-background]*[tck-id-payloads-timestamp-in-UTC] This
 timestamp MUST be in UTC.*#
@@ -666,7 +666,7 @@ and DBIRTH messages MUST include both a metric name and alias.*#
 *** [tck-testable tck-id-payloads-alias-data-cmd-requirement]#[yellow-background]*[tck-id-payloads-alias-data-cmd-requirement] NDATA,
 DDATA, NCMD, and DCMD messages MUST only include an alias and the metric name MUST be excluded.*#
 * *timestamp*
-** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
+** This is the timestamp in the form of a signed 64-bit integer representing the number of
 nanoseconds since epoch (Jan 1, 1970).
 ** [tck-not-testable]#[yellow-background]*In an NBIRTH, NREBIRTH, DBIRTH, DREBIRTH, NDATA, or DDATA
 message, the timestamp of a Metric MUST represent the metric value change time, meaning the time at
@@ -2112,8 +2112,9 @@ NREBIRTH message MUST include a sequence number and it MUST have a value between
 9223372036854775807 (inclusive).*#
 * [tck-testable tck-id-payloads-nrebirth-seq-2]#[yellow-background]*[tck-id-payloads-nrebirth-seq-2] Every
 NREBIRTH message MUST include a sequence number that is the following value:*#
-** rsn = pds - (1 + dc)
-** If the rsn results in a negative number, add 9223372036854775807 (max value of an INT64) to it.
+** If pds is greater than or equal to (1 + dc), then rsn = pds - (1 + dc)
+** Otherwise the sequence number has rolled over since that pending DATA publish, and
+rsn = 9223372036854775807 - (dc - pds)
 *** rsn = Rebirth Sequence Number value
 *** pds = Next pending DATA publish seq number
 *** dc = Device count (number of Sparkplug Devices under the scope of the Edge Node)

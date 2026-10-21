@@ -66,12 +66,12 @@ an implementation to have a nanosecond resolution time source. An implementation
 is coarser than one nanosecond expresses its timestamps in nanoseconds all the same, scaled to that
 denomination. For example, an implementation whose time source has a resolution of one millisecond
 expresses a timestamp as the number of milliseconds since epoch multiplied by 1000000.
-** Non-normative comment: an unsigned 64-bit integer of nanoseconds since epoch covers a range of
-approximately 584 years, reaching the year 2554. Implementers should note that this range is only
-available to a genuinely unsigned representation. The Google Protocol Buffers uint64 type is
-represented as a signed 64-bit long in Java, and several widely used nanosecond time representations
-are signed 64-bit as well, which reduces the reachable range to approximately 292 years, ending on
-2262-04-11. This is the practical ceiling for such implementations.
+** Non-normative comment: a signed 64-bit integer of nanoseconds since epoch covers a range of
+approximately 292 years, ending on 2262-04-11, which is the ceiling for a Sparkplug timestamp. A
+signed type is specified rather than an unsigned one because the Google Protocol Buffers uint64
+type is represented as a signed 64-bit long in Java, and several widely used nanosecond time
+representations are signed 64-bit as well, so the upper half of an unsigned range was never
+reachable in practice.
 
 Non-normative comment: the resolution of a timestamp is not the same as its accuracy. Denominating a
 timestamp in nanoseconds says how finely a value can be expressed, not how closely it corresponds to
