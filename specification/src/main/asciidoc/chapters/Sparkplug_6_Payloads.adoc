@@ -346,8 +346,8 @@ message Payload {
 
     optional Header header = 1;                 // Always present and always uncompressed
 
-    oneof content {
-        Content plain      = 2;                 // The Content of this message, uncompressed
+    oneof payload_content {
+        Content content    = 2;                 // The Content of this message, uncompressed
         bytes   compressed = 3;                 // The compressed bytes of a serialized Content
     }
 
@@ -3152,13 +3152,14 @@ Compression applies to the content section of a payload only. The header section
 compressed, so a consuming application can read the header of a compressed payload without
 decompressing anything.
 
-A compressed payload carries its content in the compressed field of the content oneof rather than in
-the plain field. Which of the two is present is therefore evident from the payload itself, and no
+A compressed payload carries its content in the compressed field of the payload_content oneof
+rather than in the content field. Which of the two is present is therefore evident from the payload
+itself, and no
 separate marker is required.
 
 * [tck-testable tck-id-payloads-compression-content-only]#[yellow-background]*[tck-id-payloads-compression-content-only] When
 using Sparkplug compression, the compressed field of a payload MUST contain the compressed bytes of
-a serialized Content message, and the plain field MUST NOT be present.*#
+a serialized Content message, and the content field MUST NOT be present.*#
 * [tck-testable tck-id-payloads-compression-header-uncompressed]#[yellow-background]*[tck-id-payloads-compression-header-uncompressed] The
 header section of a payload MUST NOT be compressed.*#
 ** Non-normative comment: this is what allows a Host Application to evaluate the sequence numbers
@@ -3175,7 +3176,7 @@ before decompressing it. In earlier versions of this specification the algorithm
 metric inside the payload being compressed, which required the payload to be decompressed in order
 to discover how to decompress it.
 ** Non-normative comment: the value names the algorithm only. Whether the content is compressed at
-all is already carried by which field of the content oneof is present, so no marker value is
+all is already carried by which field of the payload_content oneof is present, so no marker value is
 required in this field.
 * [tck-testable tck-id-payloads-compression-algorithm-support]#[yellow-background]*[tck-id-payloads-compression-algorithm-support] A
 consuming application that is delivered a compressed payload whose algorithm it does not support
@@ -3195,7 +3196,8 @@ the original, and the header and framing are not compressible in any case.
 
 The following is the NDATA message shown earlier in this chapter, with its content section
 compressed. The header is identical to the uncompressed form apart from the addition of the
-compression_algorithm, the plain field is absent, and the compressed field holds the deflated bytes
+compression_algorithm, the content field is absent, and the compressed field holds the deflated
+bytes
 of the serialized Content:
 
 ----
@@ -3481,9 +3483,15 @@ spJv4.0, or the reverse, as a mechanical transformation.
 Non-normative comment: The JSON encoding is derived from the JSON Mapping defined by Google
 Protocol Buffers, which most Protocol Buffers libraries implement directly. Where this
 specification deviates from that mapping it does so explicitly, and those deviations are collected
-in the link:#payloads_json_structural[Structural Mappings] section. An implementation that already
-has the Sparkplug Protocol Buffers schema can therefore produce most of the JSON encoding with
-library facilities rather than with hand-written code.
+in the link:#payloads_json_structural[Structural Mappings] section.
+
+Non-normative comment: Deriving the encoding this way settles the scalar questions rather than
+reopening them, so the rules for 64-bit integers, enumerated values, bytes, and non-finite floating
+point values in the link:#payloads_json_scalar[Scalar Value Mapping] section are the ones a
+Protocol Buffers JSON implementation already applies, and a payload's header needs no adjustment at
+all. It does not mean a conformant encoder can be assembled from library calls. The structural
+mappings reshape every Metric, so an implementation writes its own traversal and uses the library,
+if at all, for the scalar formatting within it.
 
 [[payloads_json_encoding_selection]]
 ==== Encoding Selection
@@ -3701,8 +3709,8 @@ represented according to the scalar mapping for the column's datatype.*#
 
 [tck-testable tck-id-payloads-json-content-key]#[yellow-background]*[tck-id-payloads-json-content-key] An
 uncompressed payload MUST carry its content under the key 'content', and a compressed payload MUST
-carry it under the key 'compressed', matching the two arms of the content oneof in the Google
-Protocol Buffers schema.*#
+carry it under the key 'compressed', matching the two arms of the payload_content oneof in the
+Google Protocol Buffers schema.*#
 
 [tck-testable tck-id-payloads-json-compressed-base64]#[yellow-background]*[tck-id-payloads-json-compressed-base64] The
 value of 'compressed' MUST be a JSON string containing the base64 encoding of the compressed bytes,
