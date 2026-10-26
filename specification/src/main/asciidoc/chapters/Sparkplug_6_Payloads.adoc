@@ -973,53 +973,115 @@ components.
 [[payloads_c_dataset]]
 ==== DataSet
 
-A Sparkplug B DataSet object is used to encode matrices of data. It includes the following
-components.
+A Sparkplug DataSet object is used to encode matrices of data. A DataSet is column oriented: it
+carries an array of Columns, and each Column holds its own header name, its own datatype, and every
+value in that column. A row of the matrix is formed by taking the value at the same index from each
+Column in turn, so the number of rows is the number of values in any one Column.
 
-* *num_of_columns*
-** [tck-testable tck-id-payloads-dataset-column-size]#[yellow-background]*[tck-id-payloads-dataset-column-size] This
-MUST be an unsigned 64-bit integer representing the number of columns in this DataSet.*#
 * *columns*
-** This is an array of strings representing the column headers of this DataSet.
-** [tck-testable tck-id-payloads-dataset-column-num-headers]#[yellow-background]*[tck-id-payloads-dataset-column-num-headers] The
-size of the array MUST have the same number of elements that the types array contains.*#
-* *types*
-** [tck-testable tck-id-payloads-dataset-types-def]#[yellow-background]*[tck-id-payloads-dataset-types-def] This
-MUST be an array of unsigned 32 bit integers representing the datatypes of the columns.*#
-** [tck-testable tck-id-payloads-dataset-types-num]#[yellow-background]*[tck-id-payloads-dataset-types-num] The
-array of types MUST have the same number of elements that the columns array contains.*#
-** [tck-testable tck-id-payloads-dataset-types-type]#[yellow-background]*[tck-id-payloads-dataset-types-type] The
-values in the types array MUST be a unsigned 32-bit integer representing the datatype.*#
-** [tck-testable tck-id-payloads-dataset-types-value]#[yellow-background]*[tck-id-payloads-dataset-types-value] This
-values in the types array MUST be one of the enumerated values as shown in the
-link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
-** [tck-testable tck-id-payloads-dataset-parameter-type-req]#[yellow-background]*[tck-id-payloads-dataset-parameter-type-req] The
-types array MUST be included in all DataSets.*#
-* *rows*
-** This is an array of DataSet.Row objects. It contains the data that makes up the data rows of this 
-DataSet.
+** This is an array of DataSet.Column objects, one per column of the matrix, in column order. It
+contains the data that makes up the DataSet.
+** [tck-testable tck-id-payloads-dataset-column-equal-length]#[yellow-background]*[tck-id-payloads-dataset-column-equal-length] Every
+Column in a DataSet MUST contain the same number of values, because the values at a given index
+across all Columns form one row of the matrix.*#
 
-[[payloads_c_dataset_row]]
-==== DataSet.Row
+Non-normative comment: A column oriented layout lets every value in a column share one datatype and
+one Google Protocol Buffers field, so the values pack into a single length delimited run rather than
+repeating a type tag per cell. The row at index i is read by taking element i of each Column.
 
-A Sparkplug B DataSet.Row object represents a row of data in a DataSet. It includes the following 
+[[payloads_c_dataset_column]]
+==== DataSet.Column
+
+A Sparkplug DataSet.Column object represents a single column of a DataSet. It includes the following
 components.
 
-* *elements*
-** This is an array of DataSet.DataSetValue objects. It represents the data contained within a row
-of a DataSet.
+* *name*
+** [tck-testable tck-id-payloads-dataset-column-name]#[yellow-background]*[tck-id-payloads-dataset-column-name] Each
+Column MUST include a name, which is the column header for that column.*#
+* *datatype*
+** [tck-testable tck-id-payloads-dataset-column-datatype-req]#[yellow-background]*[tck-id-payloads-dataset-column-datatype-req] Each
+Column MUST include a datatype, which is the datatype of every value in that column.*#
+** [tck-testable tck-id-payloads-dataset-column-datatype-value]#[yellow-background]*[tck-id-payloads-dataset-column-datatype-value] The
+datatype MUST be one of the enumerated values shown in the
+link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
+* *values*
+** The values of a Column are carried in one of six repeated fields, selected by the Column's
+datatype as shown in the table below.
+** [tck-testable tck-id-payloads-dataset-column-values-field]#[yellow-background]*[tck-id-payloads-dataset-column-values-field] The
+values of a Column MUST be carried in the repeated field that corresponds to that Column's datatype
+as shown in the DataSet Column Value Fields table.*#
+** [tck-testable tck-id-payloads-dataset-column-values-one]#[yellow-background]*[tck-id-payloads-dataset-column-values-one] A
+Column MUST NOT populate more than one of the six repeated value fields.*#
+** [tck-testable tck-id-payloads-dataset-column-values-signed]#[yellow-background]*[tck-id-payloads-dataset-column-values-signed] A
+signed value carried in int_values or long_values MUST be encoded as its two's complement
+representation, and a consuming application MUST interpret it according to the Column's datatype.*#
 
-[[payloads_c_dataset_datasetvalue]]
-==== DataSet.DataSetValue
+The following table defines which repeated field carries the values of a Column for each datatype.
 
-* *value*
-** The value of a DataSet.DataSetValue utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
-** [tck-testable tck-id-payloads-template-dataset-value]#[yellow-background]*[tck-id-payloads-template-dataset-value] The
-value supplied MUST be one of the following Google Protobuf types: _uint32_, _uint64_, _float_,
-_double_, _bool_, or _string_.*#
+.DataSet Column Value Fields
+[cols="2,2,4"]
+|===
+|*Column datatype*
+|*Field*
+|*Google Protocol Buffers Type*
 
-More information on the types above can be found here:
-https://developers.google.com/protocol-buffers/docs/proto#scalar
+|Int8, Int16, Int32, UInt8, UInt16, UInt32
+|int_values
+|repeated uint32, packed
+
+|Int64, UInt64, DateTime
+|long_values
+|repeated uint64, packed
+
+|Float
+|float_values
+|repeated float, packed
+
+|Double
+|double_values
+|repeated double, packed
+
+|Boolean
+|boolean_values
+|repeated bool, packed
+
+|String, Text
+|string_values
+|repeated string, not packed
+|===
+
+Non-normative comment: There is no signed repeated field, so the signed datatypes share int_values
+and long_values with their unsigned counterparts. A publishing application writes the value's two's
+complement bit pattern and a consuming application narrows it back to the declared datatype, which
+is the same convention the Metric value fields use for Int8 and Int16.
+
+[[payloads_c_dataset_example]]
+===== DataSet Example
+
+The following is a non-normative example of a metric whose value is a DataSet of three columns and
+two rows. The first row is (1, 72.5, true) and the second is (2, 80.0, false).
+
+----
+{
+        "name": "Recipe Steps",
+        "datatype": "DataSet",
+        "value": {
+                "columns": [{
+                        "name": "Step",
+                        "datatype": "UInt32",
+                        "int_values": [1, 2]
+                }, {
+                        "name": "Setpoint",
+                        "datatype": "Double",
+                        "double_values": [72.5, 80.0]
+                }, {
+                        "name": "Enabled",
+                        "datatype": "Boolean",
+                        "boolean_values": [true, false]
+                }]
+        }
+}
+----
 
 [[payloads_c_template]]
 ==== Template
