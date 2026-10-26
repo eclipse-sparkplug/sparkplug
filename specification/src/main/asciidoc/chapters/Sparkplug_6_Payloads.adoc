@@ -981,9 +981,15 @@ Column in turn, so the number of rows is the number of values in any one Column.
 * *columns*
 ** This is an array of DataSet.Column objects, one per column of the matrix, in column order. It
 contains the data that makes up the DataSet.
+** [tck-not-testable tck-id-payloads-dataset-row-correlation]#[yellow-background]*[tck-id-payloads-dataset-row-correlation] The
+values of a DataSet MUST be correlated by index: the value at a given index of each Column, taken
+across the Columns in the order they appear, forms one row of the matrix. A consuming application
+MUST reconstruct rows this way and MUST NOT correlate values by any other means.*#
 ** [tck-testable tck-id-payloads-dataset-column-equal-length]#[yellow-background]*[tck-id-payloads-dataset-column-equal-length] Every
-Column in a DataSet MUST contain the same number of values, because the values at a given index
-across all Columns form one row of the matrix.*#
+Column in a DataSet MUST contain the same number of values, so that every row is complete.*#
+** [tck-not-testable tck-id-payloads-dataset-column-order]#[yellow-background]*[tck-id-payloads-dataset-column-order] The
+order of the Columns in a DataSet is significant and MUST be preserved, because it is the column
+order of the matrix.*#
 
 Non-normative comment: A column oriented layout lets every value in a column share one datatype and
 one Google Protocol Buffers field, so the values pack into a single length delimited run rather than
