@@ -327,9 +327,9 @@ message Payload {
 
     message Header {
         optional int64  timestamp              = 1;  // Timestamp at message sending time
-        optional int64  seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
-        optional int64  bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
-        optional int64  descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
+        optional uint64 seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
+        optional uint64 bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
+        optional uint64 descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
         optional string definition_id          = 5;  // Definition identifier: content hash of the metric definitions this message reports against
         optional string previous_definition_id = 6;  // NMMETA/DMMETA only: the definition_id in effect before the change
         optional string source                 = 7;  // Source for CMD and REBIRTH messages - the Host Application ID that sent the message
@@ -502,7 +502,16 @@ timestamp is the point at which the reported values were current, and the timest
 is the time that metric's value last changed. A consuming application needs both to know what a
 value is and how long it has held that value.
 ** _seq_
-*** This is the sequence number which is a signed 64-bit integer.
+*** This is the sequence number which is an unsigned 64-bit integer.
+*** Non-normative comment: the Sparkplug sequence numbers - seq, bd_seq, and descriptor_seq - are
+declared as unsigned 64-bit integers but roll over at 9223372036854775807, which is half of what
+that type can hold. The restriction is deliberate. An unsigned type is used because a sequence
+number is a counter and can never be negative, and the range is capped so that every value a
+conformant Edge Node can produce also fits a signed 64-bit integer. Several widely used languages,
+including Java, have no unsigned 64-bit type, so an implementation in one of them would otherwise
+have to compare sequence numbers with unsigned arithmetic to remain correct near the top of the
+range. Neither bound is reachable in practice: at one million messages per second the capped range
+takes roughly 292,000 years to exhaust.
 **** [tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*[tck-id-payloads-sequence-num-always-included] A
 sequence number MUST be included in the payload of every Sparkplug MQTT message from an Edge Node
 except an NDEATH message that is delivered as the Edge Node's registered MQTT Will Message.*#
@@ -521,10 +530,10 @@ NBIRTH message from an Edge Node MUST always contain a sequence number between 0
 **** [tck-testable tck-id-payloads-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-sequence-num-incrementing] All
 subsequent messages after an NBIRTH from an Edge Node MUST contain a sequence number that is
 continually increasing by one in each message from that Edge Node until a value of
-9223372036854775807 (max value of an INT64) is reached. At that point, the sequence number of the
+9223372036854775807 is reached. At that point, the sequence number of the
 following message MUST be zero.*#
 ** _bd_seq_
-*** This is the birth/death sequence number which is a signed 64-bit integer. It scopes a message to
+*** This is the birth/death sequence number which is an unsigned 64-bit integer. It scopes a message to
 the MQTT session in which it was published. Unlike seq and descriptor_seq, which advance from message
 to message, the bd_seq number is constant for the lifetime of an MQTT session and changes only when a
 new session is established.
@@ -555,13 +564,13 @@ message from an Edge Node can be attributed to the session that produced it, and
 discard a message belonging to a session it has already replaced.
 **** [tck-testable tck-id-payloads-bd-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-bd-sequence-num-incrementing] The
 birth/death sequence number MUST start at zero and MUST increment by one on every new MQTT CONNECT
-packet sent by the Edge Node, until a value of 9223372036854775807 (max value of an INT64) is reached.
+packet sent by the Edge Node, until a value of 9223372036854775807 is reached.
 At that point the birth/death sequence number of the following MQTT CONNECT packet MUST be zero.*#
 ***** Non-normative comment: the bd_seq number is not incremented from message to message within a
 session, and it is not incremented by an NREBIRTH, because an NREBIRTH does not establish a new MQTT
 session.
 ** _descriptor_seq_
-*** This is the descriptor sequence number which is a signed 64-bit integer. It is an ordered
+*** This is the descriptor sequence number which is an unsigned 64-bit integer. It is an ordered
 sequence number stream scoped to a single Sparkplug Descriptor (see the
 link:#introduction_sparkplug_ids[Sparkplug Identifiers] section), either the Edge Node Descriptor for
 an Edge Node's messages (NBIRTH, NDATA) or a Device Descriptor for a Device's messages (DBIRTH,
@@ -584,7 +593,7 @@ sequence (see the Reconnect Optimization), the NBIRTH or DBIRTH is the first mes
 **** [tck-testable tck-id-payloads-descriptor-seq-incrementing]#[yellow-background]*[tck-id-payloads-descriptor-seq-incrementing] Each
 subsequent message in a descriptor sequence stream MUST contain a descriptor sequence number that is
 one greater than the descriptor sequence number of the previous message in that same stream, until a
-value of 9223372036854775807 (max value of an INT64) is reached, after which the next descriptor
+value of 9223372036854775807 is reached, after which the next descriptor
 sequence number MUST be 0.*#
 **** [tck-testable tck-id-payloads-descriptor-seq-rebirth]#[yellow-background]*[tck-id-payloads-descriptor-seq-rebirth] An
 NREBIRTH or DREBIRTH slip-streams a Host Application into the existing data stream and MUST NOT reset
@@ -2231,8 +2240,8 @@ NOT be used to convey metric datatype, properties, or metadata.*#
 DBIRTH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-dbirth-seq-inc]#[yellow-background]*[tck-id-payloads-dbirth-seq-inc] Every
 DBIRTH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
-INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*[tck-id-payloads-dbirth-order] All
 DBIRTH messages sent by an Edge Node MUST be sent immediately after the NBIRTH and before any NDATA
@@ -2334,8 +2343,8 @@ NOT be used to convey metric datatype, properties, or metadata.*#
 DREBIRTH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-drebirth-seq-inc]#[yellow-background]*[tck-id-payloads-drebirth-seq-inc] Every
 DREBIRTH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
-INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST be a value of 0.*#
 * [tck-testable tck-id-payloads-drebirth-order]#[yellow-background]*[tck-id-payloads-drebirth-order] All
 DREBIRTH messages sent by an Edge Node MUST be sent immediately after the NREBIRTH and before any
@@ -2434,8 +2443,8 @@ published.*#
 NDATA message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ndata-seq-inc]#[yellow-background]*[tck-id-payloads-ndata-seq-inc] Every
 NDATA message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
-INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*[tck-id-payloads-ndata-order] All
 NDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
@@ -2501,8 +2510,8 @@ published.*#
 DDATA message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ddata-seq-inc]#[yellow-background]*[tck-id-payloads-ddata-seq-inc] Every
 DDATA message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
-INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*[tck-id-payloads-ddata-order] All
 DDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
@@ -2904,7 +2913,7 @@ message.
 payload compared to what was in the previous CONNECT packet. This ensures that any Host Applications
 will be able to distinguish between current and old bd_seq numbers in the event that messages are
 delivered out of order. When incrementing the bd_seq number, if the previous value was
-9223372036854775807 (max value of an INT64), the next value must be zero.
+9223372036854775807, the next value must be zero.
 * [tck-testable tck-id-payloads-ndeath-will-message-publisher]#[yellow-background]*[tck-id-payloads-ndeath-will-message-publisher] An
 NDEATH message SHOULD be published by the Edge Node before it intentionally disconnects from the
 MQTT Server.*#
@@ -2972,8 +2981,8 @@ published.*#
 DDEATH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*[tck-id-payloads-ddeath-seq-inc] Every
 DDEATH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 9223372036854775807 (max value of an
-INT64). If in the previous sequence number sent by the Edge Node was 9223372036854775807, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 
 The following is a representation of a simple DDEATH message on the topic:
@@ -3601,10 +3610,10 @@ would be silently rounded, typically to the nearest 256 nanoseconds. Metric valu
 UInt64, and DateTime have the same exposure.
 
 Non-normative comment: The sequence numbers are subject to this for the same reason. A Sparkplug
-seq, bd_seq, and descriptor_seq each count up to the maximum value of their declared type before
-rolling over to zero, as required in the link:#payloads_c_payload_header[Header] section, so they
-reach magnitudes a JSON number cannot carry exactly. A sequence number is small early in a session
-and large late in one, which would make a numeric form correct in testing and lossy in production.
+seq, bd_seq, and descriptor_seq each count up to 9223372036854775807 before rolling over to zero, as
+required in the link:#payloads_c_payload_header[Header] section, so they reach magnitudes a JSON
+number cannot carry exactly. A sequence number is small early in a session and large late in one,
+which would make a numeric form correct in testing and lossy in production.
 
 Non-normative comment: The rule is driven by the declared type of the field rather than by the
 magnitude of a particular value, so an encoder derives it from the schema alone and no value can
