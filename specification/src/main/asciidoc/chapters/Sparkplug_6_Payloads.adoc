@@ -3555,23 +3555,42 @@ JSON object key MUST be the name of the corresponding field exactly as it appear
 Google Protocol Buffers schema, except where the
 link:#payloads_json_structural[Structural Mappings] section names a different key.*#
 
-[tck-testable tck-id-payloads-json-field-names-accept]#[yellow-background]*[tck-id-payloads-json-field-names-accept] A
-consuming application MUST also accept the lowerCamelCase form of a field name, which is the name
-with each underscore removed and the letter following it converted to upper case, and every other
-character left unchanged.*#
-
-Non-normative comment: The lowerCamelCase form is required on read because it is what a Google
-Protocol Buffers JSON implementation emits by default. Under the rule above bd_seq becomes bdSeq,
-previous_definition_id becomes previousDefinitionId, and is_multi_part becomes isMultiPart, while
-names with no underscore, such as seq, md5, and engUnit, are unchanged.
+Non-normative comment: A Google Protocol Buffers JSON implementation converts field names to
+lowerCamelCase by default, emitting bdSeq for bd_seq and isMultiPart for is_multi_part. That is not
+the Sparkplug form, so an implementation that generates JSON with such a library must configure it
+to preserve the original field names. In the Java and Python implementations this is the
+preservingProtoFieldNames printer option.
 
 [tck-testable tck-id-payloads-json-omit-absent]#[yellow-background]*[tck-id-payloads-json-omit-absent] A
 field that is not present MUST be omitted from the JSON object rather than written with a JSON null
 or a zero value.*#
 
+Non-normative comment: Every field of the Sparkplug schema is optional, so a field carries the
+distinction between having been set and never having been set, and the JSON encoding has to keep
+that distinction. Zero is a legitimate value for seq, bd_seq, descriptor_seq, alias, and quality,
+so writing an absent field as 0 would make it indistinguishable from one deliberately set to zero.
+A JSON null is excluded for a different reason: a null metric value is expressed by setting is_null
+to true and omitting the value key, as required in the
+link:#payloads_json_typed_values[Typed Values] section, so a null appearing as a value would be a
+second and conflicting way to say the same thing.
+
 [tck-testable tck-id-payloads-json-ignore-unknown]#[yellow-background]*[tck-id-payloads-json-ignore-unknown] A
-consuming application MUST ignore any JSON object key it does not recognize, and MUST NOT treat the
-payload as malformed on that basis.*#
+consuming application MUST ignore a JSON object key that does not name a field it recognizes, and
+MUST NOT treat the payload as malformed on that basis.*#
+
+[tck-not-testable tck-id-payloads-json-unknown-not-metric]#[yellow-background]*[tck-id-payloads-json-unknown-not-metric] The
+requirement above applies only to the names of fields within a message. It does not apply to a
+metric whose name or alias the consuming application does not recognize, which is a mismatch
+against the metric structure the application holds and is resolved by the rules in the
+link:#operational_behavior_modified_metadata_updates[Modified Metadata Updates] section rather than
+by ignoring it.*#
+
+Non-normative comment: The two cases look similar in a payload and are not the same thing. An
+unrecognized field name means the payload carries something this version of the application does
+not know about, such as a field added by a later revision of this specification or a third party
+extension; ignoring it is what allows an older application to keep working. An unrecognized metric
+means the application's view of what the Edge Node reports is out of date, which is a
+synchronization problem and a reason to issue a Rebirth Request, not something to pass over.
 
 Non-normative comment: The naming rule keeps a JSON payload visually identical to the field names
 in the Protocol Buffers schema, so the two encodings can be read against one another and against

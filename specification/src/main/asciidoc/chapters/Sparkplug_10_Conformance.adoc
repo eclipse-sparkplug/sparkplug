@@ -51,9 +51,9 @@ selected by configuration.*#
 * [tck-testable tck-id-conformance-edge-node-encoding-session]#[yellow-background]*[tck-id-conformance-edge-node-encoding-session] A
 Sparkplug Edge Node MUST publish every message of an MQTT session using a single payload encoding on
 the corresponding single namespace.*#
-** Non-normative comment: the sequence number is Edge-Node-wide and the bd_seq number scopes an MQTT
-session, so an Edge Node that split one session across both namespaces would produce two interleaved
-halves of one sequence number stream and neither would be consumable on its own.
+** Non-normative comment: an Edge Node has one sequence number stream, so publishing part of a
+session on one namespace and part on the other would leave a consumer of either namespace with gaps
+in that stream.
 
 Support for strongly typed commands is optional. An Edge Node that exposes commands must do so in a
 conformant manner.
