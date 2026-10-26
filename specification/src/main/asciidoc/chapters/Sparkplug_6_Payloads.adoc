@@ -635,6 +635,25 @@ link:#payloads_c_compression[Compression] section.
 ** _metrics_
 *** This is an array of metrics representing key/value/datatype values. Metrics are further defined
 link:#payloads_c_metric[here].
+*** [tck-testable tck-id-payloads-metrics-ordered]#[yellow-background]*[tck-id-payloads-metrics-ordered] The
+metrics of a payload MUST be ordered by metric value change time, oldest first.*#
+*** [tck-testable tck-id-payloads-metrics-ordered-no-timestamp]#[yellow-background]*[tck-id-payloads-metrics-ordered-no-timestamp] A
+metric that omits its timestamp MUST be ordered as though its value change time were the payload
+timestamp, which is the time that metric is taken to have changed as described in the
+link:#payloads_c_metric[Metric] section.*#
+*** [tck-not-testable tck-id-payloads-metrics-ordered-ties]#[yellow-background]*[tck-id-payloads-metrics-ordered-ties] Metrics
+that share a value change time MAY appear in any order relative to one another, and a consuming
+application MUST NOT reorder them.*#
+*** Non-normative comment: Ordering by value change time means a consuming application that applies
+the metrics in array order arrives at the correct current value without comparing timestamps, which
+matters when one payload carries several values for the same metric, as a payload of historical
+values does. Metrics remain identified by name or alias, so position still carries no identity.
+*** Non-normative comment: The order among metrics that share a value change time is the publisher's
+and is preserved by both encodings, because a JSON array and a Google Protocol Buffers repeated
+field are both ordered. Multi-part file publishing depends on this: every metric of a multi-part
+publish carries the same timestamp, as required in the
+link:#payloads_c_file_publishing[File Publishing] section, so they tie, and the rules that
+distinguish the first metric of the publish from the rest continue to apply.
 ** _body_
 *** This is an array of bytes which can be used for any custom binary encoded data.
 
@@ -3282,6 +3301,14 @@ metric MetaData file_name MUST be included and set to the String value of the fi
 When publishing in multi-part form, the following rules apply regarding the first metric associated with
 the file publish.
 
+Non-normative comment: The rules below identify a metric by its position in the payload, which is
+the one place in this specification where the position of a metric carries meaning. This does not
+conflict with the requirement that metrics be ordered by value change time, stated in the
+link:#payloads_c_payload_content[Content] section, because every metric of a multi-part file
+publish carries the same timestamp. They therefore tie, the ordering requirement does not constrain
+their relative order, and the order the publishing Edge Node or Device chooses is carried unchanged
+by both payload encodings. A consuming application MUST NOT reorder them.
+
 * [tck-testable tck-id-payloads-file-multi-metadata-size-first]#[yellow-background]*[tck-id-payloads-file-multi-metadata-size-first] The
 first metric regarding the file publish's metric MetaData size MUST be included and set to the uint64
 value of the total number of separate metrics that make up the full multi-part file publish.*#
@@ -3718,8 +3745,16 @@ PropertySet MUST be represented as a JSON object whose keys are the property nam
 are the corresponding PropertyValues.*#
 
 [tck-testable tck-id-payloads-json-propertyset-unique]#[yellow-background]*[tck-id-payloads-json-propertyset-unique] Property
-names within a single PropertySet MUST be unique, and the order of the keys MUST NOT be
-significant.*#
+names within a single PropertySet MUST be unique.*#
+
+[tck-not-testable tck-id-payloads-json-propertyset-unordered]#[yellow-background]*[tck-id-payloads-json-propertyset-unordered] The
+order of the keys of a PropertySet MUST NOT be significant, and an application MUST NOT encode
+meaning in it.*#
+
+Non-normative comment: RFC 8259 defines a JSON object as an unordered collection, so a parser is
+free to present the keys in any order and key order cannot be relied upon in any case. The
+requirement is on the publisher not to attach meaning to it. Uniqueness is stated separately
+because it is observable in a payload, whereas the absence of meaning in the ordering is not.
 
 [[payloads_json_array_types]]
 ===== Array Types
