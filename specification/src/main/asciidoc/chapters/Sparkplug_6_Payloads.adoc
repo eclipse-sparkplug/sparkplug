@@ -3480,18 +3480,20 @@ may be converted from one to the other without loss and without consulting anyth
 message itself. This is what allows a bridging application to republish an spCv4.0 namespace onto
 spJv4.0, or the reverse, as a mechanical transformation.
 
-Non-normative comment: The JSON encoding is derived from the JSON Mapping defined by Google
-Protocol Buffers, which most Protocol Buffers libraries implement directly. Where this
-specification deviates from that mapping it does so explicitly, and those deviations are collected
-in the link:#payloads_json_structural[Structural Mappings] section.
+This section defines the JSON encoding completely. Conformance to it does not depend on any
+document outside this specification.
 
-Non-normative comment: Deriving the encoding this way settles the scalar questions rather than
-reopening them, so the rules for 64-bit integers, enumerated values, bytes, and non-finite floating
-point values in the link:#payloads_json_scalar[Scalar Value Mapping] section are the ones a
-Protocol Buffers JSON implementation already applies, and a payload's header needs no adjustment at
-all. It does not mean a conformant encoder can be assembled from library calls. The structural
-mappings reshape every Metric, so an implementation writes its own traversal and uses the library,
-if at all, for the scalar formatting within it.
+Non-normative comment: The scalar rules below were chosen to agree with the JSON Mapping that
+Google Protocol Buffers defines for proto3, so the representation of 64-bit integers, enumerated
+values, bytes, and non-finite floating point values will be familiar, and a Protocol Buffers JSON
+implementation produces those forms directly. That agreement is a convenience and not a normative
+dependency. The Sparkplug schema is proto2, that mapping is specified for proto3, it does not
+define how extension fields are represented, and it is not a versioned standard, so this
+specification states the rules itself rather than incorporating them by reference.
+
+Non-normative comment: Agreement on the scalar forms does not mean a conformant encoder can be
+assembled from library calls. The structural mappings reshape every Metric, so an implementation
+writes its own traversal and uses a library, if at all, for the scalar formatting within it.
 
 [[payloads_json_encoding_selection]]
 ==== Encoding Selection
@@ -3527,8 +3529,14 @@ Google Protocol Buffers schema, except where the
 link:#payloads_json_structural[Structural Mappings] section names a different key.*#
 
 [tck-testable tck-id-payloads-json-field-names-accept]#[yellow-background]*[tck-id-payloads-json-field-names-accept] A
-consuming application MUST also accept the lowerCamelCase form of a field name, because that is the
-form a Google Protocol Buffers JSON Mapping implementation emits by default.*#
+consuming application MUST also accept the lowerCamelCase form of a field name, which is the name
+with each underscore removed and the letter following it converted to upper case, and every other
+character left unchanged.*#
+
+Non-normative comment: The lowerCamelCase form is required on read because it is what a Google
+Protocol Buffers JSON implementation emits by default. Under the rule above bd_seq becomes bdSeq,
+previous_definition_id becomes previousDefinitionId, and is_multi_part becomes isMultiPart, while
+names with no underscore, such as seq, md5, and engUnit, are unchanged.
 
 [tck-testable tck-id-payloads-json-omit-absent]#[yellow-background]*[tck-id-payloads-json-omit-absent] A
 field that is not present MUST be omitted from the JSON object rather than written with a JSON null
@@ -3609,6 +3617,11 @@ or the integer value assigned to it in the Google Protocol Buffers schema.*#
 non-finite float or double value MUST be represented as one of the JSON strings "NaN", "Infinity",
 or "-Infinity", because RFC 8259 provides no numeric form for these values.*#
 
+[tck-testable tck-id-payloads-json-float-precision]#[yellow-background]*[tck-id-payloads-json-float-precision] A
+finite float or double value MUST be written with enough decimal digits that parsing it back
+reproduces the original value exactly, which requires up to 9 significant decimal digits for a
+float and up to 17 for a double.*#
+
 Non-normative comment: 64-bit integers are represented as strings because a JSON number is not
 required by RFC 8259 to carry more precision than an IEEE 754 double, which holds integers exactly
 only up to 2^53^. Several widely used JSON parsers, including the one built into every web browser,
@@ -3626,6 +3639,38 @@ which would make a numeric form correct in testing and lossy in production.
 Non-normative comment: The rule is driven by the declared type of the field rather than by the
 magnitude of a particular value, so an encoder derives it from the schema alone and no value can
 lose precision because of how large it happened to be.
+
+[[payloads_json_extensions]]
+==== Extension Fields
+
+The Sparkplug Google Protocol Buffers schema reserves an extension range in most of its messages so
+that a third party can add fields without colliding with future Sparkplug fields. The JSON encoding
+represents those fields as well.
+
+[tck-testable tck-id-payloads-json-extension-key]#[yellow-background]*[tck-id-payloads-json-extension-key] A
+field carried in a message's extension range MUST be represented with a JSON object key that is the
+fully qualified name of that extension enclosed in square brackets, for example
+'[com.example.vendor_tag]'.*#
+
+[tck-testable tck-id-payloads-json-extension-value]#[yellow-background]*[tck-id-payloads-json-extension-value] The
+value of an extension field MUST be represented according to the same rules as any other field of
+its type, as defined in the link:#payloads_json_scalar[Scalar Value Mapping] and
+link:#payloads_json_structural[Structural Mappings] sections.*#
+
+[tck-not-testable tck-id-payloads-json-extension-ignore]#[yellow-background]*[tck-id-payloads-json-extension-ignore] A
+consuming application that does not recognize an extension MUST ignore it, as it ignores any other
+unrecognized key, and MUST NOT treat the payload as malformed.*#
+
+Non-normative comment: The bracketed form is the one Google Protocol Buffers JSON implementations
+already use for extensions, so it is specified here rather than invented. It is stated normatively
+because the Protocol Buffers JSON Mapping is defined for proto3, which has no extensions, and so
+does not cover this case at all.
+
+Non-normative comment: An extension does not survive a round trip through an application that does
+not know it. In the Google Protocol Buffers encoding an unknown field is retained and re-emitted,
+but in JSON an unrecognized key is not. A deployment that depends on extensions reaching a
+consumer through an intermediary should confirm that the intermediary understands them, rather
+than assuming they are carried through.
 
 [[payloads_json_structural]]
 ==== Structural Mappings
