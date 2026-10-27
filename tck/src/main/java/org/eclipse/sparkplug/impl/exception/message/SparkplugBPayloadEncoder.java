@@ -182,7 +182,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						builder.setBooleanValue((Boolean) value.getValue());
 						break;
 					case DateTime:
-						builder.setUint64Value(((Date) value.getValue()).getTime());
+						builder.setInt64Value(((Date) value.getValue()).getTime());
 						break;
 					case Double:
 						builder.setDoubleValue((Double) value.getValue());
@@ -256,7 +256,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 					builder.getTypedValueBuilder().setBooleanValue(toBoolean(value));
 					break;
 				case DateTime:
-					builder.getTypedValueBuilder().setUint64Value(((Date) value).getTime());
+					builder.getTypedValueBuilder().setInt64Value(((Date) value).getTime());
 					break;
 				case Double:
 					builder.getTypedValueBuilder().setDoubleValue((Double) value);
@@ -316,7 +316,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 					metricBuilder.getValueBuilder().setBooleanValue(toBoolean(metric.getValue()));
 					break;
 				case DateTime:
-					metricBuilder.getValueBuilder().setUint64Value(((Date) metric.getValue()).getTime());
+					metricBuilder.getValueBuilder().setInt64Value(((Date) metric.getValue()).getTime());
 					break;
 				case File:
 					metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(((File) metric.getValue()).getBytes()));

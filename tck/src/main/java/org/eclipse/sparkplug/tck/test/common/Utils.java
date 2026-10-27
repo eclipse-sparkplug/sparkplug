@@ -196,9 +196,9 @@ public class Utils {
 			case UInt32:
 				return Payload.TypedValue.ValueCase.UINT32_VALUE;
 			case Int64:
+			case DateTime:
 				return Payload.TypedValue.ValueCase.INT64_VALUE;
 			case UInt64:
-			case DateTime:
 				return Payload.TypedValue.ValueCase.UINT64_VALUE;
 			case Float:
 				return Payload.TypedValue.ValueCase.FLOAT_VALUE;
