@@ -60,7 +60,7 @@ import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -347,23 +347,23 @@ public class SessionTerminationTest extends TCKTest {
 
 			// The DDEATH MUST include a sequence number in the payload and it MUST have a value of one
 			// greater than the previous MQTT message from the Edge Node contained unless the previous
-			// MQTT message contained a value of 255. In this case the sequence number MUST be 0.
+			// MQTT message contained the maximum sequence number. In this case the sequence number MUST be 0.
 
 			boolean isValidSeq = false; // TODO check sequence increment
-			if (payload.hasSeq()) {
-				long seq = payload.getSeq();
-				if (seq >= 0 && seq <= 255) {
+			if (payload.getHeader().hasSeq()) {
+				long seq = payload.getHeader().getSeq();
+				if (seq >= 0) {
 					isValidSeq = true;
 				}
 			}
 			testResults.put(ID_TOPICS_DDEATH_SEQ_NUM, setResult(isValidSeq, TOPICS_DDEATH_SEQ_NUM));
 			testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(isValidSeq, PAYLOADS_DDEATH_SEQ_INC));
 
-			testResults.put(ID_PAYLOADS_DDEATH_TIMESTAMP, setResult(payload.hasTimestamp(), PAYLOADS_DDEATH_TIMESTAMP));
+			testResults.put(ID_PAYLOADS_DDEATH_TIMESTAMP, setResult(payload.getHeader().hasTimestamp(), PAYLOADS_DDEATH_TIMESTAMP));
 
-			testResults.put(ID_PAYLOADS_DDEATH_SEQ, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ));
+			testResults.put(ID_PAYLOADS_DDEATH_SEQ, setResult(payload.getHeader().hasSeq(), PAYLOADS_DDEATH_SEQ));
 
-			testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
+			testResults.put(ID_PAYLOADS_DDEATH_SEQ_NUMBER, setResult(payload.getHeader().hasSeq(), PAYLOADS_DDEATH_SEQ_NUMBER));
 		}
 
 		// if there is no device id, don't wait for a NDEATH

@@ -2,6 +2,7 @@ import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
 
 plugins {
     id("com.hivemq.extension")
+    id("com.google.protobuf") version "0.9.4"
     id("com.github.hierynomus.license-report")
     id("io.github.sgtsilvio.gradle.defaults")
     id("de.undercouch.download")
@@ -39,8 +40,36 @@ val tckAuditXml: Configuration by configurations.creating {
     }
 }
 
+val protoSchema: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("sparkplug-proto"))
+    }
+}
+
 dependencies {
    tckAuditXml("org.eclipse.sparkplug:specification")
+   protoSchema("org.eclipse.sparkplug:specification")
+}
+
+/* ******************** protobuf ******************** */
+
+// SparkplugBProto.java is generated from the schema in the Payloads chapter rather than checked in,
+// so it cannot drift from the specification the way it did through Sparkplug 3.
+val copyProtoSchema by tasks.registering(Sync::class) {
+    from(protoSchema)
+    into(layout.buildDirectory.dir("extracted-proto"))
+}
+
+sourceSets.main {
+    proto.srcDir(copyProtoSchema.map { it.destinationDir })
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${property("protobuf.version")}"
+    }
 }
 
 

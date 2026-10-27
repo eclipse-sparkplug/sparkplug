@@ -63,7 +63,7 @@ import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto;
+import org.eclipse.tahu.protobuf.SparkplugBProto;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -359,9 +359,9 @@ public class PrimaryHostTest extends TCKTest {
 	private long getBdSeq(final ByteBuffer payload) {
 		final SparkplugBProto.PayloadOrBuilder inboundPayload = Utils.decode(payload);
 		if (inboundPayload != null) {
-			for (SparkplugBProto.Payload.Metric m : inboundPayload.getMetricsList()) {
+			for (SparkplugBProto.Payload.Metric m : inboundPayload.getContent().getMetricsList()) {
 				if (m.getName().equals(BD_SEQ)) {
-					return m.getLongValue();
+					return Utils.getLongValue(m);
 				}
 			}
 		}

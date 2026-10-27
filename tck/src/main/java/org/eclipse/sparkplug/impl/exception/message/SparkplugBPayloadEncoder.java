@@ -36,7 +36,7 @@ import org.eclipse.sparkplug.impl.exception.model.Row;
 import org.eclipse.sparkplug.impl.exception.model.SparkplugBPayload;
 import org.eclipse.sparkplug.impl.exception.model.Template;
 import org.eclipse.sparkplug.impl.exception.model.Value;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto;
+import org.eclipse.tahu.protobuf.SparkplugBProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,23 +59,23 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 
 		// Set the timestamp
 		if (payload.getTimestamp() != null) {
-			protoMsg.setTimestamp(payload.getTimestamp().getTime());
+			protoMsg.getHeaderBuilder().setTimestamp(payload.getTimestamp().getTime());
 		}
 
 		// Set the sequence number
 		if (payload.getSeq() != null) {
-			protoMsg.setSeq(payload.getSeq());
+			protoMsg.getHeaderBuilder().setSeq(payload.getSeq());
 		}
 
 		// Set the UUID if defined
 		if (payload.getUuid() != null) {
-			protoMsg.setUuid(payload.getUuid());
+			protoMsg.getHeaderBuilder().setUuid(payload.getUuid());
 		}
 
 		// Set the metrics
 		for (Metric metric : payload.getMetrics()) {
 			try {
-				protoMsg.addMetrics(convertMetric(metric));
+				protoMsg.getContentBuilder().addMetrics(convertMetric(metric));
 			} catch (Exception e) {
 				logger.error("Failed to add metric: " + metric.getName(), e);
 				throw new RuntimeException(e);
@@ -84,7 +84,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 
 		// Set the body
 		if (payload.getBody() != null) {
-			protoMsg.setBody(ByteString.copyFrom(payload.getBody()));
+			protoMsg.getContentBuilder().setBody(ByteString.copyFrom(payload.getBody()));
 		}
 
 		return protoMsg.build().toByteArray();
@@ -96,7 +96,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 		SparkplugBProto.Payload.Metric.Builder builder = SparkplugBProto.Payload.Metric.newBuilder();
 
 		// set the basic parameters
-		builder.setDatatype(metric.getDataType().toIntValue());
+		builder.setDatatype(SparkplugBProto.DataType.forNumber(metric.getDataType().toIntValue()));
 		builder = setMetricValue(builder, metric);
 
 		// Set the name, data type, and value
@@ -170,10 +170,10 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 
 		Map<String, PropertyValue> map = propertySet.getPropertyMap();
 		for (String key : map.keySet()) {
-			SparkplugBProto.Payload.PropertyValue.Builder builder = SparkplugBProto.Payload.PropertyValue.newBuilder();
+			SparkplugBProto.Payload.TypedValue.Builder builder = SparkplugBProto.Payload.TypedValue.newBuilder();
 			PropertyValue value = map.get(key);
 			PropertyDataType type = value.getType();
-			builder.setType(type.toIntValue());
+			builder.setDatatype(SparkplugBProto.DataType.forNumber(type.toIntValue()));
 			if (value.getValue() == null) {
 				builder.setIsNull(true);
 			} else {
@@ -182,7 +182,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						builder.setBooleanValue((Boolean) value.getValue());
 						break;
 					case DateTime:
-						builder.setLongValue(((Date) value.getValue()).getTime());
+						builder.setUint64Value(((Date) value.getValue()).getTime());
 						break;
 					case Double:
 						builder.setDoubleValue((Double) value.getValue());
@@ -191,28 +191,28 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						builder.setFloatValue((Float) value.getValue());
 						break;
 					case Int8:
-						builder.setIntValue((Byte) value.getValue());
+						builder.setInt32Value((Byte) value.getValue());
 						break;
 					case Int16:
-						builder.setIntValue((Short) value.getValue());
+						builder.setInt32Value((Short) value.getValue());
 						break;
 					case Int32:
-						builder.setIntValue((Integer) value.getValue());
+						builder.setInt32Value((Integer) value.getValue());
 						break;
 					case Int64:
-						builder.setLongValue((Long) value.getValue());
+						builder.setInt64Value((Long) value.getValue());
 						break;
 					case UInt8:
-						builder.setIntValue(Short.toUnsignedInt((Short) value.getValue()));
+						builder.setUint32Value(Short.toUnsignedInt((Short) value.getValue()));
 						break;
 					case UInt16:
-						builder.setIntValue((int) Integer.toUnsignedLong((Integer) value.getValue()));
+						builder.setUint32Value((int) Integer.toUnsignedLong((Integer) value.getValue()));
 						break;
 					case UInt32:
-						builder.setLongValue(Long.parseUnsignedLong(Long.toUnsignedString((Long) value.getValue())));
+						builder.setUint32Value((int) Long.parseUnsignedLong(Long.toUnsignedString((Long) value.getValue())));
 						break;
 					case UInt64:
-						builder.setLongValue(bigIntegerToUnsignedLong((BigInteger) value.getValue()));
+						builder.setUint64Value(bigIntegerToUnsignedLong((BigInteger) value.getValue()));
 						break;
 					case String:
 					case Text:
@@ -245,51 +245,52 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 	private SparkplugBProto.Payload.Template.Parameter.Builder setParameterValue(
 			SparkplugBProto.Payload.Template.Parameter.Builder builder, Parameter parameter) throws Exception {
 		ParameterDataType type = parameter.getType();
-		builder.setType(type.toIntValue());
+		builder.getTypedValueBuilder()
+				.setDatatype(SparkplugBProto.DataType.forNumber(type.toIntValue()));
 
 		Object value = parameter.getValue();
 		value = type == ParameterDataType.String && value == null ? "" : value;
 		if (value != null) {
 			switch (type) {
 				case Boolean:
-					builder.setBooleanValue(toBoolean(value));
+					builder.getTypedValueBuilder().setBooleanValue(toBoolean(value));
 					break;
 				case DateTime:
-					builder.setLongValue(((Date) value).getTime());
+					builder.getTypedValueBuilder().setUint64Value(((Date) value).getTime());
 					break;
 				case Double:
-					builder.setDoubleValue((Double) value);
+					builder.getTypedValueBuilder().setDoubleValue((Double) value);
 					break;
 				case Float:
-					builder.setFloatValue((Float) value);
+					builder.getTypedValueBuilder().setFloatValue((Float) value);
 					break;
 				case Int8:
-					builder.setIntValue((Byte) value);
+					builder.getTypedValueBuilder().setInt32Value((Byte) value);
 					break;
 				case Int16:
-					builder.setIntValue((Short) value);
+					builder.getTypedValueBuilder().setInt32Value((Short) value);
 					break;
 				case Int32:
-					builder.setIntValue((Integer) value);
+					builder.getTypedValueBuilder().setInt32Value((Integer) value);
 					break;
 				case Int64:
-					builder.setLongValue((Long) value);
+					builder.getTypedValueBuilder().setInt64Value((Long) value);
 					break;
 				case UInt8:
-					builder.setIntValue(Short.toUnsignedInt((Short) value));
+					builder.getTypedValueBuilder().setUint32Value(Short.toUnsignedInt((Short) value));
 					break;
 				case UInt16:
-					builder.setIntValue((int) Integer.toUnsignedLong((Integer) value));
+					builder.getTypedValueBuilder().setUint32Value((int) Integer.toUnsignedLong((Integer) value));
 					break;
 				case UInt32:
-					builder.setLongValue(Long.valueOf(Long.toUnsignedString(((BigInteger) value).longValue())));
+					builder.getTypedValueBuilder().setUint32Value((int) ((BigInteger) value).longValue());
 					break;
 				case UInt64:
-					builder.setLongValue(bigIntegerToUnsignedLong((BigInteger) value));
+					builder.getTypedValueBuilder().setUint64Value(bigIntegerToUnsignedLong((BigInteger) value));
 					break;
 				case Text:
 				case String:
-					builder.setStringValue((String) value);
+					builder.getTypedValueBuilder().setStringValue((String) value);
 					break;
 				case Unknown:
 				default:
@@ -305,108 +306,99 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 			Metric metric) throws Exception {
 
 		// Set the data type
-		metricBuilder.setDatatype(metric.getDataType().toIntValue());
+		metricBuilder.setDatatype(SparkplugBProto.DataType.forNumber(metric.getDataType().toIntValue()));
 
 		if (metric.getValue() == null) {
 			metricBuilder.setIsNull(true);
 		} else {
 			switch (metric.getDataType()) {
 				case Boolean:
-					metricBuilder.setBooleanValue(toBoolean(metric.getValue()));
+					metricBuilder.getValueBuilder().setBooleanValue(toBoolean(metric.getValue()));
 					break;
 				case DateTime:
-					metricBuilder.setLongValue(((Date) metric.getValue()).getTime());
+					metricBuilder.getValueBuilder().setUint64Value(((Date) metric.getValue()).getTime());
 					break;
 				case File:
-					metricBuilder.setBytesValue(ByteString.copyFrom(((File) metric.getValue()).getBytes()));
+					metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(((File) metric.getValue()).getBytes()));
 					SparkplugBProto.Payload.MetaData.Builder metaDataBuilder =
 							SparkplugBProto.Payload.MetaData.newBuilder();
 					metaDataBuilder.setFileName(((File) metric.getValue()).getFileName());
 					metricBuilder.setMetadata(metaDataBuilder);
 					break;
 				case Float:
-					metricBuilder.setFloatValue((Float) metric.getValue());
+					metricBuilder.getValueBuilder().setFloatValue((Float) metric.getValue());
 					break;
 				case Double:
-					metricBuilder.setDoubleValue((Double) metric.getValue());
+					metricBuilder.getValueBuilder().setDoubleValue((Double) metric.getValue());
 					break;
 				case Int8:
-					metricBuilder.setIntValue((Byte) metric.getValue());
+					metricBuilder.getValueBuilder().setInt32Value((Byte) metric.getValue());
 					break;
 				case Int16:
-					metricBuilder.setIntValue((Short) metric.getValue());
+					metricBuilder.getValueBuilder().setInt32Value((Short) metric.getValue());
 					break;
 				case Int32:
-					metricBuilder.setIntValue((Integer) metric.getValue());
+					metricBuilder.getValueBuilder().setInt32Value((Integer) metric.getValue());
 					break;
 				case Int64:
-					metricBuilder.setLongValue((Long) metric.getValue());
+					metricBuilder.getValueBuilder().setInt64Value((Long) metric.getValue());
 					break;
 				case UInt8:
-					metricBuilder.setIntValue(Short.toUnsignedInt((Short) metric.getValue()));
+					metricBuilder.getValueBuilder().setUint32Value(Short.toUnsignedInt((Short) metric.getValue()));
 					break;
 				case UInt16:
-					metricBuilder.setIntValue((int) Integer.toUnsignedLong((Integer) metric.getValue()));
+					metricBuilder.getValueBuilder().setUint32Value((int) Integer.toUnsignedLong((Integer) metric.getValue()));
 					break;
 				case UInt32:
-					metricBuilder.setLongValue(Long.parseUnsignedLong(Long.toUnsignedString((Long) metric.getValue())));
+					metricBuilder.getValueBuilder().setUint32Value((int) Long.parseUnsignedLong(Long.toUnsignedString((Long) metric.getValue())));
 					break;
 				case UInt64:
-					metricBuilder.setLongValue(bigIntegerToUnsignedLong((BigInteger) metric.getValue()));
+					metricBuilder.getValueBuilder().setUint64Value(bigIntegerToUnsignedLong((BigInteger) metric.getValue()));
 					break;
 				case String:
 				case Text:
 				case UUID:
-					metricBuilder.setStringValue((String) metric.getValue());
+					metricBuilder.getValueBuilder().setStringValue((String) metric.getValue());
 					break;
 				case Bytes:
-					metricBuilder.setBytesValue(ByteString.copyFrom((byte[]) metric.getValue()));
+					metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom((byte[]) metric.getValue()));
 					break;
 				case DataSet:
 					DataSet dataSet = (DataSet) metric.getValue();
 					SparkplugBProto.Payload.DataSet.Builder dataSetBuilder =
 							SparkplugBProto.Payload.DataSet.newBuilder();
 
-					dataSetBuilder.setNumOfColumns(dataSet.getNumOfColumns());
-
-					// Column names
+					// v4 DataSets are column oriented: each Column carries its own name, datatype,
+					// and every value of that column, so the row-major model is transposed here.
 					List<String> columnNames = dataSet.getColumnNames();
-					if (columnNames != null && !columnNames.isEmpty()) {
-						for (String name : columnNames) {
-							// Add the column name
-							dataSetBuilder.addColumns(name);
-						}
-					}
-
-					// Column types
 					List<DataSetDataType> columnTypes = dataSet.getTypes();
-					if (columnTypes != null && !columnTypes.isEmpty()) {
-						for (DataSetDataType type : columnTypes) {
-							// Add the column type
-							dataSetBuilder.addTypes(type.toIntValue());
-						}
-					}
-
-					// Dataset rows
 					List<Row> rows = dataSet.getRows();
-					if (rows != null && !rows.isEmpty()) {
-						for (Row row : rows) {
-							SparkplugBProto.Payload.DataSet.Row.Builder protoRowBuilder =
-									SparkplugBProto.Payload.DataSet.Row.newBuilder();
-							List<Value<?>> values = row.getValues();
-							if (values != null && !values.isEmpty()) {
-								for (Value<?> value : values) {
-									// Add the converted element
-									protoRowBuilder.addElements(convertDataSetValue(value));
-								}
+					int columnCount = columnTypes == null ? 0 : columnTypes.size();
 
-								dataSetBuilder.addRows(protoRowBuilder);
+					for (int col = 0; col < columnCount; col++) {
+						SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder =
+								SparkplugBProto.Payload.DataSet.Column.newBuilder();
+						if (columnNames != null && col < columnNames.size()) {
+							columnBuilder.setName(columnNames.get(col));
+						}
+						DataSetDataType columnType = columnTypes.get(col);
+						columnBuilder.setDatatype(
+								SparkplugBProto.DataType.forNumber(columnType.toIntValue()));
+
+						if (rows != null) {
+							for (Row row : rows) {
+								List<Value<?>> values = row.getValues();
+								if (values == null || col >= values.size()) {
+									continue;
+								}
+								addDataSetValue(columnBuilder, columnType, values.get(col));
 							}
 						}
+						dataSetBuilder.addColumns(columnBuilder);
 					}
 
 					// Finally add the dataset
-					metricBuilder.setDatasetValue(dataSetBuilder);
+					metricBuilder.getValueBuilder().setDatasetValue(dataSetBuilder);
 					break;
 				case Template:
 					Template template = (Template) metric.getValue();
@@ -441,7 +433,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 					}
 
 					// Add the template to the metric
-					metricBuilder.setTemplateValue(templateBuilder);
+					metricBuilder.getValueBuilder().setTemplateValue(templateBuilder);
 					break;
 				case Int8Array:
 					Byte[] int8ArrayValue = (Byte[]) metric.getValue();
@@ -451,7 +443,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						int8ByteBuffer.put(value);
 					}
 					if (int8ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(int8ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int8ByteBuffer.array()));
 					}
 					break;
 				case Int16Array:
@@ -462,7 +454,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						int16ByteBuffer.putShort(value);
 					}
 					if (int16ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(int16ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int16ByteBuffer.array()));
 					}
 					break;
 				case Int32Array:
@@ -473,7 +465,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						int32ByteBuffer.putInt(value);
 					}
 					if (int32ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(int32ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int32ByteBuffer.array()));
 					}
 					break;
 				case Int64Array:
@@ -484,7 +476,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						int64ByteBuffer.putLong(value);
 					}
 					if (int64ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(int64ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int64ByteBuffer.array()));
 					}
 					break;
 				case UInt8Array:
@@ -495,7 +487,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						uInt8ByteBuffer.put((byte) (value & 0xffff));
 					}
 					if (uInt8ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(uInt8ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt8ByteBuffer.array()));
 					}
 					break;
 				case UInt16Array:
@@ -506,7 +498,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						uInt16ByteBuffer.putShort((short) (value & 0xffffffff));
 					}
 					if (uInt16ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(uInt16ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt16ByteBuffer.array()));
 					}
 					break;
 				case UInt32Array:
@@ -517,7 +509,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						uInt32ByteBuffer.putInt((int) (value & 0xffffffffffffffffL));
 					}
 					if (uInt32ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(uInt32ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt32ByteBuffer.array()));
 					}
 					break;
 				case UInt64Array:
@@ -528,7 +520,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						uInt64ByteBuffer.putLong(bigIntegerToUnsignedLong(value));
 					}
 					if (uInt64ByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(uInt64ByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt64ByteBuffer.array()));
 					}
 					break;
 				case FloatArray:
@@ -539,7 +531,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						floatByteBuffer.putFloat(value);
 					}
 					if (floatByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(floatByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(floatByteBuffer.array()));
 					}
 					break;
 				case DoubleArray:
@@ -550,7 +542,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						doubleByteBuffer.putDouble(value);
 					}
 					if (doubleByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(doubleByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(doubleByteBuffer.array()));
 					}
 					break;
 				case BooleanArray:
@@ -574,7 +566,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						booleanByteBuffer.put(nextByte);
 					}
 
-					metricBuilder.setBytesValue(ByteString.copyFrom(booleanByteBuffer.array()));
+					metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(booleanByteBuffer.array()));
 					break;
 				case StringArray:
 					String[] stringArrayValue = (String[]) metric.getValue();
@@ -589,7 +581,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						stringByteBuffer.put((byte) 0);
 					}
 					if (stringByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(stringByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(stringByteBuffer.array()));
 					}
 					break;
 				case DateTimeArray:
@@ -600,7 +592,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						dateTimeByteBuffer.putLong(value.getTime());
 					}
 					if (dateTimeByteBuffer.hasArray()) {
-						metricBuilder.setBytesValue(ByteString.copyFrom(dateTimeByteBuffer.array()));
+						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(dateTimeByteBuffer.array()));
 					}
 					break;
 				case Unknown:
@@ -650,99 +642,67 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 		return metricBuilder;
 	}
 
-	private SparkplugBProto.Payload.DataSet.DataSetValue.Builder convertDataSetValue(Value<?> value) throws Exception {
-		SparkplugBProto.Payload.DataSet.DataSetValue.Builder protoValueBuilder =
-				SparkplugBProto.Payload.DataSet.DataSetValue.newBuilder();
-
-		// Set the value
-		DataSetDataType type = value.getType();
+	// A v4 DataSet.Column holds all of its values in the one repeated field matching its datatype,
+	// so a value is appended to that array rather than wrapped in a per-cell message.
+	private void addDataSetValue(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
+			DataSetDataType type, Value<?> value) throws Exception {
+		Object raw = value == null ? null : value.getValue();
+		if (raw == null) {
+			return;
+		}
 
 		switch (type) {
 			case Int8:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setIntValue((Byte) value.getValue());
+				columnBuilder.addIntValues((Byte) raw);
 				break;
 			case Int16:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setIntValue((Short) value.getValue());
+				columnBuilder.addIntValues((Short) raw);
 				break;
 			case Int32:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setIntValue((Integer) value.getValue());
-				break;
-			case Int64:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setLongValue((Long) value.getValue());
+				columnBuilder.addIntValues((Integer) raw);
 				break;
 			case UInt8:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setIntValue(Short.toUnsignedInt((Short) value.getValue()));
+				columnBuilder.addIntValues(Short.toUnsignedInt((Short) raw));
 				break;
 			case UInt16:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setIntValue((int) Integer.toUnsignedLong((Integer) value.getValue()));
+				columnBuilder.addIntValues((int) Integer.toUnsignedLong((Integer) raw));
 				break;
 			case UInt32:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
+				if (raw instanceof Long) {
+					columnBuilder.addIntValues(((Long) raw).intValue());
+				} else {
+					columnBuilder.addIntValues((Integer) raw);
 				}
-				protoValueBuilder.setLongValue(Long.parseUnsignedLong(Long.toUnsignedString((Long) value.getValue())));
+				break;
+			case Int64:
+				columnBuilder.addLongValues((Long) raw);
 				break;
 			case UInt64:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
+				if (raw instanceof BigInteger) {
+					columnBuilder.addLongValues(bigIntegerToUnsignedLong((BigInteger) raw));
+				} else {
+					columnBuilder.addLongValues((Long) raw);
 				}
-				protoValueBuilder.setLongValue(bigIntegerToUnsignedLong((BigInteger) value.getValue()));
+				break;
+			case DateTime:
+				columnBuilder.addLongValues(((Date) raw).getTime());
 				break;
 			case Float:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setFloatValue((Float) value.getValue());
+				columnBuilder.addFloatValues((Float) raw);
 				break;
 			case Double:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setDoubleValue((Double) value.getValue());
+				columnBuilder.addDoubleValues((Double) raw);
+				break;
+			case Boolean:
+				columnBuilder.addBooleanValues(toBoolean(raw));
 				break;
 			case String:
 			case Text:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setStringValue((String) value.getValue());
-				break;
-			case Boolean:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setBooleanValue(toBoolean(value.getValue()));
-				break;
-			case DateTime:
-				if (value == null || value.getValue() == null) {
-					return protoValueBuilder;
-				}
-				protoValueBuilder.setLongValue(((Date) value.getValue()).getTime());
+				columnBuilder.addStringValues((String) raw);
 				break;
 			default:
-				logger.error("Unknown DataSetDataType DataType: " + value.getType());
-				throw new Exception("Failed to convert value " + value.getType());
+				throw new Exception("Unknown DataSet column type: " + type);
 		}
-
-		return protoValueBuilder;
 	}
 
 	private Boolean toBoolean(Object value) {

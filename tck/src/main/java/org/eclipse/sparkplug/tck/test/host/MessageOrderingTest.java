@@ -60,8 +60,8 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -268,7 +268,7 @@ public class MessageOrderingTest extends TCKTest {
 				// look through metrics
 				final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 
-				for (Metric metric : sparkplugPayload.getMetricsList()) {
+				for (Metric metric : sparkplugPayload.getContent().getMetricsList()) {
 					if (metric.hasName() && metric.getName().equals("Node Control/Rebirth")) {
 						if (reorder_count == 1) {
 							// should not get rebirth here
