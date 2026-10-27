@@ -3740,9 +3740,14 @@ the datatype and selects one of several value fields. In JSON the datatype is al
 the enclosing object and the value field is not needed to disambiguate.
 
 [tck-testable tck-id-payloads-json-typedvalue-flat]#[yellow-background]*[tck-id-payloads-json-typedvalue-flat] A
-TypedValue MUST be represented as the value itself, under the key 'value', rather than as a nested
-object, and its datatype MUST be carried by the 'datatype' key of the enclosing Metric or the
-'type' key of the enclosing Template.Parameter.*#
+TypedValue that is a member of a Metric or of a Template.Parameter MUST be represented as the value
+itself, under the key 'value', rather than as a nested object, and its datatype MUST be carried by
+the 'datatype' key of the enclosing Metric or the 'type' key of the enclosing Template.Parameter.*#
+
+[tck-testable tck-id-payloads-json-typedvalue-propertyset]#[yellow-background]*[tck-id-payloads-json-typedvalue-propertyset] A
+TypedValue that is a member of a PropertySet MUST instead be represented as an object carrying its
+own 'datatype' key, its 'value', and 'is_null' where applicable, because a property value has no
+enclosing Metric or Template.Parameter to carry its datatype.*#
 
 [tck-testable tck-id-payloads-json-typedvalue-parameter-keys]#[yellow-background]*[tck-id-payloads-json-typedvalue-parameter-keys] A
 Template.Parameter MUST therefore be represented with the keys 'name', 'type', and 'value', and
@@ -3767,7 +3772,7 @@ application.
 
 [tck-testable tck-id-payloads-json-propertyset-object]#[yellow-background]*[tck-id-payloads-json-propertyset-object] A
 PropertySet MUST be represented as a JSON object whose keys are the property names and whose values
-are the corresponding PropertyValues.*#
+are the corresponding TypedValues.*#
 
 [tck-testable tck-id-payloads-json-propertyset-unique]#[yellow-background]*[tck-id-payloads-json-propertyset-unique] Property
 names within a single PropertySet MUST be unique.*#
@@ -3848,7 +3853,13 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
     },
     "not": { "required": [ "content", "compressed" ] },
     "$defs": {
-        "nonNegative64": { "type": [ "string", "integer" ], "pattern": "^[0-9]+$" },
+        "nonNegative64": {
+            "comment": "0 to 9223372036854775807, as a JSON string or, on read, a JSON number",
+            "oneOf": [
+                { "type": "integer", "minimum": 0, "maximum": 9223372036854775807 },
+                { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" }
+            ]
+        },
         "base64": { "type": "string", "contentEncoding": "base64" },
         "number": {
             "oneOf": [
