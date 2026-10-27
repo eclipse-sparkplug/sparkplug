@@ -266,6 +266,10 @@ public class Utils {
 	}
 
 	public static boolean hasValue(Metric m) {
+		if (m.hasIsNull() && m.getIsNull()) {
+			// A null value is valid
+			return true;
+		}
 		return m.hasValue()
 				&& m.getValue().getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}
@@ -278,6 +282,10 @@ public class Utils {
 		Payload.TypedValue tv = p.getTypedValue();
 		if (!tv.hasDatatype()) {
 			return false;
+		}
+		if (tv.getIsNull()) {
+			// A null value is valid, and sets no value case
+			return true;
 		}
 		return tv.getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}

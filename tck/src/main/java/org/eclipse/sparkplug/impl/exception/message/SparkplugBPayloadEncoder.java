@@ -388,10 +388,14 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						if (rows != null) {
 							for (Row row : rows) {
 								List<Value<?>> values = row.getValues();
-								if (values == null || col >= values.size()) {
-									continue;
-								}
-								addDataSetValue(columnBuilder, columnType, values.get(col));
+								// Exactly one value per row, so that index i of every Column is
+								// row i, as payloads-dataset-row-correlation requires. A v4 Column
+								// has no per-cell absence, so a missing cell holds its position
+								// with the zero value for the column's datatype.
+								Value<?> cell = (values == null || col >= values.size())
+										? null
+										: values.get(col);
+								addDataSetValue(columnBuilder, columnType, cell);
 							}
 						}
 						dataSetBuilder.addColumns(columnBuilder);
@@ -648,6 +652,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 			DataSetDataType type, Value<?> value) throws Exception {
 		Object raw = value == null ? null : value.getValue();
 		if (raw == null) {
+			addDataSetPlaceholder(columnBuilder, type);
 			return;
 		}
 
@@ -699,6 +704,43 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 			case String:
 			case Text:
 				columnBuilder.addStringValues((String) raw);
+				break;
+			default:
+				throw new Exception("Unknown DataSet column type: " + type);
+		}
+	}
+
+	// A v4 DataSet.Column carries a parallel array indexed by row and cannot express an absent
+	// cell, so a null holds its position with the zero value for the column's datatype. Every
+	// Column therefore ends with the same number of values.
+	private void addDataSetPlaceholder(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
+			DataSetDataType type) throws Exception {
+		switch (type) {
+			case Int8:
+			case Int16:
+			case Int32:
+			case UInt8:
+			case UInt16:
+			case UInt32:
+				columnBuilder.addIntValues(0);
+				break;
+			case Int64:
+			case UInt64:
+			case DateTime:
+				columnBuilder.addLongValues(0L);
+				break;
+			case Float:
+				columnBuilder.addFloatValues(0f);
+				break;
+			case Double:
+				columnBuilder.addDoubleValues(0d);
+				break;
+			case Boolean:
+				columnBuilder.addBooleanValues(false);
+				break;
+			case String:
+			case Text:
+				columnBuilder.addStringValues("");
 				break;
 			default:
 				throw new Exception("Unknown DataSet column type: " + type);

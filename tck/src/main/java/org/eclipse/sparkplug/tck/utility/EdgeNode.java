@@ -100,7 +100,7 @@ public class EdgeNode {
 
 	private Calendar calendar = Calendar.getInstance();
 
-	private int deathBdSeq = 0;
+	private long deathBdSeq = 0;
 	private long birthBdSeq = Constants.MAX_SEQ;
 	private long seq = 0;
 
@@ -261,10 +261,10 @@ public class EdgeNode {
 		if (payload == null) {
 			payload = new SparkplugBPayloadBuilder();
 		}
-		if (deathBdSeq == 256) {
+		if (deathBdSeq > Constants.MAX_SEQ || deathBdSeq < 0) {
 			deathBdSeq = 0;
 		}
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) deathBdSeq).createMetric());
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, deathBdSeq).createMetric());
 		deathBdSeq++;
 
 		// Handle the Birth BD seq number
@@ -308,7 +308,7 @@ public class EdgeNode {
 	// Used to add the sequence number
 	private long getNextSeqNum() throws Exception {
 		logger.debug("seq: " + seq);
-		if (seq == 256) {
+		if (seq > Constants.MAX_SEQ || seq < 0) {
 			seq = 0;
 		}
 		return seq++;
