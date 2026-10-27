@@ -766,7 +766,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 		String id = group_id + "/" + edge_node_id;
 		if (payload.getHeader().hasSeq()) {
-			if (payload.getHeader().getSeq() < 0) {
+			if (!Utils.isValidSeq(payload.getHeader().getSeq())) {
 				testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, PAYLOADS_NBIRTH_SEQ));
 			}
 			edgeSeqs.put(id, payload.getHeader().getSeq());

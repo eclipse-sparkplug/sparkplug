@@ -331,7 +331,7 @@ public class SendComplexDataTest extends TCKTest {
 			logger.error("Check req set for : {}", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
 		} else {
 			if (result.getHeader().hasSeq()) {
-				if (result.getHeader().getSeq() >= 0) {
+				if (Utils.isValidSeq(result.getHeader().getSeq())) {
 					isValid = true;
 				}
 			} else if (topic.contains(TOPIC_PATH_NDEATH)) {

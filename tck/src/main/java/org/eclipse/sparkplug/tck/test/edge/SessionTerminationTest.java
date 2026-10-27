@@ -352,7 +352,7 @@ public class SessionTerminationTest extends TCKTest {
 			boolean isValidSeq = false; // TODO check sequence increment
 			if (payload.getHeader().hasSeq()) {
 				long seq = payload.getHeader().getSeq();
-				if (seq >= 0) {
+				if (Utils.isValidSeq(seq)) {
 					isValidSeq = true;
 				}
 			}

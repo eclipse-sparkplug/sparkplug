@@ -147,8 +147,16 @@ public class Utils {
 		return null;
 	}
 
+	// Sparkplug 4 requires a sequence number between 0 and Constants.MAX_SEQ inclusive, where
+	// MAX_SEQ is the capped rollover point. The field is an unsigned 64 bit integer on the wire but
+	// decodes into a signed Java long, so a value above the cap arrives negative. Testing for a
+	// non-negative long therefore accepts exactly the range the specification allows.
+	public static boolean isValidSeq(long seq) {
+		return Utils.isValidSeq(seq);
+	}
+
 	public static long getNextSeq(long seq) {
-		assert seq >= 0;
+		assert isValidSeq(seq);
 		return (seq == Constants.MAX_SEQ) ? 0 : seq + 1;
 	}
 

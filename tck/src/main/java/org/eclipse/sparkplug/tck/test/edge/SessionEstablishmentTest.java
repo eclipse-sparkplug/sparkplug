@@ -616,10 +616,10 @@ public class SessionEstablishmentTest extends TCKTest {
 			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((hasSeq && seq == 0), PAYLOADS_NBIRTH_SEQ));
 			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((hasSeq && seq == 0), TOPICS_NBIRTH_SEQ_NUM));
 			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
-					setResult((hasSeq && (seq >= 0)), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
+					setResult((hasSeq && (Utils.isValidSeq(seq))), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
 
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
-					setResult((hasSeq && (seq >= 0)), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
+					setResult((hasSeq && (Utils.isValidSeq(seq))), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
 
 			// receivedBirthTime::making sure that the payload timestamp is greater than (receivedBirthTime - 5 min) and
 			// less than the

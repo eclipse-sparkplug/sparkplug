@@ -509,7 +509,7 @@ public class SendDataTest extends TCKTest {
 		if (payload != null) {
 			long seqNum = payload.getHeader().getSeq();
 			bValidPayload[0] = true;
-			bValidPayload[1] = payload.getHeader().hasSeq() && (seqNum >= 0);
+			bValidPayload[1] = payload.getHeader().hasSeq() && (Utils.isValidSeq(seqNum));
 			bValidPayload[2] = payload.getHeader().hasTimestamp();
 			bValidPayload[3] = payload.getHeader().hasTimestamp();
 			List<Metric> metrics = payload.getContent().getMetricsList();
