@@ -152,7 +152,7 @@ public class Utils {
 	// decodes into a signed Java long, so a value above the cap arrives negative. Testing for a
 	// non-negative long therefore accepts exactly the range the specification allows.
 	public static boolean isValidSeq(long seq) {
-		return Utils.isValidSeq(seq);
+		return seq >= 0;
 	}
 
 	public static long getNextSeq(long seq) {
