@@ -1722,9 +1722,15 @@ enum DataType {
 *** Google Protocol Buffer Type: string
 *** Sparkplug enum value: 12
 * _DateTime_
-** Date time value as uint64 value representing nanoseconds since epoch (Jan 1, 1970)
-** Google Protocol Buffer Type: uint64
+** Date time value as int64 value representing nanoseconds since epoch (Jan 1, 1970)
+** Google Protocol Buffer Type: int64
 ** Sparkplug enum value: 13
+** Non-normative comment: a DateTime value is a nanosecond count since epoch, the same quantity the
+payload and metric timestamps carry, and is signed for the same reason. Every mainstream time
+representation it interoperates with is signed, so the ceiling is 2262-04-11 as described in the
+link:#operational_behavior_timestamps[Timestamps] section. A DateTime carried in a DataSet.Column
+shares the long_values array with UInt64, as the
+link:#payloads_c_dataset_column[DataSet.Column] section describes.
 * _Text_
 ** String value (UTF-8)
 ** Google Protocol Buffer Type: string
