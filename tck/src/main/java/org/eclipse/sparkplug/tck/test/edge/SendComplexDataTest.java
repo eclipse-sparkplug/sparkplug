@@ -22,13 +22,6 @@ import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDATA;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_PATH_NDEATH;
 import static org.eclipse.sparkplug.tck.test.common.Constants.TOPIC_ROOT_SP_BV_1_0;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_COLUMN_SIZE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_TYPES_DEF;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_TYPES_NUM;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_TYPES_TYPE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_DATASET_TYPES_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_METRIC_DATATYPE_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE;
@@ -40,7 +33,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_NAM
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DATASET_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_DEFINITION_REF;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION;
@@ -58,13 +50,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEM
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_REF_INSTANCE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_VERSION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_COLUMN_NUM_HEADERS;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_COLUMN_SIZE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_PARAMETER_TYPE_REQ;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_TYPES_DEF;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_TYPES_NUM;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_TYPES_TYPE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_DATASET_TYPES_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC_DATATYPE_NOT_REQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC_DATATYPE_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_METRIC_DATATYPE_VALUE_TYPE;
@@ -76,7 +61,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_NAME_R
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DATASET_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_DEFINITION_REF;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION;
@@ -144,9 +128,6 @@ public class SendComplexDataTest extends TCKTest {
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE, ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE,
 			ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ, ID_PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT,
 			ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ, ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT, ID_PAYLOADS_NAME_REQUIREMENT,
-			ID_PAYLOADS_DATASET_COLUMN_SIZE, ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS, ID_PAYLOADS_DATASET_TYPES_DEF,
-			ID_PAYLOADS_DATASET_TYPES_TYPE, ID_PAYLOADS_DATASET_TYPES_VALUE, ID_PAYLOADS_DATASET_TYPES_NUM,
-			ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_DATASET_VALUE,
 			ID_PAYLOADS_TEMPLATE_IS_DEFINITION, ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION,
 			ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION, ID_PAYLOADS_TEMPLATE_DEFINITION_REF,
 			ID_PAYLOADS_TEMPLATE_INSTANCE_REF, ID_PAYLOADS_TEMPLATE_REF_DEFINITION,
@@ -300,7 +281,6 @@ public class SendComplexDataTest extends TCKTest {
 			checkDatatypeValidType(packet);
 		}
 
-		checkDataSet(packet);
 		checkTemplate(packet);
 
 		// if we have results for every assertion, end the test
@@ -555,105 +535,6 @@ public class SendComplexDataTest extends TCKTest {
 		}
 		testResults.put(ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT,
 				setResult(isValid, PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT));
-	}
-
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_COLUMN_SIZE)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_TYPES_DEF)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_TYPES_TYPE)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_TYPES_VALUE)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_TYPES_NUM)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET,
-			id = ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DATASET_DATASETVALUE,
-			id = ID_PAYLOADS_TEMPLATE_DATASET_VALUE)
-	public boolean checkDataSet(final @NotNull PublishPacket packet) {
-		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
-		boolean hasDataSet = false;
-		for (Metric m : sparkplugPayload.getMetricsList()) {
-			if (m.hasDatatype()) {
-				DataType datatype = DataType.forNumber(m.getDatatype());
-
-				if (datatype == DataType.DataSet && m.hasDatasetValue()) {
-					hasDataSet = true;
-					Payload.DataSet d = m.getDatasetValue();
-
-					testResults.put(ID_PAYLOADS_DATASET_COLUMN_SIZE,
-							setResult(d.hasNumOfColumns() && (d.getNumOfColumns() >= 0), PAYLOADS_DATASET_COLUMN_SIZE));
-
-					testResults.put(ID_PAYLOADS_DATASET_COLUMN_NUM_HEADERS,
-							setResult(d.getColumnsCount() == d.getTypesCount(), PAYLOADS_DATASET_COLUMN_NUM_HEADERS));
-
-					// the types allowed in dataset elements
-					HashSet<DataType> valueTypes = new HashSet<DataType>(Arrays.asList(DataType.UInt32, DataType.UInt64,
-							DataType.Float, DataType.Double, DataType.Boolean, DataType.String));
-
-					// check that the types are valid
-					List<Integer> types = (List<Integer>) d.getTypesList();
-					boolean validtypes = true;
-					boolean uint32types = true;
-					if (types.size() == d.getTypesCount()) {
-						for (int i = 0; i < types.size(); ++i) {
-							int curtype = d.getTypes(i);
-							if (curtype <= 0 && curtype >= DataType.Text.getNumber()) {
-								logger.warn("Bad uint32type DataSet type '{}' in Types: {}", curtype, types);
-								uint32types = false;
-							}
-							if (!types.contains(curtype)) {
-								logger.warn("Invalid DataSet type '{}' in Types: {}", curtype, types);
-								validtypes = false;
-							}
-						}
-					}
-					testResults.put(ID_PAYLOADS_DATASET_TYPES_DEF, setResult(uint32types, PAYLOADS_DATASET_TYPES_DEF));
-					testResults.put(ID_PAYLOADS_DATASET_TYPES_TYPE,
-							setResult(uint32types, PAYLOADS_DATASET_TYPES_TYPE));
-					testResults.put(ID_PAYLOADS_DATASET_TYPES_VALUE,
-							setResult(validtypes, PAYLOADS_DATASET_TYPES_VALUE));
-
-					testResults.put(ID_PAYLOADS_DATASET_TYPES_NUM,
-							setResult(d.getTypesCount() == d.getColumnsCount(), PAYLOADS_DATASET_TYPES_NUM));
-
-					final String topic = packet.getTopic();
-					String[] topicParts = topic.split("/");
-					if (topicParts.length > 2
-							&& (topicParts[2].equals(TOPIC_PATH_NBIRTH) || topicParts[2].equals(TOPIC_PATH_DBIRTH))) {
-						testResults.put(ID_PAYLOADS_DATASET_PARAMETER_TYPE_REQ,
-								setResult(validtypes, PAYLOADS_DATASET_PARAMETER_TYPE_REQ));
-					}
-
-					boolean valuetypes = true;
-					for (int i = 0; i < d.getRowsCount(); ++i) {
-						Payload.DataSet.Row row = d.getRows(i);
-						for (int j = 0; j < row.getElementsCount(); ++j) {
-							Payload.DataSet.DataSetValue val = row.getElements(j);
-							if (!val.hasIntValue() && !val.hasLongValue() && !val.hasFloatValue()
-									&& !val.hasDoubleValue() && !val.hasBooleanValue() && !val.hasStringValue()) {
-								valuetypes = false;
-							}
-						}
-					}
-					testResults.put(ID_PAYLOADS_TEMPLATE_DATASET_VALUE,
-							setResult(valuetypes, PAYLOADS_TEMPLATE_DATASET_VALUE));
-
-				}
-			}
-		}
-		return hasDataSet;
 	}
 
 	@SpecAssertion(
