@@ -128,15 +128,16 @@ being requested. The entire Google Protocol Buffers definition is below.
 
 edition = "2023";
 
-// proto2 files resolve to utf8_validation = NONE, and edition 2023 defaults to VERIFY. Keeping
-// NONE preserves the decoding behavior of the Sparkplug 3 schema: a payload whose string fields
-// are not valid UTF-8 is already non-conformant, but it decodes rather than being dropped whole.
-option features.utf8_validation = NONE;
-
 package org.eclipse.tahu.protobuf;
 
 option java_package         = "org.eclipse.tahu.protobuf";
 option java_outer_classname = "SparkplugBProto";
+
+// Sparkplug string fields are UTF-8, so a decoder validates them. This is the edition 2023
+// default, stated explicitly because it differs from proto2, which did not validate. The Java
+// runtime's own utf8_validation feature defaults to respecting this setting, so every language
+// accepts or rejects the same payloads without a Java specific option here.
+option features.utf8_validation = VERIFY;
 
 enum DataType {
     option features.enum_type = CLOSED;
@@ -453,6 +454,20 @@ order to place the message in context, such as the overall payload timestamp, th
 and the definition identifier. The _content_ carries the metrics themselves. Both sections are
 length delimited, so a consuming application that only requires the header can decode it without
 decoding the content.
+
+[tck-testable tck-id-payloads-string-utf8]#[yellow-background]*[tck-id-payloads-string-utf8] Every
+string field of a Sparkplug payload MUST be valid UTF-8.*#
+
+[tck-testable tck-id-payloads-string-utf8-reject]#[yellow-background]*[tck-id-payloads-string-utf8-reject] A
+consuming application MUST reject a payload in which any string field is not valid UTF-8, and MUST
+NOT process any part of it.*#
+
+Non-normative comment: this is stated here rather than left to the encoding, because the Google
+Protocol Buffers schema enforces it through a feature whose default changed between proto2 and
+edition 2023, and because the JSON encoding inherits it from RFC 8259 instead. Rejecting the whole
+payload rather than the offending field is deliberate: a payload is the unit a sequence number
+orders, so accepting part of one would leave a consuming application unable to say whether it had
+applied that message.
 
 * [tck-testable tck-id-payloads-header-present]#[yellow-background]*[tck-id-payloads-header-present] Every
 Sparkplug payload MUST include a header.*#
