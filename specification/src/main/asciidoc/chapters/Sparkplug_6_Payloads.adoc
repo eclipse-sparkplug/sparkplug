@@ -122,10 +122,16 @@ being requested. The entire Google Protocol Buffers definition is below.
 // To compile:
 // cd client_libraries/java
 // protoc --proto_path=../../ --java_out=src/main/java ../../sparkplug_c.proto
-// Requires protoc 27 or later for edition 2023 support.
+// Requires protoc 27 or later and a Protocol Buffers runtime that supports edition 2023
+// (protobuf-java 4.27 or later, Python protobuf 5.27 or later, and equivalents).
 //
 
 edition = "2023";
+
+// proto2 files resolve to utf8_validation = NONE, and edition 2023 defaults to VERIFY. Keeping
+// NONE preserves the decoding behavior of the Sparkplug 3 schema: a payload whose string fields
+// are not valid UTF-8 is already non-conformant, but it decodes rather than being dropped whole.
+option features.utf8_validation = NONE;
 
 package org.eclipse.tahu.protobuf;
 
@@ -201,20 +207,20 @@ message Payload {
         bool     is_null  = 2;
 
         oneof value {
-            int32    int32_value                    = 3;
-            int64    int64_value                    = 4;
-            uint32   uint32_value                   = 5;
-            uint64   uint64_value                   = 6;
-            float    float_value                    = 7;
-            double   double_value                   = 8;
-            bool     boolean_value                  = 9;
-            string   string_value                   = 10;
-            bytes    bytes_value                    = 11;
-            DataSet  dataset_value                  = 12;
-            Template template_value                 = 13;
-            PropertySet     propertyset_value       = 14;
-            PropertySetList propertysets_value      = 15;
-            TypedValueExtension extension_value     = 16;
+            int32               int32_value        = 3;
+            int64               int64_value        = 4;
+            uint32              uint32_value       = 5;
+            uint64              uint64_value       = 6;
+            float               float_value        = 7;
+            double              double_value       = 8;
+            bool                boolean_value      = 9;
+            string              string_value       = 10;
+            bytes               bytes_value        = 11;
+            DataSet             dataset_value      = 12;
+            Template            template_value     = 13;
+            PropertySet         propertyset_value  = 14;
+            PropertySetList     propertysets_value = 15;
+            TypedValueExtension extension_value    = 16;
         }
 
         message TypedValueExtension {
@@ -227,57 +233,57 @@ message Payload {
     message Template {
 
         message Parameter {
-            string name            = 1;
+            string     name        = 1;
             TypedValue typed_value = 2;
             extensions                      3 to max;
         }
 
-        string version         = 1;          // The version of the Template to prevent mismatches
-        repeated Metric metrics         = 2;          // Each metric includes a name, datatype, and optionally a value
-        repeated Parameter parameters   = 3;
-        string template_ref    = 4;          // MUST be a reference to a template definition if this is an instance (i.e. the name of the template definition) - MUST be omitted for template definitions
-        bool is_definition     = 5;
+        string             version       = 1;  // The version of the Template to prevent mismatches
+        repeated Metric    metrics       = 2;  // Each metric includes a name, datatype, and optionally a value
+        repeated Parameter parameters    = 3;
+        string             template_ref  = 4;  // MUST be a reference to a template definition if this is an instance (i.e. the name of the template definition) - MUST be omitted for template definitions
+        bool               is_definition = 5;
         extensions                      6 to max;
     }
 
     message Status {
-        uint64 code            = 1;          // Result code of a command invocation - 0 indicates success, any non-zero value indicates an error
-        string message         = 2;          // Optional human readable status/error description
+        uint64 code    = 1;  // Result code of a command invocation - 0 indicates success, any non-zero value indicates an error
+        string message = 2;  // Optional human readable status/error description
         extensions                      3 to max;
     }
 
     message Command {
-        repeated Metric arguments       = 1;          // Input argument definitions (NBIRTH/DBIRTH) or supplied argument values (NCMD/DCMD) - omitted for commands that accept no inputs
-        repeated Metric results         = 2;          // Result/output argument definitions (NBIRTH/DBIRTH) or returned result values (NRESP/DRESP) - omitted for commands that return no outputs
-        string correlation_id  = 3;          // Set on an NCMD/DCMD request and echoed unchanged in the corresponding NRESP/DRESP response
-        Status status          = 4;          // Execution status - present in NRESP/DRESP responses, omitted in BIRTH definitions and CMD requests
+        repeated Metric arguments      = 1;  // Input argument definitions (NBIRTH/DBIRTH) or supplied argument values (NCMD/DCMD) - omitted for commands that accept no inputs
+        repeated Metric results        = 2;  // Result/output argument definitions (NBIRTH/DBIRTH) or returned result values (NRESP/DRESP) - omitted for commands that return no outputs
+        string          correlation_id = 3;  // Set on an NCMD/DCMD request and echoed unchanged in the corresponding NRESP/DRESP response
+        Status          status         = 4;  // Execution status - present in NRESP/DRESP responses, omitted in BIRTH definitions and CMD requests
         extensions                      5 to max;
     }
 
     message DataSet {
 
         message Column {
-            string name     = 1;
+            string   name     = 1;
             DataType datatype = 2;
 
             // Only one type of repeated value shall be used per Column
-            repeated uint32 int_values       = 3;
-            repeated uint64 long_values      = 4;
-            repeated float  float_values     = 5;
-            repeated double double_values    = 6;
-            repeated bool   boolean_values   = 7;
-            repeated string string_values    = 8;
+            repeated uint32 int_values     = 3;
+            repeated uint64 long_values    = 4;
+            repeated float  float_values   = 5;
+            repeated double double_values  = 6;
+            repeated bool   boolean_values = 7;
+            repeated string string_values  = 8;
 
             extensions                       9 to max;
         }
 
-        repeated Column columns              = 1;
+        repeated Column columns = 1;
         extensions                           2 to max;
     }
 
     message PropertySet {
-        repeated string        keys     = 1;         // Names of the properties
-        repeated TypedValue    values   = 2;         // The Property Values
+        repeated string     keys   = 1;  // Names of the properties
+        repeated TypedValue values = 2;  // The Property Values
         extensions                      3 to max;
     }
 
@@ -288,21 +294,21 @@ message Payload {
 
     message MetaData {
         // Bytes specific metadata
-        bool   is_multi_part   = 1;
+        bool is_multi_part = 1;
 
         // General metadata
-        string content_type    = 2;        // Content/Media type
-        uint64 size            = 3;        // File size, String size, Multi-part size, etc
-        uint64 seq             = 4;        // Sequence number for multi-part messages
+        string content_type = 2;  // Content/Media type
+        uint64 size         = 3;  // File size, String size, Multi-part size, etc
+        uint64 seq          = 4;  // Sequence number for multi-part messages
 
         // File metadata
-        string file_name       = 5;        // File name
-        string file_type       = 6;        // File type (i.e. xml, json, txt, cpp, etc)
-        string md5             = 7;        // md5 of data
+        string file_name = 5;  // File name
+        string file_type = 6;  // File type (i.e. xml, json, txt, cpp, etc)
+        string md5       = 7;  // md5 of data
 
         // Others
-        string description     = 8;        // Could be anything such as json or xml of custom properties
-        string engUnit         = 9;        // Engineering units
+        string description = 8;  // Could be anything such as json or xml of custom properties
+        string engUnit     = 9;  // Engineering units
 
         // Future expansion
         extensions                      10 to max;
@@ -310,21 +316,21 @@ message Payload {
 
     message Metric {
 
-        string   name            = 1;        // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
-        uint64   alias           = 2;        // Metric alias - tied to name on BIRTH and included in all later DATA messages
-        int64    timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
-        DataType datatype        = 4;        // DataType of the metric/tag value
-        uint32   quality         = 5;        // Quality code of the metric/tag value - severity in bits 30-31
-        string   quality_context = 6;        // The optional quality context of the metric/tag value
-        string   source          = 7;        // Source for CMD messages if unique to the Metric (typically for forwarded writes in CMD messages)
-        bool     is_historical   = 8;        // If this is historical data and should not update real time tag
-        bool     is_transient    = 9;        // Tells consuming clients such as MQTT Engine to not store this as a tag
-        bool     is_null         = 10;       // If this is null - explicitly say so rather than using -1, false, etc for some datatypes.
-        MetaData metadata        = 11;       // Metadata for the Metric
-        PropertySet properties   = 12;       // Properties of the Metric
-        TypedValue value         = 13;
-        Command  command         = 14;       // Command definition (BIRTH), invocation (CMD), or response (RESP) - present when datatype == Command instead of 'value'
-        MetricOperation operation = 15;      // Only in NMMETA/DMMETA: ADD, UPDATE, or DELETE
+        string          name            = 1;  // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
+        uint64          alias           = 2;  // Metric alias - tied to name on BIRTH and included in all later DATA messages
+        int64           timestamp       = 3;  // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
+        DataType        datatype        = 4;  // DataType of the metric/tag value
+        uint32          quality         = 5;  // Quality code of the metric/tag value - severity in bits 30-31
+        string          quality_context = 6;  // The optional quality context of the metric/tag value
+        string          source          = 7;  // Source for CMD messages if unique to the Metric (typically for forwarded writes in CMD messages)
+        bool            is_historical   = 8;  // If this is historical data and should not update real time tag
+        bool            is_transient    = 9;  // Tells consuming clients such as MQTT Engine to not store this as a tag
+        bool            is_null         = 10;  // If this is null - explicitly say so rather than using -1, false, etc for some datatypes.
+        MetaData        metadata        = 11;  // Metadata for the Metric
+        PropertySet     properties      = 12;  // Properties of the Metric
+        TypedValue      value           = 13;
+        Command         command         = 14;  // Command definition (BIRTH), invocation (CMD), or response (RESP) - present when datatype == Command instead of 'value'
+        MetricOperation operation       = 15;  // Only in NMMETA/DMMETA: ADD, UPDATE, or DELETE
         extensions 16 to max;
     }
 
@@ -342,16 +348,16 @@ message Payload {
     }
 
     message Content {
-        repeated Metric metrics = 1;                 // Repeated forever - no limit in Google Protobufs
-        bytes  body    = 2;                 // To optionally bypass the whole definition above
+        repeated Metric metrics = 1;  // Repeated forever - no limit in Google Protobufs
+        bytes           body    = 2;  // To optionally bypass the whole definition above
         extensions              3 to max;            // For third party extensions
     }
 
-    Header header = 1;                 // Always present and always uncompressed
+    Header header = 1;  // Always present and always uncompressed
 
     oneof payload_content {
-        Content content    = 2;                 // The Content of this message, uncompressed
-        bytes   compressed = 3;                 // The compressed bytes of a serialized Content
+        Content content    = 2;  // The Content of this message, uncompressed
+        bytes   compressed = 3;  // The compressed bytes of a serialized Content
     }
 
     extensions             4 to max;            // For third party extensions
@@ -3585,12 +3591,12 @@ preservingProtoFieldNames printer option.
 field that is not present MUST be omitted from the JSON object rather than written with a JSON null
 or a zero value.*#
 
-Non-normative comment: Every field of the Sparkplug schema has explicit presence, so a field
-carries the distinction between having been set and never having been set, and the JSON encoding
-has to keep that distinction. Zero is a legitimate value for seq, bd_seq, descriptor_seq, alias, and quality,
-so writing an absent field as 0 would make it indistinguishable from one deliberately set to zero.
-A JSON null is excluded for a different reason: a null metric value is expressed by setting is_null
-to true and omitting the value key, as required in the
+Non-normative comment: Every singular field of the Sparkplug schema has explicit presence, so a
+field carries the distinction between having been set and never having been set, and the JSON
+encoding has to keep that distinction. Zero is a legitimate value for seq, bd_seq, descriptor_seq,
+alias, and quality, so writing an absent field as 0 would make it indistinguishable from one
+deliberately set to zero. A JSON null is excluded for a different reason: a null metric value is
+expressed by setting is_null to true and omitting the value key, as required in the
 link:#payloads_json_typed_values[Typed Values] section, so a null appearing as a value would be a
 second and conflicting way to say the same thing.
 
