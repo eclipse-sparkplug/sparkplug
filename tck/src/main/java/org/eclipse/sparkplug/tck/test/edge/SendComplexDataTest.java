@@ -676,10 +676,7 @@ public class SendComplexDataTest extends TCKTest {
 							}
 
 							boolean valuetype = true;
-							final Payload.TypedValue pv = p.getTypedValue();
-							if (!pv.hasInt32Value() && !pv.hasUint32Value() && !pv.hasInt64Value()
-									&& !pv.hasUint64Value() && !pv.hasFloatValue() && !pv.hasDoubleValue()
-									&& !pv.hasBooleanValue() && !pv.hasStringValue()) {
+							if (!Utils.hasValue(p)) {
 								valuetype = false;
 							}
 							testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE,

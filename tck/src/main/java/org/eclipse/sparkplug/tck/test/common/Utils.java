@@ -132,7 +132,15 @@ public class Utils {
 		byte[] array = new byte[payload.remaining()];
 		payload.get(array);
 		try {
-			return Payload.parseFrom(array);
+			Payload parsed = Payload.parseFrom(array);
+			if (parsed.getPayloadContentCase() == Payload.PayloadContentCase.COMPRESSED) {
+				// payload_content is a oneof, so a compressed payload has no Content and every
+				// metric check downstream would silently see an empty list. The TCK does not
+				// decompress yet, so flag it rather than reporting vacuous passes.
+				logger.error("Compressed payload received; the TCK cannot yet inspect its metrics");
+				return null;
+			}
+			return parsed;
 		} catch (InvalidProtocolBufferException e) {
 			logger.error("Payload Exception", e);
 			return null;
@@ -244,6 +252,11 @@ public class Utils {
 			// If the Metric does not have a datatype, assumed valid
 			return true;
 		}
+		if (m.getDatatype() == DataType.Command) {
+			// A Command metric carries its definition or invocation in the command field rather
+			// than in a TypedValue, so it has no value case to match
+			return m.hasCommand() && !m.hasValue();
+		}
 		Payload.TypedValue.ValueCase expected = expectedValueCase(m.getDatatype());
 		if (m.getIsNull()) {
 			// A null Metric sets no value case, so only the datatype is checked
@@ -270,6 +283,10 @@ public class Utils {
 			// A null value is valid
 			return true;
 		}
+		if (m.hasDatatype() && m.getDatatype() == DataType.Command) {
+			// A Command metric's payload is the command field
+			return m.hasCommand();
+		}
 		return m.hasValue()
 				&& m.getValue().getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}
@@ -287,6 +304,7 @@ public class Utils {
 			// A null value is valid, and sets no value case
 			return true;
 		}
+		// Any arm counts, including bytes, which the specification allows for a parameter
 		return tv.getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}
 
