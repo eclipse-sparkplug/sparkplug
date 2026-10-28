@@ -635,8 +635,15 @@ link:#payloads_c_compression[Compression] section.
 ** _metrics_
 *** This is an array of metrics representing key/value/datatype values. Metrics are further defined
 link:#payloads_c_metric[here].
-*** [tck-testable tck-id-payloads-metrics-ordered]#[yellow-background]*[tck-id-payloads-metrics-ordered] The
-metrics of a payload MUST be ordered by metric value change time, oldest first.*#
+*** [tck-testable tck-id-payloads-metrics-ordered]#[yellow-background]*[tck-id-payloads-metrics-ordered] A
+payload that carries more than one value for the same metric MUST order its metrics by value change
+time, oldest first.*#
+*** [tck-testable tck-id-payloads-metrics-ordered-should]#[yellow-background]*[tck-id-payloads-metrics-ordered-should] Every
+other payload SHOULD order its metrics the same way.*#
+*** [tck-not-testable tck-id-payloads-metrics-ordered-scope]#[yellow-background]*[tck-id-payloads-metrics-ordered-scope] This
+ordering applies to the metrics array of the payload's content. It does not apply to the metrics of
+a Template, or to the arguments or results of a Command, whose order is defined by the Template
+Definition or the Command definition.*#
 *** [tck-testable tck-id-payloads-metrics-ordered-no-timestamp]#[yellow-background]*[tck-id-payloads-metrics-ordered-no-timestamp] A
 metric that omits its timestamp MUST be ordered as though its value change time were the payload
 timestamp, which is the time that metric is taken to have changed as described in the
@@ -645,9 +652,11 @@ link:#payloads_c_metric[Metric] section.*#
 that share a value change time MAY appear in any order relative to one another, and a consuming
 application MUST NOT reorder them.*#
 *** Non-normative comment: Ordering by value change time means a consuming application that applies
-the metrics in array order arrives at the correct current value without comparing timestamps, which
-matters when one payload carries several values for the same metric, as a payload of historical
-values does. Metrics remain identified by name or alias, so position still carries no identity.
+the metrics in array order arrives at the correct current value without comparing timestamps. That
+is why it is required only where a payload carries several values for the same metric, as a payload
+of historical values does; elsewhere it is a recommendation, so that an Edge Node emitting a BIRTH
+in browse order remains conformant. Metrics remain identified by name or alias, so position still
+carries no identity.
 *** Non-normative comment: The order among metrics that share a value change time is the publisher's
 and is preserved by both encodings, because a JSON array and a Google Protocol Buffers repeated
 field are both ordered. Multi-part file publishing depends on this: every metric of a multi-part
@@ -1846,7 +1855,8 @@ ends on a byte boundary.
 *** Sparkplug enum value: 33
 *** Example (string array to Metric bytes_value): [ABC, hello] -> [0x41, 0x42, 0x43, 0x00, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00]
 ** _DateTimeArray_
-*** DateTimeArray as an array of packed little endian bytes where each Datetime value is an 8-byte
+*** DateTimeArray as an array of packed little endian bytes where each DateTime value is a signed
+8-byte
 value representing the number of nanoseconds since epoch in UTC
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 34
@@ -3103,8 +3113,8 @@ same bd_seq number, and that value MUST be the one registered in the Will Messag
 session's MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-bdseq-increment]#[yellow-background]*[tck-id-payloads-state-bdseq-increment] The
 bd_seq number MUST start at zero and MUST increment by one on every new MQTT CONNECT packet the
-Sparkplug Host Application sends to a given MQTT Server, until a value of 9223372036854775807 (max
-value of an INT64) is reached. At that point the bd_seq number of the following MQTT CONNECT packet
+Sparkplug Host Application sends to a given MQTT Server, until a value of 9223372036854775807 is
+reached. At that point the bd_seq number of the following MQTT CONNECT packet
 MUST be zero.*#
 ** Non-normative comment: these are the same rules that apply to an Edge Node's bd_seq number. As
 with an Edge Node, the bd_seq number is not incremented from message to message within a session.
@@ -3313,7 +3323,7 @@ conflict with the requirement that metrics be ordered by value change time, stat
 link:#payloads_c_payload_content[Content] section, because every metric of a multi-part file
 publish carries the same timestamp. They therefore tie, the ordering requirement does not constrain
 their relative order, and the order the publishing Edge Node or Device chooses is carried unchanged
-by both payload encodings. A consuming application MUST NOT reorder them.
+by both payload encodings.
 
 * [tck-testable tck-id-payloads-file-multi-metadata-size-first]#[yellow-background]*[tck-id-payloads-file-multi-metadata-size-first] The
 first metric regarding the file publish's metric MetaData size MUST be included and set to the uint64
@@ -3749,9 +3759,22 @@ TypedValue that is a member of a PropertySet MUST instead be represented as an o
 own 'datatype' key, its 'value', and 'is_null' where applicable, because a property value has no
 enclosing Metric or Template.Parameter to carry its datatype.*#
 
+[tck-testable tck-id-payloads-typedvalue-datatype-agree]#[yellow-background]*[tck-id-payloads-typedvalue-datatype-agree] Where
+a Metric carries both its own datatype and a TypedValue that also carries one, as it does in the
+Google Protocol Buffers encoding, the two MUST be equal, and the same applies to is_null.*#
+
+[tck-testable tck-id-payloads-json-typedvalue-carries-both]#[yellow-background]*[tck-id-payloads-json-typedvalue-carries-both] The
+single 'datatype' and 'is_null' key a flattened JSON value carries represents both, so an
+application converting a JSON payload to the Google Protocol Buffers encoding MUST set the Metric
+field and the TypedValue field from it.*#
+
+[tck-testable tck-id-payloads-json-parameter-is-null]#[yellow-background]*[tck-id-payloads-json-parameter-is-null] A
+Template.Parameter whose value is null MUST carry 'is_null' set to true and omit 'value', as any
+other null value does.*#
+
 [tck-testable tck-id-payloads-json-typedvalue-parameter-keys]#[yellow-background]*[tck-id-payloads-json-typedvalue-parameter-keys] A
-Template.Parameter MUST therefore be represented with the keys 'name', 'type', and 'value', and
-MUST NOT use the key 'typed_value'.*#
+Template.Parameter MUST therefore be represented with the keys 'name', 'type', 'value', and
+'is_null' where applicable, and MUST NOT use the key 'typed_value'.*#
 
 Non-normative comment: These are the two places where a JSON key is not a Protocol Buffers field
 name. 'value' is the name of the oneof within TypedValue rather than of any field in it, because
@@ -3853,9 +3876,16 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
     },
     "not": { "required": [ "content", "compressed" ] },
     "$defs": {
-        "nonNegative64": {
-            "comment": "0 to 9223372036854775807, as a JSON string or, on read, a JSON number",
-            "oneOf": [
+        "uint64": {
+            "comment": "an unsigned 64-bit value: 0 to 18446744073709551615",
+            "anyOf": [
+                { "type": "integer", "minimum": 0, "maximum": 18446744073709551615 },
+                { "type": "string", "pattern": "^(0|[1-9][0-9]{0,19})$" }
+            ]
+        },
+        "sequence64": {
+            "comment": "a Sparkplug sequence number or timestamp: 0 to 9223372036854775807. The string form is bounded by length only; the exact upper bound is normative prose, not expressible as a readable pattern.",
+            "anyOf": [
                 { "type": "integer", "minimum": 0, "maximum": 9223372036854775807 },
                 { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" }
             ]
@@ -3876,10 +3906,10 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
         "header": {
             "type": "object",
             "properties": {
-                "timestamp": { "$ref": "#/$defs/nonNegative64" },
-                "seq": { "$ref": "#/$defs/nonNegative64" },
-                "bd_seq": { "$ref": "#/$defs/nonNegative64" },
-                "descriptor_seq": { "$ref": "#/$defs/nonNegative64" },
+                "timestamp": { "$ref": "#/$defs/sequence64" },
+                "seq": { "$ref": "#/$defs/sequence64" },
+                "bd_seq": { "$ref": "#/$defs/sequence64" },
+                "descriptor_seq": { "$ref": "#/$defs/sequence64" },
                 "definition_id": { "type": "string" },
                 "previous_definition_id": { "type": "string" },
                 "source": { "type": "string" },
@@ -3909,8 +3939,8 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
             "type": "object",
             "properties": {
                 "name": { "type": "string" },
-                "alias": { "$ref": "#/$defs/nonNegative64" },
-                "timestamp": { "$ref": "#/$defs/nonNegative64" },
+                "alias": { "$ref": "#/$defs/uint64" },
+                "timestamp": { "$ref": "#/$defs/sequence64" },
                 "datatype": { "$ref": "#/$defs/datatype" },
                 "quality": { "type": "integer", "minimum": 0 },
                 "quality_context": { "type": "string" },
@@ -3942,8 +3972,8 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
             "properties": {
                 "is_multi_part": { "type": "boolean" },
                 "content_type": { "type": "string" },
-                "size": { "$ref": "#/$defs/nonNegative64" },
-                "seq": { "$ref": "#/$defs/nonNegative64" },
+                "size": { "$ref": "#/$defs/uint64" },
+                "seq": { "$ref": "#/$defs/sequence64" },
                 "file_name": { "type": "string" },
                 "file_type": { "type": "string" },
                 "md5": { "type": "string" },
@@ -3981,6 +4011,7 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
                         "properties": {
                             "name": { "type": "string" },
                             "type": { "$ref": "#/$defs/datatype" },
+                            "is_null": { "type": "boolean" },
                             "value": { "$ref": "#/$defs/value" }
                         }
                     }
@@ -3996,7 +4027,7 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
                 "status": {
                     "type": "object",
                     "properties": {
-                        "code": { "$ref": "#/$defs/nonNegative64" },
+                        "code": { "$ref": "#/$defs/uint64" },
                         "message": { "type": "string" }
                     }
                 }

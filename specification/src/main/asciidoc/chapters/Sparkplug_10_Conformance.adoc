@@ -51,6 +51,9 @@ selected by configuration.*#
 * [tck-testable tck-id-conformance-edge-node-encoding-session]#[yellow-background]*[tck-id-conformance-edge-node-encoding-session] A
 Sparkplug Edge Node MUST publish every message of an MQTT session using a single payload encoding on
 the corresponding single namespace.*#
+* [tck-testable tck-id-conformance-edge-node-encoding-subscribe]#[yellow-background]*[tck-id-conformance-edge-node-encoding-subscribe] A
+Sparkplug Edge Node MUST subscribe to its command topics on the same namespace it publishes on, so
+that a Host Application addressing it on that namespace reaches it.*#
 ** Non-normative comment: an Edge Node has one sequence number stream, so publishing part of a
 session on one namespace and part on the other would leave a consumer of either namespace with gaps
 in that stream.
@@ -100,6 +103,14 @@ consume messages on both the spCv4.0 and spJv4.0 namespaces.*#
 * [tck-testable tck-id-conformance-host-encoding-publish]#[yellow-background]*[tck-id-conformance-host-encoding-publish] When
 a Sparkplug Host Application publishes a message, it MUST encode that message using the encoding
 that corresponds to the namespace it publishes on.*#
+* [tck-testable tck-id-conformance-host-encoding-address]#[yellow-background]*[tck-id-conformance-host-encoding-address] When
+a Sparkplug Host Application publishes a message addressed to a particular Edge Node or Device,
+including an NCMD, a DCMD, and a Rebirth Request, it MUST publish on the namespace of that Edge
+Node's current NBIRTH.*#
+** Non-normative comment: a Host Application supports both encodings, so without this it could
+address an Edge Node on a namespace that Edge Node does not subscribe to. The message would be
+accepted by the MQTT Server and never delivered, and a Rebirth Request in particular would fail
+silently, leaving the Host unable to recover its view of that Edge Node.
 ** Non-normative comment: which namespaces a Host Application subscribes to remains a deployment
 decision. The requirement is that it is capable of decoding either, so that an Edge Node's choice of
 encoding does not determine which Host Applications can consume it. This is the property that makes
@@ -168,11 +179,13 @@ continue to be published with the MQTT retain flag set to false and are not reta
 * [tck-testable tck-id-conformance-mqtt-aware-basic]#[yellow-background]*[tck-id-conformance-mqtt-aware-basic] A
 Sparkplug Aware MQTT Server MUST support all aspects of a Sparkplug Compliant MQTT Server*#
 * [tck-testable tck-id-conformance-mqtt-aware-encoding-both]#[yellow-background]*[tck-id-conformance-mqtt-aware-encoding-both] A
-Sparkplug Aware MQTT Server MUST support both Sparkplug payload encodings on both the spCv4.0 and
-spJv4.0 namespaces.*#
-** Non-normative comment: unlike a Sparkplug Compliant MQTT Server, a Sparkplug Aware MQTT Server
-decodes and re-encodes payloads in order to perform the behavior required of it below, so it cannot
-treat a payload as opaque and must therefore implement both encodings.
+Sparkplug Aware MQTT Server that replaces NDEATH timestamps MUST do so for payloads in both
+encodings, on both the spCv4.0 and spJv4.0 namespaces.*#
+** Non-normative comment: replacing an NDEATH timestamp is the only behavior required of a
+Sparkplug Aware MQTT Server that decodes a payload at all, and it is itself optional. A Server that
+does not do it never inspects a payload and needs neither encoding. The requirement is therefore
+conditional, so that offering the timestamp behavior for one encoding only cannot leave Edge Nodes
+on the other namespace silently unserved.
 * [tck-testable tck-id-conformance-mqtt-aware-ndeath-timestamp]#[yellow-background]*[tck-id-conformance-mqtt-aware-ndeath-timestamp] A
 Sparkplug Aware MQTT Server MAY replace the timestmap of NDEATH messages. If it does, it MUST set
 the timestamp to the UTC time at which it attempts to deliver the NDEATH to subscribed clients*#

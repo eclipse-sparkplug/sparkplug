@@ -1265,7 +1265,7 @@ values stop making sense.
 A Host Application also has to establish where in a descriptor sequence stream it is starting from.
 A BIRTH begins a stream and carries a descriptor_seq of 0. A REBIRTH does not begin a stream; it
 slip-streams the Host Application into a stream that is already running and carries the next
-incrementing value, which is only 0 in the case of an INT64 rollover.
+incrementing value, which is only 0 in the case of a sequence number rollover.
 
 * [tck-testable tck-id-operational-behavior-host-partial-descriptor-seq-anchor]#[yellow-background]*[tck-id-operational-behavior-host-partial-descriptor-seq-anchor] A
 Host Application MUST anchor its expected descriptor_seq for a Sparkplug Descriptor on the

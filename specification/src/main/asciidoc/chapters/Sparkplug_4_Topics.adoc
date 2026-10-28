@@ -78,6 +78,18 @@ that element substituted, because the two namespaces share one topic structure. 
 payload carried on a topic is determined by the namespace element of that topic, as required in the
 link:#payloads_json_encoding_selection[Encoding Selection] section.
 
+[tck-testable tck-id-topics-state-single-namespace]#[yellow-background]*[tck-id-topics-state-single-namespace] The
+STATE topic is the one exception. A STATE message MUST be published on
+'spCv4.0/STATE/sparkplug_host_id' whatever payload encoding the Edge Nodes and Host Applications in
+that infrastructure use, and an Edge Node that waits on a Primary Host Application MUST subscribe
+to that topic rather than to a spJv4.0 equivalent.*#
+
+Non-normative comment: STATE carries a JSON document rather than a Sparkplug payload, so there is
+nothing for a second namespace to encode differently. Publishing it on one topic also keeps a
+single Will Message per Host Application. Without this rule a JSON Edge Node would wait on
+spJv4.0/STATE while the Host published on spCv4.0/STATE, and would never see the Host come
+online.
+
 [[topics_topic_prefix_element]]
 ==== topic_prefix Element
 
