@@ -32,11 +32,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template.Parameter;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Template.Parameter;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +132,15 @@ public class Utils {
 		byte[] array = new byte[payload.remaining()];
 		payload.get(array);
 		try {
-			return Payload.parseFrom(array);
+			Payload parsed = Payload.parseFrom(array);
+			if (parsed.getPayloadContentCase() == Payload.PayloadContentCase.COMPRESSED) {
+				// payload_content is a oneof, so a compressed payload has no Content and every
+				// metric check downstream would silently see an empty list. The TCK does not
+				// decompress yet, so flag it rather than reporting vacuous passes.
+				logger.error("Compressed payload received; the TCK cannot yet inspect its metrics");
+				return null;
+			}
+			return parsed;
 		} catch (InvalidProtocolBufferException e) {
 			logger.error("Payload Exception", e);
 			return null;
@@ -147,186 +155,157 @@ public class Utils {
 		return null;
 	}
 
+	// Sparkplug 4 requires a sequence number between 0 and Constants.MAX_SEQ inclusive, where
+	// MAX_SEQ is the capped rollover point. The field is an unsigned 64 bit integer on the wire but
+	// decodes into a signed Java long, so a value above the cap arrives negative. Testing for a
+	// non-negative long therefore accepts exactly the range the specification allows.
+	public static boolean isValidSeq(long seq) {
+		return seq >= 0;
+	}
+
 	public static long getNextSeq(long seq) {
-		assert seq >= 0 && seq <= 255;
-		return (seq == 255) ? 0 : seq + 1;
+		assert isValidSeq(seq);
+		return (seq == Constants.MAX_SEQ) ? 0 : seq + 1;
+	}
+
+	// In v4 a Metric and a PropertySet entry both carry their value in a TypedValue, so one check
+	// serves both. The value case expected for a given datatype is shared between them.
+	// v3 carried every 32-bit value in int_value and every 64-bit value in long_value. v4 splits
+	// each into a signed and an unsigned arm, so a check that used to be unambiguous now has to
+	// accept either. These keep the call sites in the tests readable.
+	public static boolean hasLongValue(Metric m) {
+		Payload.TypedValue v = m.getValue();
+		return v.hasInt64Value() || v.hasUint64Value();
+	}
+
+	public static long getLongValue(Metric m) {
+		Payload.TypedValue v = m.getValue();
+		return v.hasInt64Value() ? v.getInt64Value() : v.getUint64Value();
+	}
+
+	public static boolean hasIntValue(Metric m) {
+		Payload.TypedValue v = m.getValue();
+		return v.hasInt32Value() || v.hasUint32Value();
+	}
+
+	public static int getIntValue(Metric m) {
+		Payload.TypedValue v = m.getValue();
+		return v.hasInt32Value() ? v.getInt32Value() : v.getUint32Value();
+	}
+
+	private static Payload.TypedValue.ValueCase expectedValueCase(DataType datatype) {
+		switch (datatype) {
+			case Int8:
+			case Int16:
+			case Int32:
+				return Payload.TypedValue.ValueCase.INT32_VALUE;
+			case UInt8:
+			case UInt16:
+			case UInt32:
+				return Payload.TypedValue.ValueCase.UINT32_VALUE;
+			case Int64:
+			case DateTime:
+				return Payload.TypedValue.ValueCase.INT64_VALUE;
+			case UInt64:
+				return Payload.TypedValue.ValueCase.UINT64_VALUE;
+			case Float:
+				return Payload.TypedValue.ValueCase.FLOAT_VALUE;
+			case Double:
+				return Payload.TypedValue.ValueCase.DOUBLE_VALUE;
+			case Boolean:
+				return Payload.TypedValue.ValueCase.BOOLEAN_VALUE;
+			case String:
+			case Text:
+			case UUID:
+				return Payload.TypedValue.ValueCase.STRING_VALUE;
+			case Bytes:
+			case File:
+			case Int8Array:
+			case Int16Array:
+			case Int32Array:
+			case Int64Array:
+			case UInt8Array:
+			case UInt16Array:
+			case UInt32Array:
+			case UInt64Array:
+			case FloatArray:
+			case DoubleArray:
+			case BooleanArray:
+			case StringArray:
+			case DateTimeArray:
+				return Payload.TypedValue.ValueCase.BYTES_VALUE;
+			case DataSet:
+				return Payload.TypedValue.ValueCase.DATASET_VALUE;
+			case Template:
+				return Payload.TypedValue.ValueCase.TEMPLATE_VALUE;
+			case PropertySet:
+				return Payload.TypedValue.ValueCase.PROPERTYSET_VALUE;
+			case PropertySetList:
+				return Payload.TypedValue.ValueCase.PROPERTYSETS_VALUE;
+			default:
+				return Payload.TypedValue.ValueCase.VALUE_NOT_SET;
+		}
 	}
 
 	public static boolean hasValidDatatype(Metric m) {
-        // Checks that the datatype is valid for Metric and that the value case corresponds with the datatype
-        Metric.ValueCase expectedValueCase = Metric.ValueCase.VALUE_NOT_SET;
-
-        if(DataType.forNumber(m.getDatatype()) != null) {
-            switch (DataType.forNumber(m.getDatatype())) {
-                case Int8:
-                case Int16:
-                case Int32:
-                case UInt8:
-                case UInt16:
-                    expectedValueCase = Metric.ValueCase.INT_VALUE;
-                    break;
-                case UInt32: // all integers in Java are signed
-                case Int64:
-                case UInt64:
-                case DateTime:
-                    expectedValueCase = Metric.ValueCase.LONG_VALUE;
-                    break;
-                case Float:
-                    expectedValueCase = Metric.ValueCase.FLOAT_VALUE;
-                    break;
-                case Double:
-                    expectedValueCase = Metric.ValueCase.DOUBLE_VALUE;
-                    break;
-                case Boolean:
-                    expectedValueCase = Metric.ValueCase.BOOLEAN_VALUE;
-                    break;
-                case String:
-                case Text:
-                case UUID:
-                    expectedValueCase = Metric.ValueCase.STRING_VALUE;
-                    break;
-                case Bytes:
-                case File:
-                case Int8Array:
-                case Int16Array:
-                case Int32Array:
-                case Int64Array:
-                case UInt8Array:
-                case UInt16Array:
-                case UInt32Array:
-                case UInt64Array:
-                case FloatArray:
-                case DoubleArray:
-                case BooleanArray:
-                case StringArray:
-                case DateTimeArray:
-                    expectedValueCase = Metric.ValueCase.BYTES_VALUE;
-                    break;
-                case DataSet:
-                    expectedValueCase = Metric.ValueCase.DATASET_VALUE;
-                    break;
-                case Template:
-                    expectedValueCase = Metric.ValueCase.TEMPLATE_VALUE;
-                    break;
-                default:
-                    break;
-            }
-        }else {
-            // If Metric does not have datatype, assumed valid
-            return true;
-
-        }
-
-		if(m.getIsNull()){
-			// If Metric is null, Value case will not be set, so just confirms datatype is valid
-			return expectedValueCase != Metric.ValueCase.VALUE_NOT_SET;
+		if (!m.hasDatatype()) {
+			// If the Metric does not have a datatype, assumed valid
+			return true;
 		}
-
-        return DataType.forNumber(m.getDatatype()) != null && expectedValueCase != Metric.ValueCase.VALUE_NOT_SET && m.getValueCase() == expectedValueCase;
-    }
-
-	public static boolean hasValidDatatype(Payload.PropertyValue p) {
-        // Checks that the datatype is valid for Property Values and that the value case corresponds with the datatype
-        Payload.PropertyValue.ValueCase expectedValueCase = Payload.PropertyValue.ValueCase.VALUE_NOT_SET;
-        if (DataType.forNumber(p.getType()) != null) {
-            switch (DataType.forNumber(p.getType())) {
-                case Int8:
-                case Int16:
-                case Int32:
-                case UInt8:
-                case UInt16:
-                case UInt32:
-                    expectedValueCase = Payload.PropertyValue.ValueCase.INT_VALUE;
-                    break;
-                case Int64:
-                case UInt64:
-                    expectedValueCase = Payload.PropertyValue.ValueCase.LONG_VALUE;
-                    break;
-                case Float:
-                    expectedValueCase = Payload.PropertyValue.ValueCase.FLOAT_VALUE;
-                    break;
-                case Double:
-                    expectedValueCase = Payload.PropertyValue.ValueCase.DOUBLE_VALUE;
-                    break;
-                case Boolean:
-                    expectedValueCase = Payload.PropertyValue.ValueCase.BOOLEAN_VALUE;
-                    break;
-                case String:
-                case Text:
-                case UUID:
-                    expectedValueCase = Payload.PropertyValue.ValueCase.STRING_VALUE;
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            // If Property Value does not have type, assumed valid
-            return true;
-
-        }
-		if(p.getIsNull()){
-			// If Property Value is null, Value case will not be set, so just confirms datatype is valid
-			return expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET;
+		if (m.getDatatype() == DataType.Command) {
+			// A Command metric carries its definition or invocation in the command field rather
+			// than in a TypedValue, so it has no value case to match
+			return m.hasCommand() && !m.hasValue();
 		}
-        return DataType.forNumber(p.getType()) != null && expectedValueCase != Payload.PropertyValue.ValueCase.VALUE_NOT_SET && p.getValueCase() == expectedValueCase;
-    }
+		Payload.TypedValue.ValueCase expected = expectedValueCase(m.getDatatype());
+		if (m.getIsNull()) {
+			// A null Metric sets no value case, so only the datatype is checked
+			return expected != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
+		}
+		return expected != Payload.TypedValue.ValueCase.VALUE_NOT_SET
+				&& m.getValue().getValueCase() == expected;
+	}
+
+	public static boolean hasValidDatatype(Payload.TypedValue p) {
+		if (!p.hasDatatype()) {
+			// If the value does not carry a datatype, assumed valid
+			return true;
+		}
+		Payload.TypedValue.ValueCase expected = expectedValueCase(p.getDatatype());
+		if (p.getIsNull()) {
+			return expected != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
+		}
+		return expected != Payload.TypedValue.ValueCase.VALUE_NOT_SET && p.getValueCase() == expected;
+	}
 
 	public static boolean hasValue(Metric m) {
 		if (m.hasIsNull() && m.getIsNull()) {
 			// A null value is valid
 			return true;
 		}
-
-		switch(m.getValueCase()){
-			case INT_VALUE:
-				return m.hasIntValue();
-			case LONG_VALUE:
-				return m.hasLongValue();
-			case FLOAT_VALUE:
-				return m.hasFloatValue();
-			case DOUBLE_VALUE:
-				return m.hasDoubleValue();
-			case BOOLEAN_VALUE:
-				return m.hasBooleanValue();
-			case STRING_VALUE:
-				return m.hasStringValue();
-			case BYTES_VALUE:
-				return m.hasBytesValue();
-			case DATASET_VALUE:
-				return m.hasDatasetValue();
-			case TEMPLATE_VALUE:
-				return m.hasTemplateValue();
-			case EXTENSION_VALUE:
-				return m.hasExtensionValue();
-			default:
-				return false;
+		if (m.hasDatatype() && m.getDatatype() == DataType.Command) {
+			// A Command metric's payload is the command field
+			return m.hasCommand();
 		}
+		return m.hasValue()
+				&& m.getValue().getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}
 
 	public static boolean hasValue(Parameter p) {
-		if (!p.hasType()) {
+		// A v4 Template.Parameter carries its datatype and value in a TypedValue
+		if (!p.hasTypedValue()) {
 			return false;
 		}
-
-		switch (p.getValueCase()){
-			case INT_VALUE:
-				return p.hasIntValue();
-			case LONG_VALUE:
-				return p.hasLongValue();
-			case FLOAT_VALUE:
-				return p.hasFloatValue();
-			case DOUBLE_VALUE:
-				return p.hasDoubleValue();
-			case BOOLEAN_VALUE:
-				return p.hasBooleanValue();
-			case STRING_VALUE:
-				return p.hasStringValue();
-			case EXTENSION_VALUE:
-				return p.hasExtensionValue();
-			default:
-				return false;
+		Payload.TypedValue tv = p.getTypedValue();
+		if (!tv.hasDatatype()) {
+			return false;
 		}
-
+		if (tv.getIsNull()) {
+			// A null value is valid, and sets no value case
+			return true;
+		}
+		// Any arm counts, including bytes, which the specification allows for a parameter
+		return tv.getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}
 
 	public static String getRetained(String topic) {

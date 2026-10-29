@@ -95,11 +95,11 @@ import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template.Parameter;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Template.Parameter;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -345,7 +345,7 @@ public class SendDataTest extends TCKTest {
 
 		logger.debug(
 				"Check Req: {} The NDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node "
-						+ "contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.",
+						+ "contained unless the previous MQTT message contained the maximum sequence number. In this case the sequence number MUST be 0.",
 				ID_TOPICS_NDATA_SEQ_NUM);
 		testResults.put(ID_TOPICS_NDATA_SEQ_NUM, setResult(bValid[1], TOPICS_NDATA_SEQ_NUM));
 
@@ -376,16 +376,16 @@ public class SendDataTest extends TCKTest {
 
 		// check templates
 		String sparkplugDescriptor = groupId + "/" + edgeNodeId;
-		for (Metric metric : inboundPayload.getMetricsList()) {
+		for (Metric metric : inboundPayload.getContent().getMetricsList()) {
 			String currentMetricName = metric.getName();
 			if (!metric.hasName() && metric.hasAlias()) {
 				currentMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(metric.getAlias());
 				logger.debug("Got currentMetricName from alias: {} -> {}", metric.getAlias(), currentMetricName);
 			}
 			if (metric.hasDatatype()) {
-				DataType datatype = DataType.forNumber(metric.getDatatype());
-				if (datatype == DataType.Template && metric.hasTemplateValue()) {
-					checkInstance(sparkplugDescriptor, currentMetricName, metric.getTemplateValue(), TOPIC_PATH_DDATA);
+				DataType datatype = metric.getDatatype();
+				if (datatype == DataType.Template && metric.getValue().hasTemplateValue()) {
+					checkInstance(sparkplugDescriptor, currentMetricName, metric.getValue().getTemplateValue(), TOPIC_PATH_DDATA);
 				}
 			}
 			if (metric.hasTimestamp()) {
@@ -453,7 +453,7 @@ public class SendDataTest extends TCKTest {
 
 		logger.debug(
 				"Check Req: {} The DDATA MUST include a sequence number in the payload and it MUST have a value of one greater than the previous MQTT message from the Edge Node "
-						+ "contained unless the previous MQTT message contained a value of 255. In this case the sequence number MUST be 0.",
+						+ "contained unless the previous MQTT message contained the maximum sequence number. In this case the sequence number MUST be 0.",
 				ID_TOPICS_DDATA_SEQ_NUM);
 		testResults.put(ID_TOPICS_DDATA_SEQ_NUM, setResult(bValid[1], TOPICS_DDATA_SEQ_NUM));
 
@@ -484,16 +484,16 @@ public class SendDataTest extends TCKTest {
 
 		// check templates
 		String sparkplugDescriptor = groupId + "/" + edgeNodeId + "/" + deviceId;
-		for (Metric metric : inboundPayload.getMetricsList()) {
+		for (Metric metric : inboundPayload.getContent().getMetricsList()) {
 			String currentMetricName = metric.getName();
 			if (!metric.hasName() && metric.hasAlias()) {
 				currentMetricName = edgeAliasMaps.get(sparkplugDescriptor).get(metric.getAlias());
 				logger.debug("Got currentMetricName from alias: {} -> {}", metric.getAlias(), currentMetricName);
 			}
 			if (metric.hasDatatype()) {
-				DataType datatype = DataType.forNumber(metric.getDatatype());
-				if (datatype == DataType.Template && metric.hasTemplateValue()) {
-					checkInstance(sparkplugDescriptor, metric.getName(), metric.getTemplateValue(), TOPIC_PATH_DDATA);
+				DataType datatype = metric.getDatatype();
+				if (datatype == DataType.Template && metric.getValue().hasTemplateValue()) {
+					checkInstance(sparkplugDescriptor, metric.getName(), metric.getValue().getTemplateValue(), TOPIC_PATH_DDATA);
 				}
 			}
 			if (metric.hasTimestamp()) {
@@ -507,12 +507,12 @@ public class SendDataTest extends TCKTest {
 		Boolean[] bValidPayload = new Boolean[] { false, false, false, false, false };
 
 		if (payload != null) {
-			long seqNum = payload.getSeq();
+			long seqNum = payload.getHeader().getSeq();
 			bValidPayload[0] = true;
-			bValidPayload[1] = payload.hasSeq() && (seqNum >= 0 && seqNum <= 255);
-			bValidPayload[2] = payload.hasTimestamp();
-			bValidPayload[3] = payload.hasTimestamp();
-			List<Metric> metrics = payload.getMetricsList();
+			bValidPayload[1] = payload.getHeader().hasSeq() && (Utils.isValidSeq(seqNum));
+			bValidPayload[2] = payload.getHeader().hasTimestamp();
+			bValidPayload[3] = payload.getHeader().hasTimestamp();
+			List<Metric> metrics = payload.getContent().getMetricsList();
 
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
@@ -670,7 +670,7 @@ public class SendDataTest extends TCKTest {
 		// record definitions
 		String id = groupId + "/" + edgeNodeId;
 		boolean aliasMapInitialized = false;
-		for (Metric metric : sparkplugPayload.getMetricsList()) {
+		for (Metric metric : sparkplugPayload.getContent().getMetricsList()) {
 			if (metric.hasAlias()) {
 				Map<Long, String> aliasMap = edgeAliasMaps.get(id);
 				if (!aliasMapInitialized) {
@@ -684,9 +684,9 @@ public class SendDataTest extends TCKTest {
 			}
 
 			if (metric.hasDatatype()) {
-				DataType datatype = DataType.forNumber(metric.getDatatype());
-				if (datatype == DataType.Template && metric.hasTemplateValue()) {
-					Payload.Template template = metric.getTemplateValue();
+				DataType datatype = metric.getDatatype();
+				if (datatype == DataType.Template && metric.getValue().hasTemplateValue()) {
+					Payload.Template template = metric.getValue().getTemplateValue();
 					if (template.hasIsDefinition() && template.getIsDefinition()) {
 						// this is a definition
 						definitions.put(metric.getName(), template);
@@ -709,11 +709,11 @@ public class SendDataTest extends TCKTest {
 		}
 
 		// now check any instances included
-		for (Metric metric : sparkplugPayload.getMetricsList()) {
+		for (Metric metric : sparkplugPayload.getContent().getMetricsList()) {
 			if (metric.hasDatatype()) {
-				DataType datatype = DataType.forNumber(metric.getDatatype());
-				if (datatype == DataType.Template && metric.hasTemplateValue()) {
-					Payload.Template template = metric.getTemplateValue();
+				DataType datatype = metric.getDatatype();
+				if (datatype == DataType.Template && metric.getValue().hasTemplateValue()) {
+					Payload.Template template = metric.getValue().getTemplateValue();
 					if (!template.hasIsDefinition() || !template.getIsDefinition()) {
 						checkInstance(id, metric.getName(), template, TOPIC_PATH_NBIRTH);
 					}
@@ -728,7 +728,7 @@ public class SendDataTest extends TCKTest {
 		// check templates
 		String id = groupId + "/" + edgeNodeId + "/" + deviceId;
 		boolean aliasMapInitialized = false;
-		for (Metric m : sparkplugPayload.getMetricsList()) {
+		for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 			if (m.hasAlias()) {
 				Map<Long, String> aliasMap = edgeAliasMaps.get(id);
 				if (!aliasMapInitialized) {
@@ -742,9 +742,9 @@ public class SendDataTest extends TCKTest {
 			}
 
 			if (m.hasDatatype()) {
-				DataType datatype = DataType.forNumber(m.getDatatype());
-				if (datatype == DataType.Template && m.hasTemplateValue()) {
-					checkInstance(id, m.getName(), m.getTemplateValue(), TOPIC_PATH_DBIRTH);
+				DataType datatype = m.getDatatype();
+				if (datatype == DataType.Template && m.getValue().hasTemplateValue()) {
+					checkInstance(id, m.getName(), m.getValue().getTemplateValue(), TOPIC_PATH_DBIRTH);
 				}
 			}
 		}

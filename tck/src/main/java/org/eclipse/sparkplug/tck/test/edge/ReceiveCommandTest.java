@@ -46,10 +46,10 @@ import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
 import org.jboss.test.audit.annotations.SpecAssertion;
@@ -207,8 +207,12 @@ public class ReceiveCommandTest extends TCKTest {
 		try {
 			payload =
 					Payload.newBuilder()
-							.addMetrics(Metric.newBuilder().setName(NODE_CONTROL_REBIRTH)
-									.setDatatype(DataType.Boolean.getNumber()).setBooleanValue(true))
+							.setContent(Payload.Content.newBuilder()
+									.addMetrics(Metric.newBuilder().setName(NODE_CONTROL_REBIRTH)
+											.setDatatype(DataType.Boolean)
+											.setValue(Payload.TypedValue.newBuilder()
+													.setDatatype(DataType.Boolean)
+													.setBooleanValue(true))))
 							.build().toByteArray();
 		} catch (Exception e) {
 			logger.error("Error building edge node rebirth command. Aborting test. {} ", e.getMessage());
@@ -281,9 +285,9 @@ public class ReceiveCommandTest extends TCKTest {
 	private long getBdSeq(final ByteBuffer payload) {
 		final PayloadOrBuilder inboundPayload = Utils.decode(payload);
 		if (inboundPayload != null) {
-			for (Metric m : inboundPayload.getMetricsList()) {
+			for (Metric m : inboundPayload.getContent().getMetricsList()) {
 				if (m.getName().equals(BD_SEQ)) {
-					return m.getLongValue();
+					return Utils.getLongValue(m);
 				}
 			}
 		}

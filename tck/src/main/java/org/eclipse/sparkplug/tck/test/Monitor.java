@@ -130,10 +130,10 @@ import java.util.TreeMap;
 
 import org.eclipse.sparkplug.tck.sparkplug.Sections;
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Template;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Template;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -375,13 +375,13 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				// this is an edge node connect
 				PayloadOrBuilder payload = getSparkplugPayload(willPublishPacket);
 
-				List<Metric> metrics = payload.getMetricsList();
+				List<Metric> metrics = payload.getContent().getMetricsList();
 				String id = levels[1] + "/" + levels[3]; // group_id + edge_node_id
 				ListIterator<Metric> metricIterator = metrics.listIterator();
 				while (metricIterator.hasNext()) {
 					Metric current = metricIterator.next();
-					if (current.getName().equals("bdSeq") && current.hasLongValue()) {
-						long bdseq = current.getLongValue();
+					if (current.getName().equals("bdSeq") && Utils.hasLongValue(current)) {
+						long bdseq = Utils.getLongValue(current);
 						if (edgeBdSeqs.get(id) != null) {
 							if (!ignoreBdSeqNumCheck) {
 								if (!setResultIfNotFail(testResults, bdseq == getNextSeq(edgeBdSeqs.get(id)),
@@ -539,8 +539,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 			PayloadOrBuilder payload = getSparkplugPayload(packet);
 
-			if (payload.hasTimestamp()) {
-				setResultIfNotFail(testResults, checkUTC(payload.getTimestamp(), results.getConfig().UTCwindow),
+			if (payload.getHeader().hasTimestamp()) {
+				setResultIfNotFail(testResults, checkUTC(payload.getHeader().getTimestamp(), results.getConfig().UTCwindow),
 						ID_PAYLOADS_TIMESTAMP_IN_UTC, PAYLOADS_TIMESTAMP_IN_UTC);
 			}
 
@@ -765,21 +765,22 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				CASE_SENSITIVITY_SPARKPLUG_IDS + " edge ids: " + edge_node_id + " " + lowerEdgeIds.get(lowEdgeId));
 
 		String id = group_id + "/" + edge_node_id;
-		if (payload.hasSeq()) {
-			if (payload.getSeq() > 255 || payload.getSeq() < 0) {
+		if (payload.getHeader().hasSeq()) {
+			if (!Utils.isValidSeq(payload.getHeader().getSeq())) {
 				testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, PAYLOADS_NBIRTH_SEQ));
+			} else {
+				testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(true, PAYLOADS_NBIRTH_SEQ));
 			}
-			edgeSeqs.put(id, payload.getSeq());
-			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(true, PAYLOADS_NBIRTH_SEQ));
+			edgeSeqs.put(id, payload.getHeader().getSeq());
 		} else {
 			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult(false, PAYLOADS_NBIRTH_SEQ));
 		}
 
 		if (payload != null) {
-			edgeBirthMetrics.put(id, payload.getMetricsList());
+			edgeBirthMetrics.put(id, payload.getContent().getMetricsList());
 
 			long lastHistoricalTimestamp = 0L;
-			List<Metric> metrics = payload.getMetricsList();
+			List<Metric> metrics = payload.getContent().getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			boolean aliasMapInitialized = false;
 			while (metricIterator.hasNext()) {
@@ -878,15 +879,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		logger.info("Monitor: *** NDATA *** {}/{}", group_id, edge_node_id);
 
 		boolean correct_seq = false;
-		if (payload.hasSeq()) {
+		if (payload.getHeader().hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
-				if (payload.getSeq() == expectedSeq) {
+				if (payload.getHeader().getSeq() == expectedSeq) {
 					correct_seq = true;
 				}
 			}
-			edgeSeqs.put(id, payload.getSeq());
+			edgeSeqs.put(id, payload.getHeader().getSeq());
 		}
 		if (ignoreSeqNumCheck) {
 			setResultIfNotFail(testResults, true, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
@@ -899,7 +900,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		}
 
 		long lastHistoricalTimestamp = 0L;
-		List<Metric> metrics = payload.getMetricsList();
+		List<Metric> metrics = payload.getContent().getMetricsList();
 		String id = group_id + "/" + edge_node_id;
 		ListIterator<Metric> metricIterator = metrics.listIterator();
 		while (metricIterator.hasNext()) {
@@ -934,9 +935,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				}
 			}
 
-			if (current.getDatatype() == DataType.Template.getNumber()) {
-				if (current.hasTemplateValue()) {
-					Template template = current.getTemplateValue();
+			if (current.getDatatype() == DataType.Template) {
+				if (current.getValue().hasTemplateValue()) {
+					Template template = current.getValue().getTemplateValue();
 					// instances must have a reference
 					if (template.hasTemplateRef()) {
 						boolean found = false;
@@ -945,8 +946,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						for (Metric birth : birthMetrics) {
 							if (birth.getName().equals(templateName)) {
 
-								if (birth.hasTemplateValue()) {
-									Template templatedef = birth.getTemplateValue();
+								if (birth.getValue().hasTemplateValue()) {
+									Template templatedef = birth.getValue().getTemplateValue();
 									if (templatedef.hasIsDefinition() && templatedef.hasIsDefinition()
 											&& !templatedef.hasTemplateRef()) {
 										found = true;
@@ -1073,12 +1074,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 				CASE_SENSITIVITY_SPARKPLUG_IDS + " device ids: " + device_id + " " + lowerDeviceIds.get(lowDeviceId));
 
 		// record sequence numbers for checking
-		if (payload.hasSeq()) {
+		if (payload.getHeader().hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
-				if (payload.getSeq() == expectedSeq) {
+				if (payload.getHeader().getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DBIRTH_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(true, PAYLOADS_DBIRTH_SEQ_INC));
 					}
@@ -1092,7 +1093,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 							setResult(false, MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ));
 				}
 			}
-			edgeSeqs.put(id, payload.getSeq());
+			edgeSeqs.put(id, payload.getHeader().getSeq());
 		} else {
 			testResults.put(ID_PAYLOADS_DBIRTH_SEQ_INC, setResult(false, PAYLOADS_DBIRTH_SEQ_INC));
 			testResults.put(ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD_SEQ,
@@ -1101,11 +1102,11 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 
 		if (payload != null) {
 			String id = group_id + "/" + edge_node_id + "/" + device_id;
-			deviceBirthMetrics.put(id, payload.getMetricsList());
-			deviceLastMetrics.put(id, payload.getMetricsList());
+			deviceBirthMetrics.put(id, payload.getContent().getMetricsList());
+			deviceLastMetrics.put(id, payload.getContent().getMetricsList());
 
 			long lastHistoricalTimestamp = 0L;
-			List<Metric> metrics = payload.getMetricsList();
+			List<Metric> metrics = payload.getContent().getMetricsList();
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			boolean aliasMapInitialized = false;
 			while (metricIterator.hasNext()) {
@@ -1153,12 +1154,12 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 		}
 
-		if (payload != null && payload.hasSeq()) {
+		if (payload != null && payload.getHeader().hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
-				if (payload.getSeq() == expectedSeq) {
+				if (payload.getHeader().getSeq() == expectedSeq) {
 					if (testResults.get(ID_PAYLOADS_DDEATH_SEQ_INC) == null) {
 						testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(true, PAYLOADS_DDEATH_SEQ_INC));
 					}
@@ -1166,7 +1167,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 					testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(false, PAYLOADS_DDEATH_SEQ_INC));
 				}
 			}
-			edgeSeqs.put(id, payload.getSeq());
+			edgeSeqs.put(id, payload.getHeader().getSeq());
 		} else {
 			testResults.put(ID_PAYLOADS_DDEATH_SEQ_INC, setResult(false, PAYLOADS_DDEATH_SEQ_INC));
 		}
@@ -1200,15 +1201,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		logger.info("Monitor: *** DDATA *** {}/{}/{}", group_id, edge_node_id, device_id);
 
 		boolean correct_seq = false;
-		if (payload.hasSeq()) {
+		if (payload.getHeader().hasSeq()) {
 			String id = group_id + "/" + edge_node_id;
 			if (edgeSeqs.get(id) != null) {
 				long expectedSeq = getNextSeq((Long) edgeSeqs.get(id));
-				if (payload.getSeq() == expectedSeq) {
+				if (payload.getHeader().getSeq() == expectedSeq) {
 					correct_seq = true;
 				}
 			}
-			edgeSeqs.put(id, payload.getSeq());
+			edgeSeqs.put(id, payload.getHeader().getSeq());
 		}
 		if (ignoreSeqNumCheck) {
 			setResultIfNotFail(testResults, true, ID_PAYLOADS_NDATA_SEQ_INC, PAYLOADS_NDATA_SEQ_INC);
@@ -1221,7 +1222,7 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		}
 
 		long lastHistoricalTimestamp = 0L;
-		List<Metric> metrics = payload.getMetricsList();
+		List<Metric> metrics = payload.getContent().getMetricsList();
 		String id = group_id + "/" + edge_node_id + "/" + device_id;
 		ListIterator<Metric> metricIterator = metrics.listIterator();
 		while (metricIterator.hasNext()) {
@@ -1257,9 +1258,9 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 			}
 
 			List<Metric> eBirthMetrics = edgeBirthMetrics.get(id);
-			if (eBirthMetrics != null && current.getDatatype() == DataType.Template.getNumber()) {
-				if (current.hasTemplateValue()) {
-					Template template = current.getTemplateValue();
+			if (eBirthMetrics != null && current.getDatatype() == DataType.Template) {
+				if (current.getValue().hasTemplateValue()) {
+					Template template = current.getValue().getTemplateValue();
 					// instances must have a reference
 					if (template.hasTemplateRef()) {
 						boolean found = false;
@@ -1268,8 +1269,8 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 						for (Metric birth : eBirthMetrics) {
 							if (birth.getName().equals(templateName)) {
 
-								if (birth.hasTemplateValue()) {
-									Template templatedef = birth.getTemplateValue();
+								if (birth.getValue().hasTemplateValue()) {
+									Template templatedef = birth.getValue().getTemplateValue();
 									if (templatedef.hasIsDefinition() && templatedef.hasIsDefinition()
 											&& !templatedef.hasTemplateRef()) {
 										found = true;
@@ -1403,15 +1404,15 @@ public class Monitor extends TCKTest implements ClientLifecycleEventListener {
 		} else {
 			logger.debug("metricOne and metricTwo are not null");
 			if (metricOne.getAlias() == metricTwo.getAlias() && metricOne.getName() == metricTwo.getName()
-					&& metricOne.getBooleanValue() == metricTwo.getBooleanValue()
-					&& metricOne.getBytesValue() == metricTwo.getBytesValue()
-					&& metricOne.getDatasetValue() == metricTwo.getDatasetValue()
-					&& metricOne.getDoubleValue() == metricTwo.getDoubleValue()
-					&& metricOne.getFloatValue() == metricTwo.getFloatValue()
-					&& metricOne.getIntValue() == metricTwo.getIntValue()
-					&& metricOne.getLongValue() == metricTwo.getLongValue()
-					&& metricOne.getStringValue() == metricTwo.getStringValue()
-					&& metricOne.getTemplateValue() == metricTwo.getTemplateValue()) {
+					&& metricOne.getValue().getBooleanValue() == metricTwo.getValue().getBooleanValue()
+					&& metricOne.getValue().getBytesValue() == metricTwo.getValue().getBytesValue()
+					&& metricOne.getValue().getDatasetValue() == metricTwo.getValue().getDatasetValue()
+					&& metricOne.getValue().getDoubleValue() == metricTwo.getValue().getDoubleValue()
+					&& metricOne.getValue().getFloatValue() == metricTwo.getValue().getFloatValue()
+					&& Utils.getIntValue(metricOne) == Utils.getIntValue(metricTwo)
+					&& Utils.getLongValue(metricOne) == Utils.getLongValue(metricTwo)
+					&& metricOne.getValue().getStringValue() == metricTwo.getValue().getStringValue()
+					&& metricOne.getValue().getTemplateValue() == metricTwo.getValue().getTemplateValue()) {
 				// Metrics are considered equal if the name, alias, and values are equal
 				logger.trace("Metrics match...");
 				return true;

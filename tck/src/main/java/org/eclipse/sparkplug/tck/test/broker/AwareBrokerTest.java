@@ -44,7 +44,7 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.broker.test.BrokerAwareFeatureTester;
 import org.eclipse.sparkplug.tck.test.broker.test.results.AwareTestResult;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto;
+import org.eclipse.tahu.protobuf.SparkplugBProto;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -274,7 +274,7 @@ public class AwareBrokerTest extends TCKTest {
 	public void checkNDEATHAware(PublishPacket packet) {
 		logger.debug("AWARE:: Broker - Check Req: {} ", ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP);
 		SparkplugBProto.PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
-		boolean bValid = result.getTimestamp() > willTimestamp;
+		boolean bValid = result.getHeader().getTimestamp() > willTimestamp;
 		testResults.put(ID_CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP,
 				setResult(bValid, CONFORMANCE_MQTT_AWARE_NDEATH_TIMESTAMP));
 		bNDeathChecked = true;

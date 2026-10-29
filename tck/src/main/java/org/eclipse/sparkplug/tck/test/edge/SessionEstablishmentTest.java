@@ -48,8 +48,8 @@ import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -379,7 +379,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				"Check Req: The timestamp MUST be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.");
 
 		boolean isValid = true;
-		List<Metric> metrics = sparkplugPayload.getMetricsList();
+		List<Metric> metrics = sparkplugPayload.getContent().getMetricsList();
 		ListIterator<Metric> metricIterator = metrics.listIterator();
 		while (metricIterator.hasNext()) {
 			Metric current = metricIterator.next();
@@ -403,7 +403,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				+ "if alias is included, NBIRTH and DBIRTH messages MUST include both a metric name and alias.");
 
 		boolean isValid = true;
-		List<Metric> metrics = sparkplugPayload.getMetricsList();
+		List<Metric> metrics = sparkplugPayload.getContent().getMetricsList();
 		ListIterator<Metric> metricIterator = metrics.listIterator();
 		while (metricIterator.hasNext()) {
 			Metric current = metricIterator.next();
@@ -463,11 +463,11 @@ public class SessionEstablishmentTest extends TCKTest {
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD,
 					setResult(sparkplugPayload != null, MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_WILL_MESSAGE_PAYLOAD));
 
-			if (sparkplugPayload != null && sparkplugPayload.getMetricsList() != null) {
-				List<Metric> metrics = sparkplugPayload.getMetricsList();
+			if (sparkplugPayload != null && sparkplugPayload.getContent().getMetricsList() != null) {
+				List<Metric> metrics = sparkplugPayload.getContent().getMetricsList();
 				for (Metric m : metrics) {
-					if (m.getName().equals("bdSeq") && m.hasLongValue()) {
-						deathBdSeq = m.getLongValue();
+					if (m.getName().equals("bdSeq") && Utils.hasLongValue(m)) {
+						deathBdSeq = Utils.getLongValue(m);
 						break;
 					}
 				}
@@ -476,7 +476,7 @@ public class SessionEstablishmentTest extends TCKTest {
 				testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
 
 				logger.debug("Check Req: NDEATH must not include a sequence number");
-				bValid = !sparkplugPayload.hasSeq();
+				bValid = !sparkplugPayload.getHeader().hasSeq();
 				testResults.put(ID_PAYLOADS_NDEATH_SEQ, setResult(bValid, PAYLOADS_NDEATH_SEQ));
 				testResults.put(ID_TOPICS_NDEATH_SEQ, setResult(bValid, TOPICS_NDEATH_SEQ));
 				testResults.put(ID_TOPICS_NDEATH_PAYLOAD, setResult(bValid, TOPICS_NDEATH_PAYLOAD));
@@ -611,34 +611,34 @@ public class SessionEstablishmentTest extends TCKTest {
 			logger.debug("Check Req: NBIRTH message must have Qos set to 0.");
 			logger.debug(
 					"Check Req: Every NBIRTH message MUST include a sequence number and it MUST have a value of 0.");
-			boolean hasSeq = sparkplugPayload.hasSeq();
-			seq = sparkplugPayload.getSeq();
+			boolean hasSeq = sparkplugPayload.getHeader().hasSeq();
+			seq = sparkplugPayload.getHeader().getSeq();
 			testResults.put(ID_PAYLOADS_NBIRTH_SEQ, setResult((hasSeq && seq == 0), PAYLOADS_NBIRTH_SEQ));
 			testResults.put(ID_TOPICS_NBIRTH_SEQ_NUM, setResult((hasSeq && seq == 0), TOPICS_NBIRTH_SEQ_NUM));
 			testResults.put(ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH,
-					setResult((hasSeq && (seq >= 0 && seq <= 255)), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
+					setResult((hasSeq && (Utils.isValidSeq(seq))), PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH));
 
 			testResults.put(ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ,
-					setResult((hasSeq && (seq >= 0 && seq <= 255)), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
+					setResult((hasSeq && (Utils.isValidSeq(seq))), MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_SEQ));
 
 			// receivedBirthTime::making sure that the payload timestamp is greater than (receivedBirthTime - 5 min) and
 			// less than the
 			logger.debug(
 					"Check Req: NBIRTH messages MUST include a payload timestamp that denotes the time at which the message was published.");
 			boolean bHasTimeStamp = false;
-			if (sparkplugPayload.hasTimestamp()) {
-				long ts = sparkplugPayload.getTimestamp();
+			if (sparkplugPayload.getHeader().hasTimestamp()) {
+				long ts = sparkplugPayload.getHeader().getTimestamp();
 				bHasTimeStamp = (ts > millisPastFiveMin && ts < (millisReceivedBirth));
 			}
 			testResults.put(ID_PAYLOADS_NBIRTH_TIMESTAMP, setResult(bHasTimeStamp, PAYLOADS_NBIRTH_TIMESTAMP));
 			testResults.put(ID_TOPICS_NBIRTH_TIMESTAMP_1, setResult(bHasTimeStamp, TOPICS_NBIRTH_TIMESTAMP_1));
 
 			logger.debug("Check Req: NBIRTH must include a bdSeq");
-			List<Metric> metrics = sparkplugPayload.getMetricsList();
+			List<Metric> metrics = sparkplugPayload.getContent().getMetricsList();
 			Set<String> metric_names = new HashSet<String>();
 			for (Metric m : metrics) {
 				if (m.getName().equals("bdSeq")) {
-					birthBdSeq = m.getLongValue();
+					birthBdSeq = Utils.getLongValue(m);
 				}
 
 				if (m.hasName()) {
@@ -831,8 +831,8 @@ public class SessionEstablishmentTest extends TCKTest {
 			prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_TIMESTAMP_1, NOT_EXECUTED);
 			boolean bValid = false;
 			if (!prevResult.contains(FAIL)) {
-				if (sparkplugPayload.hasTimestamp()) {
-					long millisPayload = sparkplugPayload.getTimestamp();
+				if (sparkplugPayload.getHeader().hasTimestamp()) {
+					long millisPayload = sparkplugPayload.getHeader().getTimestamp();
 					bValid = (millisPayload > millisPastFiveMin && millisPayload < (millisReceivedBirth));
 				}
 				if (prevResult.equals(NOT_EXECUTED)) {
@@ -845,25 +845,25 @@ public class SessionEstablishmentTest extends TCKTest {
 			prevResult = testResults.getOrDefault(ID_PAYLOADS_DBIRTH_SEQ, NOT_EXECUTED);
 			if (!prevResult.contains(FAIL)) {
 				if (prevResult.equals(NOT_EXECUTED)) {
-					testResults.put(ID_PAYLOADS_DBIRTH_SEQ, setResult(sparkplugPayload.hasSeq(), PAYLOADS_DBIRTH_SEQ));
+					testResults.put(ID_PAYLOADS_DBIRTH_SEQ, setResult(sparkplugPayload.getHeader().hasSeq(), PAYLOADS_DBIRTH_SEQ));
 				}
 			}
 
 			logger.debug(
 					"Check Req: DBIRTH sequence number must have a value of one greater than the previous MQTT message from the "
-							+ " edge node unless the previous MQTT message contained a value of 255; in this case, sequence number must be 0.");
+							+ " edge node unless the previous MQTT message contained the maximum sequence number; in this case, sequence number must be 0.");
 			prevResult = testResults.getOrDefault(ID_TOPICS_DBIRTH_SEQ, "");
 			if (!prevResult.contains(FAIL)) {
 				boolean bSeqValid = false;
-				if (seq != 255) {
-					if (sparkplugPayload.hasSeq() && (sparkplugPayload.getSeq() == (seq + 1))) {
+				if (seq != Constants.MAX_SEQ) {
+					if (sparkplugPayload.getHeader().hasSeq() && (sparkplugPayload.getHeader().getSeq() == (seq + 1))) {
 						bSeqValid = true;
-						seq = sparkplugPayload.getSeq();
+						seq = sparkplugPayload.getHeader().getSeq();
 					}
 				} else {
-					if (sparkplugPayload.hasSeq() && (sparkplugPayload.getSeq() == 0)) {
+					if (sparkplugPayload.getHeader().hasSeq() && (sparkplugPayload.getHeader().getSeq() == 0)) {
 						bSeqValid = true;
-						seq = sparkplugPayload.getSeq();
+						seq = sparkplugPayload.getHeader().getSeq();
 					}
 				}
 				if (prevResult.equals("")) {
@@ -876,7 +876,7 @@ public class SessionEstablishmentTest extends TCKTest {
 					|| testResults.get(ID_PAYLOADS_METRIC_DATATYPE_REQ).contains(PASS)) {
 				logger.debug(
 						"Check req: The datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.");
-				List<Metric> metrics = sparkplugPayload.getMetricsList();
+				List<Metric> metrics = sparkplugPayload.getContent().getMetricsList();
 				int hasDataTypeCnt = countDataType(metrics);
 				testResults.put(ID_PAYLOADS_METRIC_DATATYPE_REQ,
 						setResult(hasDataTypeCnt == metrics.size(), PAYLOADS_METRIC_DATATYPE_REQ));
@@ -886,7 +886,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			checkPayloadsAliasAndNameRequirement(sparkplugPayload);
 
 			Set<String> metric_names = new HashSet<String>();
-			List<Metric> metrics = sparkplugPayload.getMetricsList();
+			List<Metric> metrics = sparkplugPayload.getContent().getMetricsList();
 			for (Metric m : metrics) {
 				if (!m.hasName() || !Utils.hasValue(m) || !m.hasDatatype()) {
 					testResults.put(ID_TOPICS_DBIRTH_METRICS, setResult(false, TOPICS_DBIRTH_METRICS));

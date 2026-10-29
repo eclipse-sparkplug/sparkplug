@@ -91,8 +91,8 @@ import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
 import org.eclipse.sparkplug.tck.test.common.Constants;
 import org.eclipse.sparkplug.tck.test.common.Constants.TestStatus;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -303,7 +303,7 @@ public class SendCommandTest extends TCKTest {
 				if (topicLevels[3].equals(edgeNodeId)) {
 					PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 					if (sparkplugPayload != null) {
-						edgeBirthMetrics = sparkplugPayload.getMetricsList();
+						edgeBirthMetrics = sparkplugPayload.getContent().getMetricsList();
 					}
 				}
 			}
@@ -313,7 +313,7 @@ public class SendCommandTest extends TCKTest {
 				if (device.equals(deviceId)) {
 					PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 					if (sparkplugPayload != null) {
-						deviceBirthMetrics = sparkplugPayload.getMetricsList();
+						deviceBirthMetrics = sparkplugPayload.getContent().getMetricsList();
 					}
 				}
 			}
@@ -497,9 +497,9 @@ public class SendCommandTest extends TCKTest {
 		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
 		if (payload != null) {
-			bValidPayload[0] = (payload.hasTimestamp());
-			bValidPayload[1] = !payload.hasSeq();
-			List<Metric> metrics = payload.getMetricsList();
+			bValidPayload[0] = (payload.getHeader().hasTimestamp());
+			bValidPayload[1] = !payload.getHeader().hasSeq();
+			List<Metric> metrics = payload.getContent().getMetricsList();
 
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
@@ -538,9 +538,9 @@ public class SendCommandTest extends TCKTest {
 		Boolean[] bValidPayload = new Boolean[] { false, false, false };
 
 		if (payload != null) {
-			bValidPayload[0] = payload.hasTimestamp();
-			bValidPayload[1] = !payload.hasSeq();
-			List<Metric> metrics = payload.getMetricsList();
+			bValidPayload[0] = payload.getHeader().hasTimestamp();
+			bValidPayload[1] = !payload.getHeader().hasSeq();
+			List<Metric> metrics = payload.getContent().getMetricsList();
 
 			ListIterator<Metric> metricIterator = metrics.listIterator();
 			while (metricIterator.hasNext()) {
@@ -562,10 +562,10 @@ public class SendCommandTest extends TCKTest {
 							testResults.put(ID_OPERATIONAL_BEHAVIOR_COMMANDS_NCMD_METRIC_NAME,
 									setShouldResult(true, OPERATIONAL_BEHAVIOR_COMMANDS_NCMD_METRIC_NAME));
 							testResults.put(ID_OPERATIONAL_BEHAVIOR_COMMANDS_NCMD_METRIC_VALUE, setResult(
-									current.hasBooleanValue() || current.hasBytesValue() || current.hasDatasetValue()
-											|| current.hasDoubleValue() || current.hasFloatValue()
-											|| current.hasIntValue() || current.hasLongValue()
-											|| current.hasStringValue() || current.hasTemplateValue(),
+									current.getValue().hasBooleanValue() || current.getValue().hasBytesValue() || current.getValue().hasDatasetValue()
+											|| current.getValue().hasDoubleValue() || current.getValue().hasFloatValue()
+											|| Utils.hasIntValue(current) || Utils.hasLongValue(current)
+											|| current.getValue().hasStringValue() || current.getValue().hasTemplateValue(),
 									OPERATIONAL_BEHAVIOR_COMMANDS_NCMD_METRIC_VALUE));
 							break;
 						}
@@ -583,7 +583,7 @@ public class SendCommandTest extends TCKTest {
 		logger.debug("Check Req: The timestamp MAY be included with metrics in NCMD and DCMD messages.");
 		boolean hasTimestamp = false;
 		if (topic.contains(TOPIC_PATH_NCMD) || topic.contains(TOPIC_PATH_DCMD)) {
-			for (Metric m : sparkplugPayload.getMetricsList()) {
+			for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 				if (!m.hasTimestamp()) {
 					hasTimestamp = true;
 					break;

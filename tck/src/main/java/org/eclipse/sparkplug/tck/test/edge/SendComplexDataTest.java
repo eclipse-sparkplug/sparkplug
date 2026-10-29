@@ -92,10 +92,10 @@ import org.eclipse.sparkplug.tck.test.Results;
 import org.eclipse.sparkplug.tck.test.TCK;
 import org.eclipse.sparkplug.tck.test.TCK.Utilities;
 import org.eclipse.sparkplug.tck.test.TCKTest;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.DataType;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.Payload.Metric;
-import org.eclipse.sparkplug.tck.test.common.SparkplugBProto.PayloadOrBuilder;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+import org.eclipse.tahu.protobuf.SparkplugBProto.PayloadOrBuilder;
 import org.eclipse.sparkplug.tck.test.common.Utils;
 import org.jboss.test.audit.annotations.SpecAssertion;
 import org.jboss.test.audit.annotations.SpecVersion;
@@ -330,8 +330,8 @@ public class SendComplexDataTest extends TCKTest {
 			isValid = false;
 			logger.error("Check req set for : {}", ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED);
 		} else {
-			if (result.hasSeq()) {
-				if (result.getSeq() >= 0 && result.getSeq() <= 255) {
+			if (result.getHeader().hasSeq()) {
+				if (Utils.isValidSeq(result.getHeader().getSeq())) {
 					isValid = true;
 				}
 			} else if (topic.contains(TOPIC_PATH_NDEATH)) {
@@ -366,7 +366,7 @@ public class SendComplexDataTest extends TCKTest {
 		logger.debug(
 				"Check Req: The datatype MUST be one of the enumerated values as shown in the valid Sparkplug Data Types.");
 		if (result != null) {
-			for (Metric m : result.getMetricsList()) {
+			for (Metric m : result.getContent().getMetricsList()) {
 				if(!Utils.hasValidDatatype(m)){
 					isValid_DataType = false;
 					isValid_DataTypeValue = false;
@@ -429,19 +429,19 @@ public class SendComplexDataTest extends TCKTest {
 					"Check Req: {} This MUST be included in Property Value Definitions in NBIRTH and DBIRTH messages.",
 					ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ);
 
-			for (Metric m : result.getMetricsList()) {
+			for (Metric m : result.getContent().getMetricsList()) {
 				if (m.hasProperties()
 						&& m.getProperties().getValuesList().size() != m.getProperties().getKeysList().size()) {
 					isValid_KeyArraySize = false;
 				}
 				for (int i = 0; i < m.getProperties().getValuesCount(); i++) {
-					final Payload.PropertyValue propertyValue = m.getProperties().getValues(i);
+					final Payload.TypedValue propertyValue = m.getProperties().getValues(i);
 					if(!Utils.hasValidDatatype(propertyValue)){
 						isValid_PropertyValueType = false;
 						isValid_PropertyValueTypeValue = false;
 					}
 					if ((topic.contains(TOPIC_PATH_NBIRTH) || topic.contains(TOPIC_PATH_DBIRTH))
-							&& Payload.PropertyValue.ValueCase.VALUE_NOT_SET == propertyValue.getValueCase()) {
+							&& Payload.TypedValue.ValueCase.VALUE_NOT_SET == propertyValue.getValueCase()) {
 						isValid_PropertyValueTypeReq = false;
 					}
 				}
@@ -473,7 +473,7 @@ public class SendComplexDataTest extends TCKTest {
 		boolean isValid = false;
 		if (topic.contains(TOPIC_PATH_NDATA) || topic.contains(TOPIC_PATH_DDATA) || topic.contains(TOPIC_PATH_NCMD)
 				|| topic.contains(TOPIC_PATH_DCMD)) {
-			for (Metric m : sparkplugPayload.getMetricsList()) {
+			for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 				if (!m.getIsNull() && ((m.hasAlias() && (!m.hasName() || m.getName().length() == 0))
 						|| (!m.hasAlias() && (m.hasName() || m.getName().length() > 0))))
 					isValid = true;
@@ -493,7 +493,7 @@ public class SendComplexDataTest extends TCKTest {
 		boolean isValid = true;
 		if (topic.contains(TOPIC_PATH_NDATA) || topic.contains(TOPIC_PATH_DDATA) || topic.contains(TOPIC_PATH_NCMD)
 				|| topic.contains(TOPIC_PATH_DCMD)) {
-			for (Metric m : sparkplugPayload.getMetricsList()) {
+			for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 				if (m.hasDatatype()) {
 					logger.info("On topic={} - Invalid payload: {}", topic, sparkplugPayload);
 					isValid = false;
@@ -511,7 +511,7 @@ public class SendComplexDataTest extends TCKTest {
 	public void checkPayloadsNameRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug("Check Req: The name MUST be included with every metric unless aliases are being used.");
 		boolean isValid = true;
-		for (Metric m : sparkplugPayload.getMetricsList()) {
+		for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 			if (m.getIsNull() || !m.hasName() && !m.hasAlias()) {
 				isValid = false;
 				break;
@@ -527,7 +527,7 @@ public class SendComplexDataTest extends TCKTest {
 		logger.debug(
 				"Check Req: The timestamp MUST be included with every metric in all NBIRTH, DBIRTH, NDATA, and DDATA messages.");
 		boolean isValid = true;
-		for (Metric m : sparkplugPayload.getMetricsList()) {
+		for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 			if (!m.hasTimestamp()) {
 				isValid = false;
 				break;
@@ -589,12 +589,12 @@ public class SendComplexDataTest extends TCKTest {
 	public boolean checkTemplate(final @NotNull PublishPacket packet) {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 		boolean hasTemplate = false;
-		for (Metric m : sparkplugPayload.getMetricsList()) {
+		for (Metric m : sparkplugPayload.getContent().getMetricsList()) {
 			if (m.hasDatatype()) {
-				DataType datatype = DataType.forNumber(m.getDatatype());
+				DataType datatype = m.getDatatype();
 
-				if (datatype == DataType.Template && m.hasTemplateValue()) {
-					Payload.Template t = m.getTemplateValue();
+				if (datatype == DataType.Template && m.getValue().hasTemplateValue()) {
+					Payload.Template t = m.getValue().getTemplateValue();
 
 					hasTemplate = true;
 
@@ -650,8 +650,8 @@ public class SendComplexDataTest extends TCKTest {
 										Utils.checkUTF8String(p.getName()), PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE));
 							}
 
-							if (p.hasType()) {
-								int curtype = p.getType();
+							if (p.getTypedValue().hasDatatype()) {
+								int curtype = p.getTypedValue().getDatatype().getNumber();
 								boolean isBasicType = true;
 								if (curtype < 0 || curtype > DataType.Text.getNumber()) {
 									logger.info("FOR {} the TYPE is: {} AND {}", p.getName(), curtype, p);
@@ -671,13 +671,12 @@ public class SendComplexDataTest extends TCKTest {
 
 								if (t.getIsDefinition()) {
 									testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ,
-											setResult(p.hasType(), PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ));
+											setResult(p.getTypedValue().hasDatatype(), PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ));
 								}
 							}
 
 							boolean valuetype = true;
-							if (!p.hasIntValue() && !p.hasLongValue() && !p.hasFloatValue() && !p.hasDoubleValue()
-									&& !p.hasBooleanValue() && !p.hasStringValue()) {
+							if (!Utils.hasValue(p)) {
 								valuetype = false;
 							}
 							testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE,

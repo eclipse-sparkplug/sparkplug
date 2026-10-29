@@ -100,8 +100,8 @@ public class EdgeNode {
 
 	private Calendar calendar = Calendar.getInstance();
 
-	private int deathBdSeq = 0;
-	private int birthBdSeq = 255;
+	private long deathBdSeq = 0;
+	private long birthBdSeq = Constants.MAX_SEQ;
 	private long seq = 0;
 
 	public EdgeNode() {
@@ -261,15 +261,16 @@ public class EdgeNode {
 		if (payload == null) {
 			payload = new SparkplugBPayloadBuilder();
 		}
-		if (deathBdSeq == 256) {
+		if (deathBdSeq > Constants.MAX_SEQ || deathBdSeq < 0) {
 			deathBdSeq = 0;
 		}
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) deathBdSeq).createMetric());
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, deathBdSeq).createMetric());
 		deathBdSeq++;
 
 		// Handle the Birth BD seq number
 		birthBdSeq++;
-		if (birthBdSeq == 256) {
+		if (birthBdSeq < 0) {
+			// wrapped past the maximum sequence number
 			birthBdSeq = 0;
 		}
 
@@ -307,7 +308,7 @@ public class EdgeNode {
 	// Used to add the sequence number
 	private long getNextSeqNum() throws Exception {
 		logger.debug("seq: " + seq);
-		if (seq == 256) {
+		if (seq > Constants.MAX_SEQ || seq < 0) {
 			seq = 0;
 		}
 		return seq++;
@@ -321,7 +322,7 @@ public class EdgeNode {
 		SparkplugBPayload payload = new SparkplugBPayload(new Date(), new ArrayList<Metric>(), getNextSeqNum(),
 				newUUID(), null);
 
-		payload.addMetric(new MetricBuilder("bdSeq", Int64, (long) birthBdSeq).createMetric());
+		payload.addMetric(new MetricBuilder("bdSeq", Int64, birthBdSeq).createMetric());
 		payload.addMetric(new MetricBuilder("Node Control/Rebirth", Boolean, false).createMetric());
 
 		payload.addMetric(new MetricBuilder("TCK_metric/Boolean", Boolean, true).createMetric());

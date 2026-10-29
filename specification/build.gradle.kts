@@ -238,6 +238,34 @@ val combineSpecSourceWithNormativeAppendix by tasks.registering(Sync::class) {
     into(layout.buildDirectory.dir("spec"))
 }
 
+/* ******************** protobuf schema extraction ******************** */
+
+// The Protocol Buffers schema lives in the Payloads chapter so that the specification text is its
+// single source of truth. This lifts it out so the TCK can generate against the same bytes the
+// specification publishes, rather than a copy that drifts.
+val extractProtoSchema by tasks.registering {
+    group = "tck"
+    val chapter = layout.projectDirectory.file(
+        "src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc")
+    val output = layout.buildDirectory.file("proto/sparkplug_c.proto")
+    inputs.file(chapter)
+    outputs.file(output)
+    doLast {
+        val text = chapter.asFile.readText()
+        val heading = "==== Google Protocol Buffer Schema"
+        val from = text.indexOf(heading)
+        require(from >= 0) { "could not find the schema heading in ${chapter.asFile}" }
+        val block = Regex("^----\\R(.*?)^----", setOf(
+            RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)).find(text.substring(from))
+        require(block != null) { "could not find the schema listing after $heading" }
+        val schema = block.groupValues[1]
+        require(schema.contains("message Payload")) { "extracted block is not the schema" }
+        val file = output.get().asFile
+        file.parentFile.mkdirs()
+        file.writeText(schema)
+    }
+}
+
 /* ******************** artifacts ******************** */
 
 val tckAuditXml: Configuration by configurations.creating {
@@ -248,6 +276,17 @@ val tckAuditXml: Configuration by configurations.creating {
     }
 }
 
+val protoSchema: Configuration by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("sparkplug-proto"))
+    }
+}
+
 artifacts {
     add(tckAuditXml.name, xsltAudit)
+    add(protoSchema.name, extractProtoSchema.map { it.outputs.files.singleFile }) {
+        builtBy(extractProtoSchema)
+    }
 }

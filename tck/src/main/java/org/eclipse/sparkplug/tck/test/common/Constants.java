@@ -17,6 +17,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public class Constants {
 
 	public static final @NotNull String TOPIC_ROOT_SP_BV_1_0 = "spBv1.0";
+
+	// Sparkplug 4 sequence numbers are capped at this value and roll over to zero, replacing the
+	// 0-255 range of Sparkplug 3.
+	public static final long MAX_SEQ = Long.MAX_VALUE;
 	public static final @NotNull String TOPIC_PATH_STATE = "STATE";
 	public static final @NotNull String TOPIC_ROOT_STATE = TOPIC_ROOT_SP_BV_1_0 + "/" + TOPIC_PATH_STATE;
 	public static final @NotNull String TOPIC_PATH_NBIRTH = "NBIRTH";
