@@ -309,7 +309,7 @@ message Payload {
 
         optional string   name            = 1;        // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
         optional uint64   alias           = 2;        // Metric alias - tied to name on BIRTH and included in all later DATA messages
-        optional uint64   timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
+        optional int64    timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
         optional DataType datatype        = 4;        // DataType of the metric/tag value
         optional uint32   quality         = 5;        // Quality code of the metric/tag value - severity in bits 30-31
         optional string   quality_context = 6;        // The optional quality context of the metric/tag value
@@ -326,7 +326,7 @@ message Payload {
     }
 
     message Header {
-        optional uint64 timestamp              = 1;  // Timestamp at message sending time
+        optional int64  timestamp              = 1;  // Timestamp at message sending time
         optional uint64 seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
         optional uint64 bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
         optional uint64 descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
@@ -346,8 +346,8 @@ message Payload {
 
     optional Header header = 1;                 // Always present and always uncompressed
 
-    oneof content {
-        Content plain      = 2;                 // The Content of this message, uncompressed
+    oneof payload_content {
+        Content content    = 2;                 // The Content of this message, uncompressed
         bytes   compressed = 3;                 // The compressed bytes of a serialized Content
     }
 
@@ -378,7 +378,7 @@ JSON as follows:
                         "name": <metric_name>,
                         "alias": <alias>,
                         "timestamp": <timestamp>,
-                        "dataType": <datatype>,
+                        "datatype": <datatype>,
                         "value": <value>
                 }]
         }
@@ -401,7 +401,7 @@ A simple Sparkplug B payload with values would be represented as follows:
                         "name": "My Metric",
                         "alias": 1,
                         "timestamp": 1479123452194000000,
-                        "dataType": "String",
+                        "datatype": "String",
                         "value": "Test"
                 }]
         }
@@ -489,7 +489,7 @@ The header section includes the following components.
 
 * *header*
 ** _timestamp_
-*** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
+*** This is the timestamp in the form of a signed 64-bit integer representing the number of
 nanoseconds since epoch (Jan 1, 1970).
 *** [tck-testable tck-id-payloads-timestamp-in-UTC]#[yellow-background]*[tck-id-payloads-timestamp-in-UTC] This
 timestamp MUST be in UTC.*#
@@ -503,6 +503,15 @@ is the time that metric's value last changed. A consuming application needs both
 value is and how long it has held that value.
 ** _seq_
 *** This is the sequence number which is an unsigned 64-bit integer.
+*** Non-normative comment: the Sparkplug sequence numbers - seq, bd_seq, and descriptor_seq - are
+declared as unsigned 64-bit integers but roll over at 9223372036854775807, which is half of what
+that type can hold. The restriction is deliberate. An unsigned type is used because a sequence
+number is a counter and can never be negative, and the range is capped so that every value a
+conformant Edge Node can produce also fits a signed 64-bit integer. Several widely used languages,
+including Java, have no unsigned 64-bit type, so an implementation in one of them would otherwise
+have to compare sequence numbers with unsigned arithmetic to remain correct near the top of the
+range. Neither bound is reachable in practice: at one million messages per second the capped range
+takes roughly 292,000 years to exhaust.
 **** [tck-testable tck-id-payloads-sequence-num-always-included]#[yellow-background]*[tck-id-payloads-sequence-num-always-included] A
 sequence number MUST be included in the payload of every Sparkplug MQTT message from an Edge Node
 except an NDEATH message that is delivered as the Edge Node's registered MQTT Will Message.*#
@@ -517,11 +526,11 @@ Node does. This allows Host Applications to easily distinguish an NDEATH deliver
 from an NDEATH published by the Edge Node itself.
 **** [tck-testable tck-id-payloads-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-sequence-num-req-nbirth] A
 NBIRTH message from an Edge Node MUST always contain a sequence number between 0 and
-18446744073709551615 (inclusive).*#
+9223372036854775807 (inclusive).*#
 **** [tck-testable tck-id-payloads-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-sequence-num-incrementing] All
 subsequent messages after an NBIRTH from an Edge Node MUST contain a sequence number that is
 continually increasing by one in each message from that Edge Node until a value of
-18446744073709551615 (max value of a UINT64) is reached. At that point, the sequence number of the
+9223372036854775807 is reached. At that point, the sequence number of the
 following message MUST be zero.*#
 ** _bd_seq_
 *** This is the birth/death sequence number which is an unsigned 64-bit integer. It scopes a message to
@@ -545,7 +554,7 @@ that Host Application and is unrelated to the bd_seq number of any Edge Node. Se
 link:#payloads_c_state_bd_seq[STATE bd_seq Number] section.
 **** [tck-testable tck-id-payloads-bd-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-bd-sequence-num-req-nbirth] Every
 birth/death sequence number included in the payload from an Edge Node MUST always be between 0 and
-18446744073709551615 (inclusive).*#
+9223372036854775807 (inclusive).*#
 **** [tck-testable tck-id-payloads-bd-sequence-num-session-constant]#[yellow-background]*[tck-id-payloads-bd-sequence-num-session-constant] Every
 message an Edge Node publishes within a single MQTT session MUST carry the same birth/death sequence
 number, and that value MUST be the one registered in the Will Message payload of that session's MQTT
@@ -555,7 +564,7 @@ message from an Edge Node can be attributed to the session that produced it, and
 discard a message belonging to a session it has already replaced.
 **** [tck-testable tck-id-payloads-bd-sequence-num-incrementing]#[yellow-background]*[tck-id-payloads-bd-sequence-num-incrementing] The
 birth/death sequence number MUST start at zero and MUST increment by one on every new MQTT CONNECT
-packet sent by the Edge Node, until a value of 18446744073709551615 (max value of a UINT64) is reached.
+packet sent by the Edge Node, until a value of 9223372036854775807 is reached.
 At that point the birth/death sequence number of the following MQTT CONNECT packet MUST be zero.*#
 ***** Non-normative comment: the bd_seq number is not incremented from message to message within a
 session, and it is not incremented by an NREBIRTH, because an NREBIRTH does not establish a new MQTT
@@ -584,7 +593,7 @@ sequence (see the Reconnect Optimization), the NBIRTH or DBIRTH is the first mes
 **** [tck-testable tck-id-payloads-descriptor-seq-incrementing]#[yellow-background]*[tck-id-payloads-descriptor-seq-incrementing] Each
 subsequent message in a descriptor sequence stream MUST contain a descriptor sequence number that is
 one greater than the descriptor sequence number of the previous message in that same stream, until a
-value of 18446744073709551615 (max value of a UINT64) is reached, after which the next descriptor
+value of 9223372036854775807 is reached, after which the next descriptor
 sequence number MUST be 0.*#
 **** [tck-testable tck-id-payloads-descriptor-seq-rebirth]#[yellow-background]*[tck-id-payloads-descriptor-seq-rebirth] An
 NREBIRTH or DREBIRTH slip-streams a Host Application into the existing data stream and MUST NOT reset
@@ -626,6 +635,34 @@ link:#payloads_c_compression[Compression] section.
 ** _metrics_
 *** This is an array of metrics representing key/value/datatype values. Metrics are further defined
 link:#payloads_c_metric[here].
+*** [tck-testable tck-id-payloads-metrics-ordered]#[yellow-background]*[tck-id-payloads-metrics-ordered] A
+payload that carries more than one value for the same metric MUST order its metrics by value change
+time, oldest first.*#
+*** [tck-testable tck-id-payloads-metrics-ordered-should]#[yellow-background]*[tck-id-payloads-metrics-ordered-should] Every
+other payload SHOULD order its metrics the same way.*#
+*** [tck-not-testable tck-id-payloads-metrics-ordered-scope]#[yellow-background]*[tck-id-payloads-metrics-ordered-scope] This
+ordering applies to the metrics array of the payload's content. It does not apply to the metrics of
+a Template, or to the arguments or results of a Command, whose order is defined by the Template
+Definition or the Command definition.*#
+*** [tck-testable tck-id-payloads-metrics-ordered-no-timestamp]#[yellow-background]*[tck-id-payloads-metrics-ordered-no-timestamp] A
+metric that omits its timestamp MUST be ordered as though its value change time were the payload
+timestamp, which is the time that metric is taken to have changed as described in the
+link:#payloads_c_metric[Metric] section.*#
+*** [tck-not-testable tck-id-payloads-metrics-ordered-ties]#[yellow-background]*[tck-id-payloads-metrics-ordered-ties] Metrics
+that share a value change time MAY appear in any order relative to one another, and a consuming
+application MUST NOT reorder them.*#
+*** Non-normative comment: Ordering by value change time means a consuming application that applies
+the metrics in array order arrives at the correct current value without comparing timestamps. That
+is why it is required only where a payload carries several values for the same metric, as a payload
+of historical values does; elsewhere it is a recommendation, so that an Edge Node emitting a BIRTH
+in browse order remains conformant. Metrics remain identified by name or alias, so position still
+carries no identity.
+*** Non-normative comment: The order among metrics that share a value change time is the publisher's
+and is preserved by both encodings, because a JSON array and a Google Protocol Buffers repeated
+field are both ordered. Multi-part file publishing depends on this: every metric of a multi-part
+publish carries the same timestamp, as required in the
+link:#payloads_c_file_publishing[File Publishing] section, so they tie, and the rules that
+distinguish the first metric of the publish from the rest continue to apply.
 ** _body_
 *** This is an array of bytes which can be used for any custom binary encoded data.
 
@@ -666,7 +703,7 @@ and DBIRTH messages MUST include both a metric name and alias.*#
 *** [tck-testable tck-id-payloads-alias-data-cmd-requirement]#[yellow-background]*[tck-id-payloads-alias-data-cmd-requirement] NDATA,
 DDATA, NCMD, and DCMD messages MUST only include an alias and the metric name MUST be excluded.*#
 * *timestamp*
-** This is the timestamp in the form of an unsigned 64-bit integer representing the number of
+** This is the timestamp in the form of a signed 64-bit integer representing the number of
 nanoseconds since epoch (Jan 1, 1970).
 ** [tck-not-testable]#[yellow-background]*In an NBIRTH, NREBIRTH, DBIRTH, DREBIRTH, NDATA, or DDATA
 message, the timestamp of a Metric MUST represent the metric value change time, meaning the time at
@@ -1255,8 +1292,8 @@ Acme/Dublin/Packaging/spCv4.0/NMETA/EdgeNode1
         "content": {
                 "metrics": [{
                         "name": "MotorType",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": true,
                                 "parameters": [{
@@ -1266,13 +1303,13 @@ Acme/Dublin/Packaging/spCv4.0/NMETA/EdgeNode1
                                 }],
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32"
+                                        "datatype": "Int32"
                                 }, {
                                         "name": "AmpDraw",
-                                        "dataType": "Float"
+                                        "datatype": "Float"
                                 }, {
                                         "name": "Running",
-                                        "dataType": "Boolean"
+                                        "datatype": "Boolean"
                                 }]
                         }
                 }]
@@ -1300,16 +1337,16 @@ Acme/Dublin/Packaging/spCv4.0/DMETA/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "name": "Motors/Conveyor",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType"
                         }
                 }, {
                         "name": "Motors/Filler",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType"
@@ -1339,8 +1376,8 @@ Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "name": "Motors/Conveyor",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType",
@@ -1351,36 +1388,36 @@ Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Line3
                                 }],
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 1780
                                 }, {
                                         "name": "AmpDraw",
-                                        "dataType": "Float",
+                                        "datatype": "Float",
                                         "value": 12.4
                                 }, {
                                         "name": "Running",
-                                        "dataType": "Boolean",
+                                        "datatype": "Boolean",
                                         "value": true
                                 }]
                         }
                 }, {
                         "name": "Motors/Filler",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "version": "1.0",
                                 "is_definition": false,
                                 "template_ref": "MotorType",
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 900
                                 }, {
                                         "name": "AmpDraw",
-                                        "dataType": "Float",
+                                        "datatype": "Float",
                                         "value": 7.1
                                 }, {
                                         "name": "Running",
-                                        "dataType": "Boolean",
+                                        "datatype": "Boolean",
                                         "value": false
                                 }]
                         }
@@ -1408,13 +1445,13 @@ Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "name": "Motors/Conveyor",
-                        "dataType": "Template",
-                        "template": {
+                        "datatype": "Template",
+                        "value": {
                                 "is_definition": false,
                                 "template_ref": "MotorType",
                                 "metrics": [{
                                         "name": "RPM",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 1802
                                 }]
                         }
@@ -1694,9 +1731,15 @@ enum DataType {
 *** Google Protocol Buffer Type: string
 *** Sparkplug enum value: 12
 * _DateTime_
-** Date time value as uint64 value representing nanoseconds since epoch (Jan 1, 1970)
-** Google Protocol Buffer Type: uint64
+** Date time value as int64 value representing nanoseconds since epoch (Jan 1, 1970)
+** Google Protocol Buffer Type: int64
 ** Sparkplug enum value: 13
+** Non-normative comment: a DateTime value is a nanosecond count since epoch, the same quantity the
+payload and metric timestamps carry, and is signed for the same reason. Every mainstream time
+representation it interoperates with is signed, so the ceiling is 2262-04-11 as described in the
+link:#operational_behavior_timestamps[Timestamps] section. A DateTime carried in a DataSet.Column
+shares the long_values array with UInt64, as the
+link:#payloads_c_dataset_column[DataSet.Column] section describes.
 * _Text_
 ** String value (UTF-8)
 ** Google Protocol Buffer Type: string
@@ -1812,8 +1855,8 @@ ends on a byte boundary.
 *** Sparkplug enum value: 33
 *** Example (string array to Metric bytes_value): [ABC, hello] -> [0x41, 0x42, 0x43, 0x00, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00]
 ** _DateTimeArray_
-*** DateTimeArray as an array of packed little endian bytes where each Datetime value is an 8-byte
-value representing the number of nanoseconds since epoch in UTC
+*** DateTimeArray as an array of packed little endian bytes where each DateTime value is a signed
+8-byte value representing the number of nanoseconds since epoch in UTC
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 34
 *** Example (DateTime array -> nanoseconds since epoch -> Metric bytes_value): ['Wednesday, October 21, 2009 5:27:55.335 AM', 'Friday, June 24, 2022 9:57:55 PM'] -> [1256102875335000000, 1656107875000000000] -> [0xC0, 0x7F, 0xB0, 0xF5, 0xE8, 0x92, 0x6E, 0x11, 0x00, 0x1E, 0x1A, 0x7F, 0x56, 0xAD, 0xFB, 0x16]
@@ -2109,11 +2152,12 @@ alias was assigned to it in the referenced NMETA, or otherwise by its metric nam
 NOT be used to convey metric datatype, properties, or metadata.*#
 * [tck-testable tck-id-payloads-nrebirth-seq-1]#[yellow-background]*[tck-id-payloads-nrebirth-seq-1] Every
 NREBIRTH message MUST include a sequence number and it MUST have a value between 0 and
-18446744073709551615 (inclusive).*#
+9223372036854775807 (inclusive).*#
 * [tck-testable tck-id-payloads-nrebirth-seq-2]#[yellow-background]*[tck-id-payloads-nrebirth-seq-2] Every
 NREBIRTH message MUST include a sequence number that is the following value:*#
-** rsn = pds - (1 + dc)
-** If the rsn results in a negative number, add 18446744073709551615 (max value of a UINT64) to it.
+** If pds is greater than or equal to (1 + dc), then rsn = pds - (1 + dc)
+** Otherwise the sequence number has rolled over since that pending DATA publish, and
+rsn = 9223372036854775807 - (dc - pds)
 *** rsn = Rebirth Sequence Number value
 *** pds = Next pending DATA publish seq number
 *** dc = Device count (number of Sparkplug Devices under the scope of the Edge Node)
@@ -2230,8 +2274,8 @@ NOT be used to convey metric datatype, properties, or metadata.*#
 DBIRTH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-dbirth-seq-inc]#[yellow-background]*[tck-id-payloads-dbirth-seq-inc] Every
 DBIRTH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-dbirth-order]#[yellow-background]*[tck-id-payloads-dbirth-order] All
 DBIRTH messages sent by an Edge Node MUST be sent immediately after the NBIRTH and before any NDATA
@@ -2333,8 +2377,8 @@ NOT be used to convey metric datatype, properties, or metadata.*#
 DREBIRTH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-drebirth-seq-inc]#[yellow-background]*[tck-id-payloads-drebirth-seq-inc] Every
 DREBIRTH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST be a value of 0.*#
 * [tck-testable tck-id-payloads-drebirth-order]#[yellow-background]*[tck-id-payloads-drebirth-order] All
 DREBIRTH messages sent by an Edge Node MUST be sent immediately after the NREBIRTH and before any
@@ -2433,8 +2477,8 @@ published.*#
 NDATA message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ndata-seq-inc]#[yellow-background]*[tck-id-payloads-ndata-seq-inc] Every
 NDATA message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-ndata-order]#[yellow-background]*[tck-id-payloads-ndata-order] All
 NDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
@@ -2500,8 +2544,8 @@ published.*#
 DDATA message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ddata-seq-inc]#[yellow-background]*[tck-id-payloads-ddata-seq-inc] Every
 DDATA message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 * [tck-testable tck-id-payloads-ddata-order]#[yellow-background]*[tck-id-payloads-ddata-order] All
 DDATA messages sent by an Edge Node MUST NOT be sent until all the NBIRTH and all DBIRTH messages
@@ -2640,7 +2684,7 @@ Consider the following Sparkplug B payload in the NCMD message shown above:
                 "metrics": [{
                         "name": "DIGITAL_OUT_1",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Boolean",
+                        "datatype": "Boolean",
                         "value": true
                 }]
         }
@@ -2671,12 +2715,12 @@ The following is a representation of an NCMD payload that invokes the 'Calibrate
                 "metrics": [{
                         "name": "Calibrate",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Command",
+                        "datatype": "Command",
                         "command": {
                                 "correlation_id": "5d7c1f6e-9c2a-4f1b-8f3a-1c9d2e6b4a01",
                                 "arguments": [{
                                         "name": "channel",
-                                        "dataType": "Int32",
+                                        "datatype": "Int32",
                                         "value": 1
                                 }]
                         }
@@ -2735,12 +2779,12 @@ Consider the following Sparkplug B payload in the DCMD message shown above:
                 "metrics": [{
                         "name": "Motor/Run",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Boolean",
+                        "datatype": "Boolean",
                         "value": true
                 }, {
                         "name": "Motor/Speed Setpoint",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Int32",
+                        "datatype": "Int32",
                         "value": 120
                 }]
         }
@@ -2799,7 +2843,7 @@ Consider the following Sparkplug B payload in the NRESP message shown above:
                 "metrics": [{
                         "name": "Calibrate",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Command",
+                        "datatype": "Command",
                         "command": {
                                 "correlation_id": "5d7c1f6e-9c2a-4f1b-8f3a-1c9d2e6b4a01",
                                 "status": {
@@ -2808,7 +2852,7 @@ Consider the following Sparkplug B payload in the NRESP message shown above:
                                 },
                                 "results": [{
                                         "name": "offset",
-                                        "dataType": "Double",
+                                        "datatype": "Double",
                                         "value": 0.125
                                 }]
                         }
@@ -2863,7 +2907,7 @@ Consider the following Sparkplug B payload in the DRESP message shown above:
                 "metrics": [{
                         "name": "Reset",
                         "timestamp": 1486144502122000000,
-                        "dataType": "Command",
+                        "datatype": "Command",
                         "command": {
                                 "correlation_id": "a1b2c3d4-0001",
                                 "status": {
@@ -2903,7 +2947,7 @@ message.
 payload compared to what was in the previous CONNECT packet. This ensures that any Host Applications
 will be able to distinguish between current and old bd_seq numbers in the event that messages are
 delivered out of order. When incrementing the bd_seq number, if the previous value was
-18446744073709551615 (max value of a UINT64), the next value must be zero.
+9223372036854775807, the next value must be zero.
 * [tck-testable tck-id-payloads-ndeath-will-message-publisher]#[yellow-background]*[tck-id-payloads-ndeath-will-message-publisher] An
 NDEATH message SHOULD be published by the Edge Node before it intentionally disconnects from the
 MQTT Server.*#
@@ -2971,8 +3015,8 @@ published.*#
 DDEATH message MUST include a sequence number.*#
 * [tck-testable tck-id-payloads-ddeath-seq-inc]#[yellow-background]*[tck-id-payloads-ddeath-seq-inc] Every
 DDEATH message MUST include a sequence number value that is one greater than the previous sequence
-number sent by the Edge Node. This value MUST never exceed 18446744073709551615 (max value of a
-UINT64). If in the previous sequence number sent by the Edge Node was 18446744073709551615, the next
+number sent by the Edge Node. This value MUST never exceed 9223372036854775807. If in the previous
+sequence number sent by the Edge Node was 9223372036854775807, the next
 sequence number sent MUST have a value of 0.*#
 
 The following is a representation of a simple DDEATH message on the topic:
@@ -3061,15 +3105,15 @@ Certificate to be matched to the Birth Certificate of the session it terminates.
 bd_seq number MUST be included in every STATE message published by or on behalf of a Sparkplug Host
 Application, including the Death Certificate registered as the MQTT Will Message.*#
 * [tck-testable tck-id-payloads-state-bdseq-range]#[yellow-background]*[tck-id-payloads-state-bdseq-range] The
-bd_seq number in a STATE payload MUST always be between 0 and 18446744073709551615 (inclusive).*#
+bd_seq number in a STATE payload MUST always be between 0 and 9223372036854775807 (inclusive).*#
 * [tck-testable tck-id-payloads-state-bdseq-session-constant]#[yellow-background]*[tck-id-payloads-state-bdseq-session-constant] Every
 STATE message a Sparkplug Host Application publishes within a single MQTT session MUST carry the
 same bd_seq number, and that value MUST be the one registered in the Will Message payload of that
 session's MQTT CONNECT packet.*#
 * [tck-testable tck-id-payloads-state-bdseq-increment]#[yellow-background]*[tck-id-payloads-state-bdseq-increment] The
 bd_seq number MUST start at zero and MUST increment by one on every new MQTT CONNECT packet the
-Sparkplug Host Application sends to a given MQTT Server, until a value of 18446744073709551615 (max
-value of a UINT64) is reached. At that point the bd_seq number of the following MQTT CONNECT packet
+Sparkplug Host Application sends to a given MQTT Server, until a value of 9223372036854775807 is
+reached. At that point the bd_seq number of the following MQTT CONNECT packet
 MUST be zero.*#
 ** Non-normative comment: these are the same rules that apply to an Edge Node's bd_seq number. As
 with an Edge Node, the bd_seq number is not incremented from message to message within a session.
@@ -3142,13 +3186,14 @@ Compression applies to the content section of a payload only. The header section
 compressed, so a consuming application can read the header of a compressed payload without
 decompressing anything.
 
-A compressed payload carries its content in the compressed field of the content oneof rather than in
-the plain field. Which of the two is present is therefore evident from the payload itself, and no
+A compressed payload carries its content in the compressed field of the payload_content oneof
+rather than in the content field. Which of the two is present is therefore evident from the payload
+itself, and no
 separate marker is required.
 
 * [tck-testable tck-id-payloads-compression-content-only]#[yellow-background]*[tck-id-payloads-compression-content-only] When
 using Sparkplug compression, the compressed field of a payload MUST contain the compressed bytes of
-a serialized Content message, and the plain field MUST NOT be present.*#
+a serialized Content message, and the content field MUST NOT be present.*#
 * [tck-testable tck-id-payloads-compression-header-uncompressed]#[yellow-background]*[tck-id-payloads-compression-header-uncompressed] The
 header section of a payload MUST NOT be compressed.*#
 ** Non-normative comment: this is what allows a Host Application to evaluate the sequence numbers
@@ -3165,7 +3210,7 @@ before decompressing it. In earlier versions of this specification the algorithm
 metric inside the payload being compressed, which required the payload to be decompressed in order
 to discover how to decompress it.
 ** Non-normative comment: the value names the algorithm only. Whether the content is compressed at
-all is already carried by which field of the content oneof is present, so no marker value is
+all is already carried by which field of the payload_content oneof is present, so no marker value is
 required in this field.
 * [tck-testable tck-id-payloads-compression-algorithm-support]#[yellow-background]*[tck-id-payloads-compression-algorithm-support] A
 consuming application that is delivered a compressed payload whose algorithm it does not support
@@ -3185,7 +3230,8 @@ the original, and the header and framing are not compressible in any case.
 
 The following is the NDATA message shown earlier in this chapter, with its content section
 compressed. The header is identical to the uncompressed form apart from the addition of the
-compression_algorithm, the plain field is absent, and the compressed field holds the deflated bytes
+compression_algorithm, the content field is absent, and the compressed field holds the deflated
+bytes
 of the serialized Content:
 
 ----
@@ -3269,6 +3315,14 @@ metric MetaData file_name MUST be included and set to the String value of the fi
 
 When publishing in multi-part form, the following rules apply regarding the first metric associated with
 the file publish.
+
+Non-normative comment: The rules below identify a metric by its position in the payload, which is
+the one place in this specification where the position of a metric carries meaning. This does not
+conflict with the requirement that metrics be ordered by value change time, stated in the
+link:#payloads_c_payload_content[Content] section, because every metric of a multi-part file
+publish carries the same timestamp. They therefore tie, the ordering requirement does not constrain
+their relative order, and the order the publishing Edge Node or Device chooses is carried unchanged
+by both payload encodings.
 
 * [tck-testable tck-id-payloads-file-multi-metadata-size-first]#[yellow-background]*[tck-id-payloads-file-multi-metadata-size-first] The
 first metric regarding the file publish's metric MetaData size MUST be included and set to the uint64
@@ -3444,3 +3498,635 @@ on the publishing (transmission) side, and 5xx indicate an error on the receivin
 |Receiving Side Error
 |Error Renaming Partial File
 |===
+
+[[payloads_json]]
+=== Sparkplug JSON Payload Definition
+
+[[payloads_json_overview]]
+==== Overview
+
+Sparkplug defines two payload encodings of the same data model. The Google Protocol Buffers
+encoding is defined in the link:#payloads_sparkplug_c_mqtt_payload_definition[Sparkplug B MQTT
+Payload Definition] section above and is published on the spCv4.0 namespace. The JSON encoding is
+defined in this section and is published on the spJv4.0 namespace.
+
+The two encodings carry identical information. Every component defined in the sections above -
+Header, Content, Metric, Quality, MetaData, PropertySet, DataSet, Template, Command, and the
+DataTypes - applies unchanged to the JSON encoding, and every normative statement made about those
+components applies to both encodings. This section defines only how those components are
+represented as JSON text. All operational behavior, topic structure, sequence numbering, and
+session management defined elsewhere in this specification is encoding independent.
+
+Non-normative comment: Because the two encodings are two representations of one model, a message
+may be converted from one to the other without loss and without consulting anything outside the
+message itself. This is what allows a bridging application to republish an spCv4.0 namespace onto
+spJv4.0, or the reverse, as a mechanical transformation.
+
+This section defines the JSON encoding completely. Conformance to it does not depend on any
+document outside this specification.
+
+Non-normative comment: The scalar rules below were chosen to agree with the JSON Mapping that
+Google Protocol Buffers defines for proto3, so the representation of 64-bit integers, enumerated
+values, bytes, and non-finite floating point values will be familiar, and a Protocol Buffers JSON
+implementation produces those forms directly. That agreement is a convenience and not a normative
+dependency. The Sparkplug schema is proto2, that mapping is specified for proto3, it does not
+define how extension fields are represented, and it is not a versioned standard, so this
+specification states the rules itself rather than incorporating them by reference.
+
+Non-normative comment: Agreement on the scalar forms does not mean a conformant encoder can be
+assembled from library calls. The structural mappings reshape every Metric, so an implementation
+writes its own traversal and uses a library, if at all, for the scalar formatting within it.
+
+[[payloads_json_encoding_selection]]
+==== Encoding Selection
+
+[tck-testable tck-id-payloads-json-namespace-encoding]#[yellow-background]*[tck-id-payloads-json-namespace-encoding] The
+payload of any Sparkplug message published on the spJv4.0 namespace MUST be encoded as defined in
+this section.*#
+
+[tck-testable tck-id-payloads-protobuf-namespace-encoding]#[yellow-background]*[tck-id-payloads-protobuf-namespace-encoding] The
+payload of any Sparkplug message published on the spCv4.0 namespace MUST be encoded using the
+Google Protocol Buffers schema defined in the
+link:#payloads_c_google_protocol_buffer_schema[Google Protocol Buffer Schema] section.*#
+
+[tck-testable tck-id-payloads-json-utf8]#[yellow-background]*[tck-id-payloads-json-utf8] A Sparkplug
+JSON payload MUST be a JSON text as defined by RFC 8259, encoded as UTF-8 with no byte order
+mark.*#
+
+[tck-testable tck-id-payloads-json-object]#[yellow-background]*[tck-id-payloads-json-object] The
+top level JSON value of a Sparkplug JSON payload MUST be a JSON object representing the Payload
+message.*#
+
+Non-normative comment: An Edge Node publishes on one namespace, not both. An Edge Node that
+publishes on spJv4.0 is a complete Sparkplug Edge Node and is not required to implement the
+Protocol Buffers encoding at all. The choice is a deployment decision; see the
+link:#payloads_json_choosing[Choosing a Payload Encoding] section.
+
+[[payloads_json_field_naming]]
+==== Field Naming
+
+[tck-testable tck-id-payloads-json-field-names]#[yellow-background]*[tck-id-payloads-json-field-names] Each
+JSON object key MUST be the name of the corresponding field exactly as it appears in the Sparkplug
+Google Protocol Buffers schema, except where the
+link:#payloads_json_structural[Structural Mappings] section names a different key.*#
+
+Non-normative comment: A Google Protocol Buffers JSON implementation converts field names to
+lowerCamelCase by default, emitting bdSeq for bd_seq and isMultiPart for is_multi_part. That is not
+the Sparkplug form, so an implementation that generates JSON with such a library must configure it
+to preserve the original field names. In the Java and Python implementations this is the
+preservingProtoFieldNames printer option.
+
+[tck-testable tck-id-payloads-json-omit-absent]#[yellow-background]*[tck-id-payloads-json-omit-absent] A
+field that is not present MUST be omitted from the JSON object rather than written with a JSON null
+or a zero value.*#
+
+Non-normative comment: Every field of the Sparkplug schema is optional, so a field carries the
+distinction between having been set and never having been set, and the JSON encoding has to keep
+that distinction. Zero is a legitimate value for seq, bd_seq, descriptor_seq, alias, and quality,
+so writing an absent field as 0 would make it indistinguishable from one deliberately set to zero.
+A JSON null is excluded for a different reason: a null metric value is expressed by setting is_null
+to true and omitting the value key, as required in the
+link:#payloads_json_typed_values[Typed Values] section, so a null appearing as a value would be a
+second and conflicting way to say the same thing.
+
+[tck-testable tck-id-payloads-json-ignore-unknown]#[yellow-background]*[tck-id-payloads-json-ignore-unknown] A
+consuming application MUST ignore a JSON object key that does not name a field it recognizes, and
+MUST NOT treat the payload as malformed on that basis.*#
+
+[tck-not-testable tck-id-payloads-json-unknown-not-metric]#[yellow-background]*[tck-id-payloads-json-unknown-not-metric] The
+requirement above applies only to the names of fields within a message. It does not apply to a
+metric whose name or alias the consuming application does not recognize, which is a mismatch
+against the metric structure the application holds and is resolved by the rules in the
+link:#operational_behavior_modified_metadata_updates[Modified Metadata Updates] section rather than
+by ignoring it.*#
+
+Non-normative comment: The two cases look similar in a payload and are not the same thing. An
+unrecognized field name means the payload carries something this version of the application does
+not know about, such as a field added by a later revision of this specification or a third party
+extension; ignoring it is what allows an older application to keep working. An unrecognized metric
+means the application's view of what the Edge Node reports is out of date, which is a
+synchronization problem and a reason to issue a Rebirth Request, not something to pass over.
+
+Non-normative comment: The naming rule keeps a JSON payload visually identical to the field names
+in the Protocol Buffers schema, so the two encodings can be read against one another and against
+the component definitions above without a translation table. Ignoring unrecognized keys is the JSON
+counterpart of the extension ranges reserved in the Protocol Buffers schema, and serves the same
+purpose for third party extensions.
+
+[[payloads_json_scalar]]
+==== Scalar Value Mapping
+
+The following table defines how each Protocol Buffers scalar type is represented in JSON.
+
+[cols="2,2,4"]
+|===
+|*Protocol Buffers Type*
+|*JSON Type*
+|*Representation*
+
+|int32, uint32, sint32, fixed32, sfixed32
+|number
+|A JSON number with no fractional part or exponent.
+
+|int64, uint64, sint64, fixed64, sfixed64
+|string
+|The value written in decimal, as a JSON string. For example "1486144502122847913".
+
+|float, double
+|number or string
+|A JSON number, or one of the strings "NaN", "Infinity", or "-Infinity".
+
+|bool
+|true or false
+|A JSON literal, never the strings "true" or "false" and never 0 or 1.
+
+|string
+|string
+|The string value.
+
+|bytes
+|string
+|The bytes, base64 encoded as defined in RFC 4648 Section 4, including padding.
+
+|enum
+|string
+|The name of the enumerated value, for example "Int32", "Template", or "ADD".
+|===
+
+[tck-testable tck-id-payloads-json-64bit-string]#[yellow-background]*[tck-id-payloads-json-64bit-string] A
+publishing application MUST represent every 64-bit integer field as a JSON string containing the
+decimal value, including when the value is small enough to be represented exactly as a JSON
+number.*#
+
+[tck-testable tck-id-payloads-json-64bit-accept]#[yellow-background]*[tck-id-payloads-json-64bit-accept] A
+consuming application MUST accept a 64-bit integer field represented as either a JSON string or a
+JSON number.*#
+
+[tck-testable tck-id-payloads-json-bytes-base64]#[yellow-background]*[tck-id-payloads-json-bytes-base64] A
+field of Protocol Buffers type bytes MUST be represented as a JSON string containing the base64
+encoding of those bytes as defined in RFC 4648 Section 4, including padding.*#
+
+[tck-testable tck-id-payloads-json-enum-name]#[yellow-background]*[tck-id-payloads-json-enum-name] A
+publishing application MUST represent an enumerated value, including a DataType and a
+MetricOperation, as a JSON string containing the name of that value.*#
+
+[tck-testable tck-id-payloads-json-enum-accept]#[yellow-background]*[tck-id-payloads-json-enum-accept] A
+consuming application MUST accept an enumerated value represented as either the name of that value
+or the integer value assigned to it in the Google Protocol Buffers schema.*#
+
+[tck-testable tck-id-payloads-json-float-nonfinite]#[yellow-background]*[tck-id-payloads-json-float-nonfinite] A
+non-finite float or double value MUST be represented as one of the JSON strings "NaN", "Infinity",
+or "-Infinity", because RFC 8259 provides no numeric form for these values.*#
+
+[tck-testable tck-id-payloads-json-float-precision]#[yellow-background]*[tck-id-payloads-json-float-precision] A
+finite float or double value MUST be written with enough decimal digits that parsing it back
+reproduces the original value exactly, which requires up to 9 significant decimal digits for a
+float and up to 17 for a double.*#
+
+Non-normative comment: 64-bit integers are represented as strings because a JSON number is not
+required by RFC 8259 to carry more precision than an IEEE 754 double, which holds integers exactly
+only up to 2^53^. Several widely used JSON parsers, including the one built into every web browser,
+decode JSON numbers into doubles unconditionally. A Sparkplug timestamp is a nanosecond count and
+is therefore roughly 165 times larger than that limit, so a timestamp written as a JSON number
+would be silently rounded, typically to the nearest 256 nanoseconds. Metric values of type Int64,
+UInt64, and DateTime have the same exposure.
+
+Non-normative comment: The sequence numbers are subject to this for the same reason. A Sparkplug
+seq, bd_seq, and descriptor_seq each count up to 9223372036854775807 before rolling over to zero, as
+required in the link:#payloads_c_payload_header[Header] section, so they reach magnitudes a JSON
+number cannot carry exactly. A sequence number is small early in a session and large late in one,
+which would make a numeric form correct in testing and lossy in production.
+
+Non-normative comment: The rule is driven by the declared type of the field rather than by the
+magnitude of a particular value, so an encoder derives it from the schema alone and no value can
+lose precision because of how large it happened to be.
+
+[[payloads_json_extensions]]
+==== Extension Fields
+
+The Sparkplug Google Protocol Buffers schema reserves an extension range in most of its messages so
+that a third party can add fields without colliding with future Sparkplug fields. The JSON encoding
+represents those fields as well.
+
+[tck-testable tck-id-payloads-json-extension-key]#[yellow-background]*[tck-id-payloads-json-extension-key] A
+field carried in a message's extension range MUST be represented with a JSON object key that is the
+fully qualified name of that extension enclosed in square brackets, for example
+'[com.example.vendor_tag]'.*#
+
+[tck-testable tck-id-payloads-json-extension-value]#[yellow-background]*[tck-id-payloads-json-extension-value] The
+value of an extension field MUST be represented according to the same rules as any other field of
+its type, as defined in the link:#payloads_json_scalar[Scalar Value Mapping] and
+link:#payloads_json_structural[Structural Mappings] sections.*#
+
+[tck-not-testable tck-id-payloads-json-extension-ignore]#[yellow-background]*[tck-id-payloads-json-extension-ignore] A
+consuming application that does not recognize an extension MUST ignore it, as it ignores any other
+unrecognized key, and MUST NOT treat the payload as malformed.*#
+
+Non-normative comment: The bracketed form is the one Google Protocol Buffers JSON implementations
+already use for extensions, so it is specified here rather than invented. It is stated normatively
+because the Protocol Buffers JSON Mapping is defined for proto3, which has no extensions, and so
+does not cover this case at all.
+
+Non-normative comment: An extension does not survive a round trip through an application that does
+not know it. In the Google Protocol Buffers encoding an unknown field is retained and re-emitted,
+but in JSON an unrecognized key is not. A deployment that depends on extensions reaching a
+consumer through an intermediary should confirm that the intermediary understands them, rather
+than assuming they are carried through.
+
+[[payloads_json_structural]]
+==== Structural Mappings
+
+A Protocol Buffers message is represented as a JSON object and a repeated field as a JSON array.
+The following cases are where the Sparkplug JSON encoding deviates from a direct mapping of the
+Protocol Buffers schema, in each case so that the JSON encoding reads as JSON rather than as a
+transliteration of a binary format.
+
+[[payloads_json_typed_values]]
+===== Typed Values
+
+In the Protocol Buffers schema a Metric carries its value in a TypedValue submessage, which repeats
+the datatype and selects one of several value fields. In JSON the datatype is already carried by
+the enclosing object and the value field is not needed to disambiguate.
+
+[tck-testable tck-id-payloads-json-typedvalue-flat]#[yellow-background]*[tck-id-payloads-json-typedvalue-flat] A
+TypedValue that is a member of a Metric or of a Template.Parameter MUST be represented as the value
+itself, under the key 'value', rather than as a nested object, and its datatype MUST be carried by
+the 'datatype' key of the enclosing Metric or the 'type' key of the enclosing Template.Parameter.*#
+
+[tck-testable tck-id-payloads-json-typedvalue-propertyset]#[yellow-background]*[tck-id-payloads-json-typedvalue-propertyset] A
+TypedValue that is a member of a PropertySet MUST instead be represented as an object carrying its
+own 'datatype' key, its 'value', and 'is_null' where applicable, because a property value has no
+enclosing Metric or Template.Parameter to carry its datatype.*#
+
+[tck-testable tck-id-payloads-typedvalue-datatype-agree]#[yellow-background]*[tck-id-payloads-typedvalue-datatype-agree] Where
+a Metric carries both its own datatype and a TypedValue that also carries one, as it does in the
+Google Protocol Buffers encoding, the two MUST be equal, and the same applies to is_null.*#
+
+[tck-testable tck-id-payloads-json-typedvalue-carries-both]#[yellow-background]*[tck-id-payloads-json-typedvalue-carries-both] The
+single 'datatype' and 'is_null' key a flattened JSON value carries represents both, so an
+application converting a JSON payload to the Google Protocol Buffers encoding MUST set the Metric
+field and the TypedValue field from it.*#
+
+[tck-testable tck-id-payloads-json-parameter-is-null]#[yellow-background]*[tck-id-payloads-json-parameter-is-null] A
+Template.Parameter whose value is null MUST carry 'is_null' set to true and omit 'value', as any
+other null value does.*#
+
+[tck-testable tck-id-payloads-json-typedvalue-parameter-keys]#[yellow-background]*[tck-id-payloads-json-typedvalue-parameter-keys] A
+Template.Parameter MUST therefore be represented with the keys 'name', 'type', 'value', and
+'is_null' where applicable, and MUST NOT use the key 'typed_value'.*#
+
+Non-normative comment: These are the two places where a JSON key is not a Protocol Buffers field
+name. 'value' is the name of the oneof within TypedValue rather than of any field in it, because
+flattening replaces the whole oneof with the single value it holds; a Metric's own field is also
+called value, so a Metric reads the same either way. A Template.Parameter's field is typed_value,
+and flattening replaces it with the 'type' and 'value' pair used for parameters throughout this
+specification.
+
+[tck-testable tck-id-payloads-json-null]#[yellow-background]*[tck-id-payloads-json-null] A value
+that is null MUST be represented by setting 'is_null' to true and omitting the 'value' key.*#
+
+[[payloads_json_propertyset]]
+===== PropertySet
+
+In the Protocol Buffers schema a PropertySet is a pair of parallel arrays of keys and values. In
+JSON it is represented as an object, which is both smaller and directly usable by a consuming
+application.
+
+[tck-testable tck-id-payloads-json-propertyset-object]#[yellow-background]*[tck-id-payloads-json-propertyset-object] A
+PropertySet MUST be represented as a JSON object whose keys are the property names and whose values
+are the corresponding TypedValues.*#
+
+[tck-testable tck-id-payloads-json-propertyset-unique]#[yellow-background]*[tck-id-payloads-json-propertyset-unique] Property
+names within a single PropertySet MUST be unique.*#
+
+[tck-not-testable tck-id-payloads-json-propertyset-unordered]#[yellow-background]*[tck-id-payloads-json-propertyset-unordered] The
+order of the keys of a PropertySet MUST NOT be significant, and an application MUST NOT encode
+meaning in it.*#
+
+Non-normative comment: RFC 8259 defines a JSON object as an unordered collection, so a parser is
+free to present the keys in any order and key order cannot be relied upon in any case. The
+requirement is on the publisher not to attach meaning to it. Uniqueness is stated separately
+because it is observable in a payload, whereas the absence of meaning in the ordering is not.
+
+[[payloads_json_array_types]]
+===== Array Types
+
+In the Protocol Buffers encoding the array DataTypes are carried as packed little-endian bytes, as
+described in the link:#payloads_c_datatype_array[Array Types] section. Carrying those same packed
+bytes in JSON would make an array value opaque to a JSON consumer.
+
+[tck-testable tck-id-payloads-json-array-values]#[yellow-background]*[tck-id-payloads-json-array-values] A
+value of an array DataType MUST be represented as a JSON array of the element values, not as a
+base64 encoded packed byte array.*#
+
+[tck-testable tck-id-payloads-json-array-element-type]#[yellow-background]*[tck-id-payloads-json-array-element-type] Each
+element of that JSON array MUST be represented according to the scalar mapping for the element
+type, so that the elements of an Int64Array and a DateTimeArray are JSON strings and the elements
+of an Int32Array are JSON numbers.*#
+
+[[payloads_json_dataset]]
+===== DataSet
+
+In the Protocol Buffers schema a DataSet.Column carries its values in one of six parallel arrays,
+one per underlying Protocol Buffers type, of which exactly one is used. In JSON the column's
+datatype already identifies the element type.
+
+[tck-testable tck-id-payloads-json-dataset-values]#[yellow-background]*[tck-id-payloads-json-dataset-values] A
+DataSet.Column MUST carry its values as a single JSON array under the key 'values', rather than as
+one of the typed value arrays named in the Google Protocol Buffers schema, and each element MUST be
+represented according to the scalar mapping for the column's datatype.*#
+
+[[payloads_json_content]]
+===== Content and Compression
+
+[tck-testable tck-id-payloads-json-content-key]#[yellow-background]*[tck-id-payloads-json-content-key] An
+uncompressed payload MUST carry its content under the key 'content', and a compressed payload MUST
+carry it under the key 'compressed', matching the two arms of the payload_content oneof in the
+Google Protocol Buffers schema.*#
+
+[tck-testable tck-id-payloads-json-compressed-base64]#[yellow-background]*[tck-id-payloads-json-compressed-base64] The
+value of 'compressed' MUST be a JSON string containing the base64 encoding of the compressed bytes,
+and those bytes MUST be the compressed form of the UTF-8 JSON text of the Content object.*#
+
+Non-normative comment: The header of a compressed JSON payload is a sibling of the 'compressed' key
+and remains readable without decompressing, exactly as in the Protocol Buffers encoding.
+
+[[payloads_json_schema]]
+==== JSON Schema
+
+The following JSON Schema describes a Sparkplug JSON payload. It is normative for the structure and
+types it expresses. Requirements stated elsewhere in this specification that a JSON Schema cannot
+express, such as the relationship between a metric's datatype and the form of its value, apply in
+addition.
+
+[tck-testable tck-id-payloads-json-schema-valid]#[yellow-background]*[tck-id-payloads-json-schema-valid] A
+Sparkplug JSON payload MUST validate against the JSON Schema below.*#
+
+----
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://sparkplug.eclipse.org/specification/4.0.0/sparkplug_j.json",
+    "title": "Sparkplug JSON Payload",
+    "type": "object",
+    "properties": {
+        "header": { "$ref": "#/$defs/header" },
+        "content": { "$ref": "#/$defs/content" },
+        "compressed": { "$ref": "#/$defs/base64" }
+    },
+    "not": { "required": [ "content", "compressed" ] },
+    "$defs": {
+        "uint64": {
+            "comment": "an unsigned 64-bit value: 0 to 18446744073709551615. The string form is bounded by length only; the exact upper bound is normative prose, not expressible as a readable pattern.",
+            "anyOf": [
+                { "type": "integer", "minimum": 0, "maximum": 18446744073709551615 },
+                { "type": "string", "pattern": "^(0|[1-9][0-9]{0,19})$" }
+            ]
+        },
+        "sequence64": {
+            "comment": "a Sparkplug sequence number or timestamp: 0 to 9223372036854775807. The string form is bounded by length only; the exact upper bound is normative prose, not expressible as a readable pattern.",
+            "anyOf": [
+                { "type": "integer", "minimum": 0, "maximum": 9223372036854775807 },
+                { "type": "string", "pattern": "^(0|[1-9][0-9]{0,18})$" }
+            ]
+        },
+        "base64": { "type": "string", "contentEncoding": "base64" },
+        "number": {
+            "oneOf": [
+                { "type": "number" },
+                { "enum": [ "NaN", "Infinity", "-Infinity" ] }
+            ]
+        },
+        "datatype": {
+            "oneOf": [
+                { "type": "string" },
+                { "type": "integer", "minimum": 0 }
+            ]
+        },
+        "header": {
+            "type": "object",
+            "properties": {
+                "timestamp": { "$ref": "#/$defs/sequence64" },
+                "seq": { "$ref": "#/$defs/sequence64" },
+                "bd_seq": { "$ref": "#/$defs/sequence64" },
+                "descriptor_seq": { "$ref": "#/$defs/sequence64" },
+                "definition_id": { "type": "string" },
+                "previous_definition_id": { "type": "string" },
+                "source": { "type": "string" },
+                "uuid": { "type": "string" },
+                "compression_algorithm": { "type": "string" }
+            }
+        },
+        "content": {
+            "type": "object",
+            "properties": {
+                "metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "body": { "$ref": "#/$defs/base64" }
+            }
+        },
+        "value": {
+            "anyOf": [
+                { "type": [ "string", "boolean" ] },
+                { "$ref": "#/$defs/number" },
+                { "type": "array" },
+                { "$ref": "#/$defs/dataset" },
+                { "$ref": "#/$defs/template" },
+                { "$ref": "#/$defs/propertyset" },
+                { "type": "array", "items": { "$ref": "#/$defs/propertyset" } }
+            ]
+        },
+        "metric": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "alias": { "$ref": "#/$defs/uint64" },
+                "timestamp": { "$ref": "#/$defs/sequence64" },
+                "datatype": { "$ref": "#/$defs/datatype" },
+                "quality": { "type": "integer", "minimum": 0 },
+                "quality_context": { "type": "string" },
+                "source": { "type": "string" },
+                "is_historical": { "type": "boolean" },
+                "is_transient": { "type": "boolean" },
+                "is_null": { "type": "boolean" },
+                "metadata": { "$ref": "#/$defs/metadata" },
+                "properties": { "$ref": "#/$defs/propertyset" },
+                "value": { "$ref": "#/$defs/value" },
+                "command": { "$ref": "#/$defs/command" },
+                "operation": { "enum": [ "ADD", "UPDATE", "DELETE", 1, 2, 3 ] }
+            }
+        },
+        "propertyset": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/$defs/propertyvalue" }
+        },
+        "propertyvalue": {
+            "type": "object",
+            "properties": {
+                "datatype": { "$ref": "#/$defs/datatype" },
+                "is_null": { "type": "boolean" },
+                "value": { "$ref": "#/$defs/value" }
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "is_multi_part": { "type": "boolean" },
+                "content_type": { "type": "string" },
+                "size": { "$ref": "#/$defs/uint64" },
+                "seq": { "$ref": "#/$defs/uint64" },
+                "file_name": { "type": "string" },
+                "file_type": { "type": "string" },
+                "md5": { "type": "string" },
+                "description": { "type": "string" },
+                "engUnit": { "type": "string" }
+            }
+        },
+        "dataset": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "datatype": { "$ref": "#/$defs/datatype" },
+                            "values": { "type": "array" }
+                        }
+                    }
+                }
+            }
+        },
+        "template": {
+            "type": "object",
+            "properties": {
+                "version": { "type": "string" },
+                "template_ref": { "type": "string" },
+                "is_definition": { "type": "boolean" },
+                "metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "type": { "$ref": "#/$defs/datatype" },
+                            "is_null": { "type": "boolean" },
+                            "value": { "$ref": "#/$defs/value" }
+                        }
+                    }
+                }
+            }
+        },
+        "command": {
+            "type": "object",
+            "properties": {
+                "arguments": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "results": { "type": "array", "items": { "$ref": "#/$defs/metric" } },
+                "correlation_id": { "type": "string" },
+                "status": {
+                    "type": "object",
+                    "properties": {
+                        "code": { "$ref": "#/$defs/uint64" },
+                        "message": { "type": "string" }
+                    }
+                }
+            }
+        }
+    }
+}
+----
+
+[[payloads_json_example]]
+==== JSON Payload Example
+
+The following is a non-normative example of one DDATA message shown in both encodings, so the two
+may be compared directly. The payload reports a single aliased Float metric.
+
+The spCv4.0 form, shown as a structural illustration of the Protocol Buffers message:
+
+----
+Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": 1486144502122847913,
+                "seq": 4,
+                "bd_seq": 0,
+                "descriptor_seq": 2,
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "alias": 1,
+                        "datatype": "Float",
+                        "value": 1802.5
+                }]
+        }
+}
+----
+
+The same message on the spJv4.0 namespace. The payload below is the literal UTF-8 text published as
+the MQTT message payload, with the 64-bit fields represented as strings:
+
+----
+Acme/Dublin/Packaging/spJv4.0/DDATA/EdgeNode1/Line3
+----
+
+----
+{
+        "header": {
+                "timestamp": "1486144502122847913",
+                "seq": "4",
+                "bd_seq": "0",
+                "descriptor_seq": "2",
+                "definition_id": "a1c9...77"
+        },
+        "content": {
+                "metrics": [{
+                        "alias": "1",
+                        "datatype": "Float",
+                        "value": 1802.5
+                }]
+        }
+}
+----
+
+Non-normative comment: The examples given throughout the rest of this chapter use the same JSON
+notation to illustrate the structure of Protocol Buffers messages, and predate the JSON encoding.
+They show field names and nesting rather than the exact text of a published spJv4.0 payload, and in
+particular they write 64-bit values as JSON numbers. A published spJv4.0 payload follows the rules
+in this section.
+
+[[payloads_json_choosing]]
+==== Choosing a Payload Encoding
+
+Non-normative comment: The two encodings are interchangeable in terms of the information they
+carry, so the choice between them is made on operational grounds. The Protocol Buffers encoding
+produces smaller messages and is cheaper to encode and decode. The JSON encoding is readable
+without tooling and can be consumed by any application that has a JSON parser, which is most of
+them.
+
+Non-normative comment: The size difference is largest on small messages and narrows as messages
+grow, because a larger message amortizes the per-message overhead over more metrics while the
+per-metric overhead of JSON keys stays proportional. For representative payloads the JSON encoding
+is roughly two to three times the size of the Protocol Buffers encoding. The difference in
+encode and decode cost is of roughly one order of magnitude, and unlike the size difference it does
+not narrow with message size.
+
+Non-normative comment: The size difference largely disappears when the content section is
+compressed, as described in the link:#payloads_c_compression[Compression] section. The repeated
+field names that make JSON large are highly compressible, so for payloads of more than a few
+metrics the two encodings compress to within a few percent of one another. On a bandwidth
+constrained link where compression is already in use, message size is therefore not a strong reason
+to prefer one encoding over the other; encode and decode cost remains one.
+
+Non-normative comment: Taken together, the Protocol Buffers encoding is the better fit for Edge
+Nodes on constrained hardware, on metered or low bandwidth links, and wherever messages are small
+and frequent, which is the case Sparkplug was originally designed around. The JSON encoding is the
+better fit where Sparkplug data is consumed directly by applications that cannot readily add a
+Protocol Buffers dependency, and where readability during development and troubleshooting is worth
+more than the bytes. A deployment may use both, with a bridging application republishing one
+namespace onto the other, so that constrained Edge Nodes publish spCv4.0 while enterprise consumers
+subscribe to spJv4.0.

@@ -66,12 +66,12 @@ an implementation to have a nanosecond resolution time source. An implementation
 is coarser than one nanosecond expresses its timestamps in nanoseconds all the same, scaled to that
 denomination. For example, an implementation whose time source has a resolution of one millisecond
 expresses a timestamp as the number of milliseconds since epoch multiplied by 1000000.
-** Non-normative comment: an unsigned 64-bit integer of nanoseconds since epoch covers a range of
-approximately 584 years, reaching the year 2554. Implementers should note that this range is only
-available to a genuinely unsigned representation. The Google Protocol Buffers uint64 type is
-represented as a signed 64-bit long in Java, and several widely used nanosecond time representations
-are signed 64-bit as well, which reduces the reachable range to approximately 292 years, ending on
-2262-04-11. This is the practical ceiling for such implementations.
+** Non-normative comment: a signed 64-bit integer of nanoseconds since epoch covers a range of
+approximately 292 years, ending on 2262-04-11, which is the ceiling for a Sparkplug timestamp. A
+signed type is specified rather than an unsigned one because the Google Protocol Buffers uint64
+type is represented as a signed 64-bit long in Java, and several widely used nanosecond time
+representations are signed 64-bit as well, so the upper half of an unsigned range was never
+reachable in practice.
 
 Non-normative comment: the resolution of a timestamp is not the same as its accuracy. Denominating a
 timestamp in nanoseconds says how finely a value can be expressed, not how closely it corresponds to
@@ -470,12 +470,13 @@ Edge Node's MQTT Will Message's topic MUST be of the form '[topic_prefix/]spCv4.
 where the optional topic_prefix is the Sparkplug Topic Prefix and the edge_node_id is the Sparkplug
 Edge Node ID for this Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-payload] The
-Edge Node's MQTT Will Message's payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+Edge Node's MQTT Will Message's payload MUST be a Sparkplug payload encoded as defined for the
+namespace on which it is published.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq] The
 Edge Node's MQTT Will Message's payload MUST include a bd_seq number in the payload and the value
 MUST be incremented by one from the value in the previous MQTT CONNECT packet unless the value would
-be greater than 18446744073709551615 (max value of a UINT64). If in the previous NBIRTH a value of
-18446744073709551615 was sent, the next MQTT Connect packet Will Message payload bd_seq number value
+be greater than 9223372036854775807. If in the previous NBIRTH a value of
+9223372036854775807 was sent, the next MQTT Connect packet Will Message payload bd_seq number value
 MUST have a value of 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-qos]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-qos] The
 Edge Node's MQTT Will Message's MQTT QoS MUST be 1.*#
@@ -566,7 +567,8 @@ Edge Node's NBIRTH MQTT topic MUST be of the form
 '[topic_prefix/]spCv4.0/NBIRTH/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
 Prefix and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload] The
-Edge Node's NBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+Edge Node's NBIRTH payload MUST be a Sparkplug payload encoded as defined for the namespace on
+which it is published.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-bdSeq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload-bdSeq] The
 Edge Node's NBIRTH payload MUST include a bd_seq number in the payload and the value MUST be the same
 as the bd_seq number value specified in the immediately previous MQTT CONNECT packet.*#
@@ -575,11 +577,11 @@ Edge Node's NBIRTH MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-retained]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-retained] The
 Edge Node's NBIRTH retained flag MUST be set to false.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload-seq]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload-seq] The
-Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 18446744073709551615
+Edge Node's NBIRTH payload MUST include a 'seq' number that is between 0 and 9223372036854775807
 (inclusive).*#
 ** This will become the starting sequence number which all following messages will include a
-sequence number that is one more than the previous up to 18446744073709551615 (max value of a
-UINT64) where it wraps back to zero.
+sequence number that is one more than the previous up to 9223372036854775807 where it wraps back to
+zero.
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-phid-offline]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-phid-offline] If
 the Edge Node is configured to wait for a Primary Host Application, it is connected to the MQTT
 Server, and receives a STATE message on its configured Primary Host, the timestamp value in the
@@ -851,13 +853,14 @@ identify the Sparkplug Device.*#
 Device's DBIRTH MQTT topic topic_prefix and edge_node_id MUST match the topic_prefix and edge_node_id
 that were sent in the prior NBIRTH message for the Edge Node this Device is associated with.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-payload] The
-Device's DBIRTH payload MUST be a Sparkplug Google Protobuf encoded payload.*#
+Device's DBIRTH payload MUST be a Sparkplug payload encoded as defined for the namespace on which
+it is published.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-qos]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-qos] The
 Device's DBIRTH MQTT QoS MUST be 0.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-retained]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-retained] The
 Device's DBIRTH retained flag MUST be set to false.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-payload-seq]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-payload-seq] The
-Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 18446744073709551615
+Device's DBIRTH payload MUST include a 'seq' number that is between 0 and 9223372036854775807
 (inclusive) and be one more than was included in the prior Sparkplug message sent from the Edge Node
 associated with this Device.*#
 
@@ -1262,7 +1265,7 @@ values stop making sense.
 A Host Application also has to establish where in a descriptor sequence stream it is starting from.
 A BIRTH begins a stream and carries a descriptor_seq of 0. A REBIRTH does not begin a stream; it
 slip-streams the Host Application into a stream that is already running and carries the next
-incrementing value, which is only 0 in the case of a UINT64 rollover.
+incrementing value, which is only 0 in the case of a sequence number rollover.
 
 * [tck-testable tck-id-operational-behavior-host-partial-descriptor-seq-anchor]#[yellow-background]*[tck-id-operational-behavior-host-partial-descriptor-seq-anchor] A
 Host Application MUST anchor its expected descriptor_seq for a Sparkplug Descriptor on the
@@ -1743,9 +1746,10 @@ Application getting in sync with the data stream.
 NREBIRTH payload MUST account for sequence number rollover if required based on the next pending
 DATA message and the number of devices under the scope of the Edge Node.*#
 ** For example, if the next pending DATA message sequence number will be 1 and the Edge Node has
-two devices, the NBIRTHs sequence number value must be 18446744073709551614. This means the sequence
-numbers will be: NBIRTH: 18446744073709551614, DBIRTH 1: 18446744073709551615, DBIRTH 2: 0, DATA: 1
-** The above example is based on the fact that the max value of a UINT64 is 18446744073709551615
+two devices, the NBIRTHs sequence number value must be 9223372036854775806. This means the sequence
+numbers will be: NBIRTH: 9223372036854775806, DBIRTH 1: 9223372036854775807, DBIRTH 2: 0, DATA: 1
+** The above example is based on the fact that the maximum Sparkplug sequence number is
+9223372036854775807
 * [tck-testable tck-id-operational-behavior-rebirth-action-6]#[yellow-background]*[tck-id-operational-behavior-rebirth-action-6] Each
 DREBIRTH payload MUST use a seq number that is incremented by one from the previous message.*#
 * [tck-testable tck-id-operational-behavior-rebirth-action-7]#[yellow-background]*[tck-id-operational-behavior-rebirth-action-7] Each
