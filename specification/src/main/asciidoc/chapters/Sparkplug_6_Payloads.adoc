@@ -469,6 +469,12 @@ payload rather than the offending field is deliberate: a payload is the unit a s
 orders, so accepting part of one would leave a consuming application unable to say whether it had
 applied that message.
 
+Non-normative comment: a rejected payload is a non-conformant one, and republishing it will not
+make it valid. A Host Application that rejects an NBIRTH or DBIRTH on this basis therefore gains
+nothing by issuing a Rebirth Request, because the Edge Node will send the same payload again. It
+should treat the Edge Node as unusable and report the condition, rather than requesting Rebirths
+until the Edge Node is corrected.
+
 * [tck-testable tck-id-payloads-header-present]#[yellow-background]*[tck-id-payloads-header-present] Every
 Sparkplug payload MUST include a header.*#
 ** Non-normative comment: this applies to every message that carries a Sparkplug payload, which is
