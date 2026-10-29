@@ -1856,8 +1856,7 @@ ends on a byte boundary.
 *** Example (string array to Metric bytes_value): [ABC, hello] -> [0x41, 0x42, 0x43, 0x00, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00]
 ** _DateTimeArray_
 *** DateTimeArray as an array of packed little endian bytes where each DateTime value is a signed
-8-byte
-value representing the number of nanoseconds since epoch in UTC
+8-byte value representing the number of nanoseconds since epoch in UTC
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 34
 *** Example (DateTime array -> nanoseconds since epoch -> Metric bytes_value): ['Wednesday, October 21, 2009 5:27:55.335 AM', 'Friday, June 24, 2022 9:57:55 PM'] -> [1256102875335000000, 1656107875000000000] -> [0xC0, 0x7F, 0xB0, 0xF5, 0xE8, 0x92, 0x6E, 0x11, 0x00, 0x1E, 0x1A, 0x7F, 0x56, 0xAD, 0xFB, 0x16]
@@ -3877,7 +3876,7 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
     "not": { "required": [ "content", "compressed" ] },
     "$defs": {
         "uint64": {
-            "comment": "an unsigned 64-bit value: 0 to 18446744073709551615",
+            "comment": "an unsigned 64-bit value: 0 to 18446744073709551615. The string form is bounded by length only; the exact upper bound is normative prose, not expressible as a readable pattern.",
             "anyOf": [
                 { "type": "integer", "minimum": 0, "maximum": 18446744073709551615 },
                 { "type": "string", "pattern": "^(0|[1-9][0-9]{0,19})$" }
@@ -3973,7 +3972,7 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
                 "is_multi_part": { "type": "boolean" },
                 "content_type": { "type": "string" },
                 "size": { "$ref": "#/$defs/uint64" },
-                "seq": { "$ref": "#/$defs/sequence64" },
+                "seq": { "$ref": "#/$defs/uint64" },
                 "file_name": { "type": "string" },
                 "file_type": { "type": "string" },
                 "md5": { "type": "string" },
