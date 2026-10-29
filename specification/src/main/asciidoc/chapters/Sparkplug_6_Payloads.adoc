@@ -122,16 +122,25 @@ being requested. The entire Google Protocol Buffers definition is below.
 // To compile:
 // cd client_libraries/java
 // protoc --proto_path=../../ --java_out=src/main/java ../../sparkplug_c.proto
+// Requires protoc 27 or later and a Protocol Buffers runtime that supports edition 2023
+// (protobuf-java 4.27 or later, Python protobuf 5.27 or later, and equivalents).
 //
 
-syntax = "proto2";
+edition = "2023";
 
 package org.eclipse.tahu.protobuf;
 
 option java_package         = "org.eclipse.tahu.protobuf";
 option java_outer_classname = "SparkplugBProto";
 
+// Sparkplug string fields are UTF-8, so a decoder validates them. This is the edition 2023
+// default, stated explicitly because it differs from proto2, which did not validate. The Java
+// runtime's own utf8_validation feature defaults to respecting this setting, so every language
+// accepts or rejects the same payloads without a Java specific option here.
+option features.utf8_validation = VERIFY;
+
 enum DataType {
+    option features.enum_type = CLOSED;
     // Indexes of Data Types
 
     // Unknown placeholder for future expansion.
@@ -186,6 +195,7 @@ enum DataType {
 // Per-metric operation, used only within NMMETA/DMMETA (modified metadata) messages to denote a
 // create/update/delete of a metric definition. Absent in NMETA/DMETA/NBIRTH/DBIRTH messages.
 enum MetricOperation {
+    option features.enum_type = CLOSED;
     ADD    = 1;
     UPDATE = 2;
     DELETE = 3;
@@ -194,24 +204,24 @@ enum MetricOperation {
 message Payload {
 
     message TypedValue {
-        optional DataType datatype = 1;
-        optional bool     is_null  = 2;
+        DataType datatype = 1;
+        bool     is_null  = 2;
 
         oneof value {
-            int32    int32_value                    = 3;
-            int64    int64_value                    = 4;
-            uint32   uint32_value                   = 5;
-            uint64   uint64_value                   = 6;
-            float    float_value                    = 7;
-            double   double_value                   = 8;
-            bool     boolean_value                  = 9;
-            string   string_value                   = 10;
-            bytes    bytes_value                    = 11;
-            DataSet  dataset_value                  = 12;
-            Template template_value                 = 13;
-            PropertySet     propertyset_value       = 14;
-            PropertySetList propertysets_value      = 15;
-            TypedValueExtension extension_value     = 16;
+            int32               int32_value        = 3;
+            int64               int64_value        = 4;
+            uint32              uint32_value       = 5;
+            uint64              uint64_value       = 6;
+            float               float_value        = 7;
+            double              double_value       = 8;
+            bool                boolean_value      = 9;
+            string              string_value       = 10;
+            bytes               bytes_value        = 11;
+            DataSet             dataset_value      = 12;
+            Template            template_value     = 13;
+            PropertySet         propertyset_value  = 14;
+            PropertySetList     propertysets_value = 15;
+            TypedValueExtension extension_value    = 16;
         }
 
         message TypedValueExtension {
@@ -224,57 +234,57 @@ message Payload {
     message Template {
 
         message Parameter {
-            optional string name            = 1;
-            optional TypedValue typed_value = 2;
+            string     name        = 1;
+            TypedValue typed_value = 2;
             extensions                      3 to max;
         }
 
-        optional string version         = 1;          // The version of the Template to prevent mismatches
-        repeated Metric metrics         = 2;          // Each metric includes a name, datatype, and optionally a value
-        repeated Parameter parameters   = 3;
-        optional string template_ref    = 4;          // MUST be a reference to a template definition if this is an instance (i.e. the name of the template definition) - MUST be omitted for template definitions
-        optional bool is_definition     = 5;
+        string             version       = 1;  // The version of the Template to prevent mismatches
+        repeated Metric    metrics       = 2;  // Each metric includes a name, datatype, and optionally a value
+        repeated Parameter parameters    = 3;
+        string             template_ref  = 4;  // MUST be a reference to a template definition if this is an instance (i.e. the name of the template definition) - MUST be omitted for template definitions
+        bool               is_definition = 5;
         extensions                      6 to max;
     }
 
     message Status {
-        optional uint64 code            = 1;          // Result code of a command invocation - 0 indicates success, any non-zero value indicates an error
-        optional string message         = 2;          // Optional human readable status/error description
+        uint64 code    = 1;  // Result code of a command invocation - 0 indicates success, any non-zero value indicates an error
+        string message = 2;  // Optional human readable status/error description
         extensions                      3 to max;
     }
 
     message Command {
-        repeated Metric arguments       = 1;          // Input argument definitions (NBIRTH/DBIRTH) or supplied argument values (NCMD/DCMD) - omitted for commands that accept no inputs
-        repeated Metric results         = 2;          // Result/output argument definitions (NBIRTH/DBIRTH) or returned result values (NRESP/DRESP) - omitted for commands that return no outputs
-        optional string correlation_id  = 3;          // Set on an NCMD/DCMD request and echoed unchanged in the corresponding NRESP/DRESP response
-        optional Status status          = 4;          // Execution status - present in NRESP/DRESP responses, omitted in BIRTH definitions and CMD requests
+        repeated Metric arguments      = 1;  // Input argument definitions (NBIRTH/DBIRTH) or supplied argument values (NCMD/DCMD) - omitted for commands that accept no inputs
+        repeated Metric results        = 2;  // Result/output argument definitions (NBIRTH/DBIRTH) or returned result values (NRESP/DRESP) - omitted for commands that return no outputs
+        string          correlation_id = 3;  // Set on an NCMD/DCMD request and echoed unchanged in the corresponding NRESP/DRESP response
+        Status          status         = 4;  // Execution status - present in NRESP/DRESP responses, omitted in BIRTH definitions and CMD requests
         extensions                      5 to max;
     }
 
     message DataSet {
 
         message Column {
-            optional string name     = 1;
-            optional DataType datatype = 2;
+            string   name     = 1;
+            DataType datatype = 2;
 
             // Only one type of repeated value shall be used per Column
-            repeated uint32 int_values       = 3 [packed=true];
-            repeated uint64 long_values      = 4 [packed=true];
-            repeated float  float_values     = 5 [packed=true];
-            repeated double double_values    = 6 [packed=true];
-            repeated bool   boolean_values   = 7 [packed=true];
-            repeated string string_values    = 8 [packed=false];
+            repeated uint32 int_values     = 3;
+            repeated uint64 long_values    = 4;
+            repeated float  float_values   = 5;
+            repeated double double_values  = 6;
+            repeated bool   boolean_values = 7;
+            repeated string string_values  = 8;
 
             extensions                       9 to max;
         }
 
-        repeated Column columns              = 1;
+        repeated Column columns = 1;
         extensions                           2 to max;
     }
 
     message PropertySet {
-        repeated string        keys     = 1;         // Names of the properties
-        repeated TypedValue    values   = 2;         // The Property Values
+        repeated string     keys   = 1;  // Names of the properties
+        repeated TypedValue values = 2;  // The Property Values
         extensions                      3 to max;
     }
 
@@ -285,21 +295,21 @@ message Payload {
 
     message MetaData {
         // Bytes specific metadata
-        optional bool   is_multi_part   = 1;
+        bool is_multi_part = 1;
 
         // General metadata
-        optional string content_type    = 2;        // Content/Media type
-        optional uint64 size            = 3;        // File size, String size, Multi-part size, etc
-        optional uint64 seq             = 4;        // Sequence number for multi-part messages
+        string content_type = 2;  // Content/Media type
+        uint64 size         = 3;  // File size, String size, Multi-part size, etc
+        uint64 seq          = 4;  // Sequence number for multi-part messages
 
         // File metadata
-        optional string file_name       = 5;        // File name
-        optional string file_type       = 6;        // File type (i.e. xml, json, txt, cpp, etc)
-        optional string md5             = 7;        // md5 of data
+        string file_name = 5;  // File name
+        string file_type = 6;  // File type (i.e. xml, json, txt, cpp, etc)
+        string md5       = 7;  // md5 of data
 
         // Others
-        optional string description     = 8;        // Could be anything such as json or xml of custom properties
-        optional string engUnit         = 9;        // Engineering units
+        string description = 8;  // Could be anything such as json or xml of custom properties
+        string engUnit     = 9;  // Engineering units
 
         // Future expansion
         extensions                      10 to max;
@@ -307,48 +317,48 @@ message Payload {
 
     message Metric {
 
-        optional string   name            = 1;        // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
-        optional uint64   alias           = 2;        // Metric alias - tied to name on BIRTH and included in all later DATA messages
-        optional int64    timestamp       = 3;        // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
-        optional DataType datatype        = 4;        // DataType of the metric/tag value
-        optional uint32   quality         = 5;        // Quality code of the metric/tag value - severity in bits 30-31
-        optional string   quality_context = 6;        // The optional quality context of the metric/tag value
-        optional string   source          = 7;        // Source for CMD messages if unique to the Metric (typically for forwarded writes in CMD messages)
-        optional bool     is_historical   = 8;        // If this is historical data and should not update real time tag
-        optional bool     is_transient    = 9;        // Tells consuming clients such as MQTT Engine to not store this as a tag
-        optional bool     is_null         = 10;       // If this is null - explicitly say so rather than using -1, false, etc for some datatypes.
-        optional MetaData metadata        = 11;       // Metadata for the Metric
-        optional PropertySet properties   = 12;       // Properties of the Metric
-        optional TypedValue value         = 13;
-        optional Command  command         = 14;       // Command definition (BIRTH), invocation (CMD), or response (RESP) - present when datatype == Command instead of 'value'
-        optional MetricOperation operation = 15;      // Only in NMMETA/DMMETA: ADD, UPDATE, or DELETE
+        string          name            = 1;  // Metric name - Required in BIRTH messages, optional in DATA messages if using aliases
+        uint64          alias           = 2;  // Metric alias - tied to name on BIRTH and included in all later DATA messages
+        int64           timestamp       = 3;  // Metric value change time - the time this metric's value last changed - if omitted, the overall payload timestamp is assumed as the metric value change time
+        DataType        datatype        = 4;  // DataType of the metric/tag value
+        uint32          quality         = 5;  // Quality code of the metric/tag value - severity in bits 30-31
+        string          quality_context = 6;  // The optional quality context of the metric/tag value
+        string          source          = 7;  // Source for CMD messages if unique to the Metric (typically for forwarded writes in CMD messages)
+        bool            is_historical   = 8;  // If this is historical data and should not update real time tag
+        bool            is_transient    = 9;  // Tells consuming clients such as MQTT Engine to not store this as a tag
+        bool            is_null         = 10;  // If this is null - explicitly say so rather than using -1, false, etc for some datatypes.
+        MetaData        metadata        = 11;  // Metadata for the Metric
+        PropertySet     properties      = 12;  // Properties of the Metric
+        TypedValue      value           = 13;
+        Command         command         = 14;  // Command definition (BIRTH), invocation (CMD), or response (RESP) - present when datatype == Command instead of 'value'
+        MetricOperation operation       = 15;  // Only in NMMETA/DMMETA: ADD, UPDATE, or DELETE
         extensions 16 to max;
     }
 
     message Header {
-        optional int64  timestamp              = 1;  // Timestamp at message sending time
-        optional uint64 seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
-        optional uint64 bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
-        optional uint64 descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
-        optional string definition_id          = 5;  // Definition identifier: content hash of the metric definitions this message reports against
-        optional string previous_definition_id = 6;  // NMMETA/DMMETA only: the definition_id in effect before the change
-        optional string source                 = 7;  // Source for CMD and REBIRTH messages - the Host Application ID that sent the message
-        optional string uuid                   = 8;  // UUID to track message type in terms of schema definitions
-        optional string compression_algorithm  = 9;  // Present only when the content section is compressed - names the algorithm used
+        int64  timestamp              = 1;  // Timestamp at message sending time
+        uint64 seq                    = 2;  // Message sequence number - ordered stream of all messages from the Edge Node
+        uint64 bd_seq                 = 3;  // The Birth/Death sequence number - scopes this message to the MQTT session it was published in
+        uint64 descriptor_seq         = 4;  // Descriptor sequence number - ordered stream per Sparkplug Descriptor (the Edge Node Descriptor for Edge Node messages, or a Device Descriptor for Device messages)
+        string definition_id          = 5;  // Definition identifier: content hash of the metric definitions this message reports against
+        string previous_definition_id = 6;  // NMMETA/DMMETA only: the definition_id in effect before the change
+        string source                 = 7;  // Source for CMD and REBIRTH messages - the Host Application ID that sent the message
+        string uuid                   = 8;  // UUID to track message type in terms of schema definitions
+        string compression_algorithm  = 9;  // Present only when the content section is compressed - names the algorithm used
         extensions                             10 to max;  // For third party extensions
     }
 
     message Content {
-        repeated Metric metrics = 1;                 // Repeated forever - no limit in Google Protobufs
-        optional bytes  body    = 2;                 // To optionally bypass the whole definition above
+        repeated Metric metrics = 1;  // Repeated forever - no limit in Google Protobufs
+        bytes           body    = 2;  // To optionally bypass the whole definition above
         extensions              3 to max;            // For third party extensions
     }
 
-    optional Header header = 1;                 // Always present and always uncompressed
+    Header header = 1;  // Always present and always uncompressed
 
     oneof payload_content {
-        Content content    = 2;                 // The Content of this message, uncompressed
-        bytes   compressed = 3;                 // The compressed bytes of a serialized Content
+        Content content    = 2;  // The Content of this message, uncompressed
+        bytes   compressed = 3;  // The compressed bytes of a serialized Content
     }
 
     extensions             4 to max;            // For third party extensions
@@ -444,6 +454,26 @@ order to place the message in context, such as the overall payload timestamp, th
 and the definition identifier. The _content_ carries the metrics themselves. Both sections are
 length delimited, so a consuming application that only requires the header can decode it without
 decoding the content.
+
+[tck-testable tck-id-payloads-string-utf8]#[yellow-background]*[tck-id-payloads-string-utf8] Every
+string field of a Sparkplug payload MUST be valid UTF-8.*#
+
+[tck-testable tck-id-payloads-string-utf8-reject]#[yellow-background]*[tck-id-payloads-string-utf8-reject] A
+consuming application MUST reject a payload in which any string field is not valid UTF-8, and MUST
+NOT process any part of it.*#
+
+Non-normative comment: this is stated here rather than left to the encoding, because the Google
+Protocol Buffers schema enforces it through a feature whose default changed between proto2 and
+edition 2023, and because the JSON encoding inherits it from RFC 8259 instead. Rejecting the whole
+payload rather than the offending field is deliberate: a payload is the unit a sequence number
+orders, so accepting part of one would leave a consuming application unable to say whether it had
+applied that message.
+
+Non-normative comment: a rejected payload is a non-conformant one, and republishing it will not
+make it valid. A Host Application that rejects an NBIRTH or DBIRTH on this basis therefore gains
+nothing by issuing a Rebirth Request, because the Edge Node will send the same payload again. It
+should treat the Edge Node as unusable and report the condition, rather than requesting Rebirths
+until the Edge Node is corrected.
 
 * [tck-testable tck-id-payloads-header-present]#[yellow-background]*[tck-id-payloads-header-present] Every
 Sparkplug payload MUST include a header.*#
@@ -1623,6 +1653,7 @@ represented as an enum in Google Protobufs as shown below.
 
 ----
 enum DataType {
+    option features.enum_type = CLOSED;
     // Indexes of Data Types
 
     // Unknown placeholder for future expansion.
@@ -3529,9 +3560,10 @@ Non-normative comment: The scalar rules below were chosen to agree with the JSON
 Google Protocol Buffers defines for proto3, so the representation of 64-bit integers, enumerated
 values, bytes, and non-finite floating point values will be familiar, and a Protocol Buffers JSON
 implementation produces those forms directly. That agreement is a convenience and not a normative
-dependency. The Sparkplug schema is proto2, that mapping is specified for proto3, it does not
-define how extension fields are represented, and it is not a versioned standard, so this
-specification states the rules itself rather than incorporating them by reference.
+dependency. The Sparkplug schema uses Protocol Buffers edition 2023, that mapping is specified for
+proto3, it does not define how extension fields are represented, and it is not a versioned
+standard, so this specification states the rules itself rather than incorporating them by
+reference.
 
 Non-normative comment: Agreement on the scalar forms does not mean a conformant encoder can be
 assembled from library calls. The structural mappings reshape every Metric, so an implementation
@@ -3580,12 +3612,12 @@ preservingProtoFieldNames printer option.
 field that is not present MUST be omitted from the JSON object rather than written with a JSON null
 or a zero value.*#
 
-Non-normative comment: Every field of the Sparkplug schema is optional, so a field carries the
-distinction between having been set and never having been set, and the JSON encoding has to keep
-that distinction. Zero is a legitimate value for seq, bd_seq, descriptor_seq, alias, and quality,
-so writing an absent field as 0 would make it indistinguishable from one deliberately set to zero.
-A JSON null is excluded for a different reason: a null metric value is expressed by setting is_null
-to true and omitting the value key, as required in the
+Non-normative comment: Every singular field of the Sparkplug schema has explicit presence, so a
+field carries the distinction between having been set and never having been set, and the JSON
+encoding has to keep that distinction. Zero is a legitimate value for seq, bd_seq, descriptor_seq,
+alias, and quality, so writing an absent field as 0 would make it indistinguishable from one
+deliberately set to zero. A JSON null is excluded for a different reason: a null metric value is
+expressed by setting is_null to true and omitting the value key, as required in the
 link:#payloads_json_typed_values[Typed Values] section, so a null appearing as a value would be a
 second and conflicting way to say the same thing.
 
