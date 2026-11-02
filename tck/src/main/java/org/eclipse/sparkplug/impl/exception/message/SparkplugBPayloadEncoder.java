@@ -650,63 +650,95 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 	// so a value is appended to that array rather than wrapped in a per-cell message.
 	private void addDataSetValue(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
 			DataSetDataType type, Value<?> value) throws Exception {
+		SparkplugBProto.Payload.ValueArray.Builder va = columnBuilder.getValuesBuilder();
 		Object raw = value == null ? null : value.getValue();
 		if (raw == null) {
+			// Record the index as null, then write a placeholder so the column keeps one entry
+			// per row. A consuming application ignores the placeholder.
+			va.addNullIndexes(nextRowIndex(va, type));
 			addDataSetPlaceholder(columnBuilder, type);
 			return;
 		}
 
 		switch (type) {
 			case Int8:
-				columnBuilder.addIntValues((Byte) raw);
+				va.addSint32Values((Byte) raw);
 				break;
 			case Int16:
-				columnBuilder.addIntValues((Short) raw);
+				va.addSint32Values((Short) raw);
 				break;
 			case Int32:
-				columnBuilder.addIntValues((Integer) raw);
+				va.addSint32Values((Integer) raw);
 				break;
 			case UInt8:
-				columnBuilder.addIntValues(Short.toUnsignedInt((Short) raw));
+				va.addUint32Values(Short.toUnsignedInt((Short) raw));
 				break;
 			case UInt16:
-				columnBuilder.addIntValues((int) Integer.toUnsignedLong((Integer) raw));
+				va.addUint32Values((int) Integer.toUnsignedLong((Integer) raw));
 				break;
 			case UInt32:
 				if (raw instanceof Long) {
-					columnBuilder.addIntValues(((Long) raw).intValue());
+					va.addUint32Values(((Long) raw).intValue());
 				} else {
-					columnBuilder.addIntValues((Integer) raw);
+					va.addSint32Values((Integer) raw);
 				}
 				break;
 			case Int64:
-				columnBuilder.addLongValues((Long) raw);
+				va.addSint64Values((Long) raw);
 				break;
 			case UInt64:
 				if (raw instanceof BigInteger) {
-					columnBuilder.addLongValues(bigIntegerToUnsignedLong((BigInteger) raw));
+					va.addUint64Values(bigIntegerToUnsignedLong((BigInteger) raw));
 				} else {
-					columnBuilder.addLongValues((Long) raw);
+					va.addSint64Values((Long) raw);
 				}
 				break;
 			case DateTime:
-				columnBuilder.addLongValues(((Date) raw).getTime());
+				va.addInt64Values(((Date) raw).getTime());
 				break;
 			case Float:
-				columnBuilder.addFloatValues((Float) raw);
+				va.addFloatValues((Float) raw);
 				break;
 			case Double:
-				columnBuilder.addDoubleValues((Double) raw);
+				va.addDoubleValues((Double) raw);
 				break;
 			case Boolean:
-				columnBuilder.addBooleanValues(toBoolean(raw));
+				va.addBooleanValues(toBoolean(raw));
 				break;
 			case String:
 			case Text:
-				columnBuilder.addStringValues((String) raw);
+				va.addStringValues((String) raw);
 				break;
 			default:
 				throw new Exception("Unknown DataSet column type: " + type);
+		}
+	}
+
+	// The index the next appended element will occupy in the array this datatype uses.
+	private int nextRowIndex(SparkplugBProto.Payload.ValueArray.Builder va, DataSetDataType type) {
+		switch (type) {
+			case Int8:
+			case Int16:
+			case Int32:
+				return va.getSint32ValuesCount();
+			case UInt8:
+			case UInt16:
+			case UInt32:
+				return va.getUint32ValuesCount();
+			case Int64:
+				return va.getSint64ValuesCount();
+			case UInt64:
+				return va.getUint64ValuesCount();
+			case DateTime:
+				return va.getInt64ValuesCount();
+			case Float:
+				return va.getFloatValuesCount();
+			case Double:
+				return va.getDoubleValuesCount();
+			case Boolean:
+				return va.getBooleanValuesCount();
+			default:
+				return va.getStringValuesCount();
 		}
 	}
 
@@ -715,6 +747,7 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 	// Column therefore ends with the same number of values.
 	private void addDataSetPlaceholder(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
 			DataSetDataType type) throws Exception {
+		SparkplugBProto.Payload.ValueArray.Builder va = columnBuilder.getValuesBuilder();
 		switch (type) {
 			case Int8:
 			case Int16:
@@ -722,25 +755,25 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 			case UInt8:
 			case UInt16:
 			case UInt32:
-				columnBuilder.addIntValues(0);
+				va.addSint32Values(0);
 				break;
 			case Int64:
 			case UInt64:
 			case DateTime:
-				columnBuilder.addLongValues(0L);
+				va.addSint64Values(0L);
 				break;
 			case Float:
-				columnBuilder.addFloatValues(0f);
+				va.addFloatValues(0f);
 				break;
 			case Double:
-				columnBuilder.addDoubleValues(0d);
+				va.addDoubleValues(0d);
 				break;
 			case Boolean:
-				columnBuilder.addBooleanValues(false);
+				va.addBooleanValues(false);
 				break;
 			case String:
 			case Text:
-				columnBuilder.addStringValues("");
+				va.addStringValues("");
 				break;
 			default:
 				throw new Exception("Unknown DataSet column type: " + type);
