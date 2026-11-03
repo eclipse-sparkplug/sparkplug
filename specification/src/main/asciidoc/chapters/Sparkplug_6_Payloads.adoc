@@ -221,14 +221,8 @@ message Payload {
             Template            template_value     = 13;
             PropertySet         propertyset_value  = 14;
             PropertySetList     propertysets_value = 15;
-            TypedValueExtension extension_value    = 16;
         }
 
-        message TypedValueExtension {
-            extensions  1 to max;
-        }
-
-        extensions 17 to max;
     }
 
     message Template {
@@ -236,7 +230,6 @@ message Payload {
         message Parameter {
             string     name        = 1;
             TypedValue typed_value = 2;
-            extensions                      3 to max;
         }
 
         string             version       = 1;  // The version of the Template to prevent mismatches
@@ -244,13 +237,11 @@ message Payload {
         repeated Parameter parameters    = 3;
         string             template_ref  = 4;  // MUST be a reference to a template definition if this is an instance (i.e. the name of the template definition) - MUST be omitted for template definitions
         bool               is_definition = 5;
-        extensions                      6 to max;
     }
 
     message Status {
         uint64 code    = 1;  // Result code of a command invocation - 0 indicates success, any non-zero value indicates an error
         string message = 2;  // Optional human readable status/error description
-        extensions                      3 to max;
     }
 
     message Command {
@@ -258,7 +249,6 @@ message Payload {
         repeated Metric results        = 2;  // Result/output argument definitions (NBIRTH/DBIRTH) or returned result values (NRESP/DRESP) - omitted for commands that return no outputs
         string          correlation_id = 3;  // Set on an NCMD/DCMD request and echoed unchanged in the corresponding NRESP/DRESP response
         Status          status         = 4;  // Execution status - present in NRESP/DRESP responses, omitted in BIRTH definitions and CMD requests
-        extensions                      5 to max;
     }
 
     message DataSet {
@@ -274,23 +264,18 @@ message Payload {
             repeated double double_values  = 6;
             repeated bool   boolean_values = 7;
             repeated string string_values  = 8;
-
-            extensions                       9 to max;
         }
 
         repeated Column columns = 1;
-        extensions                           2 to max;
     }
 
     message PropertySet {
         repeated string     keys   = 1;  // Names of the properties
         repeated TypedValue values = 2;  // The Property Values
-        extensions                      3 to max;
     }
 
     message PropertySetList {
         repeated PropertySet propertyset = 1;
-        extensions                       2 to max;
     }
 
     message MetaData {
@@ -312,7 +297,6 @@ message Payload {
         string engUnit     = 9;  // Engineering units
 
         // Future expansion
-        extensions                      10 to max;
     }
 
     message Metric {
@@ -332,7 +316,6 @@ message Payload {
         TypedValue      value           = 13;
         Command         command         = 14;  // Command definition (BIRTH), invocation (CMD), or response (RESP) - present when datatype == Command instead of 'value'
         MetricOperation operation       = 15;  // Only in NMMETA/DMMETA: ADD, UPDATE, or DELETE
-        extensions 16 to max;
     }
 
     message Header {
@@ -345,13 +328,11 @@ message Payload {
         string source                 = 7;  // Source for CMD and REBIRTH messages - the Host Application ID that sent the message
         string uuid                   = 8;  // UUID to track message type in terms of schema definitions
         string compression_algorithm  = 9;  // Present only when the content section is compressed - names the algorithm used
-        extensions                             10 to max;  // For third party extensions
     }
 
     message Content {
         repeated Metric metrics = 1;  // Repeated forever - no limit in Google Protobufs
         bytes           body    = 2;  // To optionally bypass the whole definition above
-        extensions              3 to max;            // For third party extensions
     }
 
     Header header = 1;  // Always present and always uncompressed
@@ -360,8 +341,6 @@ message Payload {
         Content content    = 2;  // The Content of this message, uncompressed
         bytes   compressed = 3;  // The compressed bytes of a serialized Content
     }
-
-    extensions             4 to max;            // For third party extensions
 }
 ----
 
@@ -3561,9 +3540,8 @@ Google Protocol Buffers defines for proto3, so the representation of 64-bit inte
 values, bytes, and non-finite floating point values will be familiar, and a Protocol Buffers JSON
 implementation produces those forms directly. That agreement is a convenience and not a normative
 dependency. The Sparkplug schema uses Protocol Buffers edition 2023, that mapping is specified for
-proto3, it does not define how extension fields are represented, and it is not a versioned
-standard, so this specification states the rules itself rather than incorporating them by
-reference.
+proto3, and it is not a versioned standard, so this specification states the rules itself rather
+than incorporating them by reference.
 
 Non-normative comment: Agreement on the scalar forms does not mean a conformant encoder can be
 assembled from library calls. The structural mappings reshape every Metric, so an implementation
@@ -3635,15 +3613,17 @@ by ignoring it.*#
 Non-normative comment: The two cases look similar in a payload and are not the same thing. An
 unrecognized field name means the payload carries something this version of the application does
 not know about, such as a field added by a later revision of this specification or a third party
-extension; ignoring it is what allows an older application to keep working. An unrecognized metric
+specification; ignoring it is what allows an older application to keep working. An unrecognized
+metric
 means the application's view of what the Edge Node reports is out of date, which is a
 synchronization problem and a reason to issue a Rebirth Request, not something to pass over.
 
 Non-normative comment: The naming rule keeps a JSON payload visually identical to the field names
 in the Protocol Buffers schema, so the two encodings can be read against one another and against
 the component definitions above without a translation table. Ignoring unrecognized keys is the JSON
-counterpart of the extension ranges reserved in the Protocol Buffers schema, and serves the same
-purpose for third party extensions.
+counterpart of the Protocol Buffers rule that an unknown field does not make a message
+unparseable, and serves the same purpose: an application built against an earlier revision of this
+specification keeps working when a later one adds a field.
 
 [[payloads_json_scalar]]
 ==== Scalar Value Mapping
@@ -3732,38 +3712,6 @@ which would make a numeric form correct in testing and lossy in production.
 Non-normative comment: The rule is driven by the declared type of the field rather than by the
 magnitude of a particular value, so an encoder derives it from the schema alone and no value can
 lose precision because of how large it happened to be.
-
-[[payloads_json_extensions]]
-==== Extension Fields
-
-The Sparkplug Google Protocol Buffers schema reserves an extension range in most of its messages so
-that a third party can add fields without colliding with future Sparkplug fields. The JSON encoding
-represents those fields as well.
-
-[tck-testable tck-id-payloads-json-extension-key]#[yellow-background]*[tck-id-payloads-json-extension-key] A
-field carried in a message's extension range MUST be represented with a JSON object key that is the
-fully qualified name of that extension enclosed in square brackets, for example
-'[com.example.vendor_tag]'.*#
-
-[tck-testable tck-id-payloads-json-extension-value]#[yellow-background]*[tck-id-payloads-json-extension-value] The
-value of an extension field MUST be represented according to the same rules as any other field of
-its type, as defined in the link:#payloads_json_scalar[Scalar Value Mapping] and
-link:#payloads_json_structural[Structural Mappings] sections.*#
-
-[tck-not-testable tck-id-payloads-json-extension-ignore]#[yellow-background]*[tck-id-payloads-json-extension-ignore] A
-consuming application that does not recognize an extension MUST ignore it, as it ignores any other
-unrecognized key, and MUST NOT treat the payload as malformed.*#
-
-Non-normative comment: The bracketed form is the one Google Protocol Buffers JSON implementations
-already use for extensions, so it is specified here rather than invented. It is stated normatively
-because the Protocol Buffers JSON Mapping is defined for proto3, which has no extensions, and so
-does not cover this case at all.
-
-Non-normative comment: An extension does not survive a round trip through an application that does
-not know it. In the Google Protocol Buffers encoding an unknown field is retained and re-emitted,
-but in JSON an unrecognized key is not. A deployment that depends on extensions reaching a
-consumer through an intermediary should confirm that the intermediary understands them, rather
-than assuming they are carried through.
 
 [[payloads_json_structural]]
 ==== Structural Mappings
