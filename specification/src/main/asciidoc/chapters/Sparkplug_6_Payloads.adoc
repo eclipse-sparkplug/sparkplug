@@ -261,7 +261,7 @@ message Payload {
         repeated sint64 sint64_values  = 2;   // Int64
         repeated uint32 uint32_values  = 3;   // UInt8, UInt16, UInt32
         repeated uint64 uint64_values  = 4;   // UInt64
-        repeated int64  int64_values   = 5;   // DateTime - large positive values, so not zigzag
+        repeated int64  int64_values   = 5;   // DateTime; not zigzag - pre-1970 costs 10 bytes
         repeated float  float_values   = 6;   // Float
         repeated double double_values  = 7;   // Double
         repeated bool   boolean_values = 8;   // Boolean
@@ -1100,11 +1100,11 @@ two rows. The first row is (1, 72.5, true) and the second is (2, 80.0, false).
                 "columns": [{
                         "name": "Step",
                         "datatype": "UInt32",
-                        "int_values": [1, 2]
+                        "values": { "uint32_values": [1, 2] }
                 }, {
                         "name": "Setpoint",
                         "datatype": "Double",
-                        "double_values": [72.5, 80.0]
+                        "values": { "double_values": [72.5, 80.0] }
                 }, {
                         "name": "Enabled",
                         "datatype": "Boolean",
@@ -1726,9 +1726,9 @@ enum DataType {
 ** Non-normative comment: a DateTime value is a nanosecond count since epoch, the same quantity the
 payload and metric timestamps carry, and is signed for the same reason. Every mainstream time
 representation it interoperates with is signed, so the ceiling is 2262-04-11 as described in the
-link:#operational_behavior_timestamps[Timestamps] section. A DateTime carried in a DataSet.Column
-shares the long_values array with UInt64, as the
-link:#payloads_c_dataset_column[DataSet.Column] section describes.
+link:#operational_behavior_timestamps[Timestamps] section. A DateTime carried in an array or a DataSet.Column
+uses the int64_values array of the ValueArray, as the
+link:#payloads_c_datatype_array[Array Types] section describes.
 * _Text_
 ** String value (UTF-8)
 ** Google Protocol Buffer Type: string
@@ -1772,21 +1772,21 @@ link:#payloads_c_dataset_column[DataSet.Column] section describes.
 * *Array Types*
 
 An array DataType carries its elements in a ValueArray, in the array_value field of the Metric's
-TypedValue. Exactly one of the ValueArray's typed arrays is populated, selected by the datatype as
-listed below, and the elements appear in order.
+TypedValue. At most one of the ValueArray's typed arrays is populated, selected by the datatype as
+listed below, and the elements appear in order; an array with no elements populates none.
 
 ** [tck-testable tck-id-payloads-array-value-array]#[yellow-background]*[tck-id-payloads-array-value-array] A
 Metric whose datatype is an array type MUST carry its elements in the array_value field of its
 TypedValue.*#
 ** [tck-testable tck-id-payloads-array-single-field]#[yellow-background]*[tck-id-payloads-array-single-field] A
-ValueArray MUST populate only the one typed array that corresponds to the datatype of the enclosing
-Metric or DataSet.Column.*#
+ValueArray MUST populate at most one typed array, which MUST be the one that corresponds to the
+datatype of the enclosing Metric or DataSet.Column. An array with no elements populates none.*#
 ** [tck-testable tck-id-payloads-array-null-indexes]#[yellow-background]*[tck-id-payloads-array-null-indexes] An
 element that is null MUST be recorded by its index in the null_indexes field, and the typed array
 MUST still hold a value at that index so that every element keeps its position.*#
 ** [tck-testable tck-id-payloads-array-null-indexes-range]#[yellow-background]*[tck-id-payloads-array-null-indexes-range] Every
-value in null_indexes MUST be a valid index of the populated typed array, and MUST NOT appear more
-than once.*#
+value in null_indexes MUST be a valid index of the populated typed array, MUST NOT appear more than
+once, and the indexes MUST appear in ascending order.*#
 ** [tck-not-testable tck-id-payloads-array-null-value-ignored]#[yellow-background]*[tck-id-payloads-array-null-value-ignored] A
 consuming application MUST treat an element whose index appears in null_indexes as null, whatever
 value the typed array holds at that index.*#
@@ -3785,9 +3785,9 @@ of an Int32Array are JSON numbers.*#
 [[payloads_json_dataset]]
 ===== DataSet
 
-In the Protocol Buffers schema a DataSet.Column carries its values in one of six parallel arrays,
-one per underlying Protocol Buffers type, of which exactly one is used. In JSON the column's
-datatype already identifies the element type.
+In the Protocol Buffers schema a DataSet.Column carries its values in a ValueArray, which selects
+a typed array by the column's datatype and records absent cells separately. In JSON the datatype is
+already known and a JSON array can hold a null directly.
 
 [tck-testable tck-id-payloads-json-dataset-values]#[yellow-background]*[tck-id-payloads-json-dataset-values] A
 DataSet.Column MUST carry its values as a single JSON array under the key 'values', one entry per
