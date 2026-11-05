@@ -439,166 +439,201 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 					// Add the template to the metric
 					metricBuilder.getValueBuilder().setTemplateValue(templateBuilder);
 					break;
-				case Int8Array:
-					Byte[] int8ArrayValue = (Byte[]) metric.getValue();
-					ByteBuffer int8ByteBuffer =
-							ByteBuffer.allocate(int8ArrayValue.length).order(ByteOrder.LITTLE_ENDIAN);
-					for (Byte value : int8ArrayValue) {
-						int8ByteBuffer.put(value);
-					}
-					if (int8ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int8ByteBuffer.array()));
-					}
-					break;
-				case Int16Array:
-					Short[] int16ArrayValue = (Short[]) metric.getValue();
-					ByteBuffer int16ByteBuffer =
-							ByteBuffer.allocate(int16ArrayValue.length * 2).order(ByteOrder.LITTLE_ENDIAN);
-					for (Short value : int16ArrayValue) {
-						int16ByteBuffer.putShort(value);
-					}
-					if (int16ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int16ByteBuffer.array()));
-					}
-					break;
-				case Int32Array:
-					Integer[] int32ArrayValue = (Integer[]) metric.getValue();
-					ByteBuffer int32ByteBuffer =
-							ByteBuffer.allocate(int32ArrayValue.length * 4).order(ByteOrder.LITTLE_ENDIAN);
-					for (Integer value : int32ArrayValue) {
-						int32ByteBuffer.putInt(value);
-					}
-					if (int32ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int32ByteBuffer.array()));
-					}
-					break;
-				case Int64Array:
-					Long[] int64ArrayValue = (Long[]) metric.getValue();
-					ByteBuffer int64ByteBuffer =
-							ByteBuffer.allocate(int64ArrayValue.length * 8).order(ByteOrder.LITTLE_ENDIAN);
-					for (Long value : int64ArrayValue) {
-						int64ByteBuffer.putLong(value);
-					}
-					if (int64ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(int64ByteBuffer.array()));
-					}
-					break;
-				case UInt8Array:
-					Short[] uInt8ArrayValue = (Short[]) metric.getValue();
-					ByteBuffer uInt8ByteBuffer =
-							ByteBuffer.allocate(uInt8ArrayValue.length).order(ByteOrder.LITTLE_ENDIAN);
-					for (Short value : uInt8ArrayValue) {
-						uInt8ByteBuffer.put((byte) (value & 0xffff));
-					}
-					if (uInt8ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt8ByteBuffer.array()));
-					}
-					break;
-				case UInt16Array:
-					Integer[] uInt16ArrayValue = (Integer[]) metric.getValue();
-					ByteBuffer uInt16ByteBuffer =
-							ByteBuffer.allocate(uInt16ArrayValue.length * 2).order(ByteOrder.LITTLE_ENDIAN);
-					for (Integer value : uInt16ArrayValue) {
-						uInt16ByteBuffer.putShort((short) (value & 0xffffffff));
-					}
-					if (uInt16ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt16ByteBuffer.array()));
-					}
-					break;
-				case UInt32Array:
-					Long[] uInt32ArrayValue = (Long[]) metric.getValue();
-					ByteBuffer uInt32ByteBuffer =
-							ByteBuffer.allocate(uInt32ArrayValue.length * 4).order(ByteOrder.LITTLE_ENDIAN);
-					for (Long value : uInt32ArrayValue) {
-						uInt32ByteBuffer.putInt((int) (value & 0xffffffffffffffffL));
-					}
-					if (uInt32ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt32ByteBuffer.array()));
-					}
-					break;
-				case UInt64Array:
-					BigInteger[] uInt64ArrayValue = (BigInteger[]) metric.getValue();
-					ByteBuffer uInt64ByteBuffer =
-							ByteBuffer.allocate(uInt64ArrayValue.length * 8).order(ByteOrder.LITTLE_ENDIAN);
-					for (BigInteger value : uInt64ArrayValue) {
-						uInt64ByteBuffer.putLong(bigIntegerToUnsignedLong(value));
-					}
-					if (uInt64ByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(uInt64ByteBuffer.array()));
-					}
-					break;
-				case FloatArray:
-					Float[] floatArrayValue = (Float[]) metric.getValue();
-					ByteBuffer floatByteBuffer =
-							ByteBuffer.allocate(floatArrayValue.length * 4).order(ByteOrder.LITTLE_ENDIAN);
-					for (Float value : floatArrayValue) {
-						floatByteBuffer.putFloat(value);
-					}
-					if (floatByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(floatByteBuffer.array()));
-					}
-					break;
-				case DoubleArray:
-					Double[] doubleArrayValue = (Double[]) metric.getValue();
-					ByteBuffer doubleByteBuffer =
-							ByteBuffer.allocate(doubleArrayValue.length * 8).order(ByteOrder.LITTLE_ENDIAN);
-					for (Double value : doubleArrayValue) {
-						doubleByteBuffer.putDouble(value);
-					}
-					if (doubleByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(doubleByteBuffer.array()));
-					}
-					break;
-				case BooleanArray:
-					Boolean[] booleanArrayValue = (Boolean[]) metric.getValue();
-					int numberOfBytes = (int) Math.ceil((double) booleanArrayValue.length / 8);
-					ByteBuffer booleanByteBuffer =
-							ByteBuffer.allocate(4 + numberOfBytes).order(ByteOrder.LITTLE_ENDIAN);
-
-					// The first 4 bytes is the number of booleans in the array
-					booleanByteBuffer.putInt(booleanArrayValue.length);
-
-					// Get the remaining bytes
-					for (int i = 0; i < numberOfBytes; i++) {
-						byte nextByte = 0;
-						for (int bit = 0; bit < 8; bit++) {
-							int index = i * 8 + bit;
-							if (index < booleanArrayValue.length && booleanArrayValue[index]) {
-								nextByte |= (128 >> bit);
-							}
+				case Int8Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaInt8Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iInt8Array = 0;
+					for (Byte element : (Byte[]) metric.getValue()) {
+						if (element == null) {
+							vaInt8Array.addNullIndexes(iInt8Array);
+							vaInt8Array.addSint32Values(0);
+						} else {
+							vaInt8Array.addSint32Values(element);
 						}
-						booleanByteBuffer.put(nextByte);
-					}
-
-					metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(booleanByteBuffer.array()));
-					break;
-				case StringArray:
-					String[] stringArrayValue = (String[]) metric.getValue();
-					int size = 0;
-					for (String string : stringArrayValue) {
-						size = size + string.length() + 1;
-					}
-					ByteBuffer stringByteBuffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
-					for (String value : stringArrayValue) {
-						byte[] stringBytes = value.getBytes(StandardCharsets.UTF_8);
-						stringByteBuffer.put(stringBytes);
-						stringByteBuffer.put((byte) 0);
-					}
-					if (stringByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(stringByteBuffer.array()));
+						iInt8Array++;
 					}
 					break;
-				case DateTimeArray:
-					Date[] dateTimeArrayValue = (Date[]) metric.getValue();
-					ByteBuffer dateTimeByteBuffer =
-							ByteBuffer.allocate(dateTimeArrayValue.length * 8).order(ByteOrder.LITTLE_ENDIAN);
-					for (Date value : dateTimeArrayValue) {
-						dateTimeByteBuffer.putLong(value.getTime());
-					}
-					if (dateTimeByteBuffer.hasArray()) {
-						metricBuilder.getValueBuilder().setBytesValue(ByteString.copyFrom(dateTimeByteBuffer.array()));
+				}
+				case Int16Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaInt16Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iInt16Array = 0;
+					for (Short element : (Short[]) metric.getValue()) {
+						if (element == null) {
+							vaInt16Array.addNullIndexes(iInt16Array);
+							vaInt16Array.addSint32Values(0);
+						} else {
+							vaInt16Array.addSint32Values(element);
+						}
+						iInt16Array++;
 					}
 					break;
+				}
+				case Int32Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaInt32Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iInt32Array = 0;
+					for (Integer element : (Integer[]) metric.getValue()) {
+						if (element == null) {
+							vaInt32Array.addNullIndexes(iInt32Array);
+							vaInt32Array.addSint32Values(0);
+						} else {
+							vaInt32Array.addSint32Values(element);
+						}
+						iInt32Array++;
+					}
+					break;
+				}
+				case Int64Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaInt64Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iInt64Array = 0;
+					for (Long element : (Long[]) metric.getValue()) {
+						if (element == null) {
+							vaInt64Array.addNullIndexes(iInt64Array);
+							vaInt64Array.addSint64Values(0L);
+						} else {
+							vaInt64Array.addSint64Values(element);
+						}
+						iInt64Array++;
+					}
+					break;
+				}
+				case UInt8Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaUInt8Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iUInt8Array = 0;
+					for (Short element : (Short[]) metric.getValue()) {
+						if (element == null) {
+							vaUInt8Array.addNullIndexes(iUInt8Array);
+							vaUInt8Array.addUint32Values(0);
+						} else {
+							vaUInt8Array.addUint32Values(Short.toUnsignedInt(element));
+						}
+						iUInt8Array++;
+					}
+					break;
+				}
+				case UInt16Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaUInt16Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iUInt16Array = 0;
+					for (Integer element : (Integer[]) metric.getValue()) {
+						if (element == null) {
+							vaUInt16Array.addNullIndexes(iUInt16Array);
+							vaUInt16Array.addUint32Values(0);
+						} else {
+							vaUInt16Array.addUint32Values((int) Integer.toUnsignedLong(element));
+						}
+						iUInt16Array++;
+					}
+					break;
+				}
+				case UInt32Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaUInt32Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iUInt32Array = 0;
+					for (Long element : (Long[]) metric.getValue()) {
+						if (element == null) {
+							vaUInt32Array.addNullIndexes(iUInt32Array);
+							vaUInt32Array.addUint32Values(0);
+						} else {
+							vaUInt32Array.addUint32Values(element.intValue());
+						}
+						iUInt32Array++;
+					}
+					break;
+				}
+				case UInt64Array: {
+					SparkplugBProto.Payload.ValueArray.Builder vaUInt64Array =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iUInt64Array = 0;
+					for (BigInteger element : (BigInteger[]) metric.getValue()) {
+						if (element == null) {
+							vaUInt64Array.addNullIndexes(iUInt64Array);
+							vaUInt64Array.addUint64Values(0L);
+						} else {
+							vaUInt64Array.addUint64Values(bigIntegerToUnsignedLong(element));
+						}
+						iUInt64Array++;
+					}
+					break;
+				}
+				case FloatArray: {
+					SparkplugBProto.Payload.ValueArray.Builder vaFloatArray =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iFloatArray = 0;
+					for (Float element : (Float[]) metric.getValue()) {
+						if (element == null) {
+							vaFloatArray.addNullIndexes(iFloatArray);
+							vaFloatArray.addFloatValues(0f);
+						} else {
+							vaFloatArray.addFloatValues(element);
+						}
+						iFloatArray++;
+					}
+					break;
+				}
+				case DoubleArray: {
+					SparkplugBProto.Payload.ValueArray.Builder vaDoubleArray =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iDoubleArray = 0;
+					for (Double element : (Double[]) metric.getValue()) {
+						if (element == null) {
+							vaDoubleArray.addNullIndexes(iDoubleArray);
+							vaDoubleArray.addDoubleValues(0d);
+						} else {
+							vaDoubleArray.addDoubleValues(element);
+						}
+						iDoubleArray++;
+					}
+					break;
+				}
+				case BooleanArray: {
+					SparkplugBProto.Payload.ValueArray.Builder vaBooleanArray =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iBooleanArray = 0;
+					for (Boolean element : (Boolean[]) metric.getValue()) {
+						if (element == null) {
+							vaBooleanArray.addNullIndexes(iBooleanArray);
+							vaBooleanArray.addBooleanValues(false);
+						} else {
+							vaBooleanArray.addBooleanValues(element);
+						}
+						iBooleanArray++;
+					}
+					break;
+				}
+				case StringArray: {
+					SparkplugBProto.Payload.ValueArray.Builder vaStringArray =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iStringArray = 0;
+					for (String element : (String[]) metric.getValue()) {
+						if (element == null) {
+							vaStringArray.addNullIndexes(iStringArray);
+							vaStringArray.addStringValues("");
+						} else {
+							vaStringArray.addStringValues(element);
+						}
+						iStringArray++;
+					}
+					break;
+				}
+				case DateTimeArray: {
+					SparkplugBProto.Payload.ValueArray.Builder vaDateTimeArray =
+							metricBuilder.getValueBuilder().getArrayValueBuilder();
+					int iDateTimeArray = 0;
+					for (Date element : (Date[]) metric.getValue()) {
+						if (element == null) {
+							vaDateTimeArray.addNullIndexes(iDateTimeArray);
+							vaDateTimeArray.addInt64Values(0L);
+						} else {
+							vaDateTimeArray.addInt64Values(element.getTime());
+						}
+						iDateTimeArray++;
+					}
+					break;
+				}
 				case Unknown:
 				default:
 					logger.error("Unsupported MetricDataType: " + metric.getDataType());
@@ -650,97 +685,136 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 	// so a value is appended to that array rather than wrapped in a per-cell message.
 	private void addDataSetValue(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
 			DataSetDataType type, Value<?> value) throws Exception {
+		SparkplugBProto.Payload.ValueArray.Builder va = columnBuilder.getValuesBuilder();
 		Object raw = value == null ? null : value.getValue();
 		if (raw == null) {
+			// Record the index as null, then write a placeholder so the column keeps one entry
+			// per row. A consuming application ignores the placeholder.
+			va.addNullIndexes(nextRowIndex(va, type));
 			addDataSetPlaceholder(columnBuilder, type);
 			return;
 		}
 
 		switch (type) {
 			case Int8:
-				columnBuilder.addIntValues((Byte) raw);
+				va.addSint32Values((Byte) raw);
 				break;
 			case Int16:
-				columnBuilder.addIntValues((Short) raw);
+				va.addSint32Values((Short) raw);
 				break;
 			case Int32:
-				columnBuilder.addIntValues((Integer) raw);
+				va.addSint32Values((Integer) raw);
 				break;
 			case UInt8:
-				columnBuilder.addIntValues(Short.toUnsignedInt((Short) raw));
+				va.addUint32Values(Short.toUnsignedInt((Short) raw));
 				break;
 			case UInt16:
-				columnBuilder.addIntValues((int) Integer.toUnsignedLong((Integer) raw));
+				va.addUint32Values((int) Integer.toUnsignedLong((Integer) raw));
 				break;
 			case UInt32:
 				if (raw instanceof Long) {
-					columnBuilder.addIntValues(((Long) raw).intValue());
+					va.addUint32Values(((Long) raw).intValue());
 				} else {
-					columnBuilder.addIntValues((Integer) raw);
+					va.addUint32Values((Integer) raw);
 				}
 				break;
 			case Int64:
-				columnBuilder.addLongValues((Long) raw);
+				va.addSint64Values((Long) raw);
 				break;
 			case UInt64:
 				if (raw instanceof BigInteger) {
-					columnBuilder.addLongValues(bigIntegerToUnsignedLong((BigInteger) raw));
+					va.addUint64Values(bigIntegerToUnsignedLong((BigInteger) raw));
 				} else {
-					columnBuilder.addLongValues((Long) raw);
+					va.addUint64Values((Long) raw);
 				}
 				break;
 			case DateTime:
-				columnBuilder.addLongValues(((Date) raw).getTime());
+				va.addInt64Values(((Date) raw).getTime());
 				break;
 			case Float:
-				columnBuilder.addFloatValues((Float) raw);
+				va.addFloatValues((Float) raw);
 				break;
 			case Double:
-				columnBuilder.addDoubleValues((Double) raw);
+				va.addDoubleValues((Double) raw);
 				break;
 			case Boolean:
-				columnBuilder.addBooleanValues(toBoolean(raw));
+				va.addBooleanValues(toBoolean(raw));
 				break;
 			case String:
 			case Text:
-				columnBuilder.addStringValues((String) raw);
+				va.addStringValues((String) raw);
 				break;
 			default:
 				throw new Exception("Unknown DataSet column type: " + type);
 		}
 	}
 
-	// A v4 DataSet.Column carries a parallel array indexed by row and cannot express an absent
-	// cell, so a null holds its position with the zero value for the column's datatype. Every
-	// Column therefore ends with the same number of values.
-	private void addDataSetPlaceholder(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
-			DataSetDataType type) throws Exception {
+	// The index the next appended element will occupy in the array this datatype uses.
+	private int nextRowIndex(SparkplugBProto.Payload.ValueArray.Builder va, DataSetDataType type) {
 		switch (type) {
 			case Int8:
 			case Int16:
 			case Int32:
+				return va.getSint32ValuesCount();
 			case UInt8:
 			case UInt16:
 			case UInt32:
-				columnBuilder.addIntValues(0);
+				return va.getUint32ValuesCount();
+			case Int64:
+				return va.getSint64ValuesCount();
+			case UInt64:
+				return va.getUint64ValuesCount();
+			case DateTime:
+				return va.getInt64ValuesCount();
+			case Float:
+				return va.getFloatValuesCount();
+			case Double:
+				return va.getDoubleValuesCount();
+			case Boolean:
+				return va.getBooleanValuesCount();
+			default:
+				return va.getStringValuesCount();
+		}
+	}
+
+	// Writes the placeholder for a null cell, into the same typed array the column's datatype
+	// uses, so the column keeps one entry per row. The zero itself carries no meaning: the cell
+	// is recorded as null in null_indexes, and a consumer ignores the placeholder.
+	private void addDataSetPlaceholder(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
+			DataSetDataType type) throws Exception {
+		SparkplugBProto.Payload.ValueArray.Builder va = columnBuilder.getValuesBuilder();
+		switch (type) {
+			case Int8:
+			case Int16:
+			case Int32:
+				va.addSint32Values(0);
+				break;
+			case UInt8:
+			case UInt16:
+			case UInt32:
+				va.addUint32Values(0);
 				break;
 			case Int64:
+				va.addSint64Values(0L);
+				break;
 			case UInt64:
+				va.addUint64Values(0L);
+				break;
 			case DateTime:
-				columnBuilder.addLongValues(0L);
+				va.addInt64Values(0L);
 				break;
 			case Float:
-				columnBuilder.addFloatValues(0f);
+				va.addFloatValues(0f);
 				break;
 			case Double:
-				columnBuilder.addDoubleValues(0d);
+				va.addDoubleValues(0d);
 				break;
 			case Boolean:
-				columnBuilder.addBooleanValues(false);
+				va.addBooleanValues(false);
 				break;
 			case String:
 			case Text:
-				columnBuilder.addStringValues("");
+				va.addStringValues("");
 				break;
 			default:
 				throw new Exception("Unknown DataSet column type: " + type);
