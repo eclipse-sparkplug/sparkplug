@@ -777,9 +777,9 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 		}
 	}
 
-	// A v4 DataSet.Column carries a parallel array indexed by row and cannot express an absent
-	// cell, so a null holds its position with the zero value for the column's datatype. Every
-	// Column therefore ends with the same number of values.
+	// Writes the placeholder for a null cell, into the same typed array the column's datatype
+	// uses, so the column keeps one entry per row. The zero itself carries no meaning: the cell
+	// is recorded as null in null_indexes, and a consumer ignores the placeholder.
 	private void addDataSetPlaceholder(SparkplugBProto.Payload.DataSet.Column.Builder columnBuilder,
 			DataSetDataType type) throws Exception {
 		SparkplugBProto.Payload.ValueArray.Builder va = columnBuilder.getValuesBuilder();

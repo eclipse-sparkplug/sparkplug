@@ -253,9 +253,9 @@ message Payload {
     }
 
     // An array of scalar values of one type, used both by the array DataTypes and by
-    // DataSet.Column. Exactly one of the typed arrays is populated, chosen by the datatype of the
-    // enclosing Metric or Column. The signed arrays use zigzag encoding because a negative plain
-    // varint occupies ten bytes.
+    // DataSet.Column. At most one of the typed arrays is populated - none for an empty array -
+    // chosen by the datatype of the enclosing Metric or Column. The signed arrays use zigzag
+    // encoding because a negative plain varint occupies ten bytes.
     message ValueArray {
         repeated sint32 sint32_values  = 1;   // Int8, Int16, Int32
         repeated sint64 sint64_values  = 2;   // Int64
@@ -1108,7 +1108,7 @@ two rows. The first row is (1, 72.5, true) and the second is (2, 80.0, false).
                 }, {
                         "name": "Enabled",
                         "datatype": "Boolean",
-                        "boolean_values": [true, false]
+                        "values": { "boolean_values": [true, false] }
                 }]
         }
 }
