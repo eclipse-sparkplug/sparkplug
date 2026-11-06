@@ -804,7 +804,7 @@ written to on the Host Application for NCMD and DCMD messages.
 timestamp MUST be in UTC if it is included.*#
 * *datatype*
 ** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*[tck-id-payloads-metric-datatype-value-type] The
-datatype MUST be an unsigned 32-bit integer representing the datatype.*#
+datatype MUST be a value of the DataType enumeration, represented as the encoding in use defines.*#
 ** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*[tck-id-payloads-metric-datatype-value] The
 datatype MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatypes[valid Sparkplug Data Types].*#
@@ -1002,9 +1002,9 @@ array of values in a PropertySet MUST contain the same number of items that are 
 A Sparkplug B PropertyValue object is used to encode the value and datatype of the value of a
 property in a PropertySet. It includes the following components.
 
-* *type*
+* *datatype*
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-type]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-type] This
-MUST be an unsigned 32-bit integer representing the datatype.*#
+MUST be a value of the DataType enumeration, represented as the encoding in use defines.*#
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-value] This
 value MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatype_basic[Sparkplug Basic Data Types]
@@ -1517,7 +1517,7 @@ MUST be included in every Template Parameter definition.*#
 MUST be a UTF-8 string representing the name of the Template parameter.*#
 * *type*
 ** [tck-testable tck-id-payloads-template-parameter-value-type]#[yellow-background]*[tck-id-payloads-template-parameter-value-type] This
-MUST be an unsigned 32-bit integer representing the datatype.*#
+MUST be a value of the DataType enumeration, represented as the encoding in use defines.*#
 ** [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*[tck-id-payloads-template-parameter-type-value] This
 value MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
@@ -1529,8 +1529,8 @@ parameter values, not parameter definitions.
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
 ** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*[tck-id-payloads-template-parameter-value] The
-value supplied MUST be one of the following Google Protocol Buffer types: _int32_, int64_, _uint32_,
-_uint64_, _float_, _double_, _bool_, _string_, or _bytes_.*#
+value supplied MUST be one of the following Google Protocol Buffer types: _int32_, _int64_,
+_uint32_, _uint64_, _float_, _double_, _bool_, _string_, or _bytes_.*#
 *** More information on these types can be found here:
 https://developers.google.com/protocol-buffers/docs/proto#scalar
 ** For a template definition, this is the default value of the parameter. For a template instance,
