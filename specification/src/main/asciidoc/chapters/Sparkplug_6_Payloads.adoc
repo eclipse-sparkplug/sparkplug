@@ -688,6 +688,57 @@ distinguish the first metric of the publish from the rest continue to apply.
 ** _body_
 *** This is an array of bytes which can be used for any custom binary encoded data.
 
+[[payloads_c_typedvalue]]
+==== TypedValue
+
+A Sparkplug TypedValue object carries a single value together with the datatype that describes it.
+It is the one structure used wherever the specification carries a value: the value of a
+link:#payloads_c_metric[Metric], the value of a property in a
+link:#payloads_c_propertyset[PropertySet], and the value of a
+link:#payloads_c_template_parameter[Template Parameter]. It includes the following components.
+
+* *datatype*
+** This is the DataType of the value, as enumerated in the link:#payloads_c_datatypes[DataTypes]
+section. It tells a consuming application how to interpret the value, and which of the fields below
+carries it.
+* *is_null*
+** This is a Boolean flag which denotes whether the value is null. This is Sparkplug's mechanism of
+explicitly denoting that a value is actually null, as distinct from a value that happens to be zero
+or empty.
+* *value*
+** The value utilizes the 'oneof' mechanism of Google Protocol Buffers, so at most one of the
+fields below is present. Which one is determined by the datatype. Note that if the is_null flag is
+set to true the value can be omitted altogether. More information on the Google Protocol Buffer
+types can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
+*** Google Protocol Buffer Type: _int32_
+*** Google Protocol Buffer Type: _int64_
+*** Google Protocol Buffer Type: _uint32_
+*** Google Protocol Buffer Type: _uint64_
+*** Google Protocol Buffer Type: _float_
+*** Google Protocol Buffer Type: _double_
+*** Google Protocol Buffer Type: _bool_
+*** Google Protocol Buffer Type: _string_
+*** Google Protocol Buffer Type: _bytes_
+*** Sparkplug _DataSet_
+**** Defined link:#payloads_c_dataset[here].
+*** Sparkplug _Template_
+**** Defined link:#payloads_c_template[here].
+*** Sparkplug _PropertySet_
+**** Defined link:#payloads_c_propertyset[here].
+*** Sparkplug _PropertySetList_
+**** Defined link:#payloads_c_propertysetlist[here].
+*** Sparkplug _ValueArray_
+**** Defined link:#payloads_c_datatype_array[here].
+
+Where the enclosing object also carries a datatype and an is_null of its own, as a Metric does, the
+two MUST agree; this is stated in the link:#payloads_json_typed_values[Typed Values] section, which
+also describes how the JSON encoding represents some TypedValues without the nesting.
+
+Non-normative comment: a context that uses a TypedValue may accept only part of this set. Where it
+does, the restriction is stated in that context's own section rather than restated here, so that
+the permitted fields are described in exactly one place. For example, a context that accepts only
+scalar values says so in its own section, without repeating this list.
+
 [[payloads_c_metric]]
 ==== Metric
 
@@ -758,10 +809,14 @@ written to on the Host Application for NCMD and DCMD messages.
 timestamp MUST be in UTC if it is included.*#
 * *datatype*
 ** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*[tck-id-payloads-metric-datatype-value-type] The
-datatype MUST be an unsigned 32-bit integer representing the datatype.*#
+datatype MUST be carried as a value of the DataType enumeration, represented as the encoding in
+use defines (for JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*[tck-id-payloads-metric-datatype-value] The
 datatype MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatypes[valid Sparkplug Data Types].*#
+** [tck-testable tck-id-payloads-metric-datatype-not-propertyset]#[yellow-background]*[tck-id-payloads-metric-datatype-not-propertyset] The
+datatype MUST NOT be PropertySet or PropertySetList, which are value types for a property rather
+than for a metric. A metric's properties are carried in its properties field.*#
 ** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*[tck-id-payloads-metric-datatype-req] The
 datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.*#
 ** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*[tck-id-payloads-metric-datatype-not-req] The
@@ -801,21 +856,9 @@ This is covered in the link:#payloads_c_metadata[metadata section].
 metadata associated with a metric. This is covered in the
 link:#payloads_c_propertyset[property set section].
 * *value*
-** The value of a metric utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
-supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
-to true the value can be omitted altogether. More information on the Google Protocol Buffer types
-can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** Google Protocol Buffer Type: _uint32_
-*** Google Protocol Buffer Type: _uint64_
-*** Google Protocol Buffer Type: _float_
-*** Google Protocol Buffer Type: _double_
-*** Google Protocol Buffer Type: _bool_
-*** Google Protocol Buffer Type: _string_
-*** Google Protocol Buffer Type: _bytes_
-*** Sparkplug _DataSet_
-**** Defined link:#payloads_c_dataset[here].
-*** Sparkplug _Template_
-**** Defined link:#payloads_c_template[here].
+** This is a TypedValue carrying the metric's value, as described in the
+link:#payloads_c_typedvalue[TypedValue section]. Which field carries the value is determined by the
+metric's datatype, and the value may be omitted altogether if the is_null flag is set to true.
 
 [[payloads_c_quality]]
 ==== Quality
@@ -968,9 +1011,10 @@ array of values in a PropertySet MUST contain the same number of items that are 
 A Sparkplug B PropertyValue object is used to encode the value and datatype of the value of a
 property in a PropertySet. It includes the following components.
 
-* *type*
+* *datatype*
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-type]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-type] This
-MUST be an unsigned 32-bit integer representing the datatype.*#
+MUST be a value of the DataType enumeration, represented as the encoding in use defines (for
+JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-value] This
 value MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatype_basic[Sparkplug Basic Data Types]
@@ -982,25 +1026,9 @@ MUST be included in Property Value Definitions in NBIRTH and DBIRTH messages.*#
 ** This is a Boolean flag which denotes whether this property has a null value. This is Sparkplug
 B’s mechanism of explicitly denoting a property’s value is actually null.
 * *value*
-** The value of a property utilizes the ‘oneof’ mechanism of Google Protocol Buffers. The value
-supplied with a metric MUST be one of the following types. Note if the metrics is_null flag is set
-to true the value can be omitted altogether. More information on the Google Protocol Buffer types
-can be found here: https://developers.google.com/protocol-buffers/docs/proto#scalar
-*** Google Protocol Buffer Type: _int32_
-*** Google Protocol Buffer Type: _int64_
-*** Google Protocol Buffer Type: _uint32_
-*** Google Protocol Buffer Type: _uint64_
-*** Google Protocol Buffer Type: _float_
-*** Google Protocol Buffer Type: _double_
-*** Google Protocol Buffer Type: _bool_
-*** Google Protocol Buffer Type: _string_
-*** Google Protocol Buffer Type: _bytes_
-*** Sparkplug _DataSet_
-**** Defined link:#payloads_c_dataset[here].
-*** Sparkplug _PropertySet_
-**** Defined link:#payloads_c_propertyset[here].
-*** Sparkplug _PropertySetList_
-**** Defined link:#payloads_c_propertysetlist[here].
+** This is a TypedValue carrying the property's value, as described in the
+link:#payloads_c_typedvalue[TypedValue section]. Which field carries the value is determined by the
+property's datatype, and the value may be omitted altogether if the is_null flag is set to true.
 
 [[payloads_c_well_known_properties]]
 ==== Well Known Properties
@@ -1499,7 +1527,8 @@ MUST be included in every Template Parameter definition.*#
 MUST be a UTF-8 string representing the name of the Template parameter.*#
 * *type*
 ** [tck-testable tck-id-payloads-template-parameter-value-type]#[yellow-background]*[tck-id-payloads-template-parameter-value-type] This
-MUST be an unsigned 32-bit integer representing the datatype.*#
+MUST be a value of the DataType enumeration, represented as the encoding in use defines (for
+JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*[tck-id-payloads-template-parameter-type-value] This
 value MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
@@ -1511,8 +1540,8 @@ parameter values, not parameter definitions.
 * *value*
 ** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
 ** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*[tck-id-payloads-template-parameter-value] The
-value supplied MUST be one of the following Google Protocol Buffer types: _int32_, int64_, _uint32_,
-_uint64_, _float_, _double_, _bool_, _string_, or _bytes_.*#
+value supplied MUST be one of the following Google Protocol Buffer types: _int32_, _int64_,
+_uint32_, _uint64_, _float_, _double_, _bool_, _string_, or _bytes_.*#
 *** More information on these types can be found here:
 https://developers.google.com/protocol-buffers/docs/proto#scalar
 ** For a template definition, this is the default value of the parameter. For a template instance,
