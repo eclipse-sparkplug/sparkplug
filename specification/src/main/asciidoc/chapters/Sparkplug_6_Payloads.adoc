@@ -730,9 +730,14 @@ types can be found here: https://developers.google.com/protocol-buffers/docs/pro
 *** Sparkplug _ValueArray_
 **** Defined link:#payloads_c_datatype_array[here].
 
+Where the enclosing object also carries a datatype and an is_null of its own, as a Metric does, the
+two MUST agree; this is stated in the link:#payloads_json_typed_values[Typed Values] section, which
+also describes how the JSON encoding represents some TypedValues without the nesting.
+
 Non-normative comment: a context that uses a TypedValue may accept only part of this set. Where it
-does, the restriction is stated in that context's own section rather than by restating the list
-here, so that the permitted fields are described in exactly one place.
+does, the restriction is stated in that context's own section rather than restated here, so that
+the permitted fields are described in exactly one place. For example, a context that accepts only
+scalar values says so in its own section, without repeating this list.
 
 [[payloads_c_metric]]
 ==== Metric
@@ -804,10 +809,14 @@ written to on the Host Application for NCMD and DCMD messages.
 timestamp MUST be in UTC if it is included.*#
 * *datatype*
 ** [tck-testable tck-id-payloads-metric-datatype-value-type]#[yellow-background]*[tck-id-payloads-metric-datatype-value-type] The
-datatype MUST be a value of the DataType enumeration, represented as the encoding in use defines.*#
+datatype MUST be carried as a value of the DataType enumeration, represented as the encoding in
+use defines (for JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*[tck-id-payloads-metric-datatype-value] The
 datatype MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatypes[valid Sparkplug Data Types].*#
+** [tck-testable tck-id-payloads-metric-datatype-not-propertyset]#[yellow-background]*[tck-id-payloads-metric-datatype-not-propertyset] The
+datatype MUST NOT be PropertySet or PropertySetList, which are value types for a property rather
+than for a metric. A metric's properties are carried in its properties field.*#
 ** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*[tck-id-payloads-metric-datatype-req] The
 datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.*#
 ** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*[tck-id-payloads-metric-datatype-not-req] The
@@ -1004,7 +1013,8 @@ property in a PropertySet. It includes the following components.
 
 * *datatype*
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-type]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-type] This
-MUST be a value of the DataType enumeration, represented as the encoding in use defines.*#
+MUST be a value of the DataType enumeration, represented as the encoding in use defines (for
+JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-value] This
 value MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatype_basic[Sparkplug Basic Data Types]
@@ -1517,7 +1527,8 @@ MUST be included in every Template Parameter definition.*#
 MUST be a UTF-8 string representing the name of the Template parameter.*#
 * *type*
 ** [tck-testable tck-id-payloads-template-parameter-value-type]#[yellow-background]*[tck-id-payloads-template-parameter-value-type] This
-MUST be a value of the DataType enumeration, represented as the encoding in use defines.*#
+MUST be a value of the DataType enumeration, represented as the encoding in use defines (for
+JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*[tck-id-payloads-template-parameter-type-value] This
 value MUST be one of the enumerated values as shown in the
 link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
