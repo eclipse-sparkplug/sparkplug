@@ -352,7 +352,8 @@ public class SendComplexDataTest extends TCKTest {
 		boolean isValid_DataType = true;
 		boolean isValid_DataTypeValue = true;
 
-		logger.debug("Check Req: {} The datatype MUST be an unsigned 32-bit integer representing the datatype.",
+		logger.debug(
+				"Check Req: {} The datatype MUST be carried as a value of the DataType enumeration, represented as the encoding in use defines (for JSON, see Scalar Value Mapping).",
 				ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE);
 
 		PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
@@ -402,9 +403,6 @@ public class SendComplexDataTest extends TCKTest {
 		boolean isValid_PropertyValueTypeValue = true;
 		boolean isValid_PropertyValueTypeReq = true;
 
-		logger.debug("Check Req: {} The datatype MUST be an unsigned 32-bit integer representing the datatype.",
-				ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE);
-
 		PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
 
 		if (result == null) {
@@ -420,7 +418,8 @@ public class SendComplexDataTest extends TCKTest {
 					"Check Req: {} The array of values in a PropertySet MUST contain the same number of items that are in the keys array.",
 					PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE);
 
-			logger.debug("Check Req: {} This MUST be an unsigned 32-bit integer representing the datatype.",
+			logger.debug(
+					"Check Req: {} This MUST be a value of the DataType enumeration, represented as the encoding in use defines (for JSON, see Scalar Value Mapping).",
 					ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE);
 			logger.debug(
 					"Check Req: {} This value MUST be one of the enumerated values as shown in the Sparkplug Basic Data Types or the Sparkplug Property Value Data Types.",
