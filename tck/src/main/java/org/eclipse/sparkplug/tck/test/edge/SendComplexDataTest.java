@@ -403,10 +403,6 @@ public class SendComplexDataTest extends TCKTest {
 		boolean isValid_PropertyValueTypeValue = true;
 		boolean isValid_PropertyValueTypeReq = true;
 
-		logger.debug(
-				"Check Req: {} The datatype MUST be carried as a value of the DataType enumeration, represented as the encoding in use defines (for JSON, see Scalar Value Mapping).",
-				ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE);
-
 		PayloadOrBuilder result = Utils.getSparkplugPayload(packet);
 
 		if (result == null) {

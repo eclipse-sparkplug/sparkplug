@@ -731,8 +731,9 @@ types can be found here: https://developers.google.com/protocol-buffers/docs/pro
 **** Defined link:#payloads_c_datatype_array[here].
 
 Where the enclosing object also carries a datatype and an is_null of its own, as a Metric does, the
-two MUST agree; this is stated in the link:#payloads_json_typed_values[Typed Values] section, which
-also describes how the JSON encoding represents some TypedValues without the nesting.
+two are required to agree; see the link:#payloads_json_typed_values[Typed Values] section, which
+carries that requirement and also describes how the JSON encoding represents some TypedValues
+without the nesting.
 
 Non-normative comment: a context that uses a TypedValue may accept only part of this set. Where it
 does, the restriction is stated in that context's own section rather than restated here, so that
