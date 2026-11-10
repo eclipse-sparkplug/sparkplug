@@ -35,7 +35,7 @@ typically be both an Edge Node and a Host Application.
 ==== Sparkplug Edge Node
 
 A Sparkplug Edge Node is typically an 'Edge Gateway'. It sends and receives data to an MQTT Server
-using a Sparkplug namespace, either spCv4.0/# or spJv4.0/#. Edge Nodes typically interact with
+using a Sparkplug namespace, either spPv4.0/# or spJv4.0/#. Edge Nodes typically interact with
 physical devices to gather data and also write to device outputs.
 
 Sparkplug defines two payload encodings, as described in the
@@ -99,7 +99,7 @@ cannot assume which payload encoding those Edge Nodes use.
 
 * [tck-testable tck-id-conformance-host-encoding-both]#[yellow-background]*[tck-id-conformance-host-encoding-both] A
 Sparkplug Host Application MUST support both Sparkplug payload encodings, and MUST be able to
-consume messages on both the spCv4.0 and spJv4.0 namespaces.*#
+consume messages on both the spPv4.0 and spJv4.0 namespaces.*#
 * [tck-testable tck-id-conformance-host-encoding-publish]#[yellow-background]*[tck-id-conformance-host-encoding-publish] When
 a Sparkplug Host Application publishes a message, it MUST encode that message using the encoding
 that corresponds to the namespace it publishes on.*#
@@ -180,7 +180,7 @@ continue to be published with the MQTT retain flag set to false and are not reta
 Sparkplug Aware MQTT Server MUST support all aspects of a Sparkplug Compliant MQTT Server*#
 * [tck-testable tck-id-conformance-mqtt-aware-encoding-both]#[yellow-background]*[tck-id-conformance-mqtt-aware-encoding-both] A
 Sparkplug Aware MQTT Server that replaces NDEATH timestamps MUST do so for payloads in both
-encodings, on both the spCv4.0 and spJv4.0 namespaces.*#
+encodings, on both the spPv4.0 and spJv4.0 namespaces.*#
 ** Non-normative comment: replacing an NDEATH timestamp is the only behavior required of a
 Sparkplug Aware MQTT Server that decodes a payload at all, and it is itself optional. A Server that
 does not do it never inspects a payload and needs neither encoding. The requirement is therefore

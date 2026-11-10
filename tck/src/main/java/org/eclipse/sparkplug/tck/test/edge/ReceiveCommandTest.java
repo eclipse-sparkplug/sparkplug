@@ -254,7 +254,7 @@ public class ReceiveCommandTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
 	@Override
 	public void connect(final String clientId, final ConnectPacket packet) {

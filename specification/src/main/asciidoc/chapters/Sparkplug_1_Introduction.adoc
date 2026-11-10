@@ -67,14 +67,14 @@ space.
 Sparkplug has defined an approach where the Topic Namespace can aid in the determination of the
 encoding scheme of any particular payload. Historically there have been three Sparkplug defined
 encoding schemes. The first one was 'Sparkplug A', the second was 'Sparkplug B', and the most recent
-is 'Sparkplug C'. This version of the specification also reserves a namespace for a JSON encoding of
+is 'Sparkplug P'. This version of the specification also reserves a namespace for a JSON encoding of
 the same data model. Each of these uses a 'first topic token identifier' so Sparkplug Edge Nodes can
 declare the payload encoding scheme they are using. These first topic tokens are:
 
 ----
 spAv1.0
 spBv1.0
-spCv4.0
+spPv4.0
 spJv4.0
 ----
 
@@ -106,11 +106,11 @@ The 'Sparkplug B' encoding scheme was created with a richer data model developed
 of many system integrators and end user customers using MQTT. These additions included metric
 timestamp support, complex datatype support, metadata, and other improvements.
 
-The 'Sparkplug C' encoding scheme builds on Sparkplug B, retaining the concepts of the topic namespace
+The 'Sparkplug P' encoding scheme builds on Sparkplug B, retaining the concepts of the topic namespace
 and data model while adding a number of new features. Some of these include better command/response
 capabilities, better support for multiple host applications (note this does not include multiple
 Primary Host Applications for the same Edge Node), file publishing support, compression, and many
-others. It is the encoding scheme defined by this version of the specification and uses the 'spCv4.0'
+others. It is the encoding scheme defined by this version of the specification and uses the 'spPv4.0'
 namespace.
 
 [[introduction_background]]
