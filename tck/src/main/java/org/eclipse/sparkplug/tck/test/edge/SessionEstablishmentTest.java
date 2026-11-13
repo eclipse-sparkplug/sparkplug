@@ -218,7 +218,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.PRINCIPLES_PERSISTENT_VS_NON_PERSISTENT_CONNECTIONS,
 			id = ID_PRINCIPLES_PERSISTENCE_CLEAN_SESSION_50)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE)
 
 	@SpecAssertion(
@@ -320,10 +320,10 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.PRINCIPLES_BIRTH_AND_DEATH_CERTIFICATES,
 			id = ID_PRINCIPLES_BIRTH_CERTIFICATES_ORDER)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDATA,
+			section = Sections.PAYLOADS_P_NDATA,
 			id = ID_PAYLOADS_NDATA_ORDER)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDATA,
+			section = Sections.PAYLOADS_P_DDATA,
 			id = ID_PAYLOADS_DDATA_ORDER)
 
 	public void publish(final @NotNull String clientId, final @NotNull PublishPacket packet) {
@@ -372,7 +372,7 @@ public class SessionEstablishmentTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT)
 	public void checkPayloadsNameInDataRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug(
@@ -393,10 +393,10 @@ public class SessionEstablishmentTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_ALIAS_BIRTH_REQUIREMENT)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_ALIAS_UNIQUENESS)
 	public void checkPayloadsAliasAndNameRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug("Check Req: "
@@ -422,16 +422,16 @@ public class SessionEstablishmentTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_SEQ)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDEATH,
 			id = ID_TOPICS_NDEATH_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_RETAIN)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDEATH,
@@ -513,31 +513,31 @@ public class SessionEstablishmentTest extends TCKTest {
 			id = ID_TOPICS_NBIRTH_METRICS)
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_BDSEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_RETAIN)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PAYLOAD,
+			section = Sections.PAYLOADS_P_PAYLOAD,
 			id = ID_PAYLOADS_SEQUENCE_NUM_REQ_NBIRTH)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_REBIRTH_REQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_BDSEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_METRIC_DATATYPE_REQ)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_DATA_PUBLISH,
@@ -565,7 +565,7 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_NBIRTH_PAYLOAD_BDSEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NBIRTH,
+			section = Sections.PAYLOADS_P_NBIRTH,
 			id = ID_PAYLOADS_NBIRTH_BDSEQ_REPEAT)
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_NBIRTH,
@@ -696,22 +696,22 @@ public class SessionEstablishmentTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DBIRTH,
+			section = Sections.PAYLOADS_P_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DBIRTH,
+			section = Sections.PAYLOADS_P_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_RETAIN)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DBIRTH,
+			section = Sections.PAYLOADS_P_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DBIRTH,
+			section = Sections.PAYLOADS_P_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DBIRTH,
+			section = Sections.PAYLOADS_P_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_SEQ_INC)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DBIRTH,
+			section = Sections.PAYLOADS_P_DBIRTH,
 			id = ID_PAYLOADS_DBIRTH_ORDER)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_DBIRTH,
@@ -750,10 +750,10 @@ public class SessionEstablishmentTest extends TCKTest {
 			section = Sections.OPERATIONAL_BEHAVIOR_DEVICE_SESSION_ESTABLISHMENT,
 			id = ID_MESSAGE_FLOW_DEVICE_BIRTH_PUBLISH_DBIRTH_PAYLOAD)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDATA,
+			section = Sections.PAYLOADS_P_NDATA,
 			id = ID_PAYLOADS_NDATA_ORDER)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDATA,
+			section = Sections.PAYLOADS_P_DDATA,
 			id = ID_PAYLOADS_DDATA_ORDER)
 	@SpecAssertion(
 			section = Sections.TOPICS_BIRTH_MESSAGE_DBIRTH,
