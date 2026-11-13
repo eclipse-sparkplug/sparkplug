@@ -65,7 +65,7 @@ https://developers.google.com/protocol-buffers/
 As described in the link:#introduction_define_the_mqtt_payload[Introduction Section] Sparkplug A is
 deprecated and is not included in this document.
 
-[[payloads_sparkplug_c_mqtt_payload_definition]]
+[[payloads_sparkplug_b_mqtt_payload_definition]]
 === Sparkplug B MQTT Payload Definition
 
 The goal of Sparkplug is to provide a specification that both OEM device manufactures and
@@ -121,7 +121,7 @@ being requested. The entire Google Protocol Buffers definition is below.
 //
 // To compile:
 // cd client_libraries/java
-// protoc --proto_path=../../ --java_out=src/main/java ../../sparkplug_c.proto
+// protoc --proto_path=../../ --java_out=src/main/java ../../sparkplug_p.proto
 // Requires protoc 27 or later and a Protocol Buffers runtime that supports edition 2023
 // (protobuf-java 4.27 or later, Python protobuf 5.27 or later, and equivalents).
 //
@@ -3518,7 +3518,7 @@ on the publishing (transmission) side, and 5xx indicate an error on the receivin
 ==== Overview
 
 Sparkplug defines two payload encodings of the same data model. The Google Protocol Buffers
-encoding is defined in the link:#payloads_sparkplug_c_mqtt_payload_definition[Sparkplug B MQTT
+encoding is defined in the link:#payloads_sparkplug_b_mqtt_payload_definition[Sparkplug B MQTT
 Payload Definition] section above and is published on the spPv4.0 namespace. The JSON encoding is
 defined in this section and is published on the spJv4.0 namespace.
 

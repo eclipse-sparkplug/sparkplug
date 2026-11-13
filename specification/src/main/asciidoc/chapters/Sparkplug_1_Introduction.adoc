@@ -83,7 +83,10 @@ Each token is divided up into three distinct components. These are:
 * Sparkplug Identifier
 ** Always 'sp'
 * Payload Encoding Scheme
-** Currently 'A', 'B', 'C', or 'J' but there could be future encoding schemes
+** Currently 'A', 'B', 'P', or 'J' but there could be future encoding schemes
+** From version 4.0 the letter names the payload encoding rather than the generation of the
+encoding scheme: 'P' for Google Protocol Buffers and 'J' for JSON. 'A' and 'B' are the earlier
+schemes, which were lettered by generation.
 * Sparkplug Specification Version
 ** The major and minor version of the Sparkplug Specification that first defined the encoding scheme
 ** 'Sparkplug A' and 'Sparkplug B' were defined by specification versions that predate this
