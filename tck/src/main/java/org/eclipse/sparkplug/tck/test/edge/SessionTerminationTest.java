@@ -204,10 +204,10 @@ public class SessionTerminationTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT311)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER_DISCONNECT_MQTT50)
 	@SpecAssertion(
 			section = Sections.OPERATIONAL_BEHAVIOR_EDGE_NODE_SESSION_TERMINATION,
@@ -279,19 +279,19 @@ public class SessionTerminationTest extends TCKTest {
 			section = Sections.PAYLOADS_DESC_DDEATH,
 			id = ID_TOPICS_DDEATH_SEQ_NUM)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDEATH,
+			section = Sections.PAYLOADS_P_DDEATH,
 			id = ID_PAYLOADS_DDEATH_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDEATH,
+			section = Sections.PAYLOADS_P_DDEATH,
 			id = ID_PAYLOADS_DDEATH_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDEATH,
+			section = Sections.PAYLOADS_P_DDEATH,
 			id = ID_PAYLOADS_DDEATH_SEQ_INC)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDEATH,
+			section = Sections.PAYLOADS_P_DDEATH,
 			id = ID_PAYLOADS_DDEATH_SEQ_NUMBER)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDEATH,
+			section = Sections.PAYLOADS_P_NDEATH,
 			id = ID_PAYLOADS_NDEATH_WILL_MESSAGE_PUBLISHER)
 
 	@SpecAssertion(

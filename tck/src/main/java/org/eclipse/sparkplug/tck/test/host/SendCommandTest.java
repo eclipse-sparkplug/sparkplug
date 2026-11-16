@@ -346,16 +346,16 @@ public class SendCommandTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NCMD,
+			section = Sections.PAYLOADS_P_NCMD,
 			id = ID_PAYLOADS_NCMD_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NCMD,
+			section = Sections.PAYLOADS_P_NCMD,
 			id = ID_PAYLOADS_NCMD_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NCMD,
+			section = Sections.PAYLOADS_P_NCMD,
 			id = ID_PAYLOADS_NCMD_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NCMD,
+			section = Sections.PAYLOADS_P_NCMD,
 			id = ID_PAYLOADS_NCMD_RETAIN)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NCMD,
@@ -417,16 +417,16 @@ public class SendCommandTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DCMD,
+			section = Sections.PAYLOADS_P_DCMD,
 			id = ID_PAYLOADS_DCMD_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DCMD,
+			section = Sections.PAYLOADS_P_DCMD,
 			id = ID_PAYLOADS_DCMD_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DCMD,
+			section = Sections.PAYLOADS_P_DCMD,
 			id = ID_PAYLOADS_DCMD_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DCMD,
+			section = Sections.PAYLOADS_P_DCMD,
 			id = ID_PAYLOADS_DCMD_RETAIN)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_DCMD,
@@ -577,7 +577,7 @@ public class SendCommandTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_NAME_CMD_REQUIREMENT)
 	public void checkPayloadsTimestampCommand(final @NotNull PayloadOrBuilder sparkplugPayload, String topic) {
 		logger.debug("Check Req: The timestamp MAY be included with metrics in NCMD and DCMD messages.");

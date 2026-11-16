@@ -44,7 +44,7 @@ connect to the next available MQTT Server where STATE for the Primary Host Appli
 === Timestamps in Sparkplug
 
 An important aspect of Sparkplug is its use of time. All timestamps are in Coordinated Universal
-Time (UTC), as required in the link:#payloads_c_payload_header[Header] section. In order to ensure
+Time (UTC), as required in the link:#payloads_p_payload_header[Header] section. In order to ensure
 this is the case, all Sparkplug Edge Nodes and Sparkplug Host Applications need an accurate
 mechanism for ensuring their clocks remain accurate. This is typically left to the system operating
 system using technologies such as Network Time Protocol (NTP). Regardless of the mechanism used,
@@ -97,7 +97,7 @@ this situation well.
 Nodes in a Sparkplug environment SHOULD NOT have Edge Node IDs, Topic Prefixes, or device_tokens
 (which identify Sparkplug Devices) that when converted to lower case match*#
 ** For example there should not be two different Edge Nodes publishing NBIRTH messages on these two
-topics spCv4.0/NBIRTH/EdgeNode1 and spCv4.0/NBIRTH/edgenode1
+topics spPv4.0/NBIRTH/EdgeNode1 and spPv4.0/NBIRTH/edgenode1
 * [tck-testable tck-id-case-sensitivity-metric-names]#[yellow-background]*[tck-id-case-sensitivity-metric-names] An
 Edge Node SHOULD NOT publish metric names that when converted to all lower case match.*#
 ** For example a DBIRTH should not contain a metric 'a' and another metric 'A'.
@@ -185,9 +185,9 @@ Host Application Birth Certificate Payload MUST be JSON UTF-8 data. It MUST incl
 pairs. One key MUST be 'online' and its value is a boolean 'true'. One key MUST be 'timestamp' and
 the value MUST be the same value set in the immediately prior MQTT CONNECT packet's Will Message
 payload. One key MUST be 'bd_seq' and the value MUST be as defined in the
-link:#payloads_c_state_bd_seq[STATE bd_seq Number] section. One key MUST be 'client_id' and the
+link:#payloads_p_state_bd_seq[STATE bd_seq Number] section. One key MUST be 'client_id' and the
 value MUST be the MQTT Client ID of the MQTT session in which the message was published, as defined
-in the link:#payloads_c_state_client_id[STATE client_id] section.*#
+in the link:#payloads_p_state_client_id[STATE client_id] section.*#
 +
 [tck-testable tck-id-message-flow-phid-sparkplug-state-publish-payload-timestamp]#[yellow-background]*[tck-id-message-flow-phid-sparkplug-state-publish-payload-timestamp] The
 timestamp value in the Host Application Birth Certificate payload MUST be the same value set in the
@@ -448,13 +448,13 @@ receive NCMD messages with the following rules.
 
 * [tck-testable tck-id-message-flow-edge-node-rebirth-subscribe]#[yellow-background]*[tck-id-message-flow-edge-node-rebirth-subscribe] The
 MQTT client associated with the Edge Node MUST subscribe to a topic of the form
-'[topic_prefix/]spCv4.0/REBIRTH/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
+'[topic_prefix/]spPv4.0/REBIRTH/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
 Prefix and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node. It MUST subscribe on
 this topic with a QoS of 0.*#
 ** This subscription is mandatory as Edge Nodes MUST be able to respond to 'rebirth requests'.
 * [tck-testable tck-id-message-flow-edge-node-ncmd-subscribe]#[yellow-background]*[tck-id-message-flow-edge-node-ncmd-subscribe] The
 MQTT client associated with the Edge Node SHOULD subscribe to a topic of the form
-'[topic_prefix/]spCv4.0/NCMD/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
+'[topic_prefix/]spPv4.0/NCMD/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
 Prefix and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node. If it subscribes, it
 MUST do so with a QoS of 0.*#
 
@@ -466,7 +466,7 @@ DBIRTH messages.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message] When
 a Sparkplug Edge Node sends its MQTT CONNECT packet, it MUST include a Will Message.*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-topic]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-topic] The
-Edge Node's MQTT Will Message's topic MUST be of the form '[topic_prefix/]spCv4.0/NDEATH/edge_node_id'
+Edge Node's MQTT Will Message's topic MUST be of the form '[topic_prefix/]spPv4.0/NDEATH/edge_node_id'
 where the optional topic_prefix is the Sparkplug Topic Prefix and the edge_node_id is the Sparkplug
 Edge Node ID for this Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-will-message-payload]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-will-message-payload] The
@@ -564,7 +564,7 @@ a session the Edge Node has already observed, whereas the timestamp gives an ord
 can evaluate on a value it is seeing for the first time.
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-topic]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-topic] The
 Edge Node's NBIRTH MQTT topic MUST be of the form
-'[topic_prefix/]spCv4.0/NBIRTH/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
+'[topic_prefix/]spPv4.0/NBIRTH/edge_node_id' where the optional topic_prefix is the Sparkplug Topic
 Prefix and the edge_node_id is the Sparkplug Edge Node ID for this Edge Node*#
 * [tck-testable tck-id-message-flow-edge-node-birth-publish-nbirth-payload]#[yellow-background]*[tck-id-message-flow-edge-node-birth-publish-nbirth-payload] The
 Edge Node's NBIRTH payload MUST be a Sparkplug payload encoded as defined for the namespace on
@@ -833,7 +833,7 @@ rules.
 
 * [tck-testable tck-id-message-flow-device-dcmd-subscribe]#[yellow-background]*[tck-id-message-flow-device-dcmd-subscribe] If
 the Device supports Device Command (DCMD) messages, the MQTT client associated with the Device MUST
-subscribe to a topic of the form '[topic_prefix/]spCv4.0/DCMD/edge_node_id/device_tokens' where the
+subscribe to a topic of the form '[topic_prefix/]spPv4.0/DCMD/edge_node_id/device_tokens' where the
 optional topic_prefix is the Sparkplug Topic Prefix, the edge_node_id is the Sparkplug Edge Node ID,
 and the device_tokens identify the Sparkplug Device (and MUST match the device_tokens used by that
 Device's DDATA messages). Any such subscription MUST use a QoS of 0.*#
@@ -846,7 +846,7 @@ NBIRTH message MUST have been sent within the current MQTT session prior to a DB
 published.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-topic]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-topic] The
 Device's DBIRTH MQTT topic MUST be of the form
-'[topic_prefix/]spCv4.0/DBIRTH/edge_node_id/device_tokens' where the optional topic_prefix is the
+'[topic_prefix/]spPv4.0/DBIRTH/edge_node_id/device_tokens' where the optional topic_prefix is the
 Sparkplug Topic Prefix, the edge_node_id is the Sparkplug Edge Node ID, and the device_tokens
 identify the Sparkplug Device.*#
 * [tck-testable tck-id-message-flow-device-birth-publish-dbirth-match-edge-node-topic]#[yellow-background]*[tck-id-message-flow-device-birth-publish-dbirth-match-edge-node-topic] The
@@ -1046,13 +1046,13 @@ Because the message_type element immediately follows the namespace element, a si
 the message_type position selects all message types for a given Edge Node or Device. For a Host
 Application interested only in 'Device1' beneath 'EdgeNode1', two subscriptions are sufficient:
 
-  [topic_prefix/]spCv4.0/+/EdgeNode1              <- all Edge Node scoped messages for EdgeNode1
-  [topic_prefix/]spCv4.0/+/EdgeNode1/Device1/#    <- all messages for Device1 and anything beneath it
+  [topic_prefix/]spPv4.0/+/EdgeNode1              <- all Edge Node scoped messages for EdgeNode1
+  [topic_prefix/]spPv4.0/+/EdgeNode1/Device1/#    <- all messages for Device1 and anything beneath it
 
 A Host Application that does not want the Edge Node's own data messages can subscribe to the
 specific Edge Node scoped message types it requires instead of using the '+' wildcard, for example
-'[topic_prefix/]spCv4.0/NBIRTH/EdgeNode1', '[topic_prefix/]spCv4.0/NREBIRTH/EdgeNode1', and
-'[topic_prefix/]spCv4.0/NDEATH/EdgeNode1'.
+'[topic_prefix/]spPv4.0/NBIRTH/EdgeNode1', '[topic_prefix/]spPv4.0/NREBIRTH/EdgeNode1', and
+'[topic_prefix/]spPv4.0/NDEATH/EdgeNode1'.
 
 Whatever form the subscriptions take, a Host Application cannot correctly interpret a Device's data
 unless it also receives the messages that define and terminate that Device's Sparkplug session.
@@ -1294,7 +1294,7 @@ receive them.
 * [tck-testable tck-id-operational-behavior-host-partial-rebirth-scope]#[yellow-background]*[tck-id-operational-behavior-host-partial-rebirth-scope] A
 Host Application with partial subscriptions that requires a rebirth of a single Sparkplug Device
 MUST issue the Rebirth Request to the Edge Node that reports that Device, on a topic of the form
-'[topic_prefix/]spCv4.0/REBIRTH/edge_node_id', following the rules in the
+'[topic_prefix/]spPv4.0/REBIRTH/edge_node_id', following the rules in the
 link:#operational_behavior_rebirth[Rebirth Requests] section. There is no Device scoped Rebirth
 Request.*#
 * [tck-testable tck-id-operational-behavior-host-partial-rebirth-rate]#[yellow-background]*[tck-id-operational-behavior-host-partial-rebirth-rate] A
@@ -1497,16 +1497,16 @@ sparkplug_host_id MUST be unique to all other Sparkplug Host IDs in the infrastr
 * [tck-testable tck-id-operational-behavior-host-application-connect-will]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-will] When
 a Sparkplug Host Application sends its MQTT CONNECT packet, it MUST include a Will Message.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-topic]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-will-topic] The
-MQTT Will Message's topic MUST be of the form 'spCv4.0/STATE/sparkplug_host_id' where host_id is the
+MQTT Will Message's topic MUST be of the form 'spPv4.0/STATE/sparkplug_host_id' where host_id is the
 unique identifier of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-payload]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-will-payload] The
 Death Certificate Payload MUST be JSON UTF-8 data. It MUST include four key/value pairs. One key
 MUST be 'online' and it's value is a boolean 'false'. One key MUST be 'timestamp' and the value MUST
 be the same value that was used for the timestamp in its own prior MQTT CONNECT packet Will Message
 payload. One key MUST be 'bd_seq' and the value MUST be as defined in the
-link:#payloads_c_state_bd_seq[STATE bd_seq Number] section. One key MUST be 'client_id' and the
+link:#payloads_p_state_bd_seq[STATE bd_seq Number] section. One key MUST be 'client_id' and the
 value MUST be the MQTT Client ID of the MQTT session in which the message was published, as defined
-in the link:#payloads_c_state_client_id[STATE client_id] section.*#
+in the link:#payloads_p_state_client_id[STATE client_id] section.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-qos]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-will-qos] The
 MQTT Will Message's MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-will-retained]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-will-retained] The
@@ -1519,16 +1519,16 @@ birth with the following rules.
 MQTT Client associated with the Sparkplug Host Application MUST send a birth message immediately
 after successfully connecting to the MQTT Server.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-topic]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-birth-topic] The
-Host Application's Birth topic MUST be of the form 'spCv4.0/STATE/sparkplug_host_id' where host_id
+Host Application's Birth topic MUST be of the form 'spPv4.0/STATE/sparkplug_host_id' where host_id
 is the unique identifier of the Sparkplug Host Application*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-payload]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-birth-payload] The
 Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include four key/value pairs. One key
 MUST be 'online' and it's value is a boolean 'true'. One key MUST be 'timestamp' and the value MUST
 match the timestamp value that was used in the immediately prior MQTT CONNECT packet Will Message
 payload. One key MUST be 'bd_seq' and the value MUST be as defined in the
-link:#payloads_c_state_bd_seq[STATE bd_seq Number] section. One key MUST be 'client_id' and the
+link:#payloads_p_state_bd_seq[STATE bd_seq Number] section. One key MUST be 'client_id' and the
 value MUST be the MQTT Client ID of the MQTT session in which the message was published, as defined
-in the link:#payloads_c_state_client_id[STATE client_id] section.*#
+in the link:#payloads_p_state_client_id[STATE client_id] section.*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-qos]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-birth-qos] The
 Host Application's Birth MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-connect-birth-retained]#[yellow-background]*[tck-id-operational-behavior-host-application-connect-birth-retained] The
@@ -1551,16 +1551,16 @@ the Sparkplug Host Application ever disconnects intentionally, it MUST publish a
 the following characteristics.*#
 
 * [tck-testable tck-id-operational-behavior-host-application-death-topic]#[yellow-background]*[tck-id-operational-behavior-host-application-death-topic] The
-Sparkplug Host Application's Death topic MUST be of the form 'spCv4.0/STATE/sparkplug_host_id' where
+Sparkplug Host Application's Death topic MUST be of the form 'spPv4.0/STATE/sparkplug_host_id' where
 host_id is the unique identifier of the Sparkplug Host Application.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-payload]#[yellow-background]*[tck-id-operational-behavior-host-application-death-payload] The
 Death Certificate Payload registered as the MQTT Will Message in the MQTT CONNECT packet MUST be
 JSON UTF-8 data. It MUST include four key/value pairs. One key MUST be 'online' and it's value is a
 boolean 'false'. One key MUST be 'timestamp' and the value MUST be a numeric value representing the
 current UTC time in nanoseconds since Epoch. One key MUST be 'bd_seq' and the value MUST be as
-defined in the link:#payloads_c_state_bd_seq[STATE bd_seq Number] section. One key MUST be
+defined in the link:#payloads_p_state_bd_seq[STATE bd_seq Number] section. One key MUST be
 'client_id' and the value MUST be the MQTT Client ID of the MQTT session in which the message was
-published, as defined in the link:#payloads_c_state_client_id[STATE client_id] section.*#
+published, as defined in the link:#payloads_p_state_client_id[STATE client_id] section.*#
 * [tck-testable tck-id-operational-behavior-host-application-death-qos]#[yellow-background]*[tck-id-operational-behavior-host-application-death-qos] The
 Sparkplug Host Application's Death MQTT QoS MUST be 1 (at least once).*#
 * [tck-testable tck-id-operational-behavior-host-application-death-retained]#[yellow-background]*[tck-id-operational-behavior-host-application-death-retained] The
@@ -1797,7 +1797,7 @@ an Edge Node or Device includes as Command metrics in its BIRTH. A command is a 
 with a typed signature: it declares the inputs it accepts and the outputs it returns. Invoking a
 command follows a correlated request/response pattern so that the result, including any returned
 data or error code, can be reliably matched back to the request that produced it. The structure of a
-Command metric is defined in the link:#payloads_c_command[Command Section].
+Command metric is defined in the link:#payloads_p_command[Command Section].
 
 The general flow is: a Host Application publishes an NCMD or DCMD that targets a Command metric and
 includes the argument values and a correlation_id. The Edge Node executes the command, and the Edge

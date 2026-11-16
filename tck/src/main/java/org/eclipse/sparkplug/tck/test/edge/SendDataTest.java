@@ -289,16 +289,16 @@ public class SendDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDATA,
+			section = Sections.PAYLOADS_P_NDATA,
 			id = ID_PAYLOADS_NDATA_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDATA,
+			section = Sections.PAYLOADS_P_NDATA,
 			id = ID_PAYLOADS_NDATA_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDATA,
+			section = Sections.PAYLOADS_P_NDATA,
 			id = ID_PAYLOADS_NDATA_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_NDATA,
+			section = Sections.PAYLOADS_P_NDATA,
 			id = ID_PAYLOADS_NDATA_RETAIN)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_NDATA,
@@ -316,7 +316,7 @@ public class SendDataTest extends TCKTest {
 			section = Sections.TOPICS_DATA_MESSAGE_NDATA,
 			id = ID_TOPICS_NDATA_TOPIC)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC)
 	public void checkNDATA(String clientId, PublishPacket packet) {
 		logger.info("Send data test payload::check Edge Node data - Start");
@@ -396,16 +396,16 @@ public class SendDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDATA,
+			section = Sections.PAYLOADS_P_DDATA,
 			id = ID_PAYLOADS_DDATA_TIMESTAMP)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDATA,
+			section = Sections.PAYLOADS_P_DDATA,
 			id = ID_PAYLOADS_DDATA_SEQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDATA,
+			section = Sections.PAYLOADS_P_DDATA,
 			id = ID_PAYLOADS_DDATA_QOS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_DDATA,
+			section = Sections.PAYLOADS_P_DDATA,
 			id = ID_PAYLOADS_DDATA_RETAIN)
 	@SpecAssertion(
 			section = Sections.PAYLOADS_DESC_DDATA,
@@ -423,7 +423,7 @@ public class SendDataTest extends TCKTest {
 			section = Sections.TOPICS_DATA_MESSAGE_DDATA,
 			id = ID_TOPICS_DDATA_TOPIC)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_METRIC_TIMESTAMP_IN_UTC)
 	public void checkDDATA(String clientId, PublishPacket packet) {
 		logger.info("Send data test payload::check Device data - Start");
@@ -526,28 +526,28 @@ public class SendDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_REF)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_MEMBERS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_PARAMETERS)
 	private void checkInstance(String sparkplugDescriptor, String instanceName, Payload.Template instance,
 			String msgtype) {
@@ -658,10 +658,10 @@ public class SendDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_REF)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_PARAMETERS_DEFAULT)
 	public void checkNBIRTH(String clientId, PublishPacket packet) {
 

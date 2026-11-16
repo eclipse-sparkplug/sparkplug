@@ -318,7 +318,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PAYLOAD,
+			section = Sections.PAYLOADS_P_PAYLOAD,
 			id = ID_PAYLOADS_SEQUENCE_NUM_ALWAYS_INCLUDED)
 	public void checkSequenceNumberIncluded(final @NotNull PublishPacket packet, String topic) {
 		logger.debug(
@@ -343,10 +343,10 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_METRIC_DATATYPE_VALUE_TYPE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_METRIC_DATATYPE_VALUE)
 	public void checkDatatypeValidType(final @NotNull PublishPacket packet) {
 		boolean isValid_DataType = true;
@@ -383,19 +383,19 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PROPERTYSET,
+			section = Sections.PAYLOADS_P_PROPERTYSET,
 			id = ID_PAYLOADS_PROPERTYSET_KEYS_ARRAY_SIZE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PROPERTYSET,
+			section = Sections.PAYLOADS_P_PROPERTYSET,
 			id = ID_PAYLOADS_PROPERTYSET_VALUES_ARRAY_SIZE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PROPERTYVALUE,
+			section = Sections.PAYLOADS_P_PROPERTYVALUE,
 			id = ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_TYPE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PROPERTYVALUE,
+			section = Sections.PAYLOADS_P_PROPERTYVALUE,
 			id = ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_VALUE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_PROPERTYVALUE,
+			section = Sections.PAYLOADS_P_PROPERTYVALUE,
 			id = ID_PAYLOADS_METRIC_PROPERTYVALUE_TYPE_REQ)
 	public void checkPropertiesValidType(final @NotNull PublishPacket packet, String topic) {
 		boolean isValid_KeyArraySize = true;
@@ -409,7 +409,7 @@ public class SendComplexDataTest extends TCKTest {
 			isValid_KeyArraySize = false;
 			isValid_PropertyValueType = false;
 			isValid_PropertyValueTypeReq = false;
-			logger.error("Check req set for : {}", Sections.PAYLOADS_C_PROPERTYVALUE);
+			logger.error("Check req set for : {}", Sections.PAYLOADS_P_PROPERTYVALUE);
 		} else {
 			logger.debug(
 					"Check Req: {} The array of keys in a PropertySet MUST contain the same number of values included in the array of PropertyValue objects.",
@@ -463,7 +463,7 @@ public class SendComplexDataTest extends TCKTest {
 	// corresponds to anything the specification defines; see the Sparkplug v4 TCK rewrite.
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_ALIAS_DATA_CMD_REQUIREMENT)
 	public void checkAliasInData(final @NotNull PayloadOrBuilder sparkplugPayload, String topic) {
 		logger.debug(
@@ -484,7 +484,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ)
 	public void checkMetricsDataTypeNotRec(final @NotNull PayloadOrBuilder sparkplugPayload, String topic) {
 		logger.debug(
@@ -505,7 +505,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_NAME_REQUIREMENT)
 	public void checkPayloadsNameRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug("Check Req: The name MUST be included with every metric unless aliases are being used.");
@@ -520,7 +520,7 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_METRIC,
+			section = Sections.PAYLOADS_P_METRIC,
 			id = ID_PAYLOADS_NAME_BIRTH_DATA_REQUIREMENT)
 	public void checkPayloadsNameInDataRequirement(final @NotNull PayloadOrBuilder sparkplugPayload) {
 		logger.debug(
@@ -537,53 +537,53 @@ public class SendComplexDataTest extends TCKTest {
 	}
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_IS_DEFINITION)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_IS_DEFINITION)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_IS_DEFINITION)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_DEFINITION_REF)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_REF_DEFINITION)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_INSTANCE_REF)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_IS_DEFINITION_DEFINITION)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_IS_DEFINITION_INSTANCE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_REF_INSTANCE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE,
+			section = Sections.PAYLOADS_P_TEMPLATE,
 			id = ID_PAYLOADS_TEMPLATE_VERSION)
 
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE_PARAMETER,
+			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE_PARAMETER,
+			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE_PARAMETER,
+			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE_PARAMETER,
+			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE_PARAMETER,
+			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ)
 	@SpecAssertion(
-			section = Sections.PAYLOADS_C_TEMPLATE_PARAMETER,
+			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE)
 	public boolean checkTemplate(final @NotNull PublishPacket packet) {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);

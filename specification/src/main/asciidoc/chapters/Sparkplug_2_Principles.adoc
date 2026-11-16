@@ -89,7 +89,7 @@ Birth and Death Certificates are used by both Edge Nodes and Host Applications. 
 for both are always registered in the MQTT CONNECT packet as the MQTT Will Message. By using the
 MQTT Will message, the Death Certificates will be delivered to subscribers even if the MQTT client
 connection is lost ungracefully. For Edge Nodes, the Death Certificate uses the NDEATH Sparkplug
-verb in the topic. For Host Applications, the spCv4.0/STATE/sparkplug_host_id topic is used. More
+verb in the topic. For Host Applications, the spPv4.0/STATE/sparkplug_host_id topic is used. More
 information on Death certificates can be found in
 link:#payloads_b_ndeath[Edge Node Death Certificates] and
 link:#payloads_b_state[Host Application Death Certificates]
@@ -100,7 +100,7 @@ Application.*#
 
 Birth Certificates denote to any subscribing MQTT clients that the Edge Node or Host Application is
 now online. For Edge Nodes, the Birth Certificate uses the NBIRTH Sparkplug verb in the topic. For
-Host Applications, the spCv4.0/STATE/sparkplug_host_id topic is used. More details and requirements
+Host Applications, the spPv4.0/STATE/sparkplug_host_id topic is used. More details and requirements
 on Birth certificates can be found in
 link:#payloads_b_nbirth[Edge Node Birth Certificates] and
 link:#payloads_b_state[Host Application Birth Certificates]

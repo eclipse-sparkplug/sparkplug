@@ -52,7 +52,7 @@ the structure of the remaining namespace elements as well as the encoding used f
 payload data. The namespace element MAY be preceded by an optional topic_prefix of any number of
 levels (see the link:#topics_topic_prefix_element[topic_prefix Element]). When no topic_prefix is
 used the namespace element is at the root of the topic. Sparkplug defines two payload encodings,
-each with its own namespace constant: spCv4.0 for the Google Protocol Buffers encoding, and spJv4.0
+each with its own namespace constant: spPv4.0 for the Google Protocol Buffers encoding, and spJv4.0
 for a JSON encoding. Earlier payload definitions A (now deprecated) and B used the 'spAv1.0' and
 'spBv1.0' namespaces respectively.
 
@@ -64,15 +64,15 @@ the encoding of the associated payload.*#
 [tck-testable tck-id-topic-structure-namespace-a]#[yellow-background]*[tck-id-topic-structure-namespace-a] The
 UTF-8 string constant for the namespace element MUST be one of the two valid Sparkplug namespaces:*#
 
-  spCv4.0
+  spPv4.0
   spJv4.0
 
-Note that the topic namespace defined in the remainder of this document applies to both the spCv4.0
+Note that the topic namespace defined in the remainder of this document applies to both the spPv4.0
 and spJv4.0 namespaces, which differ only in payload encoding. For earlier 'Sparkplug A' and
 'Sparkplug B' topic namespace definitions and concepts, see the earlier versions of the Sparkplug
 Specification.
 
-Non-normative comment: Topics are written with the spCv4.0 namespace element throughout the
+Non-normative comment: Topics are written with the spPv4.0 namespace element throughout the
 remainder of this specification. Every such topic applies equally to the spJv4.0 namespace with
 that element substituted, because the two namespaces share one topic structure. The encoding of the
 payload carried on a topic is determined by the namespace element of that topic, as required in the
@@ -80,14 +80,14 @@ link:#payloads_json_encoding_selection[Encoding Selection] section.
 
 [tck-testable tck-id-topics-state-single-namespace]#[yellow-background]*[tck-id-topics-state-single-namespace] The
 STATE topic is the one exception. A STATE message MUST be published on
-'spCv4.0/STATE/sparkplug_host_id' whatever payload encoding the Edge Nodes and Host Applications in
+'spPv4.0/STATE/sparkplug_host_id' whatever payload encoding the Edge Nodes and Host Applications in
 that infrastructure use, and an Edge Node that waits on a Primary Host Application MUST subscribe
 to that topic rather than to a spJv4.0 equivalent.*#
 
 Non-normative comment: STATE carries a JSON document rather than a Sparkplug payload, so there is
 nothing for a second namespace to encode differently. Publishing it on one topic also keeps a
 single Will Message per Host Application. Without this rule a JSON Edge Node would wait on
-spJv4.0/STATE while the Host published on spCv4.0/STATE, and would never see the Host come
+spJv4.0/STATE while the Host published on spPv4.0/STATE, and would never see the Host come
 online.
 
 [[topics_topic_prefix_element]]
@@ -199,9 +199,9 @@ applications finer-grained control over their subscriptions. For example, the fo
 topics all describe a metric whose fully-qualified name is
 'edge_node26/plc4/line3/machine1/counter/total_count' (topic_prefix empty, Edge Node 'edge_node26'):
 
-  spCv4.0/DBIRTH/edge_node26/plc4                + metric name: line3/machine1/counter/total_count
-  spCv4.0/DBIRTH/edge_node26/plc4/line3          + metric name: machine1/counter/total_count
-  spCv4.0/DBIRTH/edge_node26/plc4/line3/machine1 + metric name: counter/total_count
+  spPv4.0/DBIRTH/edge_node26/plc4                + metric name: line3/machine1/counter/total_count
+  spPv4.0/DBIRTH/edge_node26/plc4/line3          + metric name: machine1/counter/total_count
+  spPv4.0/DBIRTH/edge_node26/plc4/line3/machine1 + metric name: counter/total_count
 
 [tck-testable tck-id-topics-device-tokens-valid]#[yellow-background]*[tck-id-topics-device-tokens-valid] When
 present, the device_tokens consist of one or more MQTT topic levels separated by the / (forward
@@ -651,7 +651,7 @@ NDEATH message contains a very simple payload that MUST only include a bd_seq nu
 NDEATH event can be associated with the Sparkplug session it terminates.*#
 ** The bd_seq number in the NDEATH matches the bd_seq number carried in the NMETA, NBIRTH, and any
 NREBIRTH published in that same MQTT session. A Host Application correlates the NDEATH against
-whichever of those messages it holds, as required in the link:#payloads_c_ndeath[NDEATH] section.
+whichever of those messages it holds, as required in the link:#payloads_p_ndeath[NDEATH] section.
 Since this is typically published by the MQTT Server on behalf of the Edge Node, information about
 the current state of the Edge Node and its devices is not and cannot be known. As a result,
 [tck-testable tck-id-topics-ndeath-seq]#[yellow-background]*[tck-id-topics-ndeath-seq] The NDEATH
@@ -1167,28 +1167,28 @@ MQTT retain flag for the Birth Certificate MUST be set to TRUE*#
 The topic used for the Host Birth Certificate is identical to the topic used for the Death
 Certificate.
 [tck-testable tck-id-host-topic-phid-birth-topic]#[yellow-background]*[tck-id-host-topic-phid-birth-topic] The
-Sparkplug Host Application Birth topic MUST be of the form spCv4.0/STATE/sparkplug_host_id where the
+Sparkplug Host Application Birth topic MUST be of the form spPv4.0/STATE/sparkplug_host_id where the
 sparkplug_host_id must be replaced with the specific Spakrplug Host ID of this Sparkplug Host
 Application.*#
 
 * [tck-testable tck-id-host-topic-phid-birth-sub-required]#[yellow-background]*[tck-id-host-topic-phid-birth-sub-required] The
-Sparkplug Host Application MUST subscribe to its own spCv4.0/STATE/sparkplug_host_id and the
-appropriate spCv4.0 topic(s) immediately after successfully connecting to the MQTT Server.*#
-** An 'appropriate' spCv4.0 topic could simply be 'spCv4.0/#' when no topic_prefix is in use.
+Sparkplug Host Application MUST subscribe to its own spPv4.0/STATE/sparkplug_host_id and the
+appropriate spPv4.0 topic(s) immediately after successfully connecting to the MQTT Server.*#
+** An 'appropriate' spPv4.0 topic could simply be 'spPv4.0/#' when no topic_prefix is in use.
 However, when Edge Nodes publish beneath a topic_prefix it makes sense for a Host Application to
-subscribe beneath that prefix, for example subscribing to 'my/prefix/spCv4.0/#'; the Host
+subscribe beneath that prefix, for example subscribing to 'my/prefix/spPv4.0/#'; the Host
 Application must know the topic_prefix a priori. A Host Application could even issue a subscription
-to only a single Sparkplug Edge Node using this: '[topic_prefix/]spCv4.0/+/EdgeNode1/#', where the +
+to only a single Sparkplug Edge Node using this: '[topic_prefix/]spPv4.0/+/EdgeNode1/#', where the +
 matches the message_type element that now immediately follows the namespace. A Sparkplug Host
 Application could subscribe to a combination of specific topic_prefixes and/or Edge Nodes as well.
-Note that the STATE topic is never prefixed and always remains at 'spCv4.0/STATE/sparkplug_host_id'.
+Note that the STATE topic is never prefixed and always remains at 'spPv4.0/STATE/sparkplug_host_id'.
 ** For dynamic discovery, a Host Application that does not know the topic_prefixes in use in advance
-can subscribe at each prefix depth in turn - 'spCv4.0/#' (no prefix), '+/spCv4.0/#' (a one-level
-prefix), '+/+/spCv4.0/#' (a two-level prefix), '+/+/+/spCv4.0/#' (a three-level prefix), and so on -
+can subscribe at each prefix depth in turn - 'spPv4.0/#' (no prefix), '+/spPv4.0/#' (a one-level
+prefix), '+/+/spPv4.0/#' (a two-level prefix), '+/+/+/spPv4.0/#' (a three-level prefix), and so on -
 to discover Sparkplug namespaces published beneath any topic_prefix.
 * [tck-testable tck-id-host-topic-phid-birth-required]#[yellow-background]*[tck-id-host-topic-phid-birth-required] The
 Sparkplug Host Application MUST publish a Sparkplug Host Application BIRTH message to the MQTT
-Server immediately after successfully subscribing its own spCv4.0/STATE/sparkplug_host_id topic.*#
+Server immediately after successfully subscribing its own spPv4.0/STATE/sparkplug_host_id topic.*#
 
 [[payloads_desc_state_birth]]
 ====== Birth Certificate Payload (STATE)
@@ -1197,9 +1197,9 @@ Server immediately after successfully subscribing its own spCv4.0/STATE/sparkplu
 Birth Certificate Payload MUST be JSON UTF-8 data. It MUST include four key/value pairs. One key
 MUST be 'online' and it's value is a boolean 'true'. One key MUST be 'timestamp' and the value MUST
 be a numeric value representing the current UTC time in nanoseconds since Epoch. One key MUST be
-'bd_seq' and the value MUST be as defined in the link:#payloads_c_state_bd_seq[STATE bd_seq Number]
+'bd_seq' and the value MUST be as defined in the link:#payloads_p_state_bd_seq[STATE bd_seq Number]
 section. One key MUST be 'client_id' and the value MUST be the MQTT Client ID of the MQTT session in
-which the message was published, as defined in the link:#payloads_c_state_client_id[STATE client_id]
+which the message was published, as defined in the link:#payloads_p_state_client_id[STATE client_id]
 section.*#
 * [tck-testable tck-id-host-topic-phid-birth-payload-timestamp]#[yellow-background]*[tck-id-host-topic-phid-birth-payload-timestamp] The
 timestamp metric value MUST be the same timestamp value set in the immediately prior MQTT CONNECT
@@ -1224,7 +1224,7 @@ MQTT retain flag for the Birth Certificate MUST be set to TRUE*#
 ====== Death Certificate Topic (STATE)
 
 * [tck-testable tck-id-host-topic-phid-death-topic]#[yellow-background]*[tck-id-host-topic-phid-death-topic] The
-Sparkplug Host Application Death topic MUST be of the form spCv4.0/STATE/sparkplug_host_id where the
+Sparkplug Host Application Death topic MUST be of the form spPv4.0/STATE/sparkplug_host_id where the
 sparkplug_host_id must be replaced with the specific Sparkplug Host ID of this Sparkplug Host
 Application.*#
 * [tck-testable tck-id-host-topic-phid-death-required]#[yellow-background]*[tck-id-host-topic-phid-death-required] The
@@ -1238,9 +1238,9 @@ Sparkplug Host Application MUST provide a Will message in the MQTT CONNECT packe
 STATE Death Certificate Payload MUST be JSON UTF-8 data. It MUST include four key/value pairs. One
 key MUST be 'online' and it's value is a boolean 'false'. One key MUST be 'timestamp' and the value
 MUST be a numeric value representing the current UTC time in nanoseconds since Epoch. One key MUST
-be 'bd_seq' and the value MUST be as defined in the link:#payloads_c_state_bd_seq[STATE bd_seq
+be 'bd_seq' and the value MUST be as defined in the link:#payloads_p_state_bd_seq[STATE bd_seq
 Number] section. One key MUST be 'client_id' and the value MUST be the MQTT Client ID of the MQTT
-session in which the message was published, as defined in the link:#payloads_c_state_client_id[STATE
+session in which the message was published, as defined in the link:#payloads_p_state_client_id[STATE
 client_id] section.*#
 * [tck-testable tck-id-host-topic-phid-death-payload-timestamp-connect]#[yellow-background]*[tck-id-host-topic-phid-death-payload-connect] The
 Death Certificate's used in the MQTT CONNECT packet Will message MUST use a timestamp value that

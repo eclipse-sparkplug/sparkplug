@@ -65,7 +65,7 @@ https://developers.google.com/protocol-buffers/
 As described in the link:#introduction_define_the_mqtt_payload[Introduction Section] Sparkplug A is
 deprecated and is not included in this document.
 
-[[payloads_sparkplug_c_mqtt_payload_definition]]
+[[payloads_sparkplug_b_mqtt_payload_definition]]
 === Sparkplug B MQTT Payload Definition
 
 The goal of Sparkplug is to provide a specification that both OEM device manufactures and
@@ -99,7 +99,7 @@ Sparkplug B selected an existing, open, and highly available encoding scheme tha
 encodes register based process variables. The encoding technology selected for Sparkplug B is Google
 Protocol Buffers.
 
-[[payloads_c_google_protocol_buffer_schema]]
+[[payloads_p_google_protocol_buffer_schema]]
 ==== Google Protocol Buffer Schema
 
 Using lessons learned on the feedback from the Sparkplug A implementation a new Google Protocol
@@ -121,7 +121,7 @@ being requested. The entire Google Protocol Buffers definition is below.
 //
 // To compile:
 // cd client_libraries/java
-// protoc --proto_path=../../ --java_out=src/main/java ../../sparkplug_c.proto
+// protoc --proto_path=../../ --java_out=src/main/java ../../sparkplug_p.proto
 // Requires protoc 27 or later and a Protocol Buffers runtime that supports edition 2023
 // (protobuf-java 4.27 or later, Python protobuf 5.27 or later, and equivalents).
 //
@@ -357,7 +357,7 @@ message Payload {
 }
 ----
 
-[[payloads_c_payload_metric_naming_convention]]
+[[payloads_p_payload_metric_naming_convention]]
 ==== Payload Metric Naming Convention
 
 For the remainder of this document JSON will be used to represent components of a Sparkplug B
@@ -423,7 +423,7 @@ Topic Namespace, consuming applications can organize metrics in the same hierarc
 .Figure 9 – Payload Metric Folder Structure
 plantuml::{assetsdir}assets/plantuml/payload-metric-folder-structure.puml[format=svg, alt="Payload Metric Folder Structure"]
 
-[[payloads_c_sparkplug_cv1_0_payload_components]]
+[[payloads_p_sparkplug_bv1_0_payload_components]]
 ==== Sparkplug B v1.0 Payload Components
 
 The Sparkplug specification link:#topics[Topics Section] defines the Topic Namespace that Sparkplug
@@ -431,13 +431,13 @@ uses to publish and subscribe between Edge Nodes and Host Applications within th
 infrastructure. Using that Topic Namespace, this section of the specification defines the actual
 payload contents of each message type in Sparkplug B v1.0.
 
-[[payloads_c_payload_component_definitions]]
+[[payloads_p_payload_component_definitions]]
 ==== Payload Component Definitions
 
 Sparkplug B consists of a series of one or more metrics with metadata surrounding those metrics. The 
 following definitions explain the components that make up a payload.
 
-[[payloads_c_payload]]
+[[payloads_p_payload]]
 ==== Payload
 
 A Sparkplug payload is the top-level component that is encoded and used in an MQTT message. It is
@@ -472,7 +472,7 @@ Sparkplug payload MUST include a header.*#
 ** Non-normative comment: this applies to every message that carries a Sparkplug payload, which is
 every message type other than STATE. A STATE message is JSON UTF-8 data published by a Sparkplug
 Host Application and does not use a Sparkplug payload at all, so it has neither a header nor a
-content section. Its required contents are defined in the link:#payloads_c_state[STATE] section.
+content section. Its required contents are defined in the link:#payloads_p_state[STATE] section.
 * [tck-testable tck-id-payloads-header-first]#[yellow-background]*[tck-id-payloads-header-first] A
 publishing application MUST serialize the header section before the content section.*#
 ** Non-normative comment: Google Protocol Buffers implementations serialize fields in ascending
@@ -504,7 +504,7 @@ determine whether it belongs to a session it currently holds, or the definition 
 determine whether it already holds the metric structure the message reports against, without
 decoding any metrics.
 
-[[payloads_c_payload_header]]
+[[payloads_p_payload_header]]
 ===== Header
 
 The header section includes the following components.
@@ -573,7 +573,7 @@ is therefore known when the Will Message is registered in the MQTT CONNECT packe
 Applications do not carry a bd_seq number. A STATE message does carry one, scoping it to the MQTT
 session of the Sparkplug Host Application that published it, but it is a bd_seq number maintained by
 that Host Application and is unrelated to the bd_seq number of any Edge Node. See the
-link:#payloads_c_state_bd_seq[STATE bd_seq Number] section.
+link:#payloads_p_state_bd_seq[STATE bd_seq Number] section.
 **** [tck-testable tck-id-payloads-bd-sequence-num-req-nbirth]#[yellow-background]*[tck-id-payloads-bd-sequence-num-req-nbirth] Every
 birth/death sequence number included in the payload from an Edge Node MUST always be between 0 and
 9223372036854775807 (inclusive).*#
@@ -623,7 +623,7 @@ the descriptor sequence stream. It MUST carry the next incrementing descriptor s
 continuing the stream like any other message.*#
 ** _definition_id_
 *** This is the definition identifier, a content hash of the metric definitions this message reports
-against. It is defined in the link:#payloads_c_definition_identifier[Definition Identifier] section.
+against. It is defined in the link:#payloads_p_definition_identifier[Definition Identifier] section.
 ** _previous_definition_id_
 *** This is the definition identifier that was in effect immediately before the change conveyed by
 an NMMETA or DMMETA message. It is only present in those messages.
@@ -642,21 +642,21 @@ message. Example usage would be to supply a UUID which represents an encoding me
 optional array of bytes associated with a payload.
 ** _compression_algorithm_
 *** This names the algorithm used to compress the content section, and is present only when the
-content section is compressed. It is defined in the link:#payloads_c_compression[Compression]
+content section is compressed. It is defined in the link:#payloads_p_compression[Compression]
 section.
 
-[[payloads_c_payload_content]]
+[[payloads_p_payload_content]]
 ===== Content
 
 The content section carries the metrics of the message. It is the section that a consuming
 application can leave undecoded when it only requires the header, and it is the section that is
 compressed when Sparkplug compression is used, as described in the
-link:#payloads_c_compression[Compression] section.
+link:#payloads_p_compression[Compression] section.
 
 * *content*
 ** _metrics_
 *** This is an array of metrics representing key/value/datatype values. Metrics are further defined
-link:#payloads_c_metric[here].
+link:#payloads_p_metric[here].
 *** [tck-testable tck-id-payloads-metrics-ordered]#[yellow-background]*[tck-id-payloads-metrics-ordered] A
 payload that carries more than one value for the same metric MUST order its metrics by value change
 time, oldest first.*#
@@ -669,7 +669,7 @@ Definition or the Command definition.*#
 *** [tck-testable tck-id-payloads-metrics-ordered-no-timestamp]#[yellow-background]*[tck-id-payloads-metrics-ordered-no-timestamp] A
 metric that omits its timestamp MUST be ordered as though its value change time were the payload
 timestamp, which is the time that metric is taken to have changed as described in the
-link:#payloads_c_metric[Metric] section.*#
+link:#payloads_p_metric[Metric] section.*#
 *** [tck-not-testable tck-id-payloads-metrics-ordered-ties]#[yellow-background]*[tck-id-payloads-metrics-ordered-ties] Metrics
 that share a value change time MAY appear in any order relative to one another, and a consuming
 application MUST NOT reorder them.*#
@@ -683,22 +683,22 @@ carries no identity.
 and is preserved by both encodings, because a JSON array and a Google Protocol Buffers repeated
 field are both ordered. Multi-part file publishing depends on this: every metric of a multi-part
 publish carries the same timestamp, as required in the
-link:#payloads_c_file_publishing[File Publishing] section, so they tie, and the rules that
+link:#payloads_p_file_publishing[File Publishing] section, so they tie, and the rules that
 distinguish the first metric of the publish from the rest continue to apply.
 ** _body_
 *** This is an array of bytes which can be used for any custom binary encoded data.
 
-[[payloads_c_typedvalue]]
+[[payloads_p_typedvalue]]
 ==== TypedValue
 
 A Sparkplug TypedValue object carries a single value together with the datatype that describes it.
 It is the one structure used wherever the specification carries a value: the value of a
-link:#payloads_c_metric[Metric], the value of a property in a
-link:#payloads_c_propertyset[PropertySet], and the value of a
-link:#payloads_c_template_parameter[Template Parameter]. It includes the following components.
+link:#payloads_p_metric[Metric], the value of a property in a
+link:#payloads_p_propertyset[PropertySet], and the value of a
+link:#payloads_p_template_parameter[Template Parameter]. It includes the following components.
 
 * *datatype*
-** This is the DataType of the value, as enumerated in the link:#payloads_c_datatypes[DataTypes]
+** This is the DataType of the value, as enumerated in the link:#payloads_p_datatypes[DataTypes]
 section. It tells a consuming application how to interpret the value, and which of the fields below
 carries it.
 * *is_null*
@@ -720,15 +720,15 @@ types can be found here: https://developers.google.com/protocol-buffers/docs/pro
 *** Google Protocol Buffer Type: _string_
 *** Google Protocol Buffer Type: _bytes_
 *** Sparkplug _DataSet_
-**** Defined link:#payloads_c_dataset[here].
+**** Defined link:#payloads_p_dataset[here].
 *** Sparkplug _Template_
-**** Defined link:#payloads_c_template[here].
+**** Defined link:#payloads_p_template[here].
 *** Sparkplug _PropertySet_
-**** Defined link:#payloads_c_propertyset[here].
+**** Defined link:#payloads_p_propertyset[here].
 *** Sparkplug _PropertySetList_
-**** Defined link:#payloads_c_propertysetlist[here].
+**** Defined link:#payloads_p_propertysetlist[here].
 *** Sparkplug _ValueArray_
-**** Defined link:#payloads_c_datatype_array[here].
+**** Defined link:#payloads_p_datatype_array[here].
 
 Where the enclosing object also carries a datatype and an is_null of its own, as a Metric does, the
 two are required to agree; see the link:#payloads_json_typed_values[Typed Values] section, which
@@ -740,7 +740,7 @@ does, the restriction is stated in that context's own section rather than restat
 the permitted fields are described in exactly one place. For example, a context that accepts only
 scalar values says so in its own section, without repeating this list.
 
-[[payloads_c_metric]]
+[[payloads_p_metric]]
 ==== Metric
 
 A Sparkplug B metric is a core component of data in the payload. It represents a key, value,
@@ -814,7 +814,7 @@ datatype MUST be carried as a value of the DataType enumeration, represented as 
 use defines (for JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-metric-datatype-value]#[yellow-background]*[tck-id-payloads-metric-datatype-value] The
 datatype MUST be one of the enumerated values as shown in the
-link:#payloads_c_datatypes[valid Sparkplug Data Types].*#
+link:#payloads_p_datatypes[valid Sparkplug Data Types].*#
 ** [tck-testable tck-id-payloads-metric-datatype-not-propertyset]#[yellow-background]*[tck-id-payloads-metric-datatype-not-propertyset] The
 datatype MUST NOT be PropertySet or PropertySetList, which are value types for a property rather
 than for a metric. A metric's properties are carried in its properties field.*#
@@ -824,11 +824,11 @@ datatype MUST be included with each metric definition in NBIRTH and DBIRTH messa
 datatype SHOULD NOT be included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
 * *quality*
 ** This defines the quality of the value associated with the metric. It is defined in the
-link:#payloads_c_quality[Quality] section. This property is optional and is only required if the
+link:#payloads_p_quality[Quality] section. This property is optional and is only required if the
 quality of the metric is not Good. If the quality is not present, it is implicitly Good.
 * *quality_context*
 ** This is an optional string value used to provide additional context to the quality code of the
-metric. It is defined in the link:#payloads_c_quality[Quality] section.
+metric. It is defined in the link:#payloads_p_quality[Quality] section.
 * *source*
 ** This is the source field which represents the Sparkplug Host Application ID of the publisher for
 NCMD, DCMD, and REBIRTH messages if it differs from the overall payload source value. This may be
@@ -851,17 +851,17 @@ not be stored in a historian.
 mechanism of explicitly denoting a metric’s value is actually null.
 * *metadata*
 ** This is a MetaData object associated with the metric for dealing with more complex datatypes.
-This is covered in the link:#payloads_c_metadata[metadata section].
+This is covered in the link:#payloads_p_metadata[metadata section].
 * *properties*
 ** This is a PropertySet object associated with the metric for including custom key/value pairs of
 metadata associated with a metric. This is covered in the
-link:#payloads_c_propertyset[property set section].
+link:#payloads_p_propertyset[property set section].
 * *value*
 ** This is a TypedValue carrying the metric's value, as described in the
-link:#payloads_c_typedvalue[TypedValue section]. Which field carries the value is determined by the
+link:#payloads_p_typedvalue[TypedValue section]. Which field carries the value is determined by the
 metric's datatype, and the value may be omitted altogether if the is_null flag is set to true.
 
-[[payloads_c_quality]]
+[[payloads_p_quality]]
 ==== Quality
 
 The quality of a Metric's value is carried in the quality field of that Metric, with optional
@@ -874,7 +874,7 @@ existing numbering rather than defining a new one means that the large number of
 Nodes which acquire data from OPC UA servers, or which are themselves fronting an OPC UA address
 space, can report a value's quality without translating it.
 
-[[payloads_c_quality_severity]]
+[[payloads_p_quality_severity]]
 ===== Severity
 
 * [tck-testable tck-id-payloads-quality-severity-valid]#[yellow-background]*[tck-id-payloads-quality-severity-valid] The
@@ -904,7 +904,7 @@ Good.*#
 field containing Good carry the same meaning. An Edge Node therefore only needs to include the field
 when the quality of a value is something other than Good.
 
-[[payloads_c_quality_codes]]
+[[payloads_p_quality_codes]]
 ===== Quality Codes
 
 * [tck-not-testable tck-id-payloads-quality-recognized-codes]#[yellow-background]*[tck-id-payloads-quality-recognized-codes] A consuming application MUST recognize the following quality
@@ -945,7 +945,7 @@ quality code is carried in a Metric field that exists only in this version of th
 because an Edge Node publishes under a namespace that identifies which version of the specification
 it implements.
 
-[[payloads_c_quality_context]]
+[[payloads_p_quality_context]]
 ===== Quality Context
 
 * [tck-not-testable tck-id-payloads-quality-context-not-required]#[yellow-background]*[tck-id-payloads-quality-context-not-required] The quality_context is an optional UTF-8 string carrying
@@ -957,7 +957,7 @@ typically carries something like the identifier of the failed source or the text
 reported by an underlying protocol. The quality code itself carries everything a consuming
 application needs in order to act.
 
-[[payloads_c_metadata]]
+[[payloads_p_metadata]]
 ==== MetaData
 
 A Sparkplug B MetaData object is used to describe different types of binary data. These are optional
@@ -988,7 +988,7 @@ string to represent it.
 metric. It can contain JSON, XML, text, or anything else that can be understood by both the
 publisher and the subscriber.
 
-[[payloads_c_propertyset]]
+[[payloads_p_propertyset]]
 ==== PropertySet
 
 A Sparkplug B PropertySet object is used with a metric to add custom properties to the object. The 
@@ -1006,7 +1006,7 @@ PropertySet.
 ** [tck-testable tck-id-payloads-propertyset-values-array-size]#[yellow-background]*[tck-id-payloads-propertyset-values-array-size] The
 array of values in a PropertySet MUST contain the same number of items that are in the keys array.*#
 
-[[payloads_c_propertyvalue]]
+[[payloads_p_propertyvalue]]
 ==== PropertyValue
 
 A Sparkplug B PropertyValue object is used to encode the value and datatype of the value of a
@@ -1018,9 +1018,9 @@ MUST be a value of the DataType enumeration, represented as the encoding in use 
 JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-value]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-value] This
 value MUST be one of the enumerated values as shown in the
-link:#payloads_c_datatype_basic[Sparkplug Basic Data Types]
+link:#payloads_p_datatype_basic[Sparkplug Basic Data Types]
 or the
-link:#payloads_c_datatype_propertyvalue[Sparkplug Property Value Data Types].*#
+link:#payloads_p_datatype_propertyvalue[Sparkplug Property Value Data Types].*#
 ** [tck-testable tck-id-payloads-metric-propertyvalue-type-req]#[yellow-background]*[tck-id-payloads-metric-propertyvalue-type-req] This
 MUST be included in Property Value Definitions in NBIRTH and DBIRTH messages.*#
 * *is_null*
@@ -1028,10 +1028,10 @@ MUST be included in Property Value Definitions in NBIRTH and DBIRTH messages.*#
 B’s mechanism of explicitly denoting a property’s value is actually null.
 * *value*
 ** This is a TypedValue carrying the property's value, as described in the
-link:#payloads_c_typedvalue[TypedValue section]. Which field carries the value is determined by the
+link:#payloads_p_typedvalue[TypedValue section]. Which field carries the value is determined by the
 property's datatype, and the value may be omitted altogether if the is_null flag is set to true.
 
-[[payloads_c_well_known_properties]]
+[[payloads_p_well_known_properties]]
 ==== Well Known Properties
 
 [cols="1,1,5"]
@@ -1049,16 +1049,16 @@ property's datatype, and the value may be omitted altogether if the is_null flag
 |True or False
 |===
 
-[[payloads_c_propertysetlist]]
+[[payloads_p_propertysetlist]]
 ==== PropertySetList
 
 A Sparkplug B PropertySetList object is an array of PropertySet objects. It includes the following 
 components.
 
 * *propertyset*
-** This is an array of link:#payloads_c_propertyset[PropertySet objects].
+** This is an array of link:#payloads_p_propertyset[PropertySet objects].
 
-[[payloads_c_dataset]]
+[[payloads_p_dataset]]
 ==== DataSet
 
 A Sparkplug DataSet object is used to encode matrices of data. A DataSet is column oriented: it
@@ -1083,7 +1083,7 @@ Non-normative comment: A column oriented layout lets every value in a column sha
 one Google Protocol Buffers field, so the values pack into a single length delimited run rather than
 repeating a type tag per cell. The row at index i is read by taking element i of each Column.
 
-[[payloads_c_dataset_column]]
+[[payloads_p_dataset_column]]
 ==== DataSet.Column
 
 A Sparkplug DataSet.Column object represents a single column of a DataSet. It includes the following
@@ -1097,11 +1097,11 @@ Column MUST include a name, which is the column header for that column.*#
 Column MUST include a datatype, which is the datatype of every value in that column.*#
 ** [tck-testable tck-id-payloads-dataset-column-datatype-value]#[yellow-background]*[tck-id-payloads-dataset-column-datatype-value] The
 datatype MUST be one of the enumerated values shown in the
-link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
+link:#payloads_p_datatype_basic[Sparkplug Basic Data Types].*#
 * *values*
 ** The values of a Column are carried in a ValueArray, one entry per row, in row order. The typed
 array within it is selected by the Column's datatype, as described in the
-link:#payloads_c_datatype_array[Array Types] section, which defines the same structure for the
+link:#payloads_p_datatype_array[Array Types] section, which defines the same structure for the
 array DataTypes.
 ** [tck-testable tck-id-payloads-dataset-column-values-field]#[yellow-background]*[tck-id-payloads-dataset-column-values-field] A
 DataSet.Column MUST carry its values in a ValueArray, populating only the typed array that
@@ -1115,7 +1115,7 @@ equivalent, because a repeated field is dense, so null_indexes restores what the
 could express. Without it an encoder would have to omit the cell, which shortens the column and
 shifts every later row, or write a zero, which is indistinguishable from a real zero.
 
-[[payloads_c_dataset_example]]
+[[payloads_p_dataset_example]]
 ===== DataSet Example
 
 The following is a non-normative example of a metric whose value is a DataSet of three columns and
@@ -1143,7 +1143,7 @@ two rows. The first row is (1, 72.5, true) and the second is (2, 80.0, false).
 }
 ----
 
-[[payloads_c_template]]
+[[payloads_p_template]]
 ==== Template
 
 A Sparkplug B Template is used for encoding complex datatypes in a payload. It is a type of metric
@@ -1173,7 +1173,7 @@ appears in a Definition or in an Instance, so it has is_definition set to false 
 names that type. A member cannot be a Definition, because a Definition omits template_ref and so
 could not say which type the member is. Nesting can be carried to any depth, though a deeply nested
 type is correspondingly harder for a consuming application to present, and the flatter alternatives
-described in the link:#payloads_c_template_choosing[Choosing How to Express Structure] section are
+described in the link:#payloads_p_template_choosing[Choosing How to Express Structure] section are
 often a better fit.
 
 Non-normative comment: A Template Definition is scoped to the Edge Node that publishes it, so
@@ -1282,7 +1282,7 @@ MUST be set to true if this is a Template Definition.*#
 ** [tck-testable tck-id-payloads-template-is-definition-instance]#[yellow-background]*[tck-id-payloads-template-is-definition-instance] This
 MUST be set to false if this is a Template Instance.*#
 
-[[payloads_c_template_example]]
+[[payloads_p_template_example]]
 ===== Template Example
 
 The following is a non-normative example of a Template Definition and Template Instances of it,
@@ -1294,7 +1294,7 @@ in the Edge Node's NMETA. It carries no metric values, because a Definition desc
 only.
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NMETA/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NMETA/EdgeNode1
 ----
 
 ----
@@ -1339,7 +1339,7 @@ metric, the DMETA carries structure only: each Instance sets is_definition to fa
 'MotorType' in its template_ref, and no values appear.
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DMETA/EdgeNode1/Line3
+Acme/Dublin/Packaging/spPv4.0/DMETA/EdgeNode1/Line3
 ----
 
 ----
@@ -1378,7 +1378,7 @@ through its definition_id. The first Instance overrides the Manufacturer paramet
 it and so takes the default of 'Acme' from the Definition.
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Line3
+Acme/Dublin/Packaging/spPv4.0/DBIRTH/EdgeNode1/Line3
 ----
 
 ----
@@ -1447,7 +1447,7 @@ A subsequent DDATA reporting only a change to the conveyor motor's RPM may carry
 because a Template Instance in a DATA message MAY include a subset of the Definition's metrics.
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
+Acme/Dublin/Packaging/spPv4.0/DDATA/EdgeNode1/Line3
 ----
 
 ----
@@ -1477,7 +1477,7 @@ Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
 }
 ----
 
-[[payloads_c_template_choosing]]
+[[payloads_p_template_choosing]]
 ===== Choosing How to Express Structure
 
 Non-normative comment: Sparkplug offers three ways to express that data is structured, and they are
@@ -1509,12 +1509,12 @@ consuming applications to resynchronize.
 
 Non-normative comment: Because a Template Definition is part of an Edge Node's metric structure, any
 change to a Definition changes the definition identifier of the NMETA that carries it, as required
-in the link:#payloads_c_definition_identifier[Definition Identifier] section. Every consuming
+in the link:#payloads_p_definition_identifier[Definition Identifier] section. Every consuming
 application then re-resolves that Edge Node's metadata. Adding a member to a widely instantiated
 type is therefore more disruptive than its size suggests, and it is worth designing a Template with
 the members it will eventually need.
 
-[[payloads_c_template_parameter]]
+[[payloads_p_template_parameter]]
 ==== Template.Parameter
 
 A Sparkplug B Template.Parameter is a metadata field for a Template. This can be used to represent 
@@ -1532,7 +1532,7 @@ MUST be a value of the DataType enumeration, represented as the encoding in use 
 JSON, see link:#payloads_json_scalar[Scalar Value Mapping]).*#
 ** [tck-testable tck-id-payloads-template-parameter-type-value]#[yellow-background]*[tck-id-payloads-template-parameter-type-value] This
 value MUST be one of the enumerated values as shown in the
-link:#payloads_c_datatype_basic[Sparkplug Basic Data Types].*#
+link:#payloads_p_datatype_basic[Sparkplug Basic Data Types].*#
 ** [tck-testable tck-id-payloads-template-parameter-type-req]#[yellow-background]*[tck-id-payloads-template-parameter-type-req] This
 MUST be included in every Template Parameter Definition in an NMETA message.*#
 *** Non-normative comment: Template Parameter Definitions appear only inside Template Definitions, and
@@ -1548,10 +1548,10 @@ https://developers.google.com/protocol-buffers/docs/proto#scalar
 ** For a template definition, this is the default value of the parameter. For a template instance,
 this is the value unique to that instance.
 
-[[payloads_c_command]]
+[[payloads_p_command]]
 ==== Command
 
-A Sparkplug C Command object is used to define and invoke a strongly typed, callable command (also
+A Sparkplug P Command object is used to define and invoke a strongly typed, callable command (also
 referred to as a function or method) on an Edge Node or Device. It is carried by a Metric whose
 datatype is _Command_. The same Command object is used in three roles which are distinguished by
 which fields are populated:
@@ -1615,9 +1615,9 @@ in the corresponding Command Response so that the response can be matched to the
 produced it.
 * *status*
 ** This is a Status object representing the outcome of executing the command. It is defined
-link:#payloads_c_status[here].
+link:#payloads_p_status[here].
 
-[[payloads_c_status]]
+[[payloads_p_status]]
 ==== Status
 
 A Sparkplug B Status object represents the outcome of a command invocation and is included in a
@@ -1632,7 +1632,7 @@ represent an error.*#
 * *message*
 ** This is an optional UTF-8 string providing a human readable description of the status or error.
 
-[[payloads_c_datatypes]]
+[[payloads_p_datatypes]]
 ==== Data Types
 
 Sparkplug defines the valid data types used for various Sparkplug constucts including Metric
@@ -1694,10 +1694,10 @@ enum DataType {
 }
 ----
 
-[[payloads_c_datatype_details]]
+[[payloads_p_datatype_details]]
 ==== Datatype Details
 
-[[payloads_c_datatype_basic]]
+[[payloads_p_datatype_basic]]
 * *Basic Types*
 ** _Unknown_
 *** Sparkplug enum value: 0
@@ -1758,20 +1758,20 @@ payload and metric timestamps carry, and is signed for the same reason. Every ma
 representation it interoperates with is signed, so the ceiling is 2262-04-11 as described in the
 link:#operational_behavior_timestamps[Timestamps] section. A DateTime carried in an array or a DataSet.Column
 uses the int64_values array of the ValueArray, as the
-link:#payloads_c_datatype_array[Array Types] section describes.
+link:#payloads_p_datatype_array[Array Types] section describes.
 * _Text_
 ** String value (UTF-8)
 ** Google Protocol Buffer Type: string
 ** Sparkplug enum value: 14
 
-[[payloads_c_datatype_additional]]
+[[payloads_p_datatype_additional]]
 * *Additional Types*
 ** _UUID_
 *** UUID value as a UTF-8 string
 *** Google Protocol Buffer Type: string
 *** Sparkplug enum value: 15
 ** _DataSet_
-*** DataSet as defined link:#payloads_c_dataset[here]
+*** DataSet as defined link:#payloads_p_dataset[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
 *** Sparkplug enum value: 16
 ** _Bytes_
@@ -1783,22 +1783,22 @@ link:#payloads_c_datatype_array[Array Types] section describes.
 *** Google Protocol Buffer Type: bytes
 *** Sparkplug enum value: 18
 ** _Template_
-*** Template as defined link:#payloads_c_template[here]
+*** Template as defined link:#payloads_p_template[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
 *** Sparkplug enum value: 19
 
-[[payloads_c_datatype_propertyvalue]]
+[[payloads_p_datatype_propertyvalue]]
 * *Additional PropertyValue Types*
 ** _PropertySet_
-*** PropertySet as defined link:#payloads_c_propertyset[here]
+*** PropertySet as defined link:#payloads_p_propertyset[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
 *** Sparkplug enum value: 20
 ** _PropertySetList_
-*** PropertySetList as defined link:#payloads_c_propertysetlist[here]
+*** PropertySetList as defined link:#payloads_p_propertysetlist[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
 *** Sparkplug enum value: 21
 
-[[payloads_c_datatype_array]]
+[[payloads_p_datatype_array]]
 * *Array Types*
 
 An array DataType carries its elements in a ValueArray, in the array_value field of the Metric's
@@ -1873,11 +1873,11 @@ null_indexes to [1].
 *** Elements are carried in the int64_values field of the ValueArray
 *** Sparkplug enum value: 34
 
-[[payloads_c_datatype_command]]
+[[payloads_p_datatype_command]]
 * *Command Type*
 ** _Command_
 *** A callable command/function metric whose typed inputs and outputs are described by a Command
-object as defined link:#payloads_c_command[here]. A Command metric carries its content in the
+object as defined link:#payloads_p_command[here]. A Command metric carries its content in the
 Metric _command_ field rather than the _value_ field.
 *** Google Protocol Buffer Type: none – defined in Sparkplug
 *** Sparkplug enum value: 35
@@ -1888,7 +1888,7 @@ Metric _command_ field rather than the _value_ field.
 Sparkplug B payloads in conjunction with the Sparkplug topic namespace result in hierarchical data 
 structures that can be represented in folder structures with metrics which are often called tags.
 
-[[payloads_c_definition_identifier]]
+[[payloads_p_definition_identifier]]
 ==== Definition Identifier
 
 The _definition identifier_ is a recalculatable content hash of the metric definitions (metadata) of
@@ -1928,7 +1928,7 @@ definition, or to any Template definition MUST result in a different definition 
 consumer MUST be able to recompute the definition identifier from the assembled metadata and obtain a
 value identical to the one published by the Edge Node.*#
 
-[[payloads_c_nmeta]]
+[[payloads_p_nmeta]]
 ==== NMETA
 
 The NMETA describes the metric structure (metadata) of an Edge Node. It carries the definition of
@@ -1959,7 +1959,7 @@ messages MUST be published with the MQTT QoS set to 0.*#
 NMETA MUST be published with the MQTT retain flag set to true, so that the current metric structure
 is retained by the MQTT Server and delivered to any client that subscribes.*#
 
-[[payloads_c_dmeta]]
+[[payloads_p_dmeta]]
 ==== DMETA
 
 The DMETA describes the metric structure (metadata) of a Sparkplug Device. It is the Device
@@ -1985,7 +1985,7 @@ messages MUST be published with the MQTT QoS set to 0.*#
 * [tck-testable tck-id-payloads-dmeta-retain]#[yellow-background]*[tck-id-payloads-dmeta-retain] A full
 DMETA MUST be published with the MQTT retain flag set to true.*#
 
-[[payloads_c_nmmeta]]
+[[payloads_p_nmmeta]]
 ==== NMMETA and DMMETA
 
 An NMMETA (for an Edge Node) or DMMETA (for a Device) conveys a change to the metric structure after
@@ -2018,7 +2018,7 @@ name, and MUST include the complete new definition for that metric.*#
 DELETE metric MUST be identified by its existing alias, if an alias was assigned, or otherwise by its
 name.*#
 
-[[payloads_c_nbirth]]
+[[payloads_p_nbirth]]
 ==== NBIRTH
 
 The NBIRTH reports the current values of the Edge Node's metrics to Host Applications. It does not
@@ -2070,7 +2070,7 @@ messages MUST be published with the MQTT retain flag set to false.*#
 The following is a representation of a simple NBIRTH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NBIRTH/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NBIRTH/EdgeNode1
 ----
 
 In the topic above the following information is known based on the Sparkplug topic definition:
@@ -2138,7 +2138,7 @@ This would result in a structure as follows on the Host Application.
 .Figure 10 – Sparkplug B Metric Structure 1
 plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-1.puml[format=svg, alt="Sparkplug B Metric Structure 1"]
 
-[[payloads_c_nrebirth]]
+[[payloads_p_nrebirth]]
 ==== NREBIRTH
 
 The NREBIRTH reports the current values of the Edge Node's metrics to a specific Host Application that
@@ -2195,7 +2195,7 @@ messages MUST be published with the MQTT retain flag set to false.*#
 The following is a representation of a simple NREBIRTH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NREBIRTH/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NREBIRTH/EdgeNode1
 ----
 
 In the topic above the following information is known based on the Sparkplug topic definition:
@@ -2263,7 +2263,7 @@ This would result in a structure as follows on the Host Application.
 .Figure 10 – Sparkplug B Metric Structure 1
 plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-1.puml[format=svg, alt="Sparkplug B Metric Structure 1"]
 
-[[payloads_c_dbirth]]
+[[payloads_p_dbirth]]
 ==== DBIRTH
 
 The DBIRTH reports the current values of a Sparkplug Device's metrics to Host Applications. It does not
@@ -2300,7 +2300,7 @@ messages MUST be published with the MQTT retain flag set to false.*#
 The following is a representation of a simple DBIRTH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DBIRTH/EdgeNode1/Filler
+Acme/Dublin/Packaging/spPv4.0/DBIRTH/EdgeNode1/Filler
 ----
 
 In the topic above the following information is known based on the Sparkplug topic definition:
@@ -2368,7 +2368,7 @@ This would result in a structure as follows on the Host Application.
 .Figure 11 – Sparkplug B Metric Structure 2
 plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-2.puml[format=svg, alt="Sparkplug B Metric Structure 2"]
 
-[[payloads_c_drebirth]]
+[[payloads_p_drebirth]]
 ==== DREBIRTH
 
 The DREBIRTH reports the current values of a Sparkplug Device's metrics to a specific Host Application
@@ -2403,7 +2403,7 @@ messages MUST be published with the MQTT retain flag set to false.*#
 The following is a representation of a simple DREBIRTH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DREBIRTH/EdgeNode1/Filler
+Acme/Dublin/Packaging/spPv4.0/DREBIRTH/EdgeNode1/Filler
 ----
 
 In the topic above the following information is known based on the Sparkplug topic definition:
@@ -2471,7 +2471,7 @@ This would result in a structure as follows on the Host Application.
 .Figure 11 – Sparkplug B Metric Structure 2
 plantuml::{assetsdir}assets/plantuml/sparkplugb-metric-structure-2.puml[format=svg, alt="Sparkplug B Metric Structure 2"]
 
-[[payloads_c_ndata]]
+[[payloads_p_ndata]]
 ==== NDATA
 
 NDATA messages are used to update the values of any Edge Node metrics that were originally published
@@ -2506,7 +2506,7 @@ describes this Edge Node, and MUST identify each metric by its alias or name.*#
 The following is a representation of a simple NDATA message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NDATA/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NDATA/EdgeNode1
 ----
 
 In the topic above the following information is known based on the Sparkplug topic definition:
@@ -2538,7 +2538,7 @@ Consider the following Sparkplug B payload in the NDATA message shown above:
 
 This would result in the host application updating the value of the 'Supply Voltage' metric.
 
-[[payloads_c_ddata]]
+[[payloads_p_ddata]]
 ==== DDATA
 
 DDATA messages are used to update the values of any device metrics that were originally published in
@@ -2572,7 +2572,7 @@ describes this Device, and MUST identify each metric by its alias or name.*#
 
 The following is a representation of a simple DDATA message on the topic:
 
-Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Filler
+Acme/Dublin/Packaging/spPv4.0/DDATA/EdgeNode1/Filler
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
 * The ‘Edge Node ID’ is: EdgeNode1
@@ -2607,7 +2607,7 @@ Consider the following Sparkplug B payload in the DDATA message shown above:
 This would result in the Host Application updating the value of the ‘Running’ metric and ‘Speed’
 metric.
 
-[[payloads_c_rebirth]]
+[[payloads_p_rebirth]]
 ==== REBIRTH
 
 REBIRTH messages are used by Host Applications to resync with an Edge Nodes existing data stream.
@@ -2628,7 +2628,7 @@ value representing the Host ID of the Sparkplug Host Application that sent the R
 The following is a representation of a REBIRTH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/REBIRTH/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/REBIRTH/EdgeNode1
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -2650,7 +2650,7 @@ This REBIRTH payload tells the Edge Node to publish NREBIRTH and DREBIRTH(s) mes
 requested if a Host Application gets an out of order seq number or if a metric arrives in an NDATA
 or DDATA message that was not provided in the original NBIRTH or DBIRTH messages.
 
-[[payloads_c_ncmd]]
+[[payloads_p_ncmd]]
 ==== NCMD
 
 NCMD messages are used by Host Applications to write to Edge Node outputs and send Node Control
@@ -2677,7 +2677,7 @@ forwarding metric writes on behalf of another Host Application.*#
 The following is a representation of a simple NCMD message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NCMD/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NCMD/EdgeNode1
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -2709,7 +2709,7 @@ DIGITAL_OUT_1 is successfully set to true.
 
 An NCMD message MAY also invoke a strongly typed Command that was included in the NBIRTH. In this
 case the metric datatype is Command and the metric carries a Command object with the supplied
-argument values and a correlation_id. See the link:#payloads_c_command[Command Section] for the
+argument values and a correlation_id. See the link:#payloads_p_command[Command Section] for the
 full Command Request rules.
 
 * [tck-testable tck-id-payloads-ncmd-command-correlation]#[yellow-background]*[tck-id-payloads-ncmd-command-correlation] An
@@ -2744,7 +2744,7 @@ The following is a representation of an NCMD payload that invokes the 'Calibrate
 The Edge Node executes the command and publishes the result in an NRESP message that echoes the
 correlation_id.
 
-[[payloads_c_dcmd]]
+[[payloads_p_dcmd]]
 ==== DCMD
 
 DCMD messages are used by Host Applications to write to device outputs and send Device Control
@@ -2771,7 +2771,7 @@ forwarding metric writes on behalf of another Host Application.*#
 The following is a representation of a simple DCMD message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DCMD/EdgeNode1/Filler
+Acme/Dublin/Packaging/spPv4.0/DCMD/EdgeNode1/Filler
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -2808,17 +2808,17 @@ As a result, the Filler should begin running and result in a DDATA message back 
 after the motor is successfully started.
 
 A DCMD message MAY also invoke a strongly typed Command that was supplied in the DBIRTH, following
-the same Command Request rules as NCMD. See the link:#payloads_c_command[Command Section].
+the same Command Request rules as NCMD. See the link:#payloads_p_command[Command Section].
 
 * [tck-testable tck-id-payloads-dcmd-command-correlation]#[yellow-background]*[tck-id-payloads-dcmd-command-correlation] A
 DCMD message that invokes a Command MUST include a correlation_id in the Command object.*#
 
-[[payloads_c_nresp]]
+[[payloads_p_nresp]]
 ==== NRESP
 
 NRESP messages are published by an Edge Node to return the result of an Edge Node level Command
 Request that was received in an NCMD message. See the
-link:#payloads_c_command[Command Section] for the structure of a Command Response.
+link:#payloads_p_command[Command Section] for the structure of a Command Response.
 
 * [tck-testable tck-id-payloads-nresp-timestamp]#[yellow-background]*[tck-id-payloads-nresp-timestamp] NRESP
 messages MUST include an overall payload timestamp that denotes the time at which the message was
@@ -2834,7 +2834,7 @@ NRESP message MUST include a status for the command being responded to.*#
 The following is a representation of a simple NRESP message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NRESP/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NRESP/EdgeNode1
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -2876,12 +2876,12 @@ Consider the following Sparkplug B payload in the NRESP message shown above:
 The NRESP payload returns the result of the 'Calibrate' command that was invoked in a prior NCMD,
 correlated by the matching correlation_id.
 
-[[payloads_c_dresp]]
+[[payloads_p_dresp]]
 ==== DRESP
 
 DRESP messages are published by an Edge Node to return the result of a Device level Command Request
 that was received in a DCMD message. See the
-link:#payloads_c_command[Command Section] for the structure of a Command Response.
+link:#payloads_p_command[Command Section] for the structure of a Command Response.
 
 * [tck-testable tck-id-payloads-dresp-timestamp]#[yellow-background]*[tck-id-payloads-dresp-timestamp] DRESP
 messages MUST include an overall payload timestamp that denotes the time at which the message was
@@ -2897,7 +2897,7 @@ DRESP message MUST include a status for the command being responded to.*#
 The following is a representation of a simple DRESP message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DRESP/EdgeNode1/Filler
+Acme/Dublin/Packaging/spPv4.0/DRESP/EdgeNode1/Filler
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -2935,7 +2935,7 @@ Consider the following Sparkplug B payload in the DRESP message shown above:
 The DRESP payload returns an error status for the 'Reset' command that was invoked in a prior
 DCMD, correlated by the matching correlation_id.
 
-[[payloads_c_ndeath]]
+[[payloads_p_ndeath]]
 ==== NDEATH
 
 The NDEATH messages are registered with the MQTT Server in the MQTT CONNECT packet as the 'Will
@@ -2992,7 +2992,7 @@ to tell which session an NDEATH refers to.
 The following is a representation of a NDEATH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/NDEATH/EdgeNode1
+Acme/Dublin/Packaging/spPv4.0/NDEATH/EdgeNode1
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -3013,7 +3013,7 @@ Consider the following Sparkplug B payload in the NDEATH message shown above:
 The bd_seq number value in the payload allows a Host Application to reconcile this NDEATH with the
 NBIRTH and/or NREBIRTH that occurred previously.
 
-[[payloads_c_ddeath]]
+[[payloads_p_ddeath]]
 ==== DDEATH
 
 The DDEATH messages are published by an Edge Node on behalf of an attached device. If the Edge Node
@@ -3034,7 +3034,7 @@ sequence number sent MUST have a value of 0.*#
 The following is a representation of a simple DDEATH message on the topic:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DDEATH/EdgeNode1/Filler
+Acme/Dublin/Packaging/spPv4.0/DDEATH/EdgeNode1/Filler
 ----
 
 * The ‘Topic Prefix’ is: Acme/Dublin/Packaging
@@ -3059,7 +3059,7 @@ Consider the following Sparkplug B payload in the DDEATH message shown above:
 sequence number MUST be included with the DDEATH messages so the Host Application can ensure order
 of messages and maintain the state of the data.*#
 
-[[payloads_c_state]]
+[[payloads_p_state]]
 ==== STATE
 
 As noted previously, the STATE messages published by Sparkplug Host Applications do not use
@@ -3068,7 +3068,7 @@ whether or not the Sparkplug Host Application is online and operational or not.
 
 * [tck-testable tck-id-payloads-state-will-message]#[yellow-background]*[tck-id-payloads-state-will-message] Sparkplug
 Host Applications MUST register a Will Message in the MQTT CONNECT packet on the topic
-'spCv4.0/STATE/[sparkplug_host_id]'.*#
+'spPv4.0/STATE/[sparkplug_host_id]'.*#
 ** The [sparkplug_host_id] must be replaced with the Sparkplug Host Application's ID. This can be any
 UTF-8 string.
 * [tck-testable tck-id-payloads-state-will-message-qos]#[yellow-background]*[tck-id-payloads-state-will-message-qos] The
@@ -3079,21 +3079,21 @@ Sparkplug Host Application MUST set the Will Retained flag to true in the MQTT C
 Death Certificate Payload MUST be JSON UTF-8 data. It MUST include four key/value pairs. One key
 MUST be 'online' and it's value is a boolean 'false'. One key MUST be 'timestamp' and the value MUST
 be a numeric value representing the current UTC time in nanoseconds since Epoch. One key MUST be
-'bd_seq' and the value MUST be a numeric value as defined in the link:#payloads_c_state_bd_seq[STATE
+'bd_seq' and the value MUST be a numeric value as defined in the link:#payloads_p_state_bd_seq[STATE
 bd_seq Number] section. One key MUST be 'client_id' and the value MUST be the UTF-8 MQTT Client ID
 that the Sparkplug Host Application used in the MQTT CONNECT packet that registered this Will
 Message.*#
 * [tck-testable tck-id-payloads-state-subscribe]#[yellow-background]*[tck-id-payloads-state-subscribe] After
 establishing an MQTT connection, the Sparkplug Host Application MUST subscribe on it's own
-'spCv4.0/STATE/[sparkplug_host_id]' topic.*#
+'spPv4.0/STATE/[sparkplug_host_id]' topic.*#
 ** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
 any UTF-8 string.
 ** Non-normative comment: This allows the Sparkplug Host Application handle timing issues around
 STATE 'offline' messages being published on it's behalf by the MQTT Server when it is in fact
 online.
 * [tck-testable tck-id-payloads-state-birth]#[yellow-background]*[tck-id-payloads-state-birth] After
-subscribing on it's own spCv4.0/STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST
-publish an MQTT message on the topic 'spCv4.0/STATE/[sparkplug_host_id]' with a QoS of 1, and the
+subscribing on it's own spPv4.0/STATE/[sparkplug_host_id] topic, the Sparkplug Host Application MUST
+publish an MQTT message on the topic 'spPv4.0/STATE/[sparkplug_host_id]' with a QoS of 1, and the
 retain flag set to true.*#
 ** The [sparkplug_host_id] should be replaced with the Sparkplug Host Application's ID. This can be
 any UTF-8 string.
@@ -3105,7 +3105,7 @@ Message payload. One key MUST be 'bd_seq' and the value MUST match the bd_seq va
 that same Will Message payload. One key MUST be 'client_id' and the value MUST be the UTF-8 MQTT
 Client ID that the Sparkplug Host Application used in that same MQTT CONNECT packet.*#
 
-[[payloads_c_state_bd_seq]]
+[[payloads_p_state_bd_seq]]
 ===== STATE bd_seq Number
 
 The bd_seq number in a STATE payload scopes that STATE message to a single MQTT session of a
@@ -3136,7 +3136,7 @@ an independent bd_seq number for each MQTT Server.*#
 Server independently, so a single shared counter would advance for reasons unrelated to the server a
 consuming Edge Node is connected to.
 
-[[payloads_c_state_client_id]]
+[[payloads_p_state_client_id]]
 ===== STATE client_id
 
 The client_id in a STATE payload is the MQTT Client ID of the MQTT client that published the
@@ -3166,7 +3166,7 @@ The following is a representation of a Sparkplug Host Application Birth Certific
 topic:
 
 ----
-spCv4.0/STATE/my_host_application
+spPv4.0/STATE/my_host_application
 ----
 
 ----
@@ -3190,7 +3190,7 @@ packet carries the same timestamp, the same bd_seq number, and the same client_i
 }
 ----
 
-[[payloads_c_compression]]
+[[payloads_p_compression]]
 ==== Compression
 
 Sparkplug payloads may optionally be compressed to further improve bandwidth utilization.
@@ -3265,10 +3265,10 @@ definition identifier, without decompressing anything. It decompresses the conte
 determined from the header that the message is of interest to it and that it supports the named
 algorithm.
 
-[[payloads_c_file_publishing]]
+[[payloads_p_file_publishing]]
 ==== File Publishing
 
-Sparkplug C supports publishing of files either a single published metric or in multi-part form. If
+Sparkplug P supports publishing of files either a single published metric or in multi-part form. If
 publishing as a single metric, the following rules apply.
 
 * [tck-testable tck-id-payloads-file-single-metric-data]#[yellow-background]*[tck-id-payloads-file-single-metric-data] When
@@ -3331,7 +3331,7 @@ the file publish.
 Non-normative comment: The rules below identify a metric by its position in the payload, which is
 the one place in this specification where the position of a metric carries meaning. This does not
 conflict with the requirement that metrics be ordered by value change time, stated in the
-link:#payloads_c_payload_content[Content] section, because every metric of a multi-part file
+link:#payloads_p_payload_content[Content] section, because every metric of a multi-part file
 publish carries the same timestamp. They therefore tie, the ordering requirement does not constrain
 their relative order, and the order the publishing Edge Node or Device chooses is carried unchanged
 by both payload encodings.
@@ -3372,7 +3372,7 @@ MUST be set to an array of bytes representing this metric's portion of the file.
 metrics that are not the first metric in the multi-part file MUST either not include the is_null flag or
 it MUST be set to false.*#
 
-[[payloads_c_file_publish_acknowledgment]]
+[[payloads_p_file_publish_acknowledgment]]
 ==== File Publish Acknowledgment
 
 When a file is published as described above, the receiving application may acknowledge each received file
@@ -3387,8 +3387,8 @@ receiving application SHOULD publish an acknowledgment for each received file me
 confirm receipt and, for a multi-part file publish, advance the transfer to the next part.*#
 * [tck-testable tck-id-payloads-file-ack-topic]#[yellow-background]*[tck-id-payloads-file-ack-topic] When
 a receiving application acknowledges a received file metric, the acknowledgment MUST be published as an
-NCMD message on topic '[topic_prefix/]spCv4.0/NCMD/edge_node_id' if the file metric was received in an NDATA
-message, or as a DCMD message on topic '[topic_prefix/]spCv4.0/DCMD/edge_node_id/device_tokens' if the file metric
+NCMD message on topic '[topic_prefix/]spPv4.0/NCMD/edge_node_id' if the file metric was received in an NDATA
+message, or as a DCMD message on topic '[topic_prefix/]spPv4.0/DCMD/edge_node_id/device_tokens' if the file metric
 was received in a DDATA message, scoped to the same Sparkplug Edge Node or Device that published the
 file.*#
 * [tck-testable tck-id-payloads-file-ack-seq-metric]#[yellow-background]*[tck-id-payloads-file-ack-seq-metric] The
@@ -3518,8 +3518,8 @@ on the publishing (transmission) side, and 5xx indicate an error on the receivin
 ==== Overview
 
 Sparkplug defines two payload encodings of the same data model. The Google Protocol Buffers
-encoding is defined in the link:#payloads_sparkplug_c_mqtt_payload_definition[Sparkplug B MQTT
-Payload Definition] section above and is published on the spCv4.0 namespace. The JSON encoding is
+encoding is defined in the link:#payloads_sparkplug_b_mqtt_payload_definition[Sparkplug B MQTT
+Payload Definition] section above and is published on the spPv4.0 namespace. The JSON encoding is
 defined in this section and is published on the spJv4.0 namespace.
 
 The two encodings carry identical information. Every component defined in the sections above -
@@ -3531,7 +3531,7 @@ session management defined elsewhere in this specification is encoding independe
 
 Non-normative comment: Because the two encodings are two representations of one model, a message
 may be converted from one to the other without loss and without consulting anything outside the
-message itself. This is what allows a bridging application to republish an spCv4.0 namespace onto
+message itself. This is what allows a bridging application to republish an spPv4.0 namespace onto
 spJv4.0, or the reverse, as a mechanical transformation.
 
 This section defines the JSON encoding completely. Conformance to it does not depend on any
@@ -3557,9 +3557,9 @@ payload of any Sparkplug message published on the spJv4.0 namespace MUST be enco
 this section.*#
 
 [tck-testable tck-id-payloads-protobuf-namespace-encoding]#[yellow-background]*[tck-id-payloads-protobuf-namespace-encoding] The
-payload of any Sparkplug message published on the spCv4.0 namespace MUST be encoded using the
+payload of any Sparkplug message published on the spPv4.0 namespace MUST be encoded using the
 Google Protocol Buffers schema defined in the
-link:#payloads_c_google_protocol_buffer_schema[Google Protocol Buffer Schema] section.*#
+link:#payloads_p_google_protocol_buffer_schema[Google Protocol Buffer Schema] section.*#
 
 [tck-testable tck-id-payloads-json-utf8]#[yellow-background]*[tck-id-payloads-json-utf8] A Sparkplug
 JSON payload MUST be a JSON text as defined by RFC 8259, encoded as UTF-8 with no byte order
@@ -3707,7 +3707,7 @@ UInt64, and DateTime have the same exposure.
 
 Non-normative comment: The sequence numbers are subject to this for the same reason. A Sparkplug
 seq, bd_seq, and descriptor_seq each count up to 9223372036854775807 before rolling over to zero, as
-required in the link:#payloads_c_payload_header[Header] section, so they reach magnitudes a JSON
+required in the link:#payloads_p_payload_header[Header] section, so they reach magnitudes a JSON
 number cannot carry exactly. A sequence number is small early in a session and large late in one,
 which would make a numeric form correct in testing and lossy in production.
 
@@ -3795,7 +3795,7 @@ because it is observable in a payload, whereas the absence of meaning in the ord
 
 In the Protocol Buffers encoding the array DataTypes and a DataSet.Column carry their elements in a
 ValueArray, which selects one of several typed arrays and records absent elements separately, as
-described in the link:#payloads_c_datatype_array[Array Types] section. In JSON the datatype is
+described in the link:#payloads_p_datatype_array[Array Types] section. In JSON the datatype is
 already known and a JSON array can hold a null directly, so a ValueArray is represented as a plain
 array.
 
@@ -4038,10 +4038,10 @@ Sparkplug JSON payload MUST validate against the JSON Schema below.*#
 The following is a non-normative example of one DDATA message shown in both encodings, so the two
 may be compared directly. The payload reports a single aliased Float metric.
 
-The spCv4.0 form, shown as a structural illustration of the Protocol Buffers message:
+The spPv4.0 form, shown as a structural illustration of the Protocol Buffers message:
 
 ----
-Acme/Dublin/Packaging/spCv4.0/DDATA/EdgeNode1/Line3
+Acme/Dublin/Packaging/spPv4.0/DDATA/EdgeNode1/Line3
 ----
 
 ----
@@ -4112,7 +4112,7 @@ encode and decode cost is of roughly one order of magnitude, and unlike the size
 not narrow with message size.
 
 Non-normative comment: The size difference largely disappears when the content section is
-compressed, as described in the link:#payloads_c_compression[Compression] section. The repeated
+compressed, as described in the link:#payloads_p_compression[Compression] section. The repeated
 field names that make JSON large are highly compressible, so for payloads of more than a few
 metrics the two encodings compress to within a few percent of one another. On a bandwidth
 constrained link where compression is already in use, message size is therefore not a strong reason
@@ -4124,5 +4124,5 @@ and frequent, which is the case Sparkplug was originally designed around. The JS
 better fit where Sparkplug data is consumed directly by applications that cannot readily add a
 Protocol Buffers dependency, and where readability during development and troubleshooting is worth
 more than the bytes. A deployment may use both, with a bridging application republishing one
-namespace onto the other, so that constrained Edge Nodes publish spCv4.0 while enterprise consumers
+namespace onto the other, so that constrained Edge Nodes publish spPv4.0 while enterprise consumers
 subscribe to spJv4.0.

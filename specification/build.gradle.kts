@@ -247,7 +247,7 @@ val extractProtoSchema by tasks.registering {
     group = "tck"
     val chapter = layout.projectDirectory.file(
         "src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc")
-    val output = layout.buildDirectory.file("proto/sparkplug_c.proto")
+    val output = layout.buildDirectory.file("proto/sparkplug_p.proto")
     inputs.file(chapter)
     outputs.file(output)
     doLast {

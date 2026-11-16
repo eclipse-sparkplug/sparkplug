@@ -14,9 +14,9 @@ autonumber 1 "<b>(#)"
 PrimApp -> Server : CONNECT
 
 |||
-PrimApp -> Server : SUBSCRIBE( **[topic_prefix/]spCv4.0/#** )
+PrimApp -> Server : SUBSCRIBE( **[topic_prefix/]spPv4.0/#** )
 |||
-PrimApp -> Server : SUBSCRIBE( **spCv4.0/STATE/host_app_id** )
+PrimApp -> Server : SUBSCRIBE( **spPv4.0/STATE/host_app_id** )
 
 
 PrimApp -> Server : PUBLISH( **STATE** )
@@ -60,9 +60,9 @@ end note
 PrimApp -> Server : CONNECT
 
 |||
-PrimApp -> Server : SUBSCRIBE( **[topic_prefix/]spCv4.0/#** )
+PrimApp -> Server : SUBSCRIBE( **[topic_prefix/]spPv4.0/#** )
 |||
-PrimApp -> Server : SUBSCRIBE( **spCv4.0/STATE/host_app_id** )
+PrimApp -> Server : SUBSCRIBE( **spPv4.0/STATE/host_app_id** )
 
 
 PrimApp -> Server : PUBLISH( **STATE** )

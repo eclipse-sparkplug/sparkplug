@@ -75,26 +75,26 @@ device_tokens (Sparkplug Device) = D1
 Based on this, the following could be reasonable MQTT ACLs to be provisioned in the MQTT Server for
 the MQTT client associated with this Edge Node:
 ```
-Publish:   plantA/spCv4.0/NMETA/E1
-Publish:   plantA/spCv4.0/NMMETA/E1
-Publish:   plantA/spCv4.0/NBIRTH/E1
-Publish:   plantA/spCv4.0/NREBIRTH/E1
-Publish:   plantA/spCv4.0/NDATA/E1
-Publish:   plantA/spCv4.0/NRESP/E1
-Publish:   plantA/spCv4.0/NDEATH/E1
-Publish:   plantA/spCv4.0/DMETA/E1/D1
-Publish:   plantA/spCv4.0/DMMETA/E1/D1
-Publish:   plantA/spCv4.0/DBIRTH/E1/D1
-Publish:   plantA/spCv4.0/DREBIRTH/E1/D1
-Publish:   plantA/spCv4.0/DDATA/E1/D1
-Publish:   plantA/spCv4.0/DRESP/E1/D1
-Publish:   plantA/spCv4.0/DDEATH/E1/D1
-Subscribe: plantA/spCv4.0/REBIRTH/E1
-Subscribe: plantA/spCv4.0/NCMD/E1
-Subscribe: plantA/spCv4.0/DCMD/E1/D1
-Subscribe: plantA/spCv4.0/NMETA/E1
-Subscribe: plantA/spCv4.0/DMETA/E1/D1
-Subscribe: spCv4.0/STATE/my_primary_host
+Publish:   plantA/spPv4.0/NMETA/E1
+Publish:   plantA/spPv4.0/NMMETA/E1
+Publish:   plantA/spPv4.0/NBIRTH/E1
+Publish:   plantA/spPv4.0/NREBIRTH/E1
+Publish:   plantA/spPv4.0/NDATA/E1
+Publish:   plantA/spPv4.0/NRESP/E1
+Publish:   plantA/spPv4.0/NDEATH/E1
+Publish:   plantA/spPv4.0/DMETA/E1/D1
+Publish:   plantA/spPv4.0/DMMETA/E1/D1
+Publish:   plantA/spPv4.0/DBIRTH/E1/D1
+Publish:   plantA/spPv4.0/DREBIRTH/E1/D1
+Publish:   plantA/spPv4.0/DDATA/E1/D1
+Publish:   plantA/spPv4.0/DRESP/E1/D1
+Publish:   plantA/spPv4.0/DDEATH/E1/D1
+Subscribe: plantA/spPv4.0/REBIRTH/E1
+Subscribe: plantA/spPv4.0/NCMD/E1
+Subscribe: plantA/spPv4.0/DCMD/E1/D1
+Subscribe: plantA/spPv4.0/NMETA/E1
+Subscribe: plantA/spPv4.0/DMETA/E1/D1
+Subscribe: spPv4.0/STATE/my_primary_host
 ```
 
 Three of these are easy to overlook. The subscription on REBIRTH is mandatory, because an Edge Node
@@ -113,37 +113,37 @@ an Edge Node has many dynamic associated devices. In this case, it may make sens
 device level topic token. Note that device_tokens may be more than one topic level deep, so a multi
 level wildcard is used here rather than a single level wildcard:
 ```
-Publish:   plantA/spCv4.0/NMETA/E1
-Publish:   plantA/spCv4.0/NMMETA/E1
-Publish:   plantA/spCv4.0/NBIRTH/E1
-Publish:   plantA/spCv4.0/NREBIRTH/E1
-Publish:   plantA/spCv4.0/NDATA/E1
-Publish:   plantA/spCv4.0/NRESP/E1
-Publish:   plantA/spCv4.0/NDEATH/E1
-Publish:   plantA/spCv4.0/DMETA/E1/#
-Publish:   plantA/spCv4.0/DMMETA/E1/#
-Publish:   plantA/spCv4.0/DBIRTH/E1/#
-Publish:   plantA/spCv4.0/DREBIRTH/E1/#
-Publish:   plantA/spCv4.0/DDATA/E1/#
-Publish:   plantA/spCv4.0/DRESP/E1/#
-Publish:   plantA/spCv4.0/DDEATH/E1/#
-Subscribe: plantA/spCv4.0/REBIRTH/E1
-Subscribe: plantA/spCv4.0/NCMD/E1
-Subscribe: plantA/spCv4.0/DCMD/E1/#
-Subscribe: plantA/spCv4.0/NMETA/E1
-Subscribe: plantA/spCv4.0/DMETA/E1/#
-Subscribe: spCv4.0/STATE/my_primary_host
+Publish:   plantA/spPv4.0/NMETA/E1
+Publish:   plantA/spPv4.0/NMMETA/E1
+Publish:   plantA/spPv4.0/NBIRTH/E1
+Publish:   plantA/spPv4.0/NREBIRTH/E1
+Publish:   plantA/spPv4.0/NDATA/E1
+Publish:   plantA/spPv4.0/NRESP/E1
+Publish:   plantA/spPv4.0/NDEATH/E1
+Publish:   plantA/spPv4.0/DMETA/E1/#
+Publish:   plantA/spPv4.0/DMMETA/E1/#
+Publish:   plantA/spPv4.0/DBIRTH/E1/#
+Publish:   plantA/spPv4.0/DREBIRTH/E1/#
+Publish:   plantA/spPv4.0/DDATA/E1/#
+Publish:   plantA/spPv4.0/DRESP/E1/#
+Publish:   plantA/spPv4.0/DDEATH/E1/#
+Subscribe: plantA/spPv4.0/REBIRTH/E1
+Subscribe: plantA/spPv4.0/NCMD/E1
+Subscribe: plantA/spPv4.0/DCMD/E1/#
+Subscribe: plantA/spPv4.0/NMETA/E1
+Subscribe: plantA/spPv4.0/DMETA/E1/#
+Subscribe: spPv4.0/STATE/my_primary_host
 ```
 
 Also, it may be the case that DCMD messages should not be 'writable'. In this case, maybe DCMD
 subscriptions should not be allowed at all. In this case, the DCMD subscription is removed and the
 rest of the ACLs are unchanged:
 ```
-Subscribe: plantA/spCv4.0/REBIRTH/E1
-Subscribe: plantA/spCv4.0/NCMD/E1
-Subscribe: plantA/spCv4.0/NMETA/E1
-Subscribe: plantA/spCv4.0/DMETA/E1/#
-Subscribe: spCv4.0/STATE/my_primary_host
+Subscribe: plantA/spPv4.0/REBIRTH/E1
+Subscribe: plantA/spPv4.0/NCMD/E1
+Subscribe: plantA/spPv4.0/NMETA/E1
+Subscribe: plantA/spPv4.0/DMETA/E1/#
+Subscribe: spPv4.0/STATE/my_primary_host
 ```
 
 Note that the REBIRTH subscription cannot be removed in the same way. Denying it would prevent the
@@ -156,19 +156,19 @@ ACLs for a Sparkplug Host Application follow the same approach. Consider a Host 
 Sparkplug Host Application ID 'my_primary_host' that consumes the 'plantA' namespace and sends
 commands to it:
 ```
-Publish:   spCv4.0/STATE/my_primary_host
-Subscribe: spCv4.0/STATE/my_primary_host
-Subscribe: plantA/spCv4.0/#
-Publish:   plantA/spCv4.0/REBIRTH/+
-Publish:   plantA/spCv4.0/NCMD/+
-Publish:   plantA/spCv4.0/DCMD/#
+Publish:   spPv4.0/STATE/my_primary_host
+Subscribe: spPv4.0/STATE/my_primary_host
+Subscribe: plantA/spPv4.0/#
+Publish:   plantA/spPv4.0/REBIRTH/+
+Publish:   plantA/spPv4.0/NCMD/+
+Publish:   plantA/spPv4.0/DCMD/#
 ```
 
 The first two entries are the ones that matter most. A Sparkplug Host Application is the only client
 with a legitimate reason to publish on its own STATE topic, and it is required to subscribe to that
 same topic so that it can detect and repair displacement of the retained value. Note that the entry
 granting it publish access names its own STATE topic specifically. An entry of the form
-'spCv4.0/STATE/#' would additionally grant it publish access to every other Host Application's STATE
+'spPv4.0/STATE/#' would additionally grant it publish access to every other Host Application's STATE
 topic, which would let it displace their retained STATE values. The consequences of that are
 described in the
 link:#operational_behavior_host_application_own_state_limits[Limits of Retained STATE Restoration]
