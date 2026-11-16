@@ -304,7 +304,8 @@ public class Utils {
 			// A null value is valid, and sets no value case
 			return true;
 		}
-		// Any arm counts, including bytes, which the specification allows for a parameter
+		// Any arm counts. The specification restricts a parameter's type separately, in
+		// payloads-template-parameter-type-value, which this helper does not check
 		return tv.getValueCase() != Payload.TypedValue.ValueCase.VALUE_NOT_SET;
 	}
 

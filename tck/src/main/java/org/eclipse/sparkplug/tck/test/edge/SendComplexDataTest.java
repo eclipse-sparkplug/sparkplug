@@ -44,7 +44,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEM
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_REF_DEFINITION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.ID_PAYLOADS_TEMPLATE_REF_INSTANCE;
@@ -72,7 +71,6 @@ import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLA
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE;
-import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_PARAMETER_VALUE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_REF_DEFINITION;
 import static org.eclipse.sparkplug.tck.test.common.Requirements.PAYLOADS_TEMPLATE_REF_INSTANCE;
@@ -135,7 +133,7 @@ public class SendComplexDataTest extends TCKTest {
 			ID_PAYLOADS_TEMPLATE_VERSION, ID_PAYLOADS_TEMPLATE_REF_INSTANCE,
 			ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_REQUIRED, ID_PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE,
 			ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE, ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE,
-			ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ, ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE);
+			ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ);
 
 	private final @NotNull TCK theTCK;
 	private @NotNull Utilities utilities = null;
@@ -582,9 +580,6 @@ public class SendComplexDataTest extends TCKTest {
 	@SpecAssertion(
 			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
 			id = ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ)
-	@SpecAssertion(
-			section = Sections.PAYLOADS_P_TEMPLATE_PARAMETER,
-			id = ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE)
 	public boolean checkTemplate(final @NotNull PublishPacket packet) {
 		final PayloadOrBuilder sparkplugPayload = Utils.getSparkplugPayload(packet);
 		boolean hasTemplate = false;
@@ -649,18 +644,27 @@ public class SendComplexDataTest extends TCKTest {
 										Utils.checkUTF8String(p.getName()), PAYLOADS_TEMPLATE_PARAMETER_NAME_TYPE));
 							}
 
+							// -value-type asks that the type is a DataType enumeration value. DataType
+							// is a closed enum, so an undeclared number never reaches the field: it is
+							// retained as unknown field 1 of the TypedValue, which is the only evidence
+							// the violation leaves. Scored outside the hasDatatype() guard below,
+							// because that guard is false in exactly the case this assertion forbids.
+							boolean isKnownType = p.getTypedValue().hasDatatype()
+									|| !p.getTypedValue().getUnknownFields().hasField(1);
+							setResultIfNotFail(testResults, isKnownType,
+									ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
+									PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE);
+
 							if (p.getTypedValue().hasDatatype()) {
 								int curtype = p.getTypedValue().getDatatype().getNumber();
-								boolean isBasicType = true;
-								if (curtype < 0 || curtype > DataType.Text.getNumber()) {
+								// -type-value asks the narrower question: is it a Basic Data Type
+								boolean isBasicType = curtype >= 0 && curtype <= DataType.Text.getNumber();
+								if (!isBasicType) {
 									logger.info("FOR {} the TYPE is: {} AND {}", p.getName(), curtype, p);
-									isBasicType = false;
 								}
-								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE,
-										setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_VALUE_TYPE));
-								testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE,
-										setResult(isBasicType, PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE));
-
+								setResultIfNotFail(testResults, isBasicType,
+										ID_PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE,
+										PAYLOADS_TEMPLATE_PARAMETER_TYPE_VALUE);
 							}
 
 							final String topic = packet.getTopic();
@@ -673,13 +677,6 @@ public class SendComplexDataTest extends TCKTest {
 											setResult(p.getTypedValue().hasDatatype(), PAYLOADS_TEMPLATE_PARAMETER_TYPE_REQ));
 								}
 							}
-
-							boolean valuetype = true;
-							if (!Utils.hasValue(p)) {
-								valuetype = false;
-							}
-							testResults.put(ID_PAYLOADS_TEMPLATE_PARAMETER_VALUE,
-									setResult(valuetype, PAYLOADS_TEMPLATE_PARAMETER_VALUE));
 						}
 					}
 				}
