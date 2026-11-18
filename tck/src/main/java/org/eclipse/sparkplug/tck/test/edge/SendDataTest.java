@@ -623,10 +623,16 @@ public class SendDataTest extends TCKTest {
 					setResultIfNotFail(testResults,
 							found || msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA),
 							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_BIRTH);
-					setResultIfNotFail(testResults,
-							found && (msgtype.equals(TOPIC_PATH_DBIRTH) || msgtype.equals(TOPIC_PATH_NDATA)
-									|| msgtype.equals(TOPIC_PATH_DDATA)),
-							ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA, PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA);
+					// payloads-template-instance-members-data is a MAY: a Template Instance in an
+					// NDATA or DDATA message is permitted to carry only a subset of the
+					// definition's members. A permission cannot be violated, so this records that
+					// the case was observed and never fails. Scoring it as
+					// "found && (DBIRTH || NDATA || DDATA)" failed an instance that exercised the
+					// permission, and failed every NBIRTH instance, which the rule does not cover.
+					if (msgtype.equals(TOPIC_PATH_NDATA) || msgtype.equals(TOPIC_PATH_DDATA)) {
+						setResultIfNotFail(testResults, true, ID_PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA,
+								PAYLOADS_TEMPLATE_INSTANCE_MEMBERS_DATA);
+					}
 				}
 			}
 
