@@ -1539,14 +1539,27 @@ MUST be included in every Template Parameter Definition in an NMETA message.*#
 Template Definitions appear only in the NMETA. A Template Instance in a value-carrying message supplies
 parameter values, not parameter definitions.
 * *value*
-** The value of a template parameter utilizes the ‘oneof’ mechanism of Google Protocol Buffers.
-** [tck-testable tck-id-payloads-template-parameter-value]#[yellow-background]*[tck-id-payloads-template-parameter-value] The
-value supplied MUST be one of the following Google Protocol Buffer types: _int32_, _int64_,
-_uint32_, _uint64_, _float_, _double_, _bool_, _string_, or _bytes_.*#
-*** More information on these types can be found here:
-https://developers.google.com/protocol-buffers/docs/proto#scalar
+** This is a TypedValue carrying the parameter's value, as described in the
+link:#payloads_p_typedvalue[TypedValue section]. Which field carries the value is determined by the
+parameter's type.
+** A Template.Parameter accepts a narrower set than a TypedValue in general: its type is restricted
+to the link:#payloads_p_datatype_basic[Sparkplug Basic Data Types], so only the TypedValue fields
+that a Basic Data Type maps to are available to a parameter.
 ** For a template definition, this is the default value of the parameter. For a template instance,
-this is the value unique to that instance.
+this is the value unique to that instance. Either may omit it: a definition that omits it declares
+no default, and an instance that omits it takes the default declared by its Template Definition, as
+described in the link:#payloads_p_template[Template] section.
+** [tck-not-testable tck-id-payloads-template-parameter-value-null-distinct]#[yellow-background]*[tck-id-payloads-template-parameter-value-null-distinct] Omitting
+the value and carrying is_null set to true are distinct. A Template.Parameter that carries is_null
+set to true MUST be read as having the value null, rather than as taking the default declared by
+its Template Definition.*#
+*** Non-normative comment: this is the one case the two rules do not separate on their own. A null
+value is written by setting is_null and omitting the value, and an instance that omits a value
+takes its definition's default, so the is_null flag is what distinguishes the two.
+*** Non-normative comment: a Template Instance that omits a parameter's value and whose Template
+Definition declares no default for it leaves that parameter with no value. Detecting this requires
+the Template Definition, which is carried in a different message, so it is not stated as a
+requirement on a single payload.
 
 [[payloads_p_command]]
 ==== Command
