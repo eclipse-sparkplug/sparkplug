@@ -157,6 +157,10 @@ def process(filename):
 files = glob.glob("**/*Test.java", recursive=True)
 files.append(glob.glob("**/Monitor.java", recursive=True)[0])
 
+# Only the TCK's own profile tests carry testIds and @SpecAssertion. Unit tests under src/test
+# are ordinary JUnit classes and have neither, so processing them raises.
+files = [file for file in files if "src/test/" not in file.replace("\\", "/")]
+
 for file in files:
     if not file.endswith("TCKTest.java"):
         process(file)

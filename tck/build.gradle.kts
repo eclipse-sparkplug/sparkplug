@@ -118,6 +118,13 @@ dependencies {
     implementation("com.google.guava:guava:${property("guava.version")}")
     implementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-client.version")}")
     implementation("org.jetbrains:annotations:${property("jetbrainsAnnotations.version")}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 

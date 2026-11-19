@@ -479,7 +479,7 @@ public class PrimaryHostTest extends TCKTest {
 
 				Utils.setResultIfNotFail(testResults, true, ID_MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP,
 						MESSAGE_FLOW_EDGE_NODE_BIRTH_PUBLISH_PHID_WAIT_TIMESTAMP);
-				Utils.setResultIfNotFail(testResults, true,
+				Utils.setResult(testResults, true,
 						ID_OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT,
 						OPERATIONAL_BEHAVIOR_EDGE_NODE_TERMINATION_HOST_OFFLINE_RECONNECT);
 			} else {

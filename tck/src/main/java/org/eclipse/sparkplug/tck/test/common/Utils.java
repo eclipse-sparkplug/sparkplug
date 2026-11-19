@@ -114,7 +114,13 @@ public class Utils {
 
 	public static @NotNull boolean setResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		if (results.get(req_id) == null || !results.get(req_id).equals(FAIL)) {
+		// A failure recorded by setResultWithStackTrace is FAIL followed by the requirement and
+		// the call site; a bare FAIL is also stored directly in a few places, such as
+		// SessionTerminationTest.clearResults. Testing the prefix covers both. Comparing for
+		// equality matched only the bare form, so every decorated failure was overwritten by the
+		// next value that passed.
+		final String recorded = results.get(req_id);
+		if (recorded == null || !recorded.startsWith(FAIL)) {
 			results.put(req_id, setResultWithStackTrace(result, req_desc, 2));
 		}
 		return result;
@@ -122,7 +128,12 @@ public class Utils {
 
 	public static @NotNull boolean setShouldResultIfNotFail(Map<String, String> results, boolean result, String req_id,
 			String req_desc) {
-		if (results.get(req_id) == null || !results.get(req_id).equals(MAYBE)) {
+		// Same as above: a recorded MAYBE carries the requirement text after it. A hard failure
+		// is kept too, so a passing SHOULD check cannot erase a MUST failure recorded for the
+		// same requirement.
+		final String recordedShould = results.get(req_id);
+		if (recordedShould == null
+				|| !(recordedShould.startsWith(MAYBE) || recordedShould.startsWith(FAIL))) {
 			results.put(req_id, setShouldResult(result, req_desc));
 		}
 		return result;
