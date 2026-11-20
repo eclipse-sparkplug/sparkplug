@@ -1218,7 +1218,7 @@ packet.
 * [tck-testable tck-id-host-topic-phid-death-qos]#[yellow-background]*[tck-id-host-topic-phid-death-qos] The
 MQTT Quality of Service (QoS) MUST be set to 1*#
 * [tck-testable tck-id-host-topic-phid-death-retain]#[yellow-background]*[tck-id-host-topic-phid-death-retain] The
-MQTT retain flag for the Birth Certificate MUST be set to TRUE*#
+MQTT retain flag for the Death Certificate MUST be set to TRUE*#
 
 [[topics_death_message_state]]
 ====== Death Certificate Topic (STATE)
