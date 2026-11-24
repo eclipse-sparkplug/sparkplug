@@ -40,7 +40,6 @@ public enum MetricDataType {
 	Boolean(11, Boolean.class),
 	String(12, String.class),
 	DateTime(13, Date.class),
-	Text(14, String.class),
 
 	// Custom Types for Metrics
 	UUID(15, String.class),
@@ -130,8 +129,6 @@ public enum MetricDataType {
 				return String;
 			case 13:
 				return DateTime;
-			case 14:
-				return Text;
 			case 15:
 				return UUID;
 			case 16:

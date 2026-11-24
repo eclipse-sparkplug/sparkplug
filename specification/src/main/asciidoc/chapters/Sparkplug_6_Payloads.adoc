@@ -160,7 +160,8 @@ enum DataType {
     Boolean         = 11;
     String          = 12;
     DateTime        = 13;
-    Text            = 14;
+    // 14 was Text in Sparkplug B. It is not used in this version: it was never distinguishable
+    // from String, and the platform the type came from has deprecated it.
 
     // Additional Metric Types
     UUID            = 15;
@@ -265,7 +266,7 @@ message Payload {
         repeated float  float_values   = 6;   // Float
         repeated double double_values  = 7;   // Double
         repeated bool   boolean_values = 8;   // Boolean
-        repeated string string_values  = 9;   // String, Text
+        repeated string string_values  = 9;   // String
 
         // The indexes of the elements that are null. Omitted entirely when none are.
         repeated uint32 null_indexes   = 10;
@@ -1674,7 +1675,8 @@ enum DataType {
     Boolean         = 11;
     String          = 12;
     DateTime        = 13;
-    Text            = 14;
+    // 14 was Text in Sparkplug B. It is not used in this version: it was never distinguishable
+    // from String, and the platform the type came from has deprecated it.
 
     // Additional Metric Types
     UUID            = 15;
@@ -1772,11 +1774,6 @@ representation it interoperates with is signed, so the ceiling is 2262-04-11 as 
 link:#operational_behavior_timestamps[Timestamps] section. A DateTime carried in an array or a DataSet.Column
 uses the int64_values array of the ValueArray, as the
 link:#payloads_p_datatype_array[Array Types] section describes.
-* _Text_
-** String value (UTF-8)
-** Google Protocol Buffer Type: string
-** Sparkplug enum value: 14
-
 [[payloads_p_datatype_additional]]
 * *Additional Types*
 ** _UUID_

@@ -215,7 +215,6 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 						builder.setUint64Value(bigIntegerToUnsignedLong((BigInteger) value.getValue()));
 						break;
 					case String:
-					case Text:
 						builder.setStringValue((String) value.getValue());
 						break;
 					case PropertySet:
@@ -288,7 +287,6 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 				case UInt64:
 					builder.getTypedValueBuilder().setUint64Value(bigIntegerToUnsignedLong((BigInteger) value));
 					break;
-				case Text:
 				case String:
 					builder.getTypedValueBuilder().setStringValue((String) value);
 					break;
@@ -356,7 +354,6 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 					metricBuilder.getValueBuilder().setUint64Value(bigIntegerToUnsignedLong((BigInteger) metric.getValue()));
 					break;
 				case String:
-				case Text:
 				case UUID:
 					metricBuilder.getValueBuilder().setStringValue((String) metric.getValue());
 					break;
@@ -741,7 +738,6 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 				va.addBooleanValues(toBoolean(raw));
 				break;
 			case String:
-			case Text:
 				va.addStringValues((String) raw);
 				break;
 			default:
@@ -813,7 +809,6 @@ public class SparkplugBPayloadEncoder implements PayloadEncoder<SparkplugBPayloa
 				va.addBooleanValues(false);
 				break;
 			case String:
-			case Text:
 				va.addStringValues("");
 				break;
 			default:

@@ -117,7 +117,6 @@ public class DataSetDeserializer extends StdDeserializer<DataSet> {
 			case UInt32:
 			case Int64:
 				return new Value<Long>(type, (long) nodeValue.asLong());
-			case Text:
 			case String:
 				return new Value<String>(type, nodeValue.asText());
 			case UInt64:
