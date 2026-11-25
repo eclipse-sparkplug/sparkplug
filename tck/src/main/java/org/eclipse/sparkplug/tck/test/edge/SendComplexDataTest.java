@@ -498,7 +498,7 @@ public class SendComplexDataTest extends TCKTest {
 				}
 			}
 			testResults.put(ID_PAYLOADS_METRIC_DATATYPE_NOT_REQ,
-					Utils.setShouldResult(isValid, PAYLOADS_METRIC_DATATYPE_NOT_REQ));
+					Utils.setResult(isValid, PAYLOADS_METRIC_DATATYPE_NOT_REQ));
 		}
 	}
 
