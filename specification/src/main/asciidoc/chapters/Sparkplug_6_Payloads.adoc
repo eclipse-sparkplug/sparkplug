@@ -820,7 +820,9 @@ than for a metric. A metric's properties are carried in its properties field.*#
 ** [tck-testable tck-id-payloads-metric-datatype-req]#[yellow-background]*[tck-id-payloads-metric-datatype-req] The
 datatype MUST be included with each metric definition in NBIRTH and DBIRTH messages.*#
 ** [tck-testable tck-id-payloads-metric-datatype-not-req]#[yellow-background]*[tck-id-payloads-metric-datatype-not-req] The
-datatype SHOULD NOT be included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages.*#
+datatype MUST NOT be included with metric definitions in NDATA, NCMD, DDATA, and DCMD messages. A
+metric's datatype is established by the NBIRTH or DBIRTH that defined it, and a change of datatype
+is published as an amended BIRTH rather than in a DATA or CMD message.*#
 * *quality*
 ** This defines the quality of the value associated with the metric. It is defined in the
 link:#payloads_p_quality[Quality] section. This property is optional and is only required if the
@@ -4063,7 +4065,6 @@ Acme/Dublin/Packaging/spPv4.0/DDATA/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "alias": 1,
-                        "datatype": "Float",
                         "value": 1802.5
                 }]
         }
@@ -4089,7 +4090,6 @@ Acme/Dublin/Packaging/spJv4.0/DDATA/EdgeNode1/Line3
         "content": {
                 "metrics": [{
                         "alias": "1",
-                        "datatype": "Float",
                         "value": 1802.5
                 }]
         }
