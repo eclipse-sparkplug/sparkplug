@@ -25,7 +25,6 @@ import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Int64;
 import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Int8;
 import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.String;
 import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Template;
-import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.Text;
 import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt16;
 import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt32;
 import static org.eclipse.sparkplug.impl.exception.model.MetricDataType.UInt64;
@@ -414,7 +413,6 @@ public class EdgeNode {
 		metrics.add(new MetricBuilder("Boolean", Boolean, random.nextBoolean()).createMetric());
 		metrics.add(new MetricBuilder("String", String, newUUID()).createMetric());
 		metrics.add(new MetricBuilder("DateTime", DateTime, new Date()).createMetric());
-		metrics.add(new MetricBuilder("Text", Text, newUUID()).createMetric());
 		metrics.add(new MetricBuilder("UUID", UUID, newUUID()).createMetric());
 		// metrics.add(new MetricBuilder("Bytes", Bytes,
 		// randomBytes(20)).createMetric());
@@ -512,7 +510,6 @@ public class EdgeNode {
 		metrics.add(new MetricBuilder("MyBoolean", Boolean, random.nextBoolean()).createMetric());
 		metrics.add(new MetricBuilder("MyString", String, newUUID()).createMetric());
 		metrics.add(new MetricBuilder("MyDateTime", DateTime, new Date()).createMetric());
-		metrics.add(new MetricBuilder("MyText", Text, newUUID()).createMetric());
 		metrics.add(new MetricBuilder("MyUUID", UUID, newUUID()).createMetric());
 
 		return new TemplateBuilder().version("v1.0").templateRef(templatRef).definition(isDef)
@@ -524,12 +521,11 @@ public class EdgeNode {
 		return new DataSetBuilder(14).addColumnName("Int8s").addColumnName("Int16s").addColumnName("Int32s")
 				.addColumnName("Int64s").addColumnName("UInt8s").addColumnName("UInt16s").addColumnName("UInt32s")
 				.addColumnName("UInt64s").addColumnName("Floats").addColumnName("Doubles").addColumnName("Booleans")
-				.addColumnName("Strings").addColumnName("Dates").addColumnName("Texts").addType(DataSetDataType.Int8)
+				.addColumnName("Strings").addColumnName("Dates").addType(DataSetDataType.Int8)
 				.addType(DataSetDataType.Int16).addType(DataSetDataType.Int32).addType(DataSetDataType.Int64)
 				.addType(DataSetDataType.UInt8).addType(DataSetDataType.UInt16).addType(DataSetDataType.UInt32)
 				.addType(DataSetDataType.UInt64).addType(DataSetDataType.Float).addType(DataSetDataType.Double)
 				.addType(DataSetDataType.Boolean).addType(DataSetDataType.String).addType(DataSetDataType.DateTime)
-				.addType(DataSetDataType.Text)
 				.addRow(new RowBuilder().addValue(new Value<Byte>(DataSetDataType.Int8, (byte) random.nextInt()))
 						.addValue(new Value<Short>(DataSetDataType.Int16, (short) random.nextInt()))
 						.addValue(new Value<Integer>(DataSetDataType.Int32, random.nextInt()))
@@ -542,8 +538,7 @@ public class EdgeNode {
 						.addValue(new Value<Double>(DataSetDataType.Double, random.nextDouble()))
 						.addValue(new Value<Boolean>(DataSetDataType.Boolean, random.nextBoolean()))
 						.addValue(new Value<String>(DataSetDataType.String, newUUID()))
-						.addValue(new Value<Date>(DataSetDataType.DateTime, new Date()))
-						.addValue(new Value<String>(DataSetDataType.Text, newUUID())).createRow())
+						.addValue(new Value<Date>(DataSetDataType.DateTime, new Date())).createRow())
 				.addRow(new RowBuilder().addValue(new Value<Byte>(DataSetDataType.Int8, (byte) random.nextInt()))
 						.addValue(new Value<Short>(DataSetDataType.Int16, (short) random.nextInt()))
 						.addValue(new Value<Integer>(DataSetDataType.Int32, random.nextInt()))
@@ -556,8 +551,7 @@ public class EdgeNode {
 						.addValue(new Value<Double>(DataSetDataType.Double, random.nextDouble()))
 						.addValue(new Value<Boolean>(DataSetDataType.Boolean, random.nextBoolean()))
 						.addValue(new Value<String>(DataSetDataType.String, newUUID()))
-						.addValue(new Value<Date>(DataSetDataType.DateTime, new Date()))
-						.addValue(new Value<String>(DataSetDataType.Text, newUUID())).createRow())
+						.addValue(new Value<Date>(DataSetDataType.DateTime, new Date())).createRow())
 				.createDataSet();
 	}
 

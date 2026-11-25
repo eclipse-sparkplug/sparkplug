@@ -658,7 +658,7 @@ public class SendComplexDataTest extends TCKTest {
 							if (p.getTypedValue().hasDatatype()) {
 								int curtype = p.getTypedValue().getDatatype().getNumber();
 								// -type-value asks the narrower question: is it a Basic Data Type
-								boolean isBasicType = curtype >= 0 && curtype <= DataType.Text.getNumber();
+								boolean isBasicType = curtype >= 0 && curtype <= DataType.DateTime.getNumber();
 								if (!isBasicType) {
 									logger.info("FOR {} the TYPE is: {} AND {}", p.getName(), curtype, p);
 								}

@@ -39,7 +39,6 @@ public enum ParameterDataType {
 	Boolean(11, Boolean.class),
 	String(12, String.class),
 	DateTime(13, Date.class),
-	Text(14, String.class),
 
 	// Unknown
 	Unknown(0, Object.class);
@@ -104,8 +103,6 @@ public enum ParameterDataType {
 				return String;
 			case 13:
 				return DateTime;
-			case 14:
-				return Text;
 			default:
 				return Unknown;
 		}

@@ -226,7 +226,6 @@ public class Utils {
 			case Boolean:
 				return Payload.TypedValue.ValueCase.BOOLEAN_VALUE;
 			case String:
-			case Text:
 			case UUID:
 				return Payload.TypedValue.ValueCase.STRING_VALUE;
 			case Bytes:

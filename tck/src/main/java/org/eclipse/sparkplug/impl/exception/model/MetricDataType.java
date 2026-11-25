@@ -40,31 +40,30 @@ public enum MetricDataType {
 	Boolean(11, Boolean.class),
 	String(12, String.class),
 	DateTime(13, Date.class),
-	Text(14, String.class),
 
 	// Custom Types for Metrics
-	UUID(15, String.class),
-	DataSet(16, DataSet.class),
-	Bytes(17, byte[].class),
-	File(18, File.class),
-	Template(19, Template.class),
+	UUID(14, String.class),
+	DataSet(15, DataSet.class),
+	Bytes(16, byte[].class),
+	File(17, File.class),
+	Template(18, Template.class),
 
 	// PropertyValue Types (20 and 21) are NOT metric datatypes
 
 	// Array Types
-	Int8Array(22, Byte[].class),
-	Int16Array(23, Short[].class),
-	Int32Array(24, Integer[].class),
-	Int64Array(25, Long[].class),
-	UInt8Array(26, Short[].class),
-	UInt16Array(27, Integer[].class),
-	UInt32Array(28, Long[].class),
-	UInt64Array(29, BigInteger[].class),
-	FloatArray(30, Float[].class),
-	DoubleArray(31, Double[].class),
-	BooleanArray(32, Boolean[].class),
-	StringArray(33, String[].class),
-	DateTimeArray(34, Date[].class),
+	Int8Array(21, Byte[].class),
+	Int16Array(22, Short[].class),
+	Int32Array(23, Integer[].class),
+	Int64Array(24, Long[].class),
+	UInt8Array(25, Short[].class),
+	UInt16Array(26, Integer[].class),
+	UInt32Array(27, Long[].class),
+	UInt64Array(28, BigInteger[].class),
+	FloatArray(29, Float[].class),
+	DoubleArray(30, Double[].class),
+	BooleanArray(31, Boolean[].class),
+	StringArray(32, String[].class),
+	DateTimeArray(33, Date[].class),
 
 	// Unknown
 	Unknown(0, Object.class);
@@ -131,42 +130,40 @@ public enum MetricDataType {
 			case 13:
 				return DateTime;
 			case 14:
-				return Text;
-			case 15:
 				return UUID;
-			case 16:
+			case 15:
 				return DataSet;
-			case 17:
+			case 16:
 				return Bytes;
-			case 18:
+			case 17:
 				return File;
-			case 19:
+			case 18:
 				return Template;
-			case 22:
+			case 21:
 				return Int8Array;
-			case 23:
+			case 22:
 				return Int16Array;
-			case 24:
+			case 23:
 				return Int32Array;
-			case 25:
+			case 24:
 				return Int64Array;
-			case 26:
+			case 25:
 				return UInt8Array;
-			case 27:
+			case 26:
 				return UInt16Array;
-			case 28:
+			case 27:
 				return UInt32Array;
-			case 29:
+			case 28:
 				return UInt64Array;
-			case 30:
+			case 29:
 				return FloatArray;
-			case 31:
+			case 30:
 				return DoubleArray;
-			case 32:
+			case 31:
 				return BooleanArray;
-			case 33:
+			case 32:
 				return StringArray;
-			case 34:
+			case 33:
 				return DateTimeArray;
 			default:
 				return Unknown;
