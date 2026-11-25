@@ -160,37 +160,35 @@ enum DataType {
     Boolean         = 11;
     String          = 12;
     DateTime        = 13;
-    // 14 was Text in Sparkplug B. It is not used in this version: it was never distinguishable
-    // from String, and the platform the type came from has deprecated it.
 
     // Additional Metric Types
-    UUID            = 15;
-    DataSet         = 16;
-    Bytes           = 17;
-    File            = 18;
-    Template        = 19;
+    UUID            = 14;
+    DataSet         = 15;
+    Bytes           = 16;
+    File            = 17;
+    Template        = 18;
 
     // Additional PropertyValue Types
-    PropertySet     = 20;
-    PropertySetList = 21;
+    PropertySet     = 19;
+    PropertySetList = 20;
 
     // Array Types
-    Int8Array = 22;
-    Int16Array = 23;
-    Int32Array = 24;
-    Int64Array = 25;
-    UInt8Array = 26;
-    UInt16Array = 27;
-    UInt32Array = 28;
-    UInt64Array = 29;
-    FloatArray = 30;
-    DoubleArray = 31;
-    BooleanArray = 32;
-    StringArray = 33;
-    DateTimeArray = 34;
+    Int8Array = 21;
+    Int16Array = 22;
+    Int32Array = 23;
+    Int64Array = 24;
+    UInt8Array = 25;
+    UInt16Array = 26;
+    UInt32Array = 27;
+    UInt64Array = 28;
+    FloatArray = 29;
+    DoubleArray = 30;
+    BooleanArray = 31;
+    StringArray = 32;
+    DateTimeArray = 33;
 
     // Command Type
-    Command         = 35;        // A callable command/function metric - the value is carried in the Metric 'command' field
+    Command         = 34;        // A callable command/function metric - the value is carried in the Metric 'command' field
 }
 
 // Per-metric operation, used only within NMMETA/DMMETA (modified metadata) messages to denote a
@@ -1675,37 +1673,35 @@ enum DataType {
     Boolean         = 11;
     String          = 12;
     DateTime        = 13;
-    // 14 was Text in Sparkplug B. It is not used in this version: it was never distinguishable
-    // from String, and the platform the type came from has deprecated it.
 
     // Additional Metric Types
-    UUID            = 15;
-    DataSet         = 16;
-    Bytes           = 17;
-    File            = 18;
-    Template        = 19;
+    UUID            = 14;
+    DataSet         = 15;
+    Bytes           = 16;
+    File            = 17;
+    Template        = 18;
 
     // Additional PropertyValue Types
-    PropertySet     = 20;
-    PropertySetList = 21;
+    PropertySet     = 19;
+    PropertySetList = 20;
 
     // Array Types
-    Int8Array = 22;
-    Int16Array = 23;
-    Int32Array = 24;
-    Int64Array = 25;
-    UInt8Array = 26;
-    UInt16Array = 27;
-    UInt32Array = 28;
-    UInt64Array = 29;
-    FloatArray = 30;
-    DoubleArray = 31;
-    BooleanArray = 32;
-    StringArray = 33;
-    DateTimeArray = 34;
+    Int8Array = 21;
+    Int16Array = 22;
+    Int32Array = 23;
+    Int64Array = 24;
+    UInt8Array = 25;
+    UInt16Array = 26;
+    UInt32Array = 27;
+    UInt64Array = 28;
+    FloatArray = 29;
+    DoubleArray = 30;
+    BooleanArray = 31;
+    StringArray = 32;
+    DateTimeArray = 33;
 
     // Command Type
-    Command         = 35;        // A callable command/function metric - the value is carried in the Metric 'command' field
+    Command         = 34;        // A callable command/function metric - the value is carried in the Metric 'command' field
 }
 ----
 
@@ -1779,34 +1775,34 @@ link:#payloads_p_datatype_array[Array Types] section describes.
 ** _UUID_
 *** UUID value as a UTF-8 string
 *** Google Protocol Buffer Type: string
-*** Sparkplug enum value: 15
+*** Sparkplug enum value: 14
 ** _DataSet_
 *** DataSet as defined link:#payloads_p_dataset[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
-*** Sparkplug enum value: 16
+*** Sparkplug enum value: 15
 ** _Bytes_
 *** Array of bytes
 *** Google Protocol Buffer Type: bytes
-*** Sparkplug enum value: 17
+*** Sparkplug enum value: 16
 ** _File_
 *** Array of bytes representing a file
 *** Google Protocol Buffer Type: bytes
-*** Sparkplug enum value: 18
+*** Sparkplug enum value: 17
 ** _Template_
 *** Template as defined link:#payloads_p_template[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
-*** Sparkplug enum value: 19
+*** Sparkplug enum value: 18
 
 [[payloads_p_datatype_propertyvalue]]
 * *Additional PropertyValue Types*
 ** _PropertySet_
 *** PropertySet as defined link:#payloads_p_propertyset[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
-*** Sparkplug enum value: 20
+*** Sparkplug enum value: 19
 ** _PropertySetList_
 *** PropertySetList as defined link:#payloads_p_propertysetlist[here]
 *** Google Protocol Buffer Type: none – defined in Sparkplug
-*** Sparkplug enum value: 21
+*** Sparkplug enum value: 20
 
 [[payloads_p_datatype_array]]
 * *Array Types*
@@ -1845,43 +1841,43 @@ null_indexes to [1].
 
 ** _Int8Array_
 *** Elements are carried in the sint32_values field of the ValueArray
-*** Sparkplug enum value: 22
+*** Sparkplug enum value: 21
 ** _Int16Array_
 *** Elements are carried in the sint32_values field of the ValueArray
-*** Sparkplug enum value: 23
+*** Sparkplug enum value: 22
 ** _Int32Array_
 *** Elements are carried in the sint32_values field of the ValueArray
-*** Sparkplug enum value: 24
+*** Sparkplug enum value: 23
 ** _Int64Array_
 *** Elements are carried in the sint64_values field of the ValueArray
-*** Sparkplug enum value: 25
+*** Sparkplug enum value: 24
 ** _UInt8Array_
 *** Elements are carried in the uint32_values field of the ValueArray
-*** Sparkplug enum value: 26
+*** Sparkplug enum value: 25
 ** _UInt16Array_
 *** Elements are carried in the uint32_values field of the ValueArray
-*** Sparkplug enum value: 27
+*** Sparkplug enum value: 26
 ** _UInt32Array_
 *** Elements are carried in the uint32_values field of the ValueArray
-*** Sparkplug enum value: 28
+*** Sparkplug enum value: 27
 ** _UInt64Array_
 *** Elements are carried in the uint64_values field of the ValueArray
-*** Sparkplug enum value: 29
+*** Sparkplug enum value: 28
 ** _FloatArray_
 *** Elements are carried in the float_values field of the ValueArray
-*** Sparkplug enum value: 30
+*** Sparkplug enum value: 29
 ** _DoubleArray_
 *** Elements are carried in the double_values field of the ValueArray
-*** Sparkplug enum value: 31
+*** Sparkplug enum value: 30
 ** _BooleanArray_
 *** Elements are carried in the boolean_values field of the ValueArray
-*** Sparkplug enum value: 32
+*** Sparkplug enum value: 31
 ** _StringArray_
 *** Elements are carried in the string_values field of the ValueArray
-*** Sparkplug enum value: 33
+*** Sparkplug enum value: 32
 ** _DateTimeArray_
 *** Elements are carried in the int64_values field of the ValueArray
-*** Sparkplug enum value: 34
+*** Sparkplug enum value: 33
 
 [[payloads_p_datatype_command]]
 * *Command Type*
@@ -1890,7 +1886,7 @@ null_indexes to [1].
 object as defined link:#payloads_p_command[here]. A Command metric carries its content in the
 Metric _command_ field rather than the _value_ field.
 *** Google Protocol Buffer Type: none – defined in Sparkplug
-*** Sparkplug enum value: 35
+*** Sparkplug enum value: 34
 
 [[payloads_payload_representation_on_host_applications]]
 ==== Payload Representation on Host Applications

@@ -42,8 +42,8 @@ public enum PropertyDataType {
 	DateTime(13, Date.class),
 
 	// Custom Types for PropertySets
-	PropertySet(20, PropertySet.class),
-	PropertySetList(21, List.class),
+	PropertySet(19, PropertySet.class),
+	PropertySetList(20, List.class),
 
 	// Unknown
 	Unknown(0, Object.class);
@@ -112,9 +112,9 @@ public enum PropertyDataType {
 				return String;
 			case 13:
 				return DateTime;
-			case 20:
+			case 19:
 				return PropertySet;
-			case 21:
+			case 20:
 				return PropertySetList;
 			default:
 				return Unknown;
